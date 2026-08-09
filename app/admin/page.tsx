@@ -1,3 +1,4 @@
+import { Request, TeacherApplication } from "@prisma/client";
 import { requireAdmin } from "@/app/lib/dal";
 import { db, getPrograms } from "@/app/lib/db";
 import AdminDashboard from "./dashboard";
@@ -10,7 +11,7 @@ export default async function AdminPage() {
   const programs = await getPrograms();
   const requests = await db.request.findMany({
     orderBy: [
-      { status: "asc" }, // This might not work exactly like SQLite CASE but "new" comes before others alphabetically
+      { status: "asc" },
       { createdAt: "desc" },
     ],
   });
@@ -22,12 +23,12 @@ export default async function AdminPage() {
   return (
     <AdminDashboard 
       programs={programs} 
-      requests={requests.map(r => ({
+      requests={requests.map((r: Request) => ({
         ...r,
         parent_name: r.parentName,
         created_at: r.createdAt.toISOString()
       }))} 
-      teacherApplications={teacherApplications.map(t => ({
+      teacherApplications={teacherApplications.map((t: TeacherApplication) => ({
         ...t,
         created_at: t.createdAt.toISOString()
       }))}
