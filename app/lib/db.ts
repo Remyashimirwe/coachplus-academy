@@ -23,6 +23,26 @@ export const db = prisma;
 export async function getPrograms() {
   return prisma.program.findMany({
     orderBy: { sortOrder: "asc" },
+    include: {
+      subjects: {
+        include: {
+          topics: true
+        }
+      }
+    },
+  });
+}
+
+export async function getProgramById(id: number) {
+  return prisma.program.findUnique({
+    where: { id },
+    include: {
+      subjects: {
+        include: {
+          topics: true
+        }
+      }
+    },
   });
 }
 

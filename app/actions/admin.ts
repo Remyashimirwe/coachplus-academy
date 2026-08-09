@@ -19,12 +19,9 @@ export async function addProgram(
   const title = String(formData.get("title") || "").trim();
   const level = String(formData.get("level") || "").trim();
   const text = String(formData.get("text") || "").trim();
-  const points = String(formData.get("points") || "")
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const image = String(formData.get("image") || "").trim();
 
-  if (!title || !level || !text || points.length === 0) {
+  if (!title || !level || !text) {
     return { error: "Please fill in all fields." };
   }
 
@@ -35,7 +32,7 @@ export async function addProgram(
       title,
       level,
       text,
-      points,
+      image: image || null,
       sortOrder,
     },
   });
@@ -46,12 +43,96 @@ export async function addProgram(
   return { success: true };
 }
 
+export async function addSubject(
+  _prevState: AdminActionState | undefined,
+  formData: FormData
+): Promise<AdminActionState> {
+  await requireAdmin();
+
+  const programId = Number(formData.get("programId"));
+  const name = String(formData.get("name") || "").trim();
+  const image = String(formData.get("image") || "").trim();
+
+  if (!programId || !name) {
+    return { error: "Please provide both program and subject name." };
+  }
+
+  await db.subject.create({
+    data: {
+      name,
+      image: image || null,
+      programId,
+    },
+  });
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+
+  return { success: true };
+}
+
+export async function deleteSubject(formData: FormData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id"));
+  if (id) {
+    await db.subject.delete({
+      where: { id },
+    });
+  }
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+}
+
 export async function deleteProgram(formData: FormData) {
   await requireAdmin();
 
   const id = Number(formData.get("id"));
   if (id) {
     await db.program.delete({
+      where: { id },
+    });
+  }
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+}
+
+export async function addTopic(
+  _prevState: AdminActionState | undefined,
+  formData: FormData
+): Promise<AdminActionState> {
+  await requireAdmin();
+
+  const subjectId = Number(formData.get("subjectId"));
+  const name = String(formData.get("name") || "").trim();
+  const image = String(formData.get("image") || "").trim();
+
+  if (!subjectId || !name) {
+    return { error: "Please provide both sub-category and topic name." };
+  }
+
+  await db.topic.create({
+    data: {
+      name,
+      image: image || null,
+      subjectId,
+    },
+  });
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+
+  return { success: true };
+}
+
+export async function deleteTopic(formData: FormData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id"));
+  if (id) {
+    await db.topic.delete({
       where: { id },
     });
   }

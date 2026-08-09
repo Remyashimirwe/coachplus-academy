@@ -9,11 +9,19 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 
 export const metadata: Metadata = {
-  title: "WeCoach | Find the Perfect Teacher",
+  title: {
+    template: "%s | WeCoach",
+    default: "WeCoach | Find the Perfect Teacher",
+  },
   description:
     "Connect with verified home and online teachers for personalized learning.",
   icons: {
-    icon: "/logo.png",
+    icon: [
+      { url: "/logo.png" },
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/logo.png",
   },
 };
 

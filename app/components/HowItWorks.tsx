@@ -6,8 +6,8 @@ import { FiMessageSquare, FiUsers, FiAward } from "react-icons/fi";
 const steps = [
   {
     icon: FiMessageSquare,
-    title: "Tell us what your child needs",
-    text: "Choose the subject, grade, schedule, learning goals, and whether lessons should happen online or at home.",
+    title: "Tell us what you need",
+    text: "Choose the learning category, sub-category, schedule, goals, and whether lessons should happen online or at home.",
   },
   {
     icon: FiUsers,

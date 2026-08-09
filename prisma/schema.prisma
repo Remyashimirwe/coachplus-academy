@@ -20,13 +20,30 @@ model Admin {
 }
 
 model Program {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   title     String
   level     String
   text      String
-  points    String[]
   image     String?
-  sortOrder Int      @default(0)
+  sortOrder Int       @default(0)
+  subjects  Subject[]
+}
+
+model Subject {
+  id        Int     @id @default(autoincrement())
+  name      String
+  image     String?
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId Int
+  topics    Topic[]
+}
+
+model Topic {
+  id        Int     @id @default(autoincrement())
+  name      String
+  image     String?
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId Int
 }
 
 model Request {

@@ -9,7 +9,7 @@ import { FiSend, FiMenu, FiX } from "react-icons/fi";
 const navLinks = [
   { label: "Home", href: "/#home" },
   { label: "How It Works", href: "/#how-it-works" },
-  { label: "Programs", href: "/programs" },
+  { label: "Categories", href: "/programs" },
   { label: "Become a Teacher", href: "/become-a-teacher" },
 ];
 
