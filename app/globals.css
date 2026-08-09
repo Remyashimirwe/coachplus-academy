@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffaf8;
+  --foreground: #21121f;
+  --brand-coral: #ff5733;
+  --brand-pink: #e91e63;
+  --brand-violet: #7b1fa2;
+  --brand-ink: #21121f;
 }
 
 @theme inline {
@@ -10,12 +14,36 @@
   --color-foreground: var(--foreground);
   --font-sans: "Poppins", Arial, Helvetica, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  --animate-spin-slow: spin-slow 8s linear infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  a {
+    @apply no-underline relative transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .link-modern {
+    @apply relative inline-block no-underline;
+  }
+
+  .link-modern::after {
+    content: "";
+    @apply absolute bottom-0 left-0 w-0 h-[1.5px] bg-current transition-all duration-300 ease-out;
+  }
+
+  .link-modern:hover::after {
+    @apply w-full;
   }
 }
 
@@ -23,4 +51,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Poppins", Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--brand-pink);
+  color: white;
 }

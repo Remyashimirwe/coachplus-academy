@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FiUser,
   FiMail,
@@ -12,9 +12,11 @@ import {
   FiSend,
   FiCheckCircle,
   FiAward,
+  FiCalendar,
+  FiMapPin,
 } from "react-icons/fi";
-import Navbar from "@/app/components/Navbar";
 import { saveRequest } from "@/app/actions/request";
+import Footer from "../components/Footer";
 
 const subjects = [
   "Mathematics",
@@ -23,17 +25,17 @@ const subjects = [
   "Coding",
   "Exam Prep",
   "Languages",
+  "Art & Music",
 ];
 
 const grades = [
-  "Primary (Grades 1-6)",
-  "Middle School (Grades 7-8)",
-  "High School (Grades 9-12)",
-  "University",
+  "Primary (P1-P6)",
+  "Middle School (S1-S3)",
+  "High School (S4-S6)",
+  "Short Courses",
 ];
 
-const inputClasses =
-  "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1266f1] focus:ring-2 focus:ring-[#1266f1]/20";
+const learningModes = ["Online", "At Home", "Physical Center"];
 
 function Field({
   icon,
@@ -47,202 +49,183 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label htmlFor={htmlFor} className="text-sm font-medium text-slate-700">
+    <div className="space-y-2">
+      <label htmlFor={htmlFor} className="text-sm font-bold text-slate-700 flex items-center gap-2">
+        <span className="text-[#E91E63]">{icon}</span>
         {label}
       </label>
-      <div className="relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400">
-          {icon}
-        </span>
+      <div className="relative group">
         {children}
       </div>
     </div>
   );
 }
 
+const inputClasses =
+  "w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 text-base outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-4 focus:ring-[#E91E63]/10";
+
 export default function RequestPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+
+  const toggleSubject = (subject: string) => {
+    setSelectedSubjects(prev => 
+      prev.includes(subject) ? prev.filter(s => s !== subject) : [...prev, subject]
+    );
+  };
 
   return (
-    <main className="min-h-screen bg-white text-[#121826]">
-      <Navbar />
-
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#1266f1] via-[#1a6ff3] to-[#4f8cff] pt-32 pb-16 text-white">
-        <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#0b52d0]/40 blur-3xl" />
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-slate-50 text-[#121826]">
+      <div className="relative overflow-hidden bg-[#0f172a] pt-40 pb-24 text-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FF5733]/20 via-[#E91E63]/20 to-[#7B1FA2]/20" />
+        <div className="absolute -left-32 top-24 size-96 rounded-full bg-[#E91E63]/10 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/10 blur-3xl" />
+        
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="max-w-2xl"
           >
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
-              <FiAward className="size-4" />
-              Request a Teacher
-            </p>
-            <h1 className="mt-6 text-5xl font-medium leading-[1.05] sm:text-6xl">
-              Tell us what your child needs
+            <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
+              Start Your Journey
+            </span>
+            <h1 className="text-5xl font-bold leading-tight sm:text-6xl lg:text-7xl">
+              Request a <span className="text-[#E91E63]">Teacher</span>
             </h1>
-            <p className="mt-6 text-lg leading-8 text-white/85">
-              Fill in the details below and we&apos;ll match you with a verified
-              teacher who fits your child&apos;s goals, schedule, and learning
-              style.
+            <p className="mt-8 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300">
+              Tell us your learning goals and we'll find the perfect match from our network of verified elite educators.
             </p>
           </motion.div>
         </div>
-      </section>
+      </div>
 
-      <section className="bg-[#f6f8fb] py-20">
-        <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-8">
-          {submitted ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="rounded-[28px] bg-white p-10 text-center shadow-[0_18px_45px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 sm:p-14"
-            >
-              <div className="mx-auto grid size-20 place-items-center rounded-full bg-[#eaf2ff] text-[#1266f1]">
-                <FiCheckCircle className="size-10" />
-              </div>
-              <h2 className="mt-8 text-3xl font-medium">Request received!</h2>
-              <p className="mx-auto mt-4 max-w-md leading-7 text-slate-500">
-                Thank you for your request. WeCoach will review your details and
-                get back to you shortly with matched teachers.
-              </p>
-              <Link
-                href="/"
-                className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-gradient-to-r from-[#1266f1] to-[#4f8cff] px-8 text-sm font-medium text-white shadow-[0_10px_24px_rgba(18,102,241,0.35)] transition hover:-translate-y-0.5"
+      <section className="relative -mt-12 pb-24">
+        <div className="mx-auto max-w-4xl px-5 sm:px-6 lg:px-8">
+          <AnimatePresence mode="wait">
+            {submitted ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="rounded-[40px] bg-white p-12 text-center shadow-2xl shadow-slate-200 border border-slate-100"
               >
-                Back to Home
-              </Link>
-            </motion.div>
-          ) : (
-            <motion.form
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              onSubmit={async (e) => {
-                e.preventDefault();
-                await saveRequest(new FormData(e.currentTarget));
-                setSubmitted(true);
-              }}
-              className="rounded-[28px] bg-white p-8 shadow-[0_18px_45px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 sm:p-10"
-            >
-              <div className="grid gap-6 sm:grid-cols-2">
-                <Field
-                  icon={<FiUser className="size-4" />}
-                  label="Parent's name"
-                  htmlFor="parent-name"
+                <div className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-green-50 text-green-500 mb-8">
+                  <FiCheckCircle className="size-12" />
+                </div>
+                <h2 className="text-4xl font-bold text-[#0f172a]">Request Sent Successfully!</h2>
+                <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
+                  Our team is already working on finding the best teacher for you. Expect an update within 24 hours.
+                </p>
+                <Link
+                  href="/"
+                  className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#0f172a] px-10 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                 >
-                  <input
-                    id="parent-name"
-                    required
-                    placeholder="e.g. Sarah Johnson"
-                    className={inputClasses}
-                  />
-                </Field>
-
-                <Field
-                  icon={<FiMail className="size-4" />}
-                  label="Email address"
-                  htmlFor="email"
+                  Return Home
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-[40px] bg-white p-8 md:p-14 shadow-2xl shadow-slate-200 border border-slate-100"
+              >
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    selectedSubjects.forEach(s => formData.append('subjects', s));
+                    await saveRequest(formData);
+                    setSubmitted(true);
+                  }}
+                  className="space-y-10"
                 >
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    placeholder="you@example.com"
-                    className={inputClasses}
-                  />
-                </Field>
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <Field icon={<FiUser />} label="Parent Full Name" htmlFor="parent-name">
+                      <input id="parent-name" name="parentName" required placeholder="e.g. we coach" className={inputClasses} />
+                    </Field>
 
-                <Field
-                  icon={<FiPhone className="size-4" />}
-                  label="Phone number"
-                  htmlFor="phone"
-                >
-                  <input
-                    id="phone"
-                    type="tel"
-                    placeholder="+1 555 000 0000"
-                    className={inputClasses}
-                  />
-                </Field>
+                    <Field icon={<FiMail />} label="Email Address" htmlFor="email">
+                      <input id="email" name="email" type="email" required placeholder="wecoach@example.com" className={inputClasses} />
+                    </Field>
 
-                <Field
-                  icon={<FiAward className="size-4" />}
-                  label="Child's grade"
-                  htmlFor="grade"
-                >
-                  <select
-                    id="grade"
-                    required
-                    defaultValue=""
-                    className={`${inputClasses} appearance-none ${
-                      "text-slate-600"
-                    }`}
-                  >
-                    <option value="" disabled>
-                      Select grade
-                    </option>
-                    {grades.map((grade) => (
-                      <option key={grade}>{grade}</option>
-                    ))}
-                  </select>
-                </Field>
+                    <Field icon={<FiPhone />} label="Phone Number" htmlFor="phone">
+                      <input id="phone" name="phone" type="tel" required placeholder="+250 790 000 000" className={inputClasses} />
+                    </Field>
 
-                <div className="sm:col-span-2">
-                  <p className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <FiBookOpen className="size-4" />
-                    Subject needed
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {subjects.map((subject) => (
-                      <label key={subject} className="cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="subject"
-                          value={subject}
-                          className="peer sr-only"
-                        />
-                        <span className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition peer-checked:border-[#1266f1] peer-checked:bg-[#eaf2ff] peer-checked:text-[#1266f1] hover:border-[#1266f1]/50">
-                          {subject}
-                        </span>
-                      </label>
-                    ))}
+                    <Field icon={<FiAward />} label="Child's Grade Level" htmlFor="grade">
+                      <select id="grade" name="grade" defaultValue="" required className={`${inputClasses} appearance-none cursor-pointer`}>
+                        <option value="" disabled>Choose a grade</option>
+                        {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                      </select>
+                    </Field>
                   </div>
-                </div>
 
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="details"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-700"
+                  <div className="space-y-4">
+                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                      <FiBookOpen className="text-[#E91E63]" />
+                      Subjects of Interest
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {subjects.map(s => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => toggleSubject(s)}
+                          className={`rounded-2xl px-6 py-3 text-sm font-bold transition-all border-2 ${
+                            selectedSubjects.includes(s)
+                              ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
+                              : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <Field icon={<FiMapPin />} label="Learning Mode" htmlFor="mode">
+                      <select id="mode" name="mode" defaultValue="" required className={`${inputClasses} appearance-none cursor-pointer`}>
+                        <option value="" disabled>Preferred mode</option>
+                        {learningModes.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </Field>
+
+                    <Field icon={<FiCalendar />} label="Preferred Start Date" htmlFor="start-date">
+                      <input id="start-date" name="startDate" type="date" required className={inputClasses} />
+                    </Field>
+                  </div>
+
+                  <Field icon={<FiMessageSquare />} label="Anything else we should know?" htmlFor="details">
+                    <textarea
+                      id="details"
+                      name="details"
+                      rows={4}
+                      placeholder="Share specific goals, challenges, or schedule preferences..."
+                      className={`${inputClasses} resize-none`}
+                    />
+                  </Field>
+
+                  <button
+                    type="submit"
+                    className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-6 text-xl font-bold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
                   >
-                    <FiMessageSquare className="size-4" />
-                    Tell us more
-                  </label>
-                  <textarea
-                    id="details"
-                    rows={4}
-                    placeholder="Goals, current challenges, preferred schedule, online or at home..."
-                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1266f1] focus:ring-2 focus:ring-[#1266f1]/20"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="group mt-8 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#1266f1] to-[#4f8cff] px-8 text-sm font-medium text-white shadow-[0_10px_24px_rgba(18,102,241,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(18,102,241,0.5)]"
-              >
-                Submit Request
-                <FiSend className="size-4 transition-transform group-hover:translate-x-1" />
-              </button>
-            </motion.form>
-          )}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
+                    <span className="relative flex items-center justify-center gap-3">
+                      Send My Request
+                      <FiSend className="transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

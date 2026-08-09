@@ -21,6 +21,7 @@ import {
 export default function AdminDashboard({
   programs,
   requests,
+  teacherApplications = [],
 }: {
   programs: { id: number; title: string; level: string; text: string; points: string[] }[];
   requests: {
@@ -31,6 +32,17 @@ export default function AdminDashboard({
     grade: string;
     subjects: string;
     details: string;
+    status: string;
+    created_at: string;
+  }[];
+  teacherApplications?: {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+    subjects: string;
+    experience: string;
+    resumeUrl: string | null;
     status: string;
     created_at: string;
   }[];
@@ -208,75 +220,68 @@ export default function AdminDashboard({
           </section>
         </div>
 
-        <section className="mt-8 rounded-[24px] bg-white p-7 ring-1 ring-slate-100">
-          <h2 className="text-xl font-medium">Teacher Requests</h2>
-          <div className="mt-5 flex flex-col gap-3">
-            {requests.length === 0 && (
-              <p className="text-sm text-slate-400">
-                No requests yet. Requests submitted through the website will
-                appear here.
-              </p>
-            )}
-            {requests.map((request) => (
-              <div
-                key={request.id}
-                className="rounded-xl border border-slate-200 bg-white p-5"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 place-items-center rounded-full bg-[#eaf2ff] text-[#1266f1]">
-                      {request.parent_name.charAt(0).toUpperCase()}
-                    </span>
-                    <div>
-                      <p className="text-sm font-medium">
-                        {request.parent_name}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        {request.grade} • {request.subjects}
-                      </p>
+        <section className="mt-8 grid gap-8 lg:grid-cols-2">
+          <div className="rounded-[24px] bg-white p-7 ring-1 ring-slate-100">
+            <h2 className="text-xl font-medium">Teacher Requests</h2>
+            <div className="mt-5 flex flex-col gap-3">
+              {requests.length === 0 && (
+                <p className="text-sm text-slate-400">No requests yet.</p>
+              )}
+              {requests.map((request) => (
+                <div key={request.id} className="rounded-xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 place-items-center rounded-full bg-[#eaf2ff] text-[#1266f1] font-bold">
+                        {request.parent_name.charAt(0).toUpperCase()}
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium">{request.parent_name}</p>
+                        <p className="text-xs text-slate-400">{request.grade} • {request.subjects}</p>
+                      </div>
                     </div>
-                  </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      request.status === "new"
-                        ? "bg-amber-50 text-amber-600"
-                        : "bg-green-50 text-green-600"
-                    }`}
-                  >
-                    {request.status}
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {request.details}
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500">
-                  <span className="inline-flex items-center gap-1.5">
-                    <FiMail className="size-3.5" />
-                    {request.email}
-                  </span>
-                  {request.phone && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <FiPhone className="size-3.5" />
-                      {request.phone}
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${request.status === "new" ? "bg-amber-50 text-amber-600" : "bg-green-50 text-green-600"}`}>
+                      {request.status}
                     </span>
-                  )}
-                  <span className="text-slate-400">
-                    {new Date(request.created_at).toLocaleString()}
-                  </span>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-600">{request.details}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><FiMail /> {request.email}</span>
+                    <span className="flex items-center gap-1"><FiPhone /> {request.phone}</span>
+                  </div>
                 </div>
-                {request.status === "new" && (
-                  <form action={updateRequestStatus} className="mt-4">
-                    <input type="hidden" name="id" value={request.id} />
-                    <button
-                      type="submit"
-                      className="inline-flex min-h-9 items-center rounded-full bg-[#1266f1] px-4 text-xs font-medium text-white transition hover:bg-[#0d55ce]"
-                    >
-                      Mark as reviewed
-                    </button>
-                  </form>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[24px] bg-white p-7 ring-1 ring-slate-100">
+            <h2 className="text-xl font-medium">Teacher Applications</h2>
+            <div className="mt-5 flex flex-col gap-3">
+              {teacherApplications.length === 0 && (
+                <p className="text-sm text-slate-400">No applications yet.</p>
+              )}
+              {teacherApplications.map((app) => (
+                <div key={app.id} className="rounded-xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 place-items-center rounded-full bg-purple-50 text-purple-600 font-bold">
+                        {app.fullName.charAt(0).toUpperCase()}
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium">{app.fullName}</p>
+                        <p className="text-xs text-slate-400">{app.experience} exp • {app.subjects}</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-600">
+                      {app.status}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><FiMail /> {app.email}</span>
+                    <span className="flex items-center gap-1"><FiPhone /> {app.phone}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </section>

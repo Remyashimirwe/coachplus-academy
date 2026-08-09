@@ -1,0 +1,92 @@
+"use client";
+
+import Link from "next/link";
+import { FiTwitter, FiLinkedin, FiInstagram } from "react-icons/fi";
+
+const footerGroups = [
+  {
+    title: "Platform",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "How It Works", href: "/#how-it-works" },
+      { label: "Programs", href: "/programs" },
+      { label: "Request a Teacher", href: "/request" },
+    ],
+  },
+  {
+    title: "Community",
+    links: [
+      { label: "About Us", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Success Stories", href: "#" },
+      { label: "Blog", href: "#" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "#" },
+      { label: "Terms of Service", href: "#" },
+      { label: "Cookie Policy", href: "#" },
+    ],
+  },
+];
+
+export default function Footer() {
+  return (
+    <footer className="bg-[#0f172a] pt-24 pb-12 text-white">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
+          <div>
+            <Link href="/" className="group flex items-center gap-3 font-normal link-modern w-fit">
+              <img
+                src="/logo.png"
+                alt="WeCoach"
+                className="size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
+              />
+              <span className="text-3xl font-bold tracking-tight text-white">
+                We<span className="text-[#E91E63]">Coach</span>
+              </span>
+            </Link>
+            <p className="mt-8 max-w-sm text-lg leading-relaxed text-slate-400">
+              Connecting parents and qualified private tutors for home and online learning excellence. Building a brighter future together.
+            </p>
+          </div>
+          
+          {footerGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="text-lg font-bold text-white mb-6">{group.title}</h3>
+              <ul className="flex flex-col gap-4">
+                {group.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-base text-slate-400 transition hover:text-[#E91E63] link-modern"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-20 border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500">
+          <p>&copy; {new Date().getFullYear()} WeCoach Education Platform. All rights reserved.</p>
+          <div className="flex gap-8">
+            <a href="#" className="hover:text-white transition link-modern flex items-center gap-2">
+              <FiTwitter className="size-4" /> Twitter
+            </a>
+            <a href="#" className="hover:text-white transition link-modern flex items-center gap-2">
+              <FiLinkedin className="size-4" /> LinkedIn
+            </a>
+            <a href="#" className="hover:text-white transition link-modern flex items-center gap-2">
+              <FiInstagram className="size-4" /> Instagram
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

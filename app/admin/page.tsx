@@ -7,22 +7,30 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   await requireAdmin();
 
-  const programs = getPrograms();
-  const requests = db
-    .prepare(
-      "SELECT * FROM requests ORDER BY CASE status WHEN 'new' THEN 0 ELSE 1 END, created_at DESC"
-    )
-    .all() as {
-    id: number;
-    parent_name: string;
-    email: string;
-    phone: string;
-    grade: string;
-    subjects: string;
-    details: string;
-    status: string;
-    created_at: string;
-  }[];
+  const programs = await getPrograms();
+  const requests = await db.request.findMany({
+    orderBy: [
+      { status: "asc" }, // This might not work exactly like SQLite CASE but "new" comes before others alphabetically
+      { createdAt: "desc" },
+    ],
+  });
+  
+  const teacherApplications = await db.teacherApplication.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
-  return <AdminDashboard programs={programs} requests={requests} />;
+  return (
+    <AdminDashboard 
+      programs={programs} 
+      requests={requests.map(r => ({
+        ...r,
+        parent_name: r.parentName,
+        created_at: r.createdAt.toISOString()
+      }))} 
+      teacherApplications={teacherApplications.map(t => ({
+        ...t,
+        created_at: t.createdAt.toISOString()
+      }))}
+    />
+  );
 }

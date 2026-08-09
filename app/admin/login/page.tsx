@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { FiLock, FiMail, FiLogIn } from "react-icons/fi";
+import { motion } from "framer-motion";
 import { login, type LoginState } from "@/app/actions/auth";
 
 const initialState: LoginState = {};
@@ -11,40 +12,47 @@ export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#1266f1] via-[#1a6ff3] to-[#4f8cff] px-5">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] px-5">
       <div className="absolute -left-32 top-20 size-96 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#0b52d0]/40 blur-3xl" />
+      <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/30 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
-        <Link href="/" className="mb-8 flex items-center justify-center gap-3">
-          <img
-            src="/logo.png"
-            alt="WeCoach"
-            className="size-12 rounded-2xl object-contain shadow-lg"
-          />
+        <Link href="/" className="mb-10 flex items-center justify-center gap-3">
+          <div className="flex items-center gap-2 rounded-2xl bg-white/10 p-2 backdrop-blur-xl border border-white/20">
+            <img
+              src="/logo.png"
+              alt="WeCoach"
+              className="size-10 object-contain"
+            />
+            <span className="pr-2 text-xl font-bold tracking-tight text-white">WeCoach</span>
+          </div>
         </Link>
 
-        <div className="rounded-[24px] bg-white p-8 shadow-[0_32px_80px_rgba(3,24,69,0.28)] sm:p-10">
-          <h1 className="text-center text-3xl font-medium tracking-tight">
-            Admin Login
+        <div className="rounded-[32px] border border-white/20 bg-white/95 p-8 shadow-[0_32px_80px_rgba(233,30,99,0.2)] backdrop-blur-xl sm:p-10">
+          <h1 className="text-center text-3xl font-bold tracking-tight text-slate-900">
+            Admin Access
           </h1>
           <p className="mt-3 text-center text-sm leading-6 text-slate-500">
-            Sign in to manage programs and teacher requests.
+            Securely sign in to your dashboard.
           </p>
 
           {state?.error && (
-            <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600 ring-1 ring-red-100">
+            <motion.p 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600 ring-1 ring-red-100"
+            >
               {state.error}
-            </p>
+            </motion.p>
           )}
 
-          <form action={formAction} className="mt-6 flex flex-col gap-5">
+          <form action={formAction} className="mt-8 flex flex-col gap-6">
             <div>
               <label
                 htmlFor="email"
-                className="text-sm font-medium text-slate-700"
+                className="text-xs font-bold uppercase tracking-widest text-slate-400"
               >
-                Email
+                Email Address
               </label>
               <div className="relative mt-2">
                 <FiMail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
@@ -54,18 +62,20 @@ export default function AdminLoginPage() {
                   type="email"
                   required
                   placeholder="admin@wecouch.com"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1266f1] focus:ring-2 focus:ring-[#1266f1]/20"
+                  className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:ring-4 focus:ring-[#E91E63]/10"
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-slate-700"
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="text-xs font-bold uppercase tracking-widest text-slate-400"
+                >
+                  Password
+                </label>
+              </div>
               <div className="relative mt-2">
                 <FiLock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -74,7 +84,7 @@ export default function AdminLoginPage() {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1266f1] focus:ring-2 focus:ring-[#1266f1]/20"
+                  className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:ring-4 focus:ring-[#E91E63]/10"
                 />
               </div>
             </div>
@@ -82,16 +92,13 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={pending}
-              className="mt-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#1266f1] to-[#4f8cff] px-8 text-sm font-medium text-white shadow-[0_10px_24px_rgba(18,102,241,0.35)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              className="group relative mt-2 inline-flex min-h-[56px] items-center justify-center gap-2 overflow-hidden rounded-full bg-slate-900 px-8 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <FiLogIn className="size-4" />
-              {pending ? "Signing in..." : "Sign In"}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-0 transition-opacity group-hover:opacity-100" />
+              <FiLogIn className="relative z-10 size-5" />
+              <span className="relative z-10">{pending ? "Authenticating..." : "Sign In to Dashboard"}</span>
             </button>
           </form>
-
-          <p className="mt-6 text-center text-xs leading-5 text-slate-400">
-            Default credentials: admin@wecouch.com / admin123
-          </p>
         </div>
       </div>
     </main>

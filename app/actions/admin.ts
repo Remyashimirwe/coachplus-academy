@@ -28,13 +28,17 @@ export async function addProgram(
     return { error: "Please fill in all fields." };
   }
 
-  const sortOrder = db
-    .prepare("SELECT COUNT(*) AS count FROM programs")
-    .get() as { count: number };
+  const sortOrder = await db.program.count();
 
-  db.prepare(
-    "INSERT INTO programs (title, level, text, points, sort_order) VALUES (?, ?, ?, ?, ?)"
-  ).run(title, level, text, JSON.stringify(points), sortOrder.count);
+  await db.program.create({
+    data: {
+      title,
+      level,
+      text,
+      points,
+      sortOrder,
+    },
+  });
 
   revalidatePath("/programs");
   revalidatePath("/admin");
@@ -47,7 +51,9 @@ export async function deleteProgram(formData: FormData) {
 
   const id = Number(formData.get("id"));
   if (id) {
-    db.prepare("DELETE FROM programs WHERE id = ?").run(id);
+    await db.program.delete({
+      where: { id },
+    });
   }
 
   revalidatePath("/programs");
@@ -59,7 +65,10 @@ export async function updateRequestStatus(formData: FormData) {
 
   const id = Number(formData.get("id"));
   if (id) {
-    db.prepare("UPDATE requests SET status = 'reviewed' WHERE id = ?").run(id);
+    await db.request.update({
+      where: { id },
+      data: { status: "reviewed" },
+    });
   }
 
   revalidatePath("/admin");

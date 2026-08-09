@@ -20,9 +20,9 @@ export async function login(
     return { error: "Please enter your email and password." };
   }
 
-  const admin = getAdminByEmail(email);
+  const admin = await getAdminByEmail(email);
 
-  if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+  if (!admin || !bcrypt.compareSync(password, admin.passwordHash)) {
     return { error: "Invalid email or password." };
   }
 

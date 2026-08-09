@@ -6,6 +6,7 @@ import "@fontsource/poppins/700.css";
 import "@fontsource/poppins/800.css";
 import "@fontsource/poppins/900.css";
 import "./globals.css";
+import Navbar from "./components/Navbar";
 
 export const metadata: Metadata = {
   title: "WeCoach | Find the Perfect Teacher",
@@ -17,13 +18,16 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1266f1",
+  themeColor: "#E91E63",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

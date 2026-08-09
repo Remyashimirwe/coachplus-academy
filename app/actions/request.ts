@@ -13,7 +13,14 @@ export async function saveRequest(formData: FormData) {
     .map((s) => String(s))
     .join(", ");
 
-  db.prepare(
-    "INSERT INTO requests (parent_name, email, phone, grade, subjects, details) VALUES (?, ?, ?, ?, ?, ?)"
-  ).run(parentName, email, phone, grade, subjects, details);
+  await db.request.create({
+    data: {
+      parentName,
+      email,
+      phone,
+      grade,
+      subjects,
+      details,
+    },
+  });
 }

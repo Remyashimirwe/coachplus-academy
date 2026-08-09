@@ -3,7 +3,7 @@ import ProgramsView from "./ProgramsView";
 
 export const dynamic = "force-dynamic";
 
-export default function ProgramsPage() {
-  const programs = getPrograms();
+export default async function ProgramsPage() {
+  const programs = await getPrograms();
   return <ProgramsView programs={programs} />;
 }
