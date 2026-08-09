@@ -62,7 +62,7 @@ export default function Hero() {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  {/* Kigali / Rwanda Center Pin */}
+                  {/* Kigali  / Rwanda Center Pin */}
                   <motion.g
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
