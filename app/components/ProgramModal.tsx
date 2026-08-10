@@ -78,8 +78,8 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
 
             <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
               {/* Left Sidebar - Program Info (Hidden on small screens) */}
-              <div className="hidden md:flex w-1/3 bg-slate-50 p-10 flex-col shrink-0">
-                <div className="relative aspect-square w-full rounded-3xl overflow-hidden mb-8 shadow-lg ring-4 ring-white">
+              <div className="hidden md:flex w-1/4 bg-slate-50 p-8 flex-col shrink-0">
+                <div className="relative aspect-square w-full rounded-3xl overflow-hidden mb-6 shadow-lg ring-4 ring-white">
                   <img 
                     src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80"} 
                     alt={program.title}
@@ -90,14 +90,14 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                     {program.level}
                   </div>
                 </div>
-                <h2 className="text-3xl font-bold text-[#0f172a] mb-4">{program.title}</h2>
-                <p className="text-slate-600 leading-relaxed text-sm">
+                <h2 className="text-2xl font-bold text-[#0f172a] mb-4">{program.title}</h2>
+                <p className="text-slate-600 leading-relaxed text-xs">
                   {program.text}
                 </p>
-                <div className="mt-auto">
+                <div className="mt-auto pt-6">
                   <Link
                     href={`/request?programId=${program.id}`}
-                    className="w-full inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-[#E91E63] px-6 text-sm font-bold text-white shadow-xl shadow-rose-500/20 transition-all hover:-translate-y-1 active:scale-95"
+                    className="w-full inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-4 text-xs font-bold text-white shadow-xl shadow-rose-500/20 transition-all hover:-translate-y-1 active:scale-95"
                   >
                     Request this Category
                     <FiArrowRight className="size-4" />
@@ -106,13 +106,13 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
               </div>
 
               {/* Right Content - Sub-categories List */}
-              <div className="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar bg-white">
+              <div className="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar bg-white">
                 <div className="md:hidden mb-8">
                    <span className="text-xs font-bold text-[#E91E63] uppercase tracking-widest">{program.level}</span>
                    <h2 className="text-3xl font-bold text-[#0f172a] mt-1">{program.title}</h2>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 flex items-center justify-between">
                   <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Available Sub-categories</h3>
                 </div>
 
@@ -134,27 +134,21 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                       </div>
 
                       <div className="flex-1">
-                        <div className="grid grid-cols-2 gap-2 mb-6">
+                        <div className="flex flex-wrap gap-2 mb-6">
                           {subject.topics.map((topic) => (
                             <div 
                               key={topic.id} 
-                              className="flex items-center gap-2 p-1.5 rounded-xl bg-white border border-slate-200 group/topic hover:border-[#E91E63]/30 transition-all"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 group/topic hover:border-[#E91E63]/30 transition-all shadow-sm"
                             >
-                              <div className="size-8 shrink-0 rounded-lg overflow-hidden border border-slate-100">
-                                <img 
-                                  src={topic.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100&q=80"} 
-                                  alt={topic.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                              <span className="text-[10px] font-bold text-slate-600 truncate">
+                              <div className="size-2 rounded-full bg-[#E91E63]/30 group-hover/topic:bg-[#E91E63] transition-colors" />
+                              <span className="text-[10px] font-bold text-slate-600">
                                 {topic.name}
                               </span>
                             </div>
                           ))}
                           {subject.topics.length === 0 && (
                             <div className="col-span-2">
-                              <span className="text-[10px] text-slate-400 italic">Core fundamentals included</span>
+                              <span className="text-[10px] text-slate-400 italic">Core curriculum covered</span>
                             </div>
                           )}
                         </div>
@@ -162,7 +156,7 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
 
                       <Link
                         href={`/request?programId=${program.id}&subjectId=${subject.id}`}
-                        className="flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 py-3 text-xs font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white hover:border-[#E91E63] active:scale-95"
+                        className="flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 py-2.5 text-[10px] font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white hover:border-[#E91E63] active:scale-95"
                       >
                         Request Teacher
                         <FiArrowRight className="size-3" />

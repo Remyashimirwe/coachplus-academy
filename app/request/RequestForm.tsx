@@ -84,6 +84,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
 
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
@@ -95,6 +96,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
         const subject = program?.subjects.find(s => s.id.toString() === subjectIdParam);
         if (subject) {
           setSelectedSubjects([subject.name]);
+          setSelectedCourses({ [subject.name]: subject.topics.map(t => t.name) });
         }
       }
     }
@@ -105,23 +107,79 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
     ? []
     : programs.find(p => p.id.toString() === selectedProgramId)?.subjects.map(s => s.name) || [];
 
-  const toggleSubject = (subject: string) => {
-    setSelectedSubjects(prev => 
-      prev.includes(subject) ? prev.filter(s => s !== subject) : [...prev, subject]
-    );
+  const toggleSubCategory = (subCategoryName: string) => {
+    setSelectedSubjects(prev => {
+      const isSelecting = !prev.includes(subCategoryName);
+      
+      if (isSelecting) {
+        // Find sub-category and its topics
+        const subCategory = programs
+          .find(p => p.id.toString() === selectedProgramId)
+          ?.subjects.find(s => s.name === subCategoryName);
+        
+        if (subCategory) {
+          setSelectedCourses(c => ({
+            ...c,
+            [subCategoryName]: subCategory.topics.map(t => t.name)
+          }));
+        }
+        return [...prev, subCategoryName];
+      } else {
+        setSelectedCourses(c => {
+          const newCourses = { ...c };
+          delete newCourses[subCategoryName];
+          return newCourses;
+        });
+        return prev.filter(s => s !== subCategoryName);
+      }
+    });
+  };
+
+  const toggleTopic = (subCategoryName: string, topicName: string) => {
+    setSelectedCourses(prev => {
+      const current = prev[subCategoryName] || [];
+      const isSelecting = !current.includes(topicName);
+      let newTopicsForSubCategory: string[];
+      
+      if (isSelecting) {
+        newTopicsForSubCategory = [...current, topicName];
+      } else {
+        newTopicsForSubCategory = current.filter(c => c !== topicName);
+      }
+
+      // If a topic is selected/deselected, the sub-category must be selected
+      if (newTopicsForSubCategory.length > 0 && !selectedSubjects.includes(subCategoryName)) {
+        setSelectedSubjects(s => [...s, subCategoryName]);
+      } else if (newTopicsForSubCategory.length === 0 && selectedSubjects.includes(subCategoryName)) {
+        setSelectedSubjects(s => s.filter(name => name !== subCategoryName));
+      }
+
+      return {
+        ...prev,
+        [subCategoryName]: newTopicsForSubCategory
+      };
+    });
   };
 
   const handleSelectAll = () => {
     if (selectedSubjects.length === availableSubjects.length) {
       setSelectedSubjects([]);
+      setSelectedCourses({});
     } else {
       setSelectedSubjects([...availableSubjects]);
+      const allCourses: Record<string, string[]> = {};
+      const program = programs.find(p => p.id.toString() === selectedProgramId);
+      program?.subjects.forEach(s => {
+        allCourses[s.name] = s.topics.map(t => t.name);
+      });
+      setSelectedCourses(allCourses);
     }
   };
 
   useEffect(() => {
     if (!isInitialLoad) {
       setSelectedSubjects([]);
+      setSelectedCourses({});
     }
   }, [selectedProgramId]);
 
@@ -188,6 +246,13 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     e.preventDefault();
                     const formData = new FormData(e.currentTarget);
                     selectedSubjects.forEach(s => formData.append('subjects', s));
+                    
+                    // Add selected courses
+                    Object.entries(selectedCourses).forEach(([subject, courses]) => {
+                      courses.forEach(c => formData.append('courses', `${subject}: ${c}`));
+                    });
+
+                    formData.append('programId', selectedProgramId);
                     await saveRequest(formData);
                     setSubmitted(true);
                   }}
@@ -207,7 +272,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     </Field>
 
                     <Field icon={<FiLayers />} label="Learning Category" htmlFor="program">
-                      <div className="relative">
+                      <div className="relative group">
                         <select 
                           id="program" 
                           name="programId" 
@@ -219,7 +284,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                           <option value="" disabled>Choose a category</option>
                           {programs.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                         </select>
-                        <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#E91E63] transition-colors">
+                        <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
                           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
@@ -234,59 +299,127 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                         <FiBookOpen className="text-[#E91E63]" />
                         Sub-categories of Interest
                       </label>
-                      {availableSubjects.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={handleSelectAll}
-                          className="text-xs font-bold text-[#E91E63] hover:underline"
-                        >
-                          {selectedSubjects.length === availableSubjects.length ? "Deselect All" : "Select All"}
-                        </button>
-                      )}
                     </div>
                     
                     {availableSubjects.length > 0 ? (
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {programs.find(p => p.id.toString() === selectedProgramId)?.subjects.map(s => (
+                      <div className="space-y-10">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                           <div
-                            key={s.id}
-                            onClick={() => toggleSubject(s.name)}
-                            className={`group relative cursor-pointer overflow-hidden rounded-2xl transition-all border-2 ${
-                              selectedSubjects.includes(s.name)
+                            onClick={handleSelectAll}
+                            className={`group relative cursor-pointer overflow-hidden rounded-2xl transition-all border-2 p-4 flex items-center justify-between ${
+                              selectedSubjects.length === availableSubjects.length
                                 ? "bg-[#E91E63]/5 border-[#E91E63] shadow-md"
                                 : "bg-white border-slate-100 hover:border-[#E91E63]/30"
                             }`}
                           >
-                            <div className="relative h-24 w-full overflow-hidden">
-                              <img 
-                                src={s.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80"} 
-                                alt={s.name}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                              <div className={`absolute top-3 right-3 size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                selectedSubjects.includes(s.name)
-                                  ? "bg-[#E91E63] border-[#E91E63]"
-                                  : "bg-white/20 border-white/40 backdrop-blur-sm"
-                              }`}>
-                                {selectedSubjects.includes(s.name) && <FiCheckCircle className="text-white size-3" />}
-                              </div>
-                              <span className="absolute bottom-3 left-4 text-sm font-bold text-white truncate right-4">
-                                {s.name}
-                              </span>
-                            </div>
-                            <div className="p-4 flex flex-wrap gap-1.5">
-                              {s.topics.map(topic => (
-                                <span key={topic.id} className="text-[9px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-bold uppercase tracking-tighter">
-                                  {topic.name}
-                                </span>
-                              ))}
-                              {s.topics.length === 0 && (
-                                <span className="text-[9px] text-slate-400 italic">General topics</span>
-                              )}
+                            <span className="text-sm font-bold text-slate-800">
+                              All Sub-categories
+                            </span>
+                            <div className={`size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                              selectedSubjects.length === availableSubjects.length
+                                ? "bg-[#E91E63] border-[#E91E63]"
+                                : "bg-slate-100 border-slate-200"
+                            }`}>
+                              {selectedSubjects.length === availableSubjects.length && <FiCheckCircle className="text-white size-3" />}
                             </div>
                           </div>
-                        ))}
+
+                          {programs
+                            .find(p => p.id.toString() === selectedProgramId)
+                            ?.subjects.map(s => {
+                              const isSelected = selectedSubjects.includes(s.name);
+                              return (
+                                <div
+                                  key={s.id}
+                                  onClick={() => toggleSubCategory(s.name)}
+                                  className={`group relative cursor-pointer overflow-hidden rounded-2xl transition-all border-2 flex flex-col ${
+                                    isSelected
+                                      ? "bg-[#E91E63]/5 border-[#E91E63] shadow-md"
+                                      : "bg-white border-slate-100 hover:border-[#E91E63]/30"
+                                  }`}
+                                >
+                                  <div className="relative h-24 w-full overflow-hidden">
+                                    <img 
+                                      src={s.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80"} 
+                                      alt={s.name}
+                                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                    <div className={`absolute top-3 right-3 size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                      isSelected
+                                        ? "bg-[#E91E63] border-[#E91E63]"
+                                        : "bg-white/20 border-white/40 backdrop-blur-sm"
+                                    }`}>
+                                      {isSelected && <FiCheckCircle className="text-white size-3" />}
+                                    </div>
+                                    <span className="absolute bottom-3 left-4 text-sm font-bold text-white truncate right-4">
+                                      {s.name}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+
+                        {/* Additional Topic Selection Section */}
+                        {selectedSubjects.length > 0 && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="rounded-3xl bg-slate-50 p-8 border-2 border-slate-100"
+                          >
+                            <div className="flex items-center gap-2 mb-6">
+                              <FiLayers className="text-[#E91E63]" />
+                              <h3 className="text-sm font-bold text-slate-700">Refine Topics to Cover</h3>
+                            </div>
+                            
+                            <div className="space-y-6">
+                              {selectedSubjects.map(subName => {
+                                const sub = programs
+                                  .find(p => p.id.toString() === selectedProgramId)
+                                  ?.subjects.find(s => s.name === subName);
+                                
+                                if (!sub || sub.topics.length === 0) return null;
+
+                                return (
+                                  <div key={subName} className="space-y-3">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                      {subName}
+                                      <div className="h-px flex-1 bg-slate-200" />
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2">
+                                      {sub.topics.map(topic => (
+                                        <button
+                                          key={topic.id}
+                                          type="button"
+                                          onClick={() => toggleTopic(subName, topic.name)}
+                                          className={`group/btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                            selectedCourses[subName]?.includes(topic.name)
+                                              ? "bg-[#E91E63] text-white shadow-lg shadow-rose-200"
+                                              : "bg-white text-slate-500 border border-slate-200 hover:border-[#E91E63]/30"
+                                          }`}
+                                        >
+                                          <div className={`size-4 rounded-full border flex items-center justify-center transition-colors ${
+                                            selectedCourses[subName]?.includes(topic.name)
+                                              ? "bg-white border-white text-[#E91E63]"
+                                              : "bg-slate-100 border-slate-200"
+                                          }`}>
+                                            {selectedCourses[subName]?.includes(topic.name) && <FiCheckCircle className="size-2.5" />}
+                                          </div>
+                                          {topic.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              
+                              {Object.values(selectedCourses).every(topics => topics.length === 0) && (
+                                <p className="text-sm text-slate-400 italic">No topics selected. Please select at least one topic for your chosen sub-categories.</p>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
                     ) : (
                       <p className="text-sm text-slate-400 italic bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-100">
@@ -297,7 +430,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
 
                   <div className="grid gap-8 md:grid-cols-2">
                     <Field icon={<FiMapPin />} label="Learning Mode" htmlFor="mode">
-                      <div className="relative">
+                      <div className="relative group">
                         <select 
                           id="mode" 
                           name="mode" 
@@ -308,7 +441,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                           <option value="" disabled>Preferred mode</option>
                           {learningModes.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
-                        <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#E91E63] transition-colors">
+                        <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
                           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>

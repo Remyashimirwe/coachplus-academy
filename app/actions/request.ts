@@ -7,19 +7,23 @@ export async function saveRequest(formData: FormData) {
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const details = String(formData.get("details") || "").trim();
-  const subjects = formData
+  const subCategories = formData
     .getAll("subjects")
     .map((s) => String(s))
     .join(", ");
-  const programId = formData.get("programId") ? Number(formData.get("programId")) : null;
+  const topics = formData
+    .getAll("courses")
+    .map((c) => String(c))
+    .join(", ");
+  const programId = formData.get("programId") ? String(formData.get("programId")) : "N/A";
 
   await db.request.create({
     data: {
       parentName,
       email,
       phone,
-      grade: programId ? `Category ID: ${programId}` : "N/A",
-      subjects,
+      grade: programId,
+      subjects: subCategories + (topics ? ` (Topics: ${topics})` : ""),
       details,
     },
   });
