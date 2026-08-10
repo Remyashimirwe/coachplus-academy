@@ -69,3 +69,9 @@ model TeacherApplication {
   status     String   @default("pending")
   createdAt  DateTime @default(now())
 }
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}

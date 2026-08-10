@@ -1,7 +1,7 @@
 import { Request, TeacherApplication } from "@prisma/client";
 import { requireAdmin } from "@/app/lib/dal";
 import { db, getPrograms } from "@/app/lib/db";
-import AdminDashboard from "./dashboard";
+import OverviewView from "./components/OverviewView";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export default async function AdminPage() {
   });
 
   return (
-    <AdminDashboard 
+    <OverviewView 
       programs={programs} 
       requests={requests.map((r: Request) => ({
         ...r,

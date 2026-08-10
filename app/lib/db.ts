@@ -51,3 +51,22 @@ export async function getAdminByEmail(email: string) {
     where: { email },
   });
 }
+
+export async function getSetting(key: string, defaultValue: string = "") {
+  try {
+    const setting = await prisma.setting.findUnique({
+      where: { key },
+    });
+    return setting ? setting.value : defaultValue;
+  } catch (error) {
+    return defaultValue;
+  }
+}
+
+export async function setSetting(key: string, value: string) {
+  return prisma.setting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value },
+  });
+}

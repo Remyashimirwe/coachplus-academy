@@ -16,11 +16,6 @@ export const metadata: Metadata = {
   description:
     "Connect with verified home and online teachers for personalized learning.",
   icons: {
-    icon: [
-      { url: "/logo.png" },
-      { url: "/logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/logo.png", sizes: "16x16", type: "image/png" },
-    ],
     apple: "/logo.png",
   },
 };

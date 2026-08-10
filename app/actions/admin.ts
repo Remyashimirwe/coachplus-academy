@@ -154,3 +154,18 @@ export async function updateRequestStatus(formData: FormData) {
 
   revalidatePath("/admin");
 }
+
+export async function toggleTeacherApplications(isOpen: boolean) {
+  await requireAdmin();
+  
+  await db.setting.upsert({
+    where: { key: "teacher_applications_open" },
+    update: { value: isOpen ? "true" : "false" },
+    create: { key: "teacher_applications_open", value: isOpen ? "true" : "false" },
+  });
+
+  revalidatePath("/admin/settings");
+  revalidatePath("/become-a-teacher");
+  
+  return { success: true };
+}

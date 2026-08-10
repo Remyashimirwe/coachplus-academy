@@ -16,15 +16,23 @@ export async function saveRequest(formData: FormData) {
     .map((c) => String(c))
     .join(", ");
   const programId = formData.get("programId") ? String(formData.get("programId")) : "N/A";
+  const mode = String(formData.get("mode") || "").trim();
+  const startDate = String(formData.get("startDate") || "").trim();
 
-  await db.request.create({
-    data: {
-      parentName,
-      email,
-      phone,
-      grade: programId,
-      subjects: subCategories + (topics ? ` (Topics: ${topics})` : ""),
-      details,
-    },
-  });
+  try {
+    await db.request.create({
+      data: {
+        parentName,
+        email,
+        phone,
+        grade: programId,
+        subjects: subCategories + (topics ? ` (Topics: ${topics})` : ""),
+        details: `[Mode: ${mode}] [Start: ${startDate}] ${details}`,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to save request:", error);
+    return { success: false, error: "Database operation failed" };
+  }
 }

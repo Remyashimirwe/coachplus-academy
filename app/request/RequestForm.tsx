@@ -77,7 +77,7 @@ export default function RequestForm({ programs }: { programs: Program[] }) {
 }
 
 function RequestFormContent({ programs }: { programs: Program[] }) {
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const searchParams = useSearchParams();
   const programIdParam = searchParams.get("programId");
   const subjectIdParam = searchParams.get("subjectId");
@@ -86,6 +86,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [selectionError, setSelectionError] = useState(false);
 
   useEffect(() => {
     if (programIdParam) {
@@ -212,7 +213,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
       <section className="relative -mt-12 pb-24">
         <div className="mx-auto max-w-4xl px-5 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
-            {submitted ? (
+            {status === "success" ? (
               <motion.div
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -234,6 +235,28 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   Return Home
                 </Link>
               </motion.div>
+            ) : status === "error" ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="rounded-[40px] bg-white p-12 text-center shadow-2xl shadow-slate-200 border border-slate-100"
+              >
+                <div className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-red-50 text-red-500 mb-8">
+                  <FiX className="size-12" />
+                </div>
+                <h2 className="text-4xl font-bold text-[#0f172a]">Form is not Submited</h2>
+                <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
+                  Something went wrong while sending your request. Please try again later or contact us directly.
+                </p>
+                <button
+                  onClick={() => setStatus("idle")}
+                  className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#E91E63] px-10 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#0f172a]"
+                >
+                  Try Again
+                </button>
+              </motion.div>
             ) : (
               <motion.div
                 key="form"
@@ -244,6 +267,15 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                 <form 
                   onSubmit={async (e) => {
                     e.preventDefault();
+                    if (selectedSubjects.length === 0) {
+                      setSelectionError(true);
+                      const el = document.getElementById('subject-selection');
+                      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      return;
+                    }
+                    setSelectionError(false);
+                    setStatus("submitting");
+
                     const formData = new FormData(e.currentTarget);
                     selectedSubjects.forEach(s => formData.append('subjects', s));
                     
@@ -253,8 +285,13 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     });
 
                     formData.append('programId', selectedProgramId);
-                    await saveRequest(formData);
-                    setSubmitted(true);
+                    const result = await saveRequest(formData);
+                    
+                    if (result && result.success) {
+                      setStatus("success");
+                    } else {
+                      setStatus("error");
+                    }
                   }}
                   className="space-y-10"
                 >
@@ -293,12 +330,15 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     </Field>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-4" id="subject-selection">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <FiBookOpen className="text-[#E91E63]" />
-                        Sub-categories of Interest
+                      <label className={`text-sm font-bold flex items-center gap-2 transition-colors ${selectionError ? 'text-red-500' : 'text-slate-700'}`}>
+                        <FiBookOpen className={selectionError ? 'text-red-500' : 'text-[#E91E63]'} />
+                        Sub-categories of Interest *
                       </label>
+                      {selectionError && (
+                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please select at least one sub-category</span>
+                      )}
                     </div>
                     
                     {availableSubjects.length > 0 ? (
@@ -459,6 +499,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                       id="details"
                       name="details"
                       rows={4}
+                      required
                       placeholder="Share specific goals, challenges, or schedule preferences..."
                       className={`${inputClasses} resize-none`}
                     />
@@ -466,12 +507,13 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
 
                   <button
                     type="submit"
-                    className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-6 text-xl font-bold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+                    disabled={status === "submitting"}
+                    className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-6 text-xl font-bold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
                     <span className="relative flex items-center justify-center gap-3">
-                      Send My Request
-                      <FiSend className="transition-transform group-hover:translate-x-1" />
+                      {status === "submitting" ? "Sending..." : "Send My Request"}
+                      <FiSend className={`transition-transform ${status === "submitting" ? "animate-pulse" : "group-hover:translate-x-1"}`} />
                     </span>
                   </button>
                 </form>
