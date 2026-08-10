@@ -4,19 +4,19 @@ import ProgramsSection from "./components/ProgramsSection";
 import Features from "./components/Features";
 import CTA from "./components/CTA";
 import Footer from "./components/Footer";
-import { getPrograms } from "./lib/db";
+import {getPrograms} from "./lib/db";
 
 export default async function Home() {
-  const programs = await getPrograms();
+    const programs = await getPrograms();
 
-  return (
-    <main className="min-h-screen bg-white">
-      <Hero />
-      <HowItWorks />
-      <ProgramsSection programs={programs} />
-      <Features />
-      <CTA />
-      <Footer />
-    </main>
-  );
+    return (
+        <main className="min-h-screen bg-white">
+            <Hero/>
+            <ProgramsSection programs={programs}/>
+            <HowItWorks/>
+            <Features/>
+            <CTA/>
+            <Footer/>
+        </main>
+    );
 }
