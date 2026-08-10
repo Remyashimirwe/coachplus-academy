@@ -53,7 +53,7 @@ export default function ProgramsPage({
           >
             <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
               <FiBookOpen className="size-4" />
-              Explore WeCoach Categories
+              Explore Our Categories
             </p>
             <h1 className="mt-6 text-5xl font-medium leading-[1.05] sm:text-6xl">
               Find the right teacher for every learning need
