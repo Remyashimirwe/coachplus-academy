@@ -183,7 +183,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                   </div>
                   <h2 className="text-3xl font-bold text-[#0f172a]">Application Received!</h2>
                   <p className="mt-6 text-lg text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    Thank you for applying to join WeCoach. Our academic team will review your profile and get back to you within 3-5 business days.
+                    Thank you for applying to join Wecoach Academy. Our academic team will review your profile and get back to you within 3-5 business days.
                   </p>
                   <Link
                     href="/"
@@ -328,7 +328,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         name="bio"
                         required
                         rows={3}
-                        placeholder="Tell us about your teaching style and why you want to join WeCoach..."
+                        placeholder="Tell us about your teaching style and why you want to join Wecoach Academy..."
                         className={`${inputClasses} resize-none`}
                       />
                     </Field>

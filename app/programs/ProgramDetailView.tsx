@@ -181,7 +181,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                 Ready to find the perfect teacher for your child?
               </h2>
               <p className="mt-8 text-xl text-white/70">
-                Join hundreds of families in Rwanda who trust WeCoach for personalized education.
+                Join hundreds of families in Rwanda who trust Wecoach Academy for personalized education.
               </p>
               <div className="mt-12 flex flex-col gap-4 sm:flex-row">
                 <Link

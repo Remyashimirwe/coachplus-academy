@@ -67,18 +67,18 @@ export default function Navbar() {
           : "bg-transparent py-5"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-2">
         <Link href="/" className="group flex items-center gap-3 font-normal">
           <div className="relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-0 blur transition duration-300 group-hover:opacity-100" />
             <img
               src="/logo.png"
-              alt="WeCoach"
+              alt="Wecoach Academy"
               className="relative size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
             />
           </div>
           <span className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled ? "text-[#21121f]" : "text-white"}`}>
-            We<span className="text-[#E91E63]">Coach</span>
+            Wecoach <span className="text-[#E91E63]">Academy</span>
           </span>
         </Link>
 

@@ -21,10 +21,10 @@ export default function AdminLoginPage() {
           <div className="flex items-center gap-2 rounded-2xl bg-white/10 p-2 backdrop-blur-xl border border-white/20">
             <img
               src="/logo.png"
-              alt="WeCoach"
+              alt="Wecoach Academy"
               className="size-10 object-contain"
             />
-            <span className="pr-2 text-xl font-bold tracking-tight text-white">WeCoach</span>
+            <span className="pr-2 text-xl font-bold tracking-tight text-white">Wecoach Academy</span>
           </div>
         </Link>
 

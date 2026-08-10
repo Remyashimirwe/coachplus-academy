@@ -37,7 +37,7 @@ export default function Features() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
-            Why Choose <span className="text-[#E91E63]">WeCoach</span>
+            Why Choose <span className="text-[#E91E63]">Wecoach Academy</span>
           </h2>
           <p className="mt-6 text-base font-normal leading-8 text-slate-600">
             Premium features built around safety, comfort, and better learning outcomes for your children.

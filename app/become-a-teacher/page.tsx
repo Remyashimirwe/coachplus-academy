@@ -20,7 +20,7 @@ export default async function BecomeTeacherPage() {
               Join Our Network
             </span>
             <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-              Become a <span className="text-[#E91E63]">WeCoach Teacher</span>
+              Become a <span className="text-[#E91E63]">Wecoach Academy Teacher</span>
             </h1>
             <p className="mt-8 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300">
               Share your expertise and inspire the next generation. We match elite educators with students who value quality learning.

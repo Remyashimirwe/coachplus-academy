@@ -10,8 +10,8 @@ import Navbar from "./components/Navbar";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | WeCoach",
-    default: "WeCoach | Find the Perfect Teacher",
+    template: "%s | Wecoach Academy",
+    default: "Wecoach Academy | Find the Perfect Teacher",
   },
   description:
     "Connect with verified home and online teachers for personalized learning.",

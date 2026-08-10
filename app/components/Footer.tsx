@@ -42,11 +42,11 @@ export default function Footer() {
             <Link href="/" className="group flex items-center gap-3 font-normal w-fit">
               <img
                 src="/logo.png"
-                alt="WeCoach"
+                alt="Wecoach Academy"
                 className="size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
               />
               <span className="text-3xl font-bold tracking-tight text-white">
-                We<span className="text-[#E91E63]">Coach</span>
+                Wecoach <span className="text-[#E91E63]">Academy</span>
               </span>
             </Link>
             <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
@@ -74,7 +74,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-20 border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500">
-          <p>&copy; {new Date().getFullYear()} WeCoach Education Platform. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Wecoach Academy Education Platform. All rights reserved.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-white transition flex items-center gap-2">
               <FiTwitter className="size-4" /> Twitter
