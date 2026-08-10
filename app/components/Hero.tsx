@@ -20,11 +20,8 @@ export default function Hero() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
-              Unlock Your Child's <span className="text-orange-200">Full Potential</span>
+              Find the right teacher for every learning need
             </h1>
-            <p className="mt-8 max-w-xl text-lg font-normal leading-relaxed text-white/90">
-              WeCoach connects parents with elite, hand-picked educators for personalized learning experiences that inspire confidence and academic excellence.
-            </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
                 href="/request"

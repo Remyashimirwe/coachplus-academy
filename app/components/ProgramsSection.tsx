@@ -55,9 +55,6 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
             <h2 className="text-4xl font-bold tracking-tight text-[#21121f] sm:text-5xl">
               Learning paths for <span className="text-[#E91E63]">every goal</span>
             </h2>
-            <p className="mt-6 text-lg font-normal leading-8 text-slate-600">
-              Choose a focused category, then explore sub-categories to find the perfect teacher for your child.
-            </p>
           </div>
           <Link
             href="/programs"
@@ -107,7 +104,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                       }}
                       className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border-2 border-[#E91E63] text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95"
                     >
-                      Show Sub-categories
+                      Show Details
                     </button>
                     <Link 
                       href={`/request?programId=${program.id}`} 

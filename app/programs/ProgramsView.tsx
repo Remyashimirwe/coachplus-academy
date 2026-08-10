@@ -56,13 +56,8 @@ export default function ProgramsPage({
               Explore WeCoach Categories
             </p>
             <h1 className="mt-6 text-5xl font-medium leading-[1.05] sm:text-6xl">
-              Choose the right learning category for your child
+              Find the right teacher for every learning need
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
-              Explore categories designed for academic support, exam
-              readiness, STEM growth, language confidence, and flexible home
-              learning.
-            </p>
           </motion.div>
         </div>
       </section>
@@ -124,7 +119,7 @@ export default function ProgramsPage({
                         }}
                         className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#0f172a] py-4 text-sm font-bold text-[#0f172a] transition-all hover:bg-[#0f172a] hover:text-white active:scale-95 shadow-sm"
                       >
-                        Show Sub-categories
+                        Show Details
                       </button>
                       <Link
                         href={`/request?programId=${program.id}`}
