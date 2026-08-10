@@ -6,6 +6,14 @@ export async function saveRequest(formData: FormData) {
   const parentName = String(formData.get("parentName") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
+  const phone2 = String(formData.get("phone2") || "").trim();
+  const location = String(formData.get("location") || "").trim();
+  const province = String(formData.get("province") || "").trim();
+  const district = String(formData.get("district") || "").trim();
+  const sector = String(formData.get("sector") || "").trim();
+  const cell = String(formData.get("cell") || "").trim();
+  const village = String(formData.get("village") || "").trim();
+  const idPassport = String(formData.get("idPassport") || "").trim();
   const details = String(formData.get("details") || "").trim();
   const subCategories = formData
     .getAll("subjects")
@@ -25,6 +33,14 @@ export async function saveRequest(formData: FormData) {
         parentName,
         email,
         phone,
+        phone2,
+        location,
+        province,
+        district,
+        sector,
+        cell,
+        village,
+        idPassport,
         grade: programId,
         subjects: subCategories + (topics ? ` (Topics: ${topics})` : ""),
         details: `[Mode: ${mode}] [Start: ${startDate}] ${details}`,

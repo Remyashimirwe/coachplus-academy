@@ -51,6 +51,14 @@ model Request {
   parentName String
   email      String
   phone      String   @default("")
+  phone2     String   @default("")
+  location   String   @default("")
+  province   String   @default("")
+  district   String   @default("")
+  sector     String   @default("")
+  cell       String   @default("")
+  village    String   @default("")
+  idPassport String   @default("")
   grade      String   @default("")
   subjects   String   @default("")
   details    String   @default("")
@@ -59,15 +67,17 @@ model Request {
 }
 
 model TeacherApplication {
-  id         Int      @id @default(autoincrement())
-  fullName   String
-  email      String
-  phone      String
-  subjects   String
+  id           Int      @id @default(autoincrement())
+  fullName     String
+  email        String
+  phone        String
+  subjects     String
   experience String
-  resumeUrl  String?
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
+  resumeUrl    String?
+  idPassportUrl String?
+  photoUrl     String?
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
 }
 
 model Setting {

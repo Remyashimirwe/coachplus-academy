@@ -17,6 +17,8 @@ import {
   FiXCircle,
   FiAlertCircle,
   FiArrowRight,
+  FiFileText,
+  FiImage,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
 
@@ -309,6 +311,16 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </div>
                       </div>
                     </Field>
+
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <Field icon={<FiFileText />} label="ID / Passport (Upload)" htmlFor="id-passport">
+                        <input id="id-passport" name="idPassport" type="file" accept="image/*,.pdf" className={`${inputClasses} py-3`} />
+                      </Field>
+
+                      <Field icon={<FiImage />} label="Professional Photo (Upload)" htmlFor="photo">
+                        <input id="photo" name="photo" type="file" accept="image/*" className={`${inputClasses} py-3`} />
+                      </Field>
+                    </div>
 
                     <Field icon={<FiMessageSquare />} label="Brief Bio / Motivation" htmlFor="bio">
                       <textarea

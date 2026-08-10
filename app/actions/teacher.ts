@@ -16,6 +16,8 @@ export async function saveTeacherApplication(formData: FormData) {
   const experience = String(formData.get("experience") || "").trim();
   const bio = String(formData.get("bio") || "").trim();
   const resumeUrl = ""; // Placeholder for file upload logic
+  const idPassportUrl = ""; // Placeholder for file upload logic
+  const photoUrl = ""; // Placeholder for file upload logic
 
   try {
     await db.teacherApplication.create({
@@ -24,9 +26,10 @@ export async function saveTeacherApplication(formData: FormData) {
         email,
         phone,
         subjects,
-        experience,
+        experience: `${experience} - Bio: ${bio}`,
         resumeUrl,
-        // Using experience + bio for metadata since schema is simple
+        idPassportUrl,
+        photoUrl,
         status: "pending",
       },
     });

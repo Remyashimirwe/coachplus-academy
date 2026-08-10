@@ -16,6 +16,14 @@ export default function TeachersView({ teacherApplications }: any) {
               <div>
                 <h3 className="text-lg font-bold text-slate-900">{app.fullName}</h3>
                 <p className="text-sm font-semibold text-slate-500">{app.experience} of experience • {app.subjects}</p>
+                <div className="flex gap-4 mt-2">
+                  {app.idPassportUrl && (
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">ID Uploaded</span>
+                  )}
+                  {app.photoUrl && (
+                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Photo Uploaded</span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">

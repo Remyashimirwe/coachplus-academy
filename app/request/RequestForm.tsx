@@ -17,7 +17,10 @@ import {
   FiMapPin,
   FiLayers,
   FiX,
+  FiChevronDown,
+  FiClipboard,
 } from "react-icons/fi";
+import { getProvinces, getDistricts, getSectors, getCells, getVillages } from "rwanda-locations";
 import { saveRequest } from "@/app/actions/request";
 import Footer from "../components/Footer";
 
@@ -88,6 +91,20 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
   const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectionError, setSelectionError] = useState(false);
+
+  // Rwanda Locations State
+  const [selectedProvince, setSelectedProvince] = useState<string>("City Of Kigali");
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
+  const [selectedSector, setSelectedSector] = useState<string>("");
+  const [selectedCell, setSelectedCell] = useState<string>("");
+  const [selectedVillage, setSelectedVillage] = useState<string>("");
+
+  const provinces = getProvinces();
+  // Filter districts to only those in Kigali
+  const districts = selectedProvince === "City Of Kigali" ? getDistricts("City Of Kigali") : [];
+  const sectors = (selectedProvince && selectedDistrict) ? getSectors(selectedProvince, selectedDistrict) : [];
+  const cells = (selectedProvince && selectedDistrict && selectedSector) ? getCells(selectedProvince, selectedDistrict, selectedSector) : [];
+  const villages = (selectedProvince && selectedDistrict && selectedSector && selectedCell) ? getVillages(selectedProvince, selectedDistrict, selectedSector, selectedCell) : [];
 
   useEffect(() => {
     if (programIdParam) {
@@ -296,17 +313,137 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   }}
                   className="space-y-10"
                 >
-                  <div className="grid gap-8 md:grid-cols-2">
+                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     <Field icon={<FiUser />} label="Parent Full Name" htmlFor="parent-name">
                       <input id="parent-name" name="parentName" required placeholder="e.g. John Doe" className={inputClasses} />
+                    </Field>
+
+                    <Field icon={<FiClipboard />} label="National ID / Passport Number" htmlFor="idPassport">
+                      <input id="idPassport" name="idPassport" required placeholder="1 199... or Passport No" className={inputClasses} />
                     </Field>
 
                     <Field icon={<FiMail />} label="Email Address" htmlFor="email">
                       <input id="email" name="email" type="email" required placeholder="john@example.com" className={inputClasses} />
                     </Field>
 
-                    <Field icon={<FiPhone />} label="Phone Number" htmlFor="phone">
-                      <input id="phone" name="phone" type="tel" required placeholder="+250 790 000 000" className={inputClasses} />
+                    <Field icon={<FiPhone />} label="Primary Phone Number" htmlFor="phone">
+                      <input id="phone" name="phone" type="tel" required placeholder="+250 780 ... ..." className={inputClasses} />
+                    </Field>
+
+                    <Field icon={<FiPhone />} label="Secondary Phone Number (Optional)" htmlFor="phone2">
+                      <input id="phone2" name="phone2" type="tel" placeholder="+250 790 ... ..." className={inputClasses} />
+                    </Field>
+                  </div>
+
+                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <Field icon={<FiMapPin />} label="Province" htmlFor="province">
+                      <div className="relative group">
+                        <select 
+                          id="province" 
+                          name="province" 
+                          required 
+                          className={`${inputClasses} appearance-none cursor-not-allowed pr-12 bg-slate-100`}
+                          value={selectedProvince}
+                          onChange={(e) => {
+                            setSelectedProvince(e.target.value);
+                            setSelectedDistrict("");
+                            setSelectedSector("");
+                            setSelectedCell("");
+                            setSelectedVillage("");
+                          }}
+                        >
+                          {provinces.filter(p => p === "City Of Kigali").map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                        <FiChevronDown className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors" />
+                      </div>
+                    </Field>
+
+                    <Field icon={<FiMapPin />} label="District" htmlFor="district">
+                      <div className="relative group">
+                        <select 
+                          id="district" 
+                          name="district" 
+                          required 
+                          disabled={!selectedProvince}
+                          className={`${inputClasses} appearance-none cursor-pointer pr-12 disabled:opacity-50`}
+                          value={selectedDistrict}
+                          onChange={(e) => {
+                            setSelectedDistrict(e.target.value);
+                            setSelectedSector("");
+                            setSelectedCell("");
+                            setSelectedVillage("");
+                          }}
+                        >
+                          <option value="">Select District</option>
+                          {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                        <FiChevronDown className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors" />
+                      </div>
+                    </Field>
+
+                    <Field icon={<FiMapPin />} label="Sector" htmlFor="sector">
+                      <div className="relative group">
+                        <select 
+                          id="sector" 
+                          name="sector" 
+                          required 
+                          disabled={!selectedDistrict}
+                          className={`${inputClasses} appearance-none cursor-pointer pr-12 disabled:opacity-50`}
+                          value={selectedSector}
+                          onChange={(e) => {
+                            setSelectedSector(e.target.value);
+                            setSelectedCell("");
+                            setSelectedVillage("");
+                          }}
+                        >
+                          <option value="">Select Sector</option>
+                          {sectors.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <FiChevronDown className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors" />
+                      </div>
+                    </Field>
+
+                    <Field icon={<FiMapPin />} label="Cell" htmlFor="cell">
+                      <div className="relative group">
+                        <select 
+                          id="cell" 
+                          name="cell" 
+                          required 
+                          disabled={!selectedSector}
+                          className={`${inputClasses} appearance-none cursor-pointer pr-12 disabled:opacity-50`}
+                          value={selectedCell}
+                          onChange={(e) => {
+                            setSelectedCell(e.target.value);
+                            setSelectedVillage("");
+                          }}
+                        >
+                          <option value="">Select Cell</option>
+                          {cells.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <FiChevronDown className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors" />
+                      </div>
+                    </Field>
+
+                    <Field icon={<FiMapPin />} label="Village" htmlFor="village">
+                      <div className="relative group">
+                        <select 
+                          id="village" 
+                          name="village" 
+                          required 
+                          disabled={!selectedCell}
+                          className={`${inputClasses} appearance-none cursor-pointer pr-12 disabled:opacity-50`}
+                          value={selectedVillage}
+                          onChange={(e) => setSelectedVillage(e.target.value)}
+                        >
+                          <option value="">Select Village</option>
+                          {villages.map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                        <FiChevronDown className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors" />
+                      </div>
+                    </Field>
+
+                    <Field icon={<FiMapPin />} label="Specific Address / Land Mark" htmlFor="location">
+                      <input id="location" name="location" required placeholder="e.g. Near Kimironko Market" className={inputClasses} />
                     </Field>
 
                     <Field icon={<FiLayers />} label="Learning Category" htmlFor="program">

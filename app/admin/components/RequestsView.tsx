@@ -27,6 +27,23 @@ export default function RequestsView({ requests }: any) {
               <div className="p-4 rounded-2xl bg-slate-50 text-xs text-slate-600 border border-slate-100 font-medium leading-relaxed">
                 {request.details}
               </div>
+              {(request.province || request.district || request.sector || request.cell || request.village || request.location) && (
+                <div className="px-4 py-3 rounded-2xl bg-indigo-50/50 text-[10px] text-indigo-700 border border-indigo-100 font-medium space-y-1">
+                  <p className="font-bold text-indigo-900 uppercase tracking-wider mb-1">📍 Location</p>
+                  {request.province && <span>{request.province} • </span>}
+                  {request.district && <span>{request.district} • </span>}
+                  {request.sector && <span>{request.sector} • </span>}
+                  {request.cell && <span>{request.cell} • </span>}
+                  {request.village && <span>{request.village}</span>}
+                  {request.idPassport && (
+                    <div className="mt-2 pt-2 border-t border-indigo-100/50 flex items-center gap-2">
+                      <span className="font-bold text-indigo-900">ID/Passport:</span>
+                      <span className="text-indigo-600">{request.idPassport}</span>
+                    </div>
+                  )}
+                  {request.location && <p className="mt-1 pt-1 border-t border-indigo-100/50 italic">{request.location}</p>}
+                </div>
+              )}
               <div className="p-4 rounded-2xl bg-rose-50/30 border border-rose-100">
                 <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">Subjects & Topics</p>
                 <p className="text-xs font-bold text-slate-700 leading-relaxed">{request.subjects}</p>
@@ -38,8 +55,14 @@ export default function RequestsView({ requests }: any) {
                 </a>
                 <a href={`tel:${request.phone}`} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
                   <FiPhone className="size-4" />
-                  <span className="text-xs font-bold">Call</span>
+                  <span className="text-xs font-bold">Call 1</span>
                 </a>
+                {request.phone2 && (
+                  <a href={`tel:${request.phone2}`} className="col-span-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                    <FiPhone className="size-4" />
+                    <span className="text-xs font-bold">Call 2: {request.phone2}</span>
+                  </a>
+                )}
               </div>
             </div>
           </div>
