@@ -7,8 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiSend, FiMenu, FiX } from "react-icons/fi";
 
 const navLinks = [
-  { label: "Home", href: "/#home" },
+  { label: "Home", href: "/" },
   { label: "How It Works", href: "/#how-it-works" },
+  { label: "Why Choose Us", href: "/#why-choose-us" },
   { label: "Categories", href: "/programs" },
   { label: "Become a Teacher", href: "/become-a-teacher" },
 ];
@@ -24,11 +25,9 @@ export default function Navbar() {
       setScrolled(window.scrollY > 20);
 
       if (pathname === "/") {
-        const sections = navLinks
-          .filter(link => link.href.startsWith("/#"))
-          .map(link => link.href.substring(2));
+        const sections = ["home", "how-it-works", "why-choose-us"];
         
-        let currentSection = sections[0]; // Default to first section (home)
+        let currentSection = sections[0];
         for (const section of sections) {
           const element = document.getElementById(section);
           if (element) {
@@ -51,11 +50,11 @@ export default function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/" ;
+    }
     if (href.startsWith("/#")) {
       return pathname === "/" && activeSection === href.substring(2);
-    }
-    if (href === "/become-a-teacher") {
-      return pathname === "/become-a-teacher";
     }
     return pathname === href || pathname.startsWith(`${href}/`);
   };
@@ -83,7 +82,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-10 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.label}

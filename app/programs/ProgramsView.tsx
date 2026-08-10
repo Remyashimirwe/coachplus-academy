@@ -51,12 +51,12 @@ export default function ProgramsPage({
             transition={{ duration: 0.5 }}
             className="max-w-3xl"
           >
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
+            <p className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
               <FiBookOpen className="size-4" />
               Explore Our Categories
             </p>
-            <h1 className="mt-6 text-5xl font-medium leading-[1.05] sm:text-6xl">
-              Find the right teacher for every learning need
+            <h1 className="mt-6 text-4xl font-medium leading-[1.05] sm:text-5xl">
+              Learning paths for every goal
             </h1>
           </motion.div>
         </div>
@@ -150,7 +150,7 @@ export default function ProgramsPage({
               <FiClipboard className="size-4" />
               Not sure where to start?
             </p>
-            <h2 className="mt-5 text-4xl font-medium">Need help choosing?</h2>
+            <h2 className="mt-5 text-3xl font-medium">Need help choosing?</h2>
             <p className="mt-4 max-w-2xl leading-8 text-white/68">
               Tell WeCoach your child&apos;s goals and we&apos;ll recommend the
               best category and tutor match.

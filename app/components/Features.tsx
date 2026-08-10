@@ -33,13 +33,13 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="bg-[#f8fafc] py-24">
+    <section id="why-choose-us" className="bg-[#f8fafc] py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold tracking-tight text-[#21121f] sm:text-5xl">
+          <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
             Why Choose <span className="text-[#E91E63]">WeCoach</span>
           </h2>
-          <p className="mt-6 text-lg font-normal leading-8 text-slate-600">
+          <p className="mt-6 text-base font-normal leading-8 text-slate-600">
             Premium features built around safety, comfort, and better learning outcomes for your children.
           </p>
         </div>

@@ -24,7 +24,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const displayPrograms = programs.slice(0, 3);
+  const displayPrograms = programs.slice(0, 6);
 
   if (programs.length === 0) {
     return (
@@ -49,20 +49,10 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
+            <h2 className="hidden sm:block text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
               Our Categories
             </h2>
-            <h2 className="text-4xl font-bold tracking-tight text-[#21121f] sm:text-5xl">
-              Learning paths for <span className="text-[#E91E63]">every goal</span>
-            </h2>
           </div>
-          <Link
-            href="/programs"
-            className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-8 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-[#7B1FA2] hover:shadow-xl active:scale-95"
-          >
-            Explore All Categories
-            <FiArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-          </Link>
         </div>
         
         <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -117,6 +107,32 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
               </motion.article>
             );
           })}
+          {programs.length > 6 && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: displayPrograms.length * 0.1 }}
+              className="flex items-center justify-center"
+            >
+              <Link
+                href="/programs"
+                className="group flex h-full w-full flex-col items-center justify-center gap-6 overflow-hidden rounded-[32px] bg-slate-50 border-2 border-dashed border-slate-200 p-8 transition-all duration-500 hover:scale-[1.02] hover:bg-slate-100 hover:border-[#E91E63]/30"
+              >
+                <div className="size-20 rounded-full bg-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+                  <FiArrowRight className="size-10 text-[#E91E63] transition-transform group-hover:translate-x-1" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-[#21121f]">
+                    Explore All Categories
+                  </h3>
+                  <p className="mt-2 text-slate-600">
+                    Discover our full range of learning programs
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          )}
         </div>
       </div>
       <ProgramModal 

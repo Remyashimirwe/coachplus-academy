@@ -7,6 +7,7 @@ export async function saveRequest(formData: FormData) {
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const phone2 = String(formData.get("phone2") || "").trim();
+  const country = String(formData.get("country") || "").trim();
   const location = String(formData.get("location") || "").trim();
   const province = String(formData.get("province") || "").trim();
   const district = String(formData.get("district") || "").trim();
@@ -34,6 +35,7 @@ export async function saveRequest(formData: FormData) {
         email,
         phone,
         phone2,
+        country,
         location,
         province,
         district,

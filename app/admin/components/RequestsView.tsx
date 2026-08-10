@@ -27,9 +27,10 @@ export default function RequestsView({ requests }: any) {
               <div className="p-4 rounded-2xl bg-slate-50 text-xs text-slate-600 border border-slate-100 font-medium leading-relaxed">
                 {request.details}
               </div>
-              {(request.province || request.district || request.sector || request.cell || request.village || request.location) && (
+              {(request.country || request.province || request.district || request.sector || request.cell || request.village || request.location) && (
                 <div className="px-4 py-3 rounded-2xl bg-indigo-50/50 text-[10px] text-indigo-700 border border-indigo-100 font-medium space-y-1">
                   <p className="font-bold text-indigo-900 uppercase tracking-wider mb-1">📍 Location</p>
+                  {request.country && <span>{request.country} • </span>}
                   {request.province && <span>{request.province} • </span>}
                   {request.district && <span>{request.district} • </span>}
                   {request.sector && <span>{request.sector} • </span>}

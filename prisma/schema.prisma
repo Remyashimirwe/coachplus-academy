@@ -52,6 +52,7 @@ model Request {
   email      String
   phone      String   @default("")
   phone2     String   @default("")
+  country    String   @default("")
   location   String   @default("")
   province   String   @default("")
   district   String   @default("")

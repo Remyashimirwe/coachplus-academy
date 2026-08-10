@@ -6,37 +6,26 @@ import { FiArrowRight, FiMapPin } from "react-icons/fi";
 
 export default function Hero() {
   return (
-    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-28 pb-20">
+    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-16">
       {/* Decorative background elements */}
       <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
       <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
       
-      <div className="mx-auto grid min-h-[600px] max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+      <div className="mx-auto grid min-h-[400px] max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div className="relative z-10 max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
-              Find the right teacher for every learning need
+            <h1 className="text-4xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-6xl">
+              Forum for certified professional teachers
             </h1>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/request"
-                className="group inline-flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-white px-8 text-base font-semibold text-[#E91E63] shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
-              >
-                Find Your Perfect Teacher
-                <FiArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <a
-                href="#how-it-works"
-                className="inline-flex min-h-[56px] items-center justify-center rounded-full border border-white/30 px-8 text-base font-medium text-white backdrop-blur transition hover:bg-white/10 active:scale-95"
-              >
-                How it Works
-              </a>
-            </div>
+            <p className="mt-6 max-w-lg text-base text-white/90 leading-relaxed">
+              Find the right teacher for every learning need
+            </p>
+
           </motion.div>
         </div>
 

@@ -13,8 +13,6 @@ export default async function Home() {
         <main className="min-h-screen bg-white">
             <Hero/>
             <ProgramsSection programs={programs}/>
-            <HowItWorks/>
-            <Features/>
             <CTA/>
             <Footer/>
         </main>

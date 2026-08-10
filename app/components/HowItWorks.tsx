@@ -32,10 +32,10 @@ export default function HowItWorks() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <h2 className="text-4xl font-bold tracking-tight text-[#21121f] sm:text-5xl">
+          <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
             How It <span className="text-[#E91E63]">Works</span>
           </h2>
-          <p className="mt-6 text-lg font-normal leading-8 text-slate-600">
+          <p className="mt-6 text-base font-normal leading-8 text-slate-600">
             Three simple steps to unlock your child's learning potential and academic success.
           </p>
         </motion.div>

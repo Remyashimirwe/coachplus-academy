@@ -94,15 +94,6 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                 <p className="text-slate-600 leading-relaxed text-xs">
                   {program.text}
                 </p>
-                <div className="mt-auto pt-6">
-                  <Link
-                    href={`/request?programId=${program.id}`}
-                    className="w-full inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-4 text-xs font-bold text-white shadow-xl shadow-rose-500/20 transition-all hover:-translate-y-1 active:scale-95"
-                  >
-                    Request this Category
-                    <FiArrowRight className="size-4" />
-                  </Link>
-                </div>
               </div>
 
               {/* Right Content - Sub-categories List */}
@@ -169,16 +160,6 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                       <p className="text-slate-400 font-medium italic">No sub-categories added yet.</p>
                     </div>
                   )}
-                </div>
-
-                <div className="md:hidden mt-8">
-                  <Link
-                    href={`/request?programId=${program.id}`}
-                    className="w-full inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-[#E91E63] px-6 text-sm font-bold text-white shadow-xl shadow-rose-500/20 transition-all hover:-translate-y-1 active:scale-95"
-                  >
-                    Request this Category
-                    <FiArrowRight className="size-4" />
-                  </Link>
                 </div>
               </div>
             </div>

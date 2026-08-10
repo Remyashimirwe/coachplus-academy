@@ -63,10 +63,10 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                 <FiBookOpen className="size-4" />
                 {program.level}
               </p>
-              <h1 className="mt-6 text-5xl font-bold leading-[1.05] sm:text-6xl">
+              <h1 className="mt-6 text-4xl font-bold leading-[1.05] sm:text-5xl">
                 {program.title}
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
+              <p className="mt-6 max-w-2xl text-base leading-8 text-white/85">
                 {program.text}
               </p>
               
@@ -106,10 +106,10 @@ export default function ProgramDetailView({ program }: { program: Program }) {
             <h2 className="text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
               Learning Paths
             </h2>
-            <h2 className="text-4xl font-bold tracking-tight text-[#21121f] sm:text-5xl">
+            <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
               Explore <span className="text-[#E91E63]">Sub-categories</span>
             </h2>
-            <p className="mt-6 text-lg text-slate-600">
+            <p className="mt-6 text-base text-slate-600">
               Choose a specialized path within {program.title} to find the perfect tutor.
             </p>
           </div>
@@ -135,7 +135,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                     <FiCheck className="size-5" />
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 mb-4">{subject.name}</h3>
+              <h3 className="text-xl font-bold text-slate-800 mb-4">{subject.name}</h3>
                 
                 <div className="flex-1">
                   <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Included Subjects:</p>
@@ -177,7 +177,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
           <div className="relative overflow-hidden rounded-[48px] bg-[#0f172a] p-12 lg:p-20">
             <div className="absolute -right-24 top-0 size-72 rounded-full bg-[#E91E63]/25 blur-3xl" />
             <div className="relative z-10 max-w-3xl">
-              <h2 className="text-4xl font-bold text-white sm:text-5xl">
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
                 Ready to find the perfect teacher for your child?
               </h2>
               <p className="mt-8 text-xl text-white/70">

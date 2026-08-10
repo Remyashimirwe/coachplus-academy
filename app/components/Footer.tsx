@@ -8,7 +8,8 @@ const footerGroups = [
     title: "Platform",
     links: [
       { label: "Home", href: "/" },
-      { label: "How It Works", href: "/#how-it-works" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "Why Choose Us", href: "/why-choose-us" },
       { label: "Programs", href: "/programs" },
       { label: "Request a Teacher", href: "/request" },
     ],
@@ -38,7 +39,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
-            <Link href="/" className="group flex items-center gap-3 font-normal link-modern w-fit">
+            <Link href="/" className="group flex items-center gap-3 font-normal w-fit">
               <img
                 src="/logo.png"
                 alt="WeCoach"
@@ -48,20 +49,20 @@ export default function Footer() {
                 We<span className="text-[#E91E63]">Coach</span>
               </span>
             </Link>
-            <p className="mt-8 max-w-sm text-lg leading-relaxed text-slate-400">
+            <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
               Connecting parents and qualified private tutors for home and online learning excellence. Building a brighter future together.
             </p>
           </div>
           
           {footerGroups.map((group) => (
             <div key={group.title}>
-              <h3 className="text-lg font-bold text-white mb-6">{group.title}</h3>
+              <h3 className="text-base font-bold text-white mb-6">{group.title}</h3>
               <ul className="flex flex-col gap-4">
                 {group.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-base text-slate-400 transition hover:text-[#E91E63] link-modern"
+                      className="text-base text-slate-400 transition hover:text-[#E91E63]"
                     >
                       {link.label}
                     </Link>
@@ -75,13 +76,13 @@ export default function Footer() {
         <div className="mt-20 border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500">
           <p>&copy; {new Date().getFullYear()} WeCoach Education Platform. All rights reserved.</p>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition link-modern flex items-center gap-2">
+            <a href="#" className="hover:text-white transition flex items-center gap-2">
               <FiTwitter className="size-4" /> Twitter
             </a>
-            <a href="#" className="hover:text-white transition link-modern flex items-center gap-2">
+            <a href="#" className="hover:text-white transition flex items-center gap-2">
               <FiLinkedin className="size-4" /> LinkedIn
             </a>
-            <a href="#" className="hover:text-white transition link-modern flex items-center gap-2">
+            <a href="#" className="hover:text-white transition flex items-center gap-2">
               <FiInstagram className="size-4" /> Instagram
             </a>
           </div>
