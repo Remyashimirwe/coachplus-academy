@@ -7,7 +7,7 @@ const steps = [
   {
     icon: FiMessageSquare,
     title: "Tell us what you need",
-    text: "Choose the learning category, sub-category, schedule, goals, and whether lessons should happen online or at home.",
+    text: "Choose the learning category, course of interest, schedule, goals, and whether lessons should happen online or at home.",
   },
   {
     icon: FiUsers,

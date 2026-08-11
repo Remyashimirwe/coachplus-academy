@@ -83,6 +83,7 @@ export default function RequestForm({ programs }: { programs: Program[] }) {
 
 function RequestFormContent({ programs }: { programs: Program[] }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const searchParams = useSearchParams();
   const programIdParam = searchParams.get("programId");
   const subjectIdParam = searchParams.get("subjectId");
@@ -216,7 +217,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
       </div>
 
       <section className="relative -mt-12 pb-24">
-        <div className="mx-auto max-w-4xl px-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             {status === "success" ? (
               <motion.div
@@ -293,20 +294,21 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     const result = await saveRequest(formData);
                     
                     if (result && result.success) {
-                      setStatus("success");
+                      setStatus("idle");
+                      setShowSuccessModal(true);
+                      // Reset form
+                      e.currentTarget.reset();
+                      setSelectedSubjects([]);
+                      setSelectedCourses({});
                     } else {
                       setStatus("error");
                     }
                   }}
                   className="space-y-10"
                 >
-                  <div className="grid gap-8 grid-cols-1">
+                  <div className="grid gap-8 grid-cols-1 md:grid-cols-2">
                     <Field icon={<FiUser />} label="Parent Full Name" htmlFor="parent-name">
                       <input id="parent-name" name="parentName" required placeholder="e.g. John Doe" className={inputClasses} />
-                    </Field>
-
-                    <Field icon={<FiClipboard />} label="National ID / Passport Number" htmlFor="idPassport">
-                      <input id="idPassport" name="idPassport" required placeholder="1 199... or Passport No" className={inputClasses} />
                     </Field>
 
                     <Field icon={<FiMail />} label="Email Address" htmlFor="email">
@@ -322,35 +324,23 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     </Field>
                   </div>
 
-                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    <Field icon={<FiGlobe />} label="Country" htmlFor="country">
-                      <input id="country" name="country" required placeholder="e.g. Rwanda" className={inputClasses} />
-                    </Field>
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-bold text-[#0f172a] flex items-center gap-2">
+                      <FiMapPin className="text-[#E91E63]" />
+                      Location Details
+                    </h3>
+                    <div className="grid gap-8 md:grid-cols-2">
+                      <Field icon={<FiGlobe />} label="Country" htmlFor="country">
+                        <input id="country" name="country" required placeholder="e.g. Rwanda" className={inputClasses} />
+                      </Field>
 
-                    <Field icon={<FiMapPin />} label="Province" htmlFor="province">
-                      <input id="province" name="province" required placeholder="e.g. Kigali" className={inputClasses} />
-                    </Field>
+                      <Field icon={<FiMapPin />} label="City" htmlFor="city">
+                        <input id="city" name="city" required placeholder="e.g. Kigali" className={inputClasses} />
+                      </Field>
+                    </div>
+                  </div>
 
-                    <Field icon={<FiMapPin />} label="District" htmlFor="district">
-                      <input id="district" name="district" required placeholder="e.g. Nyarugenge" className={inputClasses} />
-                    </Field>
-
-                    <Field icon={<FiMapPin />} label="Sector" htmlFor="sector">
-                      <input id="sector" name="sector" required placeholder="e.g. Nyamirambo" className={inputClasses} />
-                    </Field>
-
-                    <Field icon={<FiMapPin />} label="Cell" htmlFor="cell">
-                      <input id="cell" name="cell" required placeholder="e.g. Rugarama" className={inputClasses} />
-                    </Field>
-
-                    <Field icon={<FiMapPin />} label="Village" htmlFor="village">
-                      <input id="village" name="village" required placeholder="e.g. Umutara" className={inputClasses} />
-                    </Field>
-
-                    <Field icon={<FiMapPin />} label="Street Number / Land Mark" htmlFor="location" className="lg:col-span-2">
-                      <input id="location" name="location" required placeholder="e.g. KK 123 St or Near Kimironko Market" className={inputClasses} />
-                    </Field>
-
+                  <div className="grid gap-8">
                     <Field icon={<FiLayers />} label="Learning Category" htmlFor="program">
                       <div className="relative group">
                         <select 
@@ -377,10 +367,10 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     <div className="flex items-center justify-between">
                       <label className={`text-sm font-bold flex items-center gap-2 transition-colors ${selectionError ? 'text-red-500' : 'text-slate-700'}`}>
                         <FiBookOpen className={selectionError ? 'text-red-500' : 'text-[#E91E63]'} />
-                        Sub-categories of Interest *
+                        Course of Interest *
                       </label>
                       {selectionError && (
-                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please select at least one sub-category</span>
+                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please select at least one course</span>
                       )}
                     </div>
                     
@@ -396,7 +386,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                             }`}
                           >
                             <span className="text-sm font-bold text-slate-800">
-                              All Sub-categories
+                              All Courses
                             </span>
                             <div className={`size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                               selectedSubjects.length === availableSubjects.length
@@ -498,7 +488,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                               })}
                               
                               {Object.values(selectedCourses).every(topics => topics.length === 0) && (
-                                <p className="text-sm text-slate-400 italic">No topics selected. Please select at least one topic for your chosen sub-categories.</p>
+                                <p className="text-sm text-slate-400 italic">No topics selected. Please select at least one topic for your chosen courses.</p>
                               )}
                             </div>
                           </motion.div>
@@ -506,7 +496,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                       </div>
                     ) : (
                       <p className="text-sm text-slate-400 italic bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-100">
-                        Please select a category above to see available sub-categories.
+                        Please select a category above to see available courses.
                       </p>
                     )}
                   </div>
@@ -566,6 +556,58 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
         </div>
       </section>
       <Footer />
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-5 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg overflow-hidden rounded-[40px] bg-white p-8 text-center shadow-2xl md:p-12"
+            >
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="absolute right-6 top-6 rounded-2xl bg-slate-100 p-2 text-slate-400 transition-colors hover:bg-rose-50 hover:text-[#E91E63]"
+              >
+                <FiX className="size-5" />
+              </button>
+              
+              <div className="mx-auto mb-8 flex size-24 items-center justify-center rounded-3xl bg-green-50 text-green-500">
+                <FiCheckCircle className="size-12" />
+              </div>
+              
+              <h2 className="text-3xl font-bold text-[#0f172a]">Request Sent!</h2>
+              <p className="mt-6 text-lg leading-relaxed text-slate-500">
+                Our team is already working on finding the best teacher for you. Expect an update within 24 hours.
+              </p>
+              
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="flex-1 rounded-2xl bg-[#0f172a] py-5 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                >
+                  Got it, thanks!
+                </button>
+                <Link
+                  href="/"
+                  className="flex-1 rounded-2xl bg-slate-100 py-5 text-lg font-bold text-slate-600 transition-all hover:bg-slate-200"
+                >
+                  Return Home
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

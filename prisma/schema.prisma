@@ -69,16 +69,62 @@ model Request {
 
 model TeacherApplication {
   id           Int      @id @default(autoincrement())
+  // 1. Personal Information
   fullName     String
   email        String
   phone        String
-  subjects     String
-  experience String
-  resumeUrl    String?
-  idPassportUrl String?
+  location     String   @default("")
+  linkedin     String?
+  instagram    String?
+  youtube      String?
+  otherSocial  String?
   photoUrl     String?
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
+
+  // 2. Education
+  educationLevel String  @default("")
+  fieldOfStudy   String  @default("")
+  institution    String  @default("")
+  graduationYear String  @default("")
+  academicCertificatesUrl String?
+
+  // 3. Teaching Experience
+  experienceYears String @default("")
+  subjects      String
+  grades        String   @default("")
+  previousOrg   String?
+  previousPos   String?
+  expDescription String  @default("")
+
+  // 4. Teaching Skills
+  methods       String   @default("")
+  difficultStudents String @default("")
+  engagement    String   @default("")
+  techTools     String?
+  teachOnline   String   @default("")
+
+  // 5. Availability
+  employmentType String  @default("")
+  availableDays String   @default("")
+  availableHours String  @default("")
+  startDate     String   @default("")
+
+  // 6. Application Documents
+  resumeUrl     String?
+  coverLetterUrl String?
+  otherCertificatesUrl String?
+  licenseUrl    String?
+  portfolioUrl  String?
+
+  // 7. Final Questions
+  whyTeach      String   @default("")
+  whySelect     String   @default("")
+  contribution  String   @default("")
+
+  // 8. Declaration
+  agreedToTerms Boolean  @default(false)
+
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
 }
 
 model Setting {

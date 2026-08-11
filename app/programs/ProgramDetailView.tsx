@@ -99,7 +99,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
         </div>
       </section>
 
-      {/* Sub-categories Section */}
+      {/* Courses Section */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
@@ -107,7 +107,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
               Learning Paths
             </h2>
             <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
-              Explore <span className="text-[#E91E63]">Sub-categories</span>
+              Explore <span className="text-[#E91E63]">Courses</span>
             </h2>
             <p className="mt-6 text-base text-slate-600">
               Choose a specialized path within {program.title} to find the perfect tutor.
@@ -165,7 +165,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
 
           {program.subjects.length === 0 && (
             <div className="mt-8 rounded-3xl bg-white p-12 text-center shadow-sm ring-1 ring-slate-100">
-              <p className="text-slate-500 font-medium">No sub-categories have been added yet.</p>
+              <p className="text-slate-500 font-medium">No courses have been added yet.</p>
             </div>
           )}
         </div>

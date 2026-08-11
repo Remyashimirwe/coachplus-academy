@@ -8,15 +8,9 @@ export async function saveRequest(formData: FormData) {
   const phone = String(formData.get("phone") || "").trim();
   const phone2 = String(formData.get("phone2") || "").trim();
   const country = String(formData.get("country") || "").trim();
-  const location = String(formData.get("location") || "").trim();
-  const province = String(formData.get("province") || "").trim();
-  const district = String(formData.get("district") || "").trim();
-  const sector = String(formData.get("sector") || "").trim();
-  const cell = String(formData.get("cell") || "").trim();
-  const village = String(formData.get("village") || "").trim();
-  const idPassport = String(formData.get("idPassport") || "").trim();
+  const location = String(formData.get("city") || "").trim();
   const details = String(formData.get("details") || "").trim();
-  const subCategories = formData
+  const coursesOfInterest = formData
     .getAll("subjects")
     .map((s) => String(s))
     .join(", ");
@@ -37,14 +31,14 @@ export async function saveRequest(formData: FormData) {
         phone2,
         country,
         location,
-        province,
-        district,
-        sector,
-        cell,
-        village,
-        idPassport,
+        province: "",
+        district: "",
+        sector: "",
+        cell: "",
+        village: "",
+        idPassport: "",
         grade: programId,
-        subjects: subCategories + (topics ? ` (Topics: ${topics})` : ""),
+        subjects: coursesOfInterest + (topics ? ` (Topics: ${topics})` : ""),
         details: `[Mode: ${mode}] [Start: ${startDate}] ${details}`,
       },
     });
