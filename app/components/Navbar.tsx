@@ -59,10 +59,12 @@ export default function Navbar() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const isHomePage = pathname === "/";
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-[60] transition-all duration-500 ${
-        scrolled
+        scrolled || !isHomePage
           ? "bg-white/80 shadow-lg backdrop-blur-xl py-3"
           : "bg-transparent py-5"
       }`}
@@ -77,7 +79,7 @@ export default function Navbar() {
               className="relative size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
             />
           </div>
-          <span className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled ? "text-[#21121f]" : "text-white"}`}>
+          <span className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-[#21121f]" : "text-white"}`}>
             Wecoach <span className="text-[#E91E63]">Academy</span>
           </span>
         </Link>
@@ -89,7 +91,7 @@ export default function Navbar() {
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
               className={`group relative rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
-                scrolled 
+                scrolled || !isHomePage
                   ? (isActive(link.href) ? "text-[#E91E63] bg-[#fff0f3]" : "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]") 
                   : (isActive(link.href) ? "text-white bg-white/20" : "text-white/80 hover:text-white hover:bg-white/10")
               }`}
@@ -100,7 +102,7 @@ export default function Navbar() {
           <Link
             href="/request"
             className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
-              scrolled
+              scrolled || !isHomePage
                 ? "bg-[#E91E63] text-white hover:bg-[#7B1FA2] hover:shadow-rose-500/25"
                 : "bg-white text-[#E91E63] hover:bg-white/90 hover:shadow-white/10"
             }`}
@@ -114,7 +116,7 @@ export default function Navbar() {
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle menu"
           className={`grid size-11 place-items-center rounded-2xl border transition-all md:hidden ${
-            scrolled
+            scrolled || !isHomePage
               ? "border-slate-200 bg-white text-[#21121f] hover:border-[#E91E63]"
               : "border-white/20 bg-white/10 text-white hover:bg-white/20"
           }`}

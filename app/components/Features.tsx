@@ -12,22 +12,22 @@ const features = [
   {
     icon: FiCheckCircle,
     title: "Verified Teachers",
-    text: "Every teacher profile is reviewed for qualifications, background, teaching experience, and trust.",
+    text: "Every teacher profile is thoroughly vetted for qualifications, experience, and trust.",
   },
   {
     icon: FiClock,
     title: "Flexible Scheduling",
-    text: "Find educators who fit your family routine with online, home, weekday, and weekend options.",
+    text: "Choose online or home coaching on weekdays or weekends that fit your daily schedule.",
   },
   {
     icon: FiUser,
     title: "Personalized Plans",
-    text: "Teachers adapt lessons to your child's pace, school curriculum, strengths, and confidence gaps.",
+    text: "Lessons are tailored specifically to your learning goals, current pace, and target confidence.",
   },
   {
     icon: FiShield,
-    title: "Safe Learning",
-    text: "A guided, transparent experience for parents who want excellent learning without guesswork.",
+    title: "Safe & Trusted Learning",
+    text: "A transparent, fully managed experience delivering top-quality coaching without stress or guesswork.",
   },
 ];
 

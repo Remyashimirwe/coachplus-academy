@@ -29,6 +29,17 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC]">
+        <main>
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">

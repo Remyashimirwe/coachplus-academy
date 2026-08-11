@@ -36,7 +36,7 @@ export default function HowItWorks() {
             How It <span className="text-[#E91E63]">Works</span>
           </h2>
           <p className="mt-6 text-base font-normal leading-8 text-slate-600">
-            Three simple steps to unlock your child's learning potential and academic success.
+            Three simple steps to find the perfect tutor and start growing.
           </p>
         </motion.div>
         
