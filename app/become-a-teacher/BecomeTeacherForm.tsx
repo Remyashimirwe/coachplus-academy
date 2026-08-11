@@ -16,7 +16,6 @@ import {
   FiStar,
   FiXCircle,
   FiAlertCircle,
-  FiArrowRight,
   FiFileText,
   FiImage,
   FiX,
@@ -75,23 +74,6 @@ const daysList = [
   "Sunday",
 ];
 
-const benefits = [
-  {
-    icon: FiBriefcase,
-    title: "Flexible Schedule",
-    text: "Teach when you want, from anywhere in the world.",
-  },
-  {
-    icon: FiAward,
-    title: "Competitive Pay",
-    text: "Set your own rates and earn what your expertise deserves.",
-  },
-  {
-    icon: FiStar,
-    title: "Professional Growth",
-    text: "Access resources and a community of elite educators.",
-  },
-];
 
 function Field({
   icon,
@@ -106,7 +88,7 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <label htmlFor={htmlFor} className="text-sm font-bold text-[#0f172a] flex items-center gap-2 mb-1">
+      <label htmlFor={htmlFor} className="text-xs font-bold text-[#0f172a] flex items-center gap-2 mb-1">
         <span className="flex items-center justify-center size-6 rounded-lg bg-[#E91E63]/5 text-[#E91E63]">{icon}</span>
         {label}
       </label>
@@ -118,7 +100,7 @@ function Field({
 }
 
 const inputClasses =
-  "w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 text-base outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-4 focus:ring-[#E91E63]/10";
+  "w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-4 focus:ring-[#E91E63]/10";
 
 export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -171,8 +153,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                   className="relative rounded-[40px] bg-white p-8 md:p-12 shadow-2xl shadow-slate-200 border border-slate-100"
                 >
                   <div className="mb-12 text-center">
-                    <h2 className="text-4xl font-extrabold text-[#0f172a] tracking-tight">Application Form</h2>
-                    <p className="text-slate-500 mt-3 text-lg">Tell us about your expertise and teaching journey</p>
+                    <h2 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">Application Form</h2>
+                    <p className="text-slate-500 mt-3 text-base">Tell us about your expertise and teaching journey</p>
                     <div className="mt-6 flex justify-center">
                       <div className="h-1.5 w-20 rounded-full bg-gradient-to-r from-[#FF5733] to-[#E91E63]" />
                     </div>
@@ -222,8 +204,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <FiUser className="size-6" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Personal Information</h3>
-                          <p className="text-sm text-slate-500 font-medium">Basic details to identify you</p>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Personal Information</h3>
+                          <p className="text-xs text-slate-500 font-medium">Basic details to identify you</p>
                         </div>
                       </div>
                       <div className="grid gap-6">
@@ -243,60 +225,42 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         <Field icon={<FiMapPin />} label="Country *" htmlFor="country">
                           <input id="country" name="country" required placeholder="e.g. Rwanda" className={inputClasses} />
                         </Field>
-                        <Field icon={<FiMapPin />} label="City *" htmlFor="city">
-                          <input id="city" name="city" required placeholder="e.g. Kigali" className={inputClasses} />
+                        <Field icon={<FiMapPin />} label="Province *" htmlFor="province">
+                          <input id="province" name="province" required placeholder="e.g. Kigali / East" className={inputClasses} />
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiMapPin />} label="Specific Location (Optional)" htmlFor="location">
-                          <input id="location" name="location" placeholder="e.g. Nyarutarama, Street 123" className={inputClasses} />
+                        <Field icon={<FiMapPin />} label="District *" htmlFor="district">
+                          <input id="district" name="district" required placeholder="e.g. Nyarugenge" className={inputClasses} />
                         </Field>
+                        <Field icon={<FiMapPin />} label="Sector *" htmlFor="sector">
+                          <input id="sector" name="sector" required placeholder="e.g. Kanyinya" className={inputClasses} />
+                        </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiMapPin />} label="Cell *" htmlFor="cell">
+                          <input id="cell" name="cell" required placeholder="e.g. Nyamweru" className={inputClasses} />
+                        </Field>
+                        <Field icon={<FiMapPin />} label="Village *" htmlFor="village">
+                          <input id="village" name="village" required placeholder="e.g. Kibenga" className={inputClasses} />
+                        </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiLinkedin />} label="LinkedIn Profile" htmlFor="linkedin">
                           <input id="linkedin" name="linkedin" type="url" placeholder="https://linkedin.com/in/username" className={inputClasses} />
                         </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiInstagram />} label="Instagram Profile" htmlFor="instagram">
                           <input id="instagram" name="instagram" type="url" placeholder="https://instagram.com/username" className={inputClasses} />
                         </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiYoutube />} label="YouTube Channel" htmlFor="youtube">
                           <input id="youtube" name="youtube" type="url" placeholder="https://youtube.com/@channel" className={inputClasses} />
                         </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiLink />} label="Other Social Media / Website (Optional)" htmlFor="otherSocial">
                           <input id="otherSocial" name="otherSocial" type="url" placeholder="https://yourwebsite.com" className={inputClasses} />
                         </Field>
                       </div>
-                    <Field icon={<FiImage />} label="Profile Photo (Upload)" htmlFor="photo">
-                      <div className="flex items-center gap-4">
-                        <input 
-                          id="photo" 
-                          name="photo" 
-                          type="file" 
-                          accept="image/*" 
-                          className={`${inputClasses} py-3`} 
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (event) => {
-                                const preview = document.getElementById('photo-preview') as HTMLImageElement;
-                                if (preview) preview.src = event.target?.result as string;
-                                const placeholder = document.getElementById('photo-placeholder');
-                                if (placeholder) placeholder.style.display = 'none';
-                                if (preview) preview.style.display = 'block';
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                        <div className="size-16 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
-                          <FiUser id="photo-placeholder" className="size-8 text-slate-400" />
-                          <img id="photo-preview" alt="Preview" className="size-full object-cover hidden" />
-                        </div>
-                      </div>
-                    </Field>
                     </div>
 
                     {/* 2. Education */}
@@ -306,8 +270,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <FiBookOpen className="size-6" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Education</h3>
-                          <p className="text-sm text-slate-500 font-medium">Your academic background</p>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Education</h3>
+                          <p className="text-xs text-slate-500 font-medium">Your academic background</p>
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -345,8 +309,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <FiBriefcase className="size-6" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Teaching Experience</h3>
-                          <p className="text-sm text-slate-500 font-medium">Where and what you've taught</p>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Teaching Experience</h3>
+                          <p className="text-xs text-slate-500 font-medium">Where and what you've taught</p>
                         </div>
                       </div>
                       <Field icon={<FiClock />} label="Years of Teaching Experience *" htmlFor="experienceYears">
@@ -372,7 +336,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                               key={s}
                               type="button"
                               onClick={() => toggleItem(s, selectedSubjects, setSelectedSubjects)}
-                              className={`rounded-xl px-4 py-2 text-sm font-bold transition-all border-2 ${
+                              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
                                 selectedSubjects.includes(s)
                                 ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -397,7 +361,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                               key={g}
                               type="button"
                               onClick={() => toggleItem(g, selectedGrades, setSelectedGrades)}
-                              className={`rounded-xl px-4 py-2 text-sm font-bold transition-all border-2 ${
+                              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
                                 selectedGrades.includes(g)
                                 ? "bg-[#0f172a] border-[#0f172a] text-white shadow-lg shadow-slate-200"
                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#0f172a]/30"
@@ -430,8 +394,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <FiStar className="size-6" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Teaching Skills</h3>
-                          <p className="text-sm text-slate-500 font-medium">Your pedagogical approach</p>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Teaching Skills</h3>
+                          <p className="text-xs text-slate-500 font-medium">Your pedagogical approach</p>
                         </div>
                       </div>
                       <Field icon={<FiActivity />} label="What teaching methods do you use? *" htmlFor="methods">
@@ -466,8 +430,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <FiCalendar className="size-6" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Availability</h3>
-                          <p className="text-sm text-slate-500 font-medium">When can you start teaching?</p>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Availability</h3>
+                          <p className="text-xs text-slate-500 font-medium">When can you start teaching?</p>
                         </div>
                       </div>
                       <Field icon={<FiBriefcase />} label="Employment Type *" htmlFor="employmentType">
@@ -492,7 +456,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                               key={d}
                               type="button"
                               onClick={() => toggleItem(d, selectedDays, setSelectedDays)}
-                              className={`rounded-xl px-4 py-2 text-sm font-bold transition-all border-2 ${
+                              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
                                 selectedDays.includes(d)
                                 ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -514,15 +478,37 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                       </div>
                     </div>
 
-                    {/* 6. Application Documents */}
+                    {/* 6. Final Questions */}
+                    <div className="space-y-8">
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiMessageSquare className="size-6" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Final Questions</h3>
+                          <p className="text-xs text-slate-500 font-medium">Tell us a bit more about your motivation</p>
+                        </div>
+                      </div>
+                      <Field label="Why do you want to teach at our institution? *" htmlFor="whyTeach" icon={<FiTarget />}>
+                        <textarea id="whyTeach" name="whyTeach" required rows={3} className={inputClasses} />
+                      </Field>
+                      <Field label="Why should we select you? *" htmlFor="whySelect" icon={<FiCheckCircle />}>
+                        <textarea id="whySelect" name="whySelect" required rows={3} className={inputClasses} />
+                      </Field>
+                      <Field label="What can you contribute to our students? *" htmlFor="contribution" icon={<FiAward />}>
+                        <textarea id="contribution" name="contribution" required rows={3} className={inputClasses} />
+                      </Field>
+                    </div>
+
+                    {/* 7. Application Documents */}
                     <div className="space-y-8">
                       <div className="flex items-center gap-4 mb-8">
                         <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
                           <FiFileText className="size-6" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Application Documents</h3>
-                          <p className="text-sm text-slate-500 font-medium">Supporting files for your application</p>
+                          <h3 className="text-xl font-bold text-[#0f172a]">Application Documents</h3>
+                          <p className="text-xs text-slate-500 font-medium">Supporting files for your application</p>
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -541,57 +527,41 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <input id="license" name="license" type="file" accept=".pdf,image/*" className={`${inputClasses} py-3`} />
                         </Field>
                       </div>
+                      <Field icon={<FiImage />} label="Profile Photo (Upload)" htmlFor="photo">
+                        <div className="flex items-center gap-4">
+                          <input 
+                            id="photo" 
+                            name="photo" 
+                            type="file" 
+                            accept="image/*" 
+                            className={`${inputClasses} py-3`} 
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  const preview = document.getElementById('photo-preview') as HTMLImageElement;
+                                  if (preview) preview.src = event.target?.result as string;
+                                  const placeholder = document.getElementById('photo-placeholder');
+                                  if (placeholder) placeholder.style.display = 'none';
+                                  if (preview) preview.style.display = 'block';
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                          <div className="size-16 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                            <FiUser id="photo-placeholder" className="size-8 text-slate-400" />
+                            <img id="photo-preview" alt="Preview" className="size-full object-cover hidden" />
+                          </div>
+                        </div>
+                      </Field>
                       <Field icon={<FiLink />} label="Portfolio / Sample Work (optional)" htmlFor="portfolio">
                         <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
                       </Field>
                     </div>
 
-                    {/* 7. Final Questions */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiMessageSquare className="size-6" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Final Questions</h3>
-                          <p className="text-sm text-slate-500 font-medium">Tell us a bit more about your motivation</p>
-                        </div>
-                      </div>
-                      <Field label="Why do you want to teach at our institution? *" htmlFor="whyTeach" icon={<FiTarget />}>
-                        <textarea id="whyTeach" name="whyTeach" required rows={3} className={inputClasses} />
-                      </Field>
-                      <Field label="Why should we select you? *" htmlFor="whySelect" icon={<FiCheckCircle />}>
-                        <textarea id="whySelect" name="whySelect" required rows={3} className={inputClasses} />
-                      </Field>
-                      <Field label="What can you contribute to our students? *" htmlFor="contribution" icon={<FiAward />}>
-                        <textarea id="contribution" name="contribution" required rows={3} className={inputClasses} />
-                      </Field>
-                    </div>
-
-                    {/* 8. Declaration */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiCheckCircle className="size-6" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-[#0f172a]">Declaration</h3>
-                          <p className="text-sm text-slate-500 font-medium">Final confirmation</p>
-                        </div>
-                      </div>
-                      <div className="rounded-[32px] bg-slate-50 p-8 border-2 border-slate-100 shadow-inner">
-                        <p className="text-slate-600 leading-relaxed italic">
-                          "I confirm that the information provided in this application is accurate and complete. 
-                          I understand that providing false information may result in disqualification."
-                        </p>
-                        <label className="mt-6 flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" name="agreedToTerms" required className="size-6 rounded-lg accent-[#E91E63]" />
-                          <span className="text-slate-700 font-bold group-hover:text-[#E91E63] transition-colors">I agree to the declaration. *</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* 9. Submit */}
+                    {/* 8. Submit */}
                     <div className="pt-6">
                       <button
                         type="submit"
@@ -675,87 +645,3 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
     </section>
   );
 }
-
-function WhyTeachSection() {
-  return (
-    <section className="py-32 bg-slate-50 relative overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-[#E91E63]/5 blur-3xl -mr-24" />
-      <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-[#FF5733]/5 blur-3xl -ml-24" />
-      
-      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl font-extrabold text-[#0f172a] sm:text-5xl tracking-tight">Why teach with us?</h2>
-          <p className="mt-6 text-xl text-slate-600 max-w-2xl mx-auto">
-            We're more than just a platform; we're a community dedicated to educational excellence and teacher empowerment.
-          </p>
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-3">
-          {benefits.map((benefit, index) => {
-            const Icon = benefit.icon;
-            return (
-              <motion.div 
-                key={benefit.title} 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group relative rounded-[40px] bg-white p-10 shadow-xl shadow-slate-200/50 border border-slate-100 hover:border-[#E91E63]/20 hover:shadow-2xl hover:shadow-[#E91E63]/5 transition-all duration-500 overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                  <Icon className="size-24" />
-                </div>
-                
-                <div className="flex size-16 items-center justify-center rounded-2xl bg-[#f8fafc] text-[#E91E63] group-hover:bg-[#E91E63] group-hover:text-white transition-all duration-500 mb-8 shadow-inner">
-                  <Icon className="size-8" />
-                </div>
-                
-                <h3 className="text-2xl font-bold text-[#0f172a] group-hover:text-[#E91E63] transition-colors">{benefit.title}</h3>
-                <p className="mt-4 text-slate-600 leading-relaxed text-lg font-medium">{benefit.text}</p>
-                
-                <div className="mt-8 flex items-center text-sm font-bold text-[#E91E63] opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
-                  Learn more <FiArrowRight className="ml-2" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="mt-20 rounded-[48px] bg-[#0f172a] p-12 md:p-16 text-white overflow-hidden relative shadow-2xl shadow-[#0f172a]/20"
-        >
-          <div className="absolute top-0 right-0 size-96 bg-[#E91E63]/20 blur-[100px] -mr-48 -mt-48 animate-pulse" />
-          <div className="absolute bottom-0 left-0 size-64 bg-[#FF5733]/10 blur-[80px] -ml-32 -mb-32" />
-          
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-            <div className="max-w-2xl text-center lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start gap-2 mb-6">
-                {[1, 2, 3, 4, 5].map(i => <FiStar key={i} className="fill-amber-400 text-amber-400 size-6" />)}
-              </div>
-              <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight">Elite Educator Network</h3>
-              <p className="mt-6 text-xl text-slate-300 leading-relaxed font-medium">
-                Join a community where 95% of our teachers report higher satisfaction and better work-life balance compared to traditional agencies.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-6 shrink-0">
-              <div className="text-center bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10 min-w-[140px]">
-                <div className="text-4xl font-bold text-[#E91E63]">95%</div>
-                <div className="text-sm text-slate-400 font-bold uppercase tracking-wider mt-1">Satisfaction</div>
-              </div>
-              <div className="text-center bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10 min-w-[140px]">
-                <div className="text-4xl font-bold text-[#FF5733]">Elite</div>
-                <div className="text-sm text-slate-400 font-bold uppercase tracking-wider mt-1">Network</div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-export { WhyTeachSection };

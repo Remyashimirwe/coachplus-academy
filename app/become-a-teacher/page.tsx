@@ -1,5 +1,5 @@
 import { getSetting } from "@/app/lib/db";
-import BecomeTeacherForm, { WhyTeachSection } from "./BecomeTeacherForm";
+import BecomeTeacherForm from "./BecomeTeacherForm";
 import Footer from "../components/Footer";
 
 export const dynamic = "force-dynamic";
@@ -26,10 +26,10 @@ export default async function BecomeTeacherPage() {
                 Hiring Now
               </span>
             </div>
-            <h1 className="text-6xl font-extrabold leading-[1.1] sm:text-6xl lg:text-7xl tracking-tight">
+            <h1 className="text-5xl font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl tracking-tight">
               Inspire the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF5733] to-[#E91E63]">Next Generation</span>
             </h1>
-            <p className="mt-10 mx-auto max-w-2xl text-2xl leading-relaxed text-slate-300 font-medium sm:text-xl">
+            <p className="mt-10 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300 font-medium sm:text-lg">
               Join Wecoach Academy's elite educator network. We connect exceptional teachers with students who are passionate about learning.
             </p>
           </div>
@@ -44,7 +44,6 @@ export default async function BecomeTeacherPage() {
       </div>
 
       <BecomeTeacherForm isOpen={isOpen} />
-      <WhyTeachSection />
       <Footer />
     </main>
   );

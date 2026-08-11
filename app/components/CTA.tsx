@@ -25,7 +25,7 @@ export default function CTA() {
                 Ready to help your <br /><span className="text-[#E91E63]">child grow?</span>
               </h2>
               <p className="mt-6 max-w-2xl text-base font-normal leading-relaxed text-slate-400">
-                Start with a teacher match built around your specific goals, schedule, and preferred learning style. Our experts are ready to assist.
+                Get matched today with a certified teacher tailored precisely to your learning goals.
               </p>
             </motion.div>
             

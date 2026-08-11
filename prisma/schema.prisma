@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,11 +7,11 @@ datasource db {
 }
 
 model Admin {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  passwordHash  String
-  name          String
-  createdAt     DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
 }
 
 model Program {
@@ -33,8 +28,8 @@ model Subject {
   id        Int     @id @default(autoincrement())
   name      String
   image     String?
-  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
   programId Int
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
   topics    Topic[]
 }
 
@@ -42,8 +37,8 @@ model Topic {
   id        Int     @id @default(autoincrement())
   name      String
   image     String?
-  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId Int
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 }
 
 model Request {
@@ -51,82 +46,69 @@ model Request {
   parentName String
   email      String
   phone      String   @default("")
-  phone2     String   @default("")
-  country    String   @default("")
-  location   String   @default("")
-  province   String   @default("")
-  district   String   @default("")
-  sector     String   @default("")
-  cell       String   @default("")
-  village    String   @default("")
-  idPassport String   @default("")
   grade      String   @default("")
   subjects   String   @default("")
   details    String   @default("")
   status     String   @default("new")
   createdAt  DateTime @default(now())
+  location   String   @default("")
+  phone2     String   @default("")
+  cell       String   @default("")
+  district   String   @default("")
+  province   String   @default("")
+  sector     String   @default("")
+  village    String   @default("")
+  idPassport String   @default("")
+  country    String   @default("")
 }
 
 model TeacherApplication {
-  id           Int      @id @default(autoincrement())
-  // 1. Personal Information
-  fullName     String
-  email        String
-  phone        String
-  country      String   @default("")
-  city         String   @default("")
-  location     String   @default("")
-  linkedin     String?
-  instagram    String?
-  youtube      String?
-  otherSocial  String?
-  photoUrl     String?
-
-  // 2. Education
-  educationLevel String  @default("")
-  fieldOfStudy   String  @default("")
-  institution    String  @default("")
-  graduationYear String  @default("")
+  id                      Int      @id @default(autoincrement())
+  fullName                String
+  email                   String
+  phone                   String
+  country                 String   @default("")
+  province                String   @default("")
+  district                String   @default("")
+  sector                  String   @default("")
+  cell                    String   @default("")
+  village                 String   @default("")
+  linkedin                String?
+  instagram               String?
+  youtube                 String?
+  otherSocial             String?
+  photoUrl                String?
+  educationLevel          String   @default("")
+  fieldOfStudy            String   @default("")
+  institution             String   @default("")
+  graduationYear          String   @default("")
   academicCertificatesUrl String?
-
-  // 3. Teaching Experience
-  experienceYears String @default("")
-  subjects      String
-  grades        String   @default("")
-  previousOrg   String?
-  previousPos   String?
-  expDescription String  @default("")
-
-  // 4. Teaching Skills
-  methods       String   @default("")
-  difficultStudents String @default("")
-  engagement    String   @default("")
-  techTools     String?
-  teachOnline   String   @default("")
-
-  // 5. Availability
-  employmentType String  @default("")
-  availableDays String   @default("")
-  availableHours String  @default("")
-  startDate     String   @default("")
-
-  // 6. Application Documents
-  resumeUrl     String?
-  coverLetterUrl String?
-  otherCertificatesUrl String?
-  licenseUrl    String?
-  portfolioUrl  String?
-
-  // 7. Final Questions
-  whyTeach      String   @default("")
-  whySelect     String   @default("")
-  contribution  String   @default("")
-
-  // 8. Declaration
-  agreedToTerms Boolean  @default(false)
-
-  status        String   @default("pending")
-  createdAt     DateTime @default(now())
+  experienceYears         String   @default("")
+  subjects                String
+  grades                  String   @default("")
+  previousOrg             String?
+  previousPos             String?
+  expDescription          String   @default("")
+  methods                 String   @default("")
+  difficultStudents       String   @default("")
+  engagement              String   @default("")
+  techTools               String?
+  teachOnline             String   @default("")
+  employmentType          String   @default("")
+  availableDays           String   @default("")
+  availableHours          String   @default("")
+  startDate               String   @default("")
+  resumeUrl               String?
+  coverLetterUrl          String?
+  otherCertificatesUrl    String?
+  licenseUrl              String?
+  portfolioUrl            String?
+  whyTeach                String   @default("")
+  whySelect               String   @default("")
+  contribution            String   @default("")
+  agreedToTerms           Boolean  @default(false)
+  status                  String   @default("pending")
+  createdAt               DateTime @default(now())
 }
 
 model Setting {

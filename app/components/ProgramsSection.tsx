@@ -45,9 +45,9 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
   }
 
   return (
-    <section id="programs" className="py-12 md:py-24 bg-white">
+    <section id="programs" className="py-12 md:py-24 bg-slate-50/50">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
+        <div className="flex flex-col items-center text-center">
           <div className="max-w-2xl">
             <h2 className="text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
               Our Categories

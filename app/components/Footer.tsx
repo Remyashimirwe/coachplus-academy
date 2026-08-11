@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { FiTwitter, FiLinkedin, FiInstagram } from "react-icons/fi";
 
 const footerGroups = [
   {
@@ -50,7 +49,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
-              Connecting parents and qualified private tutors for home and online learning excellence. Building a brighter future together.
+              Your Success Starts with the Right Coach.
             </p>
           </div>
           
@@ -73,19 +72,8 @@ export default function Footer() {
           ))}
         </div>
         
-        <div className="mt-20 border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500">
-          <p>&copy; {new Date().getFullYear()} Wecoach Academy Education Platform. All rights reserved.</p>
-          <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition flex items-center gap-2">
-              <FiTwitter className="size-4" /> Twitter
-            </a>
-            <a href="#" className="hover:text-white transition flex items-center gap-2">
-              <FiLinkedin className="size-4" /> LinkedIn
-            </a>
-            <a href="#" className="hover:text-white transition flex items-center gap-2">
-              <FiInstagram className="size-4" /> Instagram
-            </a>
-          </div>
+        <div className="mt-20 border-t border-white/10 pt-10 text-center text-sm text-slate-500">
+          <p>&copy; 2026 Wecoach Academy</p>
         </div>
       </div>
     </footer>

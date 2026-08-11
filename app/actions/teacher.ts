@@ -14,8 +14,11 @@ export async function saveTeacherApplication(formData: FormData) {
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const country = String(formData.get("country") || "").trim();
-  const city = String(formData.get("city") || "").trim();
-  const location = String(formData.get("location") || "").trim();
+  const province = String(formData.get("province") || "").trim();
+  const district = String(formData.get("district") || "").trim();
+  const sector = String(formData.get("sector") || "").trim();
+  const cell = String(formData.get("cell") || "").trim();
+  const village = String(formData.get("village") || "").trim();
   const linkedin = String(formData.get("linkedin") || "").trim();
   const instagram = String(formData.get("instagram") || "").trim();
   const youtube = String(formData.get("youtube") || "").trim();
@@ -72,8 +75,11 @@ export async function saveTeacherApplication(formData: FormData) {
         email,
         phone,
         country,
-        city,
-        location,
+        province,
+        district,
+        sector,
+        cell,
+        village,
         linkedin,
         instagram,
         youtube,
