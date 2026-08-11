@@ -14,15 +14,6 @@ const footerGroups = [
     ],
   },
   {
-    title: "Community",
-    links: [
-      { label: "About Us", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Success Stories", href: "#" },
-      { label: "Blog", href: "#" },
-    ],
-  },
-  {
     title: "Legal",
     links: [
       { label: "Privacy Policy", href: "#" },
@@ -36,7 +27,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0f172a] pt-12 pb-8 text-white">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
+        <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(2,1fr)]">
           <div>
             <Link href="/" className="group flex items-center gap-3 font-normal w-fit">
               <img
