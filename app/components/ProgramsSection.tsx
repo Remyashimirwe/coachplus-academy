@@ -79,7 +79,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                 </div>
                 
                 <div className="flex flex-1 flex-col p-6">
-                  <h3 className="text-xl font-bold text-[#21121f] transition-colors group-hover:text-[#E91E63]">
+                  <h3 className="text-lg font-semibold text-[#21121f] transition-colors group-hover:text-[#E91E63]">
                     {program.title}
                   </h3>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-700">
