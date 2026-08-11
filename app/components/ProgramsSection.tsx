@@ -78,15 +78,15 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                   </div>
                 </div>
                 
-                <div className="flex flex-1 flex-col p-8">
-                  <h3 className="text-2xl font-bold text-[#21121f] transition-colors group-hover:text-[#E91E63]">
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="text-xl font-bold text-[#21121f] transition-colors group-hover:text-[#E91E63]">
                     {program.title}
                   </h3>
-                  <p className="mt-4 flex-1 text-base leading-relaxed text-slate-700">
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-700">
                     {program.text}
                   </p>
                   
-                  <div className="mt-8 flex flex-col gap-3">
+                  <div className="mt-6 flex flex-col gap-3">
                     <button 
                       onClick={() => {
                         setSelectedProgram(program);

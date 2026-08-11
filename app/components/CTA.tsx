@@ -22,7 +22,7 @@ export default function CTA() {
               transition={{ duration: 0.5 }}
             >
               <h2 className="text-3xl font-bold text-white sm:text-4xl leading-tight">
-                Ready to help your <br /><span className="text-[#E91E63]">child grow?</span>
+                Ready to start <br /><span className="text-[#E91E63]">learning?</span>
               </h2>
               <p className="mt-6 max-w-2xl text-base font-normal leading-relaxed text-slate-400">
                 Get matched today with a certified teacher tailored precisely to your learning goals.
