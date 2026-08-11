@@ -96,15 +96,15 @@ export default function ProgramsPage({
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
-                  className="group flex h-full flex-col overflow-hidden rounded-[32px] bg-white shadow-xl shadow-slate-200 ring-1 ring-slate-100 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-300"
+                  className="group flex h-full flex-col overflow-hidden rounded-4xl bg-white shadow-xl shadow-slate-200 ring-1 ring-slate-100 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-300"
                 >
-                  <div className="aspect-[16/9] w-full overflow-hidden relative shrink-0">
+                  <div className="aspect-video w-full overflow-hidden relative shrink-0">
                     <img 
                       src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"} 
                       alt={program.title}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
                     <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg backdrop-blur-sm">
                       {program.level}
                     </div>
