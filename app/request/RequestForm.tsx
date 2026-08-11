@@ -236,7 +236,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                 </p>
                 <Link
                   href="/"
-                  className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#0f172a] px-10 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                  className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#0f172a] px-8 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                 >
                   Return Home
                 </Link>
@@ -258,7 +258,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                 </p>
                 <button
                   onClick={() => setStatus("idle")}
-                  className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#E91E63] px-10 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#0f172a]"
+                  className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#E91E63] px-8 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#0f172a]"
                 >
                   Try Again
                 </button>
@@ -341,7 +341,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   </div>
 
                   <div className="grid gap-8">
-                    <Field icon={<FiLayers />} label="Learning Category" htmlFor="program">
+                    <Field icon={<FiLayers />} label="Choose a Category" htmlFor="program">
                       <div className="relative group">
                         <select 
                           id="program" 
@@ -349,9 +349,9 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                           required
                           value={selectedProgramId}
                           onChange={(e) => setSelectedProgramId(e.target.value)}
-                          className={`${inputClasses} appearance-none cursor-pointer pr-12`}
+                          className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
                         >
-                          <option value="" disabled>Choose a category</option>
+                          <option value="" disabled>Choose a Category</option>
                           {programs.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                         </select>
                         <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
@@ -367,7 +367,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                     <div className="flex items-center justify-between">
                       <label className={`text-sm font-bold flex items-center gap-2 transition-colors ${selectionError ? 'text-red-500' : 'text-slate-700'}`}>
                         <FiBookOpen className={selectionError ? 'text-red-500' : 'text-[#E91E63]'} />
-                        Course of Interest *
+                        Choose a Learning Mode *
                       </label>
                       {selectionError && (
                         <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please select at least one course</span>
@@ -425,7 +425,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                                     }`}>
                                       {isSelected && <FiCheckCircle className="text-white size-3" />}
                                     </div>
-                                    <span className="absolute bottom-3 left-4 text-sm font-bold text-white truncate right-4">
+                                    <span className="absolute bottom-3 left-4 text-xs sm:text-sm font-bold text-white truncate right-4">
                                       {s.name}
                                     </span>
                                   </div>
@@ -466,7 +466,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                                           key={topic.id}
                                           type="button"
                                           onClick={() => toggleTopic(subName, topic.name)}
-                                          className={`group/btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                          className={`group/btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all ${
                                             selectedCourses[subName]?.includes(topic.name)
                                               ? "bg-[#E91E63] text-white shadow-lg shadow-rose-200"
                                               : "bg-white text-slate-500 border border-slate-200 hover:border-[#E91E63]/30"
@@ -502,16 +502,16 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   </div>
 
                   <div className="grid gap-8 md:grid-cols-2">
-                    <Field icon={<FiMapPin />} label="Learning Mode" htmlFor="mode">
+                    <Field icon={<FiMapPin />} label="Choose a Course or Subject" htmlFor="mode">
                       <div className="relative group">
                         <select 
                           id="mode" 
                           name="mode" 
                           defaultValue="" 
                           required 
-                          className={`${inputClasses} appearance-none cursor-pointer pr-12`}
+                          className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
                         >
-                          <option value="" disabled>Preferred mode</option>
+                          <option value="" disabled>Choose a Course or Subject</option>
                           {learningModes.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
                         <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
@@ -541,7 +541,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   <button
                     type="submit"
                     disabled={status === "submitting"}
-                    className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-6 text-xl font-bold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-4 text-lg font-bold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
                     <span className="relative flex items-center justify-center gap-3">
@@ -593,13 +593,13 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <button
                   onClick={() => setShowSuccessModal(false)}
-                  className="flex-1 rounded-2xl bg-[#0f172a] py-5 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                  className="flex-1 rounded-2xl bg-[#0f172a] py-4 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                 >
                   Got it, thanks!
                 </button>
                 <Link
                   href="/"
-                  className="flex-1 rounded-2xl bg-slate-100 py-5 text-lg font-bold text-slate-600 transition-all hover:bg-slate-200"
+                  className="flex-1 rounded-2xl bg-slate-100 py-4 text-lg font-bold text-slate-600 transition-all hover:bg-slate-200"
                 >
                   Return Home
                 </Link>

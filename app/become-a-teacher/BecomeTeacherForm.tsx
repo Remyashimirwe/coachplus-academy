@@ -297,9 +297,6 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           <input id="graduationYear" name="graduationYear" required placeholder="e.g. 2020" className={inputClasses} />
                         </Field>
                       </div>
-                      <Field icon={<FiFileText />} label="Academic Certificates (Upload) *" htmlFor="academicCert">
-                        <input id="academicCert" name="academicCert" type="file" required accept=".pdf,image/*" className={`${inputClasses} py-3`} />
-                      </Field>
                     </div>
 
                     {/* 3. Teaching Experience */}
@@ -515,47 +512,52 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         <Field icon={<FiFileText />} label="Upload CV/Resume *" htmlFor="resume">
                           <input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
                         </Field>
-                        <Field icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter">
-                          <input id="coverLetter" name="coverLetter" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
+                        <Field icon={<FiFileText />} label="Academic Certificates (Upload) *" htmlFor="academicCert">
+                          <input id="academicCert" name="academicCert" type="file" required accept=".pdf,image/*" className={`${inputClasses} py-3`} />
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter">
+                          <input id="coverLetter" name="coverLetter" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
+                        </Field>
                         <Field icon={<FiAward />} label="Upload Certificates" htmlFor="otherCerts">
                           <input id="otherCerts" name="otherCerts" type="file" accept=".pdf,image/*" multiple className={`${inputClasses} py-3`} />
                         </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiStar />} label="Teaching License/Certification" htmlFor="license">
                           <input id="license" name="license" type="file" accept=".pdf,image/*" className={`${inputClasses} py-3`} />
                         </Field>
-                      </div>
-                      <Field icon={<FiImage />} label="Profile Photo (Upload)" htmlFor="photo">
-                        <div className="flex items-center gap-4">
-                          <input 
-                            id="photo" 
-                            name="photo" 
-                            type="file" 
-                            accept="image/*" 
-                            className={`${inputClasses} py-3`} 
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  const preview = document.getElementById('photo-preview') as HTMLImageElement;
-                                  if (preview) preview.src = event.target?.result as string;
-                                  const placeholder = document.getElementById('photo-placeholder');
-                                  if (placeholder) placeholder.style.display = 'none';
-                                  if (preview) preview.style.display = 'block';
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                          <div className="size-16 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
-                            <FiUser id="photo-placeholder" className="size-8 text-slate-400" />
-                            <img id="photo-preview" alt="Preview" className="size-full object-cover hidden" />
+                        <Field icon={<FiImage />} label="Profile Photo (Upload)" htmlFor="photo">
+                          <div className="flex items-center gap-4">
+                            <input 
+                              id="photo" 
+                              name="photo" 
+                              type="file" 
+                              accept="image/*" 
+                              className={`${inputClasses} py-3`} 
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    const preview = document.getElementById('photo-preview') as HTMLImageElement;
+                                    if (preview) preview.src = event.target?.result as string;
+                                    const placeholder = document.getElementById('photo-placeholder');
+                                    if (placeholder) placeholder.style.display = 'none';
+                                    if (preview) preview.style.display = 'block';
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <div className="size-16 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                              <FiUser id="photo-placeholder" className="size-8 text-slate-400" />
+                              <img id="photo-preview" alt="Preview" className="size-full object-cover hidden" />
+                            </div>
                           </div>
-                        </div>
-                      </Field>
+                        </Field>
+                      </div>
                       <Field icon={<FiLink />} label="Portfolio / Sample Work (optional)" htmlFor="portfolio">
                         <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
                       </Field>
@@ -566,7 +568,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                       <button
                         type="submit"
                         disabled={status === "submitting"}
-                        className="group relative w-full overflow-hidden rounded-3xl bg-[#0f172a] p-6 text-xl font-bold text-white shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] active:scale-[0.98] disabled:opacity-70"
+                        className="group relative w-full overflow-hidden rounded-3xl bg-[#0f172a] p-4 text-lg font-bold text-white shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] active:scale-[0.98] disabled:opacity-70"
                       >
                         <span className="relative flex items-center justify-center gap-3">
                           {status === "submitting" ? (

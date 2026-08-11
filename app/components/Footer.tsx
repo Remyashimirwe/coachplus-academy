@@ -34,7 +34,7 @@ const footerGroups = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0f172a] pt-24 pb-12 text-white">
+    <footer className="bg-[#0f172a] pt-12 pb-8 text-white">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
@@ -72,7 +72,7 @@ export default function Footer() {
           ))}
         </div>
         
-        <div className="mt-20 border-t border-white/10 pt-10 text-center text-sm text-slate-500">
+        <div className="mt-10 border-t border-white/10 pt-6 text-center text-sm text-slate-500">
           <p>&copy; 2026 Wecoach Academy</p>
         </div>
       </div>

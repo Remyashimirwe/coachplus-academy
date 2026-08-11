@@ -124,13 +124,13 @@ export default function ProgramsPage({
                           setSelectedProgram(program);
                           setIsModalOpen(true);
                         }}
-                        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#0f172a] py-4 text-sm font-bold text-[#0f172a] transition-all hover:bg-[#0f172a] hover:text-white active:scale-95 shadow-sm"
+                        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#0f172a] py-3 text-sm font-bold text-[#0f172a] transition-all hover:bg-[#0f172a] hover:text-white active:scale-95 shadow-sm"
                       >
                         Show Details
                       </button>
                       <Link
                         href={`/request?programId=${program.id}`}
-                        className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-4 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
+                        className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-3 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
                       >
                         Request a Teacher
                         <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -159,7 +159,7 @@ export default function ProgramsPage({
             </p>
             <h2 className="mt-5 text-3xl font-medium">Need help choosing?</h2>
             <p className="mt-4 max-w-2xl leading-8 text-white/68">
-              Tell Wecoach Academy your child&apos;s goals and we&apos;ll recommend the
+              Tell Wecoach Academy your goals and we&apos;ll recommend the
               best category and tutor match.
             </p>
           </motion.div>

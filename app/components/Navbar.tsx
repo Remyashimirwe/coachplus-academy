@@ -99,7 +99,7 @@ export default function Navbar() {
           ))}
           <Link
             href="/request"
-            className={`group inline-flex min-h-[50px] items-center gap-2 rounded-2xl px-7 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
+            className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
               scrolled
                 ? "bg-[#E91E63] text-white hover:bg-[#7B1FA2] hover:shadow-rose-500/25"
                 : "bg-white text-[#E91E63] hover:bg-white/90 hover:shadow-white/10"
@@ -150,7 +150,7 @@ export default function Navbar() {
                 <Link
                   href="/request"
                   onClick={() => setMenuOpen(false)}
-                  className="mt-4 inline-flex min-h-[60px] items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-lg font-bold text-white shadow-lg shadow-rose-500/25"
+                  className="mt-4 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-lg font-bold text-white shadow-lg shadow-rose-500/25"
                 >
                   <FiSend className="size-5" />
                   Request a Teacher

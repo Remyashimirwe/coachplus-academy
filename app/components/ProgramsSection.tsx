@@ -49,7 +49,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center text-center">
           <div className="max-w-2xl">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
+            <h2 className="text-lg font-bold uppercase tracking-widest text-[#E91E63] mb-4">
               Our Categories
             </h2>
           </div>
@@ -92,13 +92,13 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                         setSelectedProgram(program);
                         setIsModalOpen(true);
                       }}
-                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border-2 border-[#E91E63] text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95"
+                      className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border-2 border-[#E91E63] text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95"
                     >
                       Show Details
                     </button>
                     <Link 
                       href={`/request?programId=${program.id}`} 
-                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#21121f] text-sm font-bold text-white transition-all hover:bg-[#E91E63] active:scale-95 shadow-md"
+                      className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[#21121f] text-sm font-bold text-white transition-all hover:bg-[#E91E63] active:scale-95 shadow-md"
                     >
                       Request a Teacher
                     </Link>

@@ -73,7 +73,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
               <div className="mt-10">
                 <Link
                   href={`/request?programId=${program.id}`}
-                  className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-white px-8 text-lg font-bold text-[#E91E63] shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
+                  className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-2xl bg-white px-8 text-lg font-bold text-[#E91E63] shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
                 >
                   Request a Teacher
                   <FiArrowRight className="size-5" />
@@ -154,7 +154,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
 
                 <Link
                   href={`/request?programId=${program.id}&subjectId=${subject.id}`}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-4 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-3 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
                 >
                   Request a Teacher
                   <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
