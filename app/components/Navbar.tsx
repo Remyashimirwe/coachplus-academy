@@ -69,7 +69,7 @@ export default function Navbar() {
           : "bg-transparent py-5"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-2">
+      <nav className="mx-auto flex max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-4">
         <Link href="/" className="group flex items-center gap-3 font-normal">
           <div className="relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-0 blur transition duration-300 group-hover:opacity-100" />
@@ -90,7 +90,7 @@ export default function Navbar() {
               key={link.label}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`group relative rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
+              className={`group relative rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
                 scrolled || !isHomePage
                   ? (isActive(link.href) ? "text-[#E91E63] bg-[#fff0f3]" : "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]") 
                   : (isActive(link.href) ? "text-white bg-white/20" : "text-white/80 hover:text-white hover:bg-white/10")
@@ -101,7 +101,7 @@ export default function Navbar() {
           ))}
           <Link
             href="/request"
-            className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
+            className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-base font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
               scrolled || !isHomePage
                 ? "bg-[#E91E63] text-white hover:bg-[#7B1FA2] hover:shadow-rose-500/25"
                 : "bg-white text-[#E91E63] hover:bg-white/90 hover:shadow-white/10"

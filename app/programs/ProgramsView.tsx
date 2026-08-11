@@ -44,29 +44,28 @@ export default function ProgramsPage({
       <section className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-12 text-white">
         <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-14">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="max-w-3xl"
           >
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
-              <FiBookOpen className="size-4" />
-              Our Categories
-            </p>
-            <h1 className="mt-6 text-sm font-medium leading-[1.05] sm:text-sm">
+            <div className="relative inline-flex items-center justify-center px-10 py-4 mb-8">
+              <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-full border border-white/20" />
+              <p className="relative flex items-center gap-2 text-sm font-medium text-white uppercase tracking-widest">
+                <FiBookOpen className="size-4 text-[#E91E63]" />
+                Our Categories
+              </p>
+            </div>
+            <h1 className="mt-10 text-sm font-semibold tracking-tight sm:text-xl md:text-2xl">
               Learning paths for every goal
             </h1>
           </motion.div>
         </div>
 
-        {/* Bottom zigzag transition */}
-        <div className="absolute -bottom-px left-0 w-full overflow-hidden leading-[0] transform rotate-180">
-          <svg className="relative block w-[calc(100%+1.3px)] h-[40px] md:h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
-          </svg>
-        </div>
+        {/* Bottom straight transition */}
+        <div className="absolute -bottom-px left-0 w-full h-12 bg-white" />
       </section>
 
       <section className="bg-white py-12 md:py-24">
@@ -157,8 +156,8 @@ export default function ProgramsPage({
               <FiClipboard className="size-4" />
               Not sure where to start?
             </p>
-            <h2 className="mt-5 text-sm font-medium">Need help choosing?</h2>
-            <p className="mt-4 max-w-2xl text-sm font-medium leading-8 text-white/68">
+            <h2 className="mt-5 text-3xl font-bold text-white">Need help choosing?</h2>
+            <p className="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed">
               Tell Wecoach Academy your goals and we&apos;ll recommend the
               best category and tutor match.
             </p>

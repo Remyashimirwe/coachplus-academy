@@ -63,10 +63,10 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                 <FiBookOpen className="size-4" />
                 {program.level}
               </p>
-              <h1 className="mt-6 text-sm font-medium leading-[1.05] sm:text-sm">
+              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
                 {program.title}
               </h1>
-              <p className="mt-6 max-w-2xl text-sm font-medium leading-8 text-white/85">
+              <p className="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed">
                 {program.text}
               </p>
               
@@ -106,10 +106,10 @@ export default function ProgramDetailView({ program }: { program: Program }) {
             <h2 className="text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
               Available programs
             </h2>
-            <h2 className="text-sm font-medium tracking-tight text-[#21121f] sm:text-sm">
+            <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
               Available <span className="text-[#E91E63]">Programs</span>
             </h2>
-            <p className="mt-6 text-sm font-medium text-slate-600">
+            <p className="mt-6 text-lg font-medium text-slate-600">
               Choose a specialized path within {program.title} to find the perfect tutor.
             </p>
           </div>

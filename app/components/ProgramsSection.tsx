@@ -46,10 +46,12 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
 
   return (
     <section id="programs" className="py-12 md:py-24 bg-slate-50/50">
-      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center text-center">
-          <div className="max-w-2xl">
-            <h2 className="text-lg font-bold uppercase tracking-widest text-[#E91E63] mb-4">
+      <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-14">
+        <div className="flex flex-col items-center text-center px-4">
+          <div className="relative inline-flex items-center justify-center px-10 py-4">
+            <div className="absolute inset-0 bg-[#E91E63]/10 rounded-full blur-md" />
+            <div className="absolute inset-0 bg-white shadow-sm rounded-full border border-[#E91E63]/10" />
+            <h2 className="relative text-lg font-bold uppercase tracking-widest text-[#E91E63]">
               Our Categories
             </h2>
           </div>

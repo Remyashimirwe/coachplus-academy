@@ -105,6 +105,8 @@ const inputClasses =
 export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -172,6 +174,11 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         setSelectionErrors(errors);
                         const firstError = document.querySelector('[data-error="true"]');
                         firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                      }
+
+                      if (!agreedToTerms) {
+                        alert("Please accept the terms and conditions to continue.");
                         return;
                       }
 
@@ -563,12 +570,45 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                       </Field>
                     </div>
 
-                    {/* 8. Submit */}
+                    {/* 8. Agreement */}
+                    <div className="space-y-4 pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-6 items-center">
+                          <input
+                            id="terms"
+                            name="terms"
+                            type="checkbox"
+                            required
+                            checked={agreedToTerms}
+                            onChange={(e) => setAgreedToTerms(e.target.checked)}
+                            className="size-5 rounded border-2 border-slate-200 text-[#E91E63] focus:ring-[#E91E63]"
+                          />
+                        </div>
+                        <div className="text-sm">
+                          <label htmlFor="terms" className="font-medium text-slate-700">
+                            I accept the {" "}
+                            <button
+                              type="button"
+                              onClick={() => setShowTermsModal(true)}
+                              className="text-[#E91E63] hover:underline font-bold"
+                            >
+                              Teacher Partner Terms & Conditions
+                            </button>
+                            {" "} and privacy policy.
+                          </label>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Ticking in the Box means you accept our terms and conditions.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 9. Submit */}
                     <div className="pt-6">
                       <button
                         type="submit"
-                        disabled={status === "submitting"}
-                        className="group relative w-full overflow-hidden rounded-3xl bg-[#0f172a] p-4 text-lg font-bold text-white shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] active:scale-[0.98] disabled:opacity-70"
+                        disabled={status === "submitting" || !agreedToTerms}
+                        className="group relative w-full overflow-hidden rounded-3xl bg-[#0f172a] p-4 text-lg font-bold text-white shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                       >
                         <span className="relative flex items-center justify-center gap-3">
                           {status === "submitting" ? (
@@ -584,6 +624,11 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           )}
                         </span>
                       </button>
+                      {!agreedToTerms && (
+                        <p className="mt-2 text-center text-xs text-rose-500 font-medium">
+                          Please accept the terms and conditions to enable submission.
+                        </p>
+                      )}
                     </div>
                   </form>
                 </motion.div>
@@ -639,6 +684,136 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                 >
                   Return Home
                 </Link>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Terms and Conditions Modal */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-5 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowTermsModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] bg-white shadow-2xl flex flex-col"
+            >
+              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#0f172a]">Teacher Partner Terms & Conditions</h2>
+                  <p className="text-sm text-[#E91E63] font-bold uppercase tracking-widest mt-1">WECOACH ACADEMY</p>
+                </div>
+                <button
+                  onClick={() => setShowTermsModal(false)}
+                  className="rounded-2xl bg-slate-100 p-3 text-slate-400 transition-colors hover:bg-rose-50 hover:text-[#E91E63]"
+                >
+                  <FiX className="size-6" />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                <section>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">1</span>
+                    YOUR STATUS & PART-TIME DISPATCH
+                  </h3>
+                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                    <li><strong className="text-slate-900">Independent Educator:</strong> You are joining Wecoach Academy as an independent, part-time teacher partner, not as a permanent full-time employee.</li>
+                    <li><strong className="text-slate-900">Session-Based Work:</strong> Assignments are offered on a part-time, per-session basis depending on client demand and your location. Wecoach Academy does not guarantee a fixed monthly salary or a fixed number of hours.</li>
+                    <li><strong className="text-slate-900">Brand Representation:</strong> When dispatched to teach a Wecoach Academy student, you act as an official representative of our academy. You must arrive on time, dress professionally, and maintain high teaching standards.</li>
+                    <li><strong className="text-slate-900">No Fixed Monthly Salary:</strong> You pay teachers based on completed hours or matched sessions. You do not owe them a fixed monthly wage if there are no active clients in their area.</li>
+                    <li><strong className="text-slate-900">No Employment Liabilities:</strong> Because they are independent partners, Wecoach Academy is not legally required to provide full-time benefits, pension contributions, paid annual leave, or severance pay.</li>
+                    <li><strong className="text-slate-900">Platform Membership:</strong> Teachers are members of your certified Educator Network/Forum. They maintain their freedom to work elsewhere, but whenever they accept a Wecoach Academy dispatch, they must follow your code of conduct and represent your brand professionally.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">2</span>
+                    TEACHING STANDARDS & CONDUCT
+                  </h3>
+                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                    <li><strong className="text-slate-900">Lesson Preparation:</strong> You must prepare your lessons well and help your assigned students reach their goals.</li>
+                    <li><strong className="text-slate-900">Zero Misconduct:</strong> Bad behavior is strictly prohibited. This includes showing up late, using inappropriate language, attending lessons under the influence of alcohol or drugs, or engaging in any unprofessional conduct with students or parents.</li>
+                    <li><strong className="text-slate-900">Account Removal:</strong> Breaking these conduct rules will lead to immediate removal from our active teacher database.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">3</span>
+                    SAFETY, THEFT & LEGAL RESPONSIBILITY
+                  </h3>
+                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                    <li><strong className="text-slate-900">Respecting Client Homes:</strong> During home-coaching visits, you must respect the client&apos;s home, privacy, and family rules.</li>
+                    <li><strong className="text-slate-900">Theft and Property Damage:</strong> If a teacher steals, causes intentional property damage, or breaks the law, Wecoach Academy will immediately terminate their profile and report them to law enforcement.</li>
+                    <li><strong className="text-slate-900">Personal Liability:</strong> You accept full legal and financial responsibility for your personal actions, damage, or misconduct during active coaching sessions.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">4</span>
+                    NO DIRECT CASH OR PRIVATE DEALS
+                  </h3>
+                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                    <li><strong className="text-slate-900">Client Ownership:</strong> All students, parents, and bookings matched through Wecoach Academy belong exclusively to the Wecoach Academy platform.</li>
+                    <li><strong className="text-slate-900">No Direct Payments:</strong> You must never ask for or accept direct cash, private mobile money, or bank transfers from parents. All client payments are collected directly by Wecoach Academy.</li>
+                    <li><strong className="text-slate-900">No Private Deals:</strong> You are strictly forbidden from making private offline coaching deals with Wecoach Academy clients outside our platform.</li>
+                    <li><strong className="text-slate-900">Penalties:</strong> Attempting to bypass the platform will result in immediate profile deactivation, forfeiture of unpaid earnings, and potential legal recovery of lost fees.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">5</span>
+                    LESSON SCHEDULES & CANCELLATIONS
+                  </h3>
+                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                    <li><strong className="text-slate-900">Package Completion:</strong> Once you accept a student match, you commit to finishing the full scheduled package.</li>
+                    <li><strong className="text-slate-900">24-Hour Notice:</strong> If you face an emergency and cannot attend a lesson, you must inform Wecoach Academy at least 24 hours in advance. Unexcused absences will result in payment deductions or account suspension.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">6</span>
+                    HOW YOU GET PAID
+                  </h3>
+                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                    <li><strong className="text-slate-900">Central Billing:</strong> Wecoach Academy handles all client billing directly before lessons begin.</li>
+                    <li><strong className="text-slate-900">Teacher Payouts:</strong> You will receive your agreed partner payment after verified completion of your assigned coaching hours according to our standard payout schedule.</li>
+                    <li><strong className="text-slate-900">Transport:</strong> The cost of transport will be conducted based on your Location provided during registration and it is paid once you start coaching.</li>
+                  </ul>
+                </section>
+
+                <div className="bg-[#fff0f3] rounded-3xl p-6 border-2 border-[#E91E63]/10">
+                  <h4 className="font-bold text-[#E91E63] mb-2 uppercase tracking-wider text-xs">Acknowledgment & Sign-Off</h4>
+                  <p className="text-sm text-slate-700 leading-relaxed italic">
+                    &quot;By checking the agreement box on our website, you confirm that you have read, understood, and agreed to follow all the rules in this agreement.&quot;
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-8 border-t border-slate-100 bg-slate-50">
+                <button
+                  onClick={() => {
+                    setAgreedToTerms(true);
+                    setShowTermsModal(false);
+                  }}
+                  className="w-full rounded-2xl bg-[#0f172a] py-5 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                >
+                  I Understand & Agree
+                </button>
               </div>
             </motion.div>
           </div>
