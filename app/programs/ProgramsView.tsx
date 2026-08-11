@@ -41,7 +41,7 @@ export default function ProgramsPage({
 
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-32 pb-20 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-12 text-white">
         <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
@@ -51,18 +51,25 @@ export default function ProgramsPage({
             transition={{ duration: 0.5 }}
             className="max-w-3xl"
           >
-            <p className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
               <FiBookOpen className="size-4" />
-              Explore Our Categories
+              Our Categories
             </p>
-            <h1 className="mt-6 text-4xl font-medium leading-[1.05] sm:text-5xl">
+            <h1 className="mt-6 text-5xl font-medium leading-[1.05] sm:text-6xl lg:text-7xl">
               Learning paths for every goal
             </h1>
           </motion.div>
         </div>
+
+        {/* Bottom zigzag transition */}
+        <div className="absolute -bottom-px left-0 w-full overflow-hidden leading-[0] transform rotate-180">
+          <svg className="relative block w-[calc(100%+1.3px)] h-[40px] md:h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
+          </svg>
+        </div>
       </section>
 
-      <section className="bg-slate-50 py-24">
+      <section className="bg-white py-12 md:py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
           {programs.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-[40px] bg-white py-20 text-center border-2 border-dashed border-slate-200 shadow-sm">

@@ -28,7 +28,7 @@ export default function TeachersView({ teacherApplications }: any) {
                       <FiClock className="text-indigo-500" /> {app.experienceYears} Years
                     </p>
                     <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
-                      <FiMapPin className="text-rose-500" /> {app.location}
+                      <FiMapPin className="text-rose-500" /> {app.city}, {app.country} {app.location ? `(${app.location})` : ""}
                     </p>
                   </div>
                 </div>

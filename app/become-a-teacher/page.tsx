@@ -26,17 +26,17 @@ export default async function BecomeTeacherPage() {
                 Hiring Now
               </span>
             </div>
-            <h1 className="text-5xl font-extrabold leading-[1.1] sm:text-6xl lg:text-7xl tracking-tight">
+            <h1 className="text-6xl font-extrabold leading-[1.1] sm:text-6xl lg:text-7xl tracking-tight">
               Inspire the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF5733] to-[#E91E63]">Next Generation</span>
             </h1>
-            <p className="mt-10 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300 font-medium">
+            <p className="mt-10 mx-auto max-w-2xl text-2xl leading-relaxed text-slate-300 font-medium sm:text-xl">
               Join Wecoach Academy's elite educator network. We connect exceptional teachers with students who are passionate about learning.
             </p>
           </div>
         </div>
         
         {/* Bottom wave-like transition */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] transform rotate-180">
+        <div className="absolute -bottom-px left-0 w-full overflow-hidden leading-[0] transform rotate-180">
           <svg className="relative block w-[calc(100%+1.3px)] h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
           </svg>

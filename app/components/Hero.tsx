@@ -1,28 +1,28 @@
 "use client";
 
+import { FiArrowRight, FiMapPin } from "react-icons/fi";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FiArrowRight, FiMapPin } from "react-icons/fi";
 
 export default function Hero() {
   return (
-    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-16">
+    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-16 md:pb-28">
       {/* Decorative background elements */}
       <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
       <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
       
-      <div className="mx-auto grid min-h-[400px] max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+      <div className="mx-auto grid min-h-[300px] max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div className="relative z-10 max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-4xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
               Forum for certified professional teachers
             </h1>
-            <p className="mt-6 max-w-lg text-base text-white/90 leading-relaxed">
+            <p className="mt-6 max-w-lg text-lg text-white/90 leading-relaxed sm:text-base">
               Find the right teacher for every learning need
             </p>
 
@@ -74,6 +74,13 @@ export default function Hero() {
             </div>
           </motion.div>
         </div>
+      </div>
+
+      {/* Bottom zigzag/wave transition */}
+      <div className="absolute -bottom-px left-0 w-full overflow-hidden leading-[0] transform rotate-180">
+        <svg className="relative block w-[calc(100%+1.3px)] h-[40px] md:h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
+        </svg>
       </div>
     </section>
   );

@@ -240,8 +240,16 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiMapPin />} label="Location *" htmlFor="location">
-                          <input id="location" name="location" required placeholder="e.g. Kigali, Rwanda" className={inputClasses} />
+                        <Field icon={<FiMapPin />} label="Country *" htmlFor="country">
+                          <input id="country" name="country" required placeholder="e.g. Rwanda" className={inputClasses} />
+                        </Field>
+                        <Field icon={<FiMapPin />} label="City *" htmlFor="city">
+                          <input id="city" name="city" required placeholder="e.g. Kigali" className={inputClasses} />
+                        </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiMapPin />} label="Specific Location (Optional)" htmlFor="location">
+                          <input id="location" name="location" placeholder="e.g. Nyarutarama, Street 123" className={inputClasses} />
                         </Field>
                         <Field icon={<FiLinkedin />} label="LinkedIn Profile" htmlFor="linkedin">
                           <input id="linkedin" name="linkedin" type="url" placeholder="https://linkedin.com/in/username" className={inputClasses} />

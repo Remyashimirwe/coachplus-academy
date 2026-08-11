@@ -73,6 +73,8 @@ model TeacherApplication {
   fullName     String
   email        String
   phone        String
+  country      String   @default("")
+  city         String   @default("")
   location     String   @default("")
   linkedin     String?
   instagram    String?
