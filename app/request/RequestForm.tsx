@@ -42,7 +42,12 @@ interface Program {
   subjects: Subject[];
 }
 
-const learningModes = ["Online", "At Home", "Physical Center"];
+const learningModes = [
+  "At-Home",
+  "Online Group",
+  "Intensive",
+  "In-Person"
+];
 
 function Field({
   icon,
@@ -307,7 +312,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   className="space-y-10"
                 >
                   <div className="grid gap-8 grid-cols-1 md:grid-cols-2">
-                    <Field icon={<FiUser />} label="Parent Full Name" htmlFor="parent-name">
+                    <Field icon={<FiUser />} label="Student or Guardian Name" htmlFor="parent-name">
                       <input id="parent-name" name="parentName" required placeholder="e.g. John Doe" className={inputClasses} />
                     </Field>
 
@@ -502,7 +507,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                   </div>
 
                   <div className="grid gap-8 md:grid-cols-2">
-                    <Field icon={<FiMapPin />} label="Choose a Course or Subject" htmlFor="mode">
+                    <Field icon={<FiMapPin />} label="Choose Learning Mode" htmlFor="mode">
                       <div className="relative group">
                         <select 
                           id="mode" 
@@ -511,7 +516,7 @@ function RequestFormContent({ programs }: { programs: Program[] }) {
                           required 
                           className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
                         >
-                          <option value="" disabled>Choose a Course or Subject</option>
+                          <option value="" disabled>Choose Learning Mode</option>
                           {learningModes.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
                         <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">

@@ -90,7 +90,7 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                     {program.level}
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-[#0f172a] mb-4">{program.title}</h2>
+                <h2 className="text-lg font-medium text-[#0f172a] mb-4">{program.title}</h2>
                 <p className="text-slate-600 leading-relaxed text-xs">
                   {program.text}
                 </p>
@@ -100,11 +100,11 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
               <div className="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar bg-white">
                 <div className="md:hidden mb-8">
                    <span className="text-xs font-bold text-[#E91E63] uppercase tracking-widest">{program.level}</span>
-                   <h2 className="text-3xl font-bold text-[#0f172a] mt-1">{program.title}</h2>
+                   <h2 className="text-xl font-medium text-[#0f172a] mt-1">{program.title}</h2>
                 </div>
 
                 <div className="mb-6 flex items-center justify-between">
-                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Available Sub-categories</h3>
+                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Available Programs</h3>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
@@ -121,7 +121,7 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <h4 className="font-bold text-slate-800 text-lg">{subject.name}</h4>
+                        <h4 className="font-medium text-slate-800 text-base">{subject.name}</h4>
                       </div>
 
                       <div className="flex-1">
@@ -157,7 +157,7 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                   
                   {program.subjects.length === 0 && (
                     <div className="col-span-full py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                      <p className="text-slate-400 font-medium italic">No sub-categories added yet.</p>
+                      <p className="text-slate-400 font-medium italic">No programs added yet.</p>
                     </div>
                   )}
                 </div>

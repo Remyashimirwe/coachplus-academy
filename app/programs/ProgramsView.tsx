@@ -55,7 +55,7 @@ export default function ProgramsPage({
               <FiBookOpen className="size-4" />
               Our Categories
             </p>
-            <h1 className="mt-6 text-5xl font-medium leading-[1.05] sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 text-sm font-medium leading-[1.05] sm:text-sm">
               Learning paths for every goal
             </h1>
           </motion.div>
@@ -76,7 +76,7 @@ export default function ProgramsPage({
               <div className="size-20 rounded-full bg-slate-50 flex items-center justify-center mb-6">
                 <FiBookOpen className="size-10 text-slate-300" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900">No Categories Found</h3>
+              <h3 className="text-2xl font-bold text-slate-900">No Programs Available</h3>
               <p className="mt-2 text-slate-600 max-w-md px-6">
                 We're currently expanding our offerings. Please check back later or contact us for custom tutoring needs.
               </p>
@@ -111,7 +111,7 @@ export default function ProgramsPage({
                   </div>
 
                   <div className="flex flex-1 flex-col p-6">
-                    <h2 className="text-lg font-semibold text-[#0f172a] transition-colors group-hover:text-[#E91E63]">
+                    <h2 className="text-base font-medium text-[#0f172a] transition-colors group-hover:text-[#E91E63]">
                       {program.title}
                     </h2>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
@@ -157,8 +157,8 @@ export default function ProgramsPage({
               <FiClipboard className="size-4" />
               Not sure where to start?
             </p>
-            <h2 className="mt-5 text-3xl font-medium">Need help choosing?</h2>
-            <p className="mt-4 max-w-2xl leading-8 text-white/68">
+            <h2 className="mt-5 text-sm font-medium">Need help choosing?</h2>
+            <p className="mt-4 max-w-2xl text-sm font-medium leading-8 text-white/68">
               Tell Wecoach Academy your goals and we&apos;ll recommend the
               best category and tutor match.
             </p>
