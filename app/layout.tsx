@@ -7,6 +7,7 @@ import "@fontsource/poppins/800.css";
 import "@fontsource/poppins/900.css";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: {
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <Navbar />
         {children}
+        <WhatsAppButton />
       </body>
     </html>
   );

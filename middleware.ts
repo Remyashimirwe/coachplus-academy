@@ -5,6 +5,13 @@ import { decrypt } from './app/lib/auth';
 export async function middleware(request: NextRequest) {
   const session = request.cookies.get('session')?.value;
   
+  if (request.nextUrl.pathname === '/login') {
+    if (session) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    return NextResponse.next();
+  }
+
   if (request.nextUrl.pathname.startsWith('/admin') || 
       request.nextUrl.pathname.startsWith('/teacher') || 
       request.nextUrl.pathname.startsWith('/student')) {
@@ -47,5 +54,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/teacher/:path*', '/student/:path*', '/setup-password'],
+  matcher: ['/admin/:path*', '/teacher/:path*', '/student/:path*', '/setup-password', '/login'],
 };

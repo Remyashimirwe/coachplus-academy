@@ -1,22 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiSend, FiMenu, FiX, FiUser } from "react-icons/fi";
-import { getSession } from "@/app/lib/auth";
+import { FiSend, FiMenu, FiX, FiUser, FiLogOut } from "react-icons/fi";
+import { getSession, logout } from "@/app/lib/auth";
 
 const navLinks = [
   { label: "Home", href: "/" },
+  { label: "Categories", href: "/programs" },
   { label: "How It Works", href: "/#how-it-works" },
   { label: "Why Choose Us", href: "/why-choose-us" },
-  { label: "Categories", href: "/programs" },
   { label: "Become a Teacher", href: "/become-a-teacher" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -29,6 +30,13 @@ export default function Navbar() {
     };
     fetchSession();
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  };
 
   useEffect(() => {
     const onScroll = () => {
@@ -74,6 +82,10 @@ export default function Navbar() {
 
   const isHomePage = pathname === "/";
 
+  const filteredNavLinks = user 
+    ? navLinks.filter(link => link.label !== "How It Works" && link.label !== "Why Choose Us")
+    : navLinks;
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-[60] transition-all duration-500 ${
@@ -98,7 +110,7 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-3 md:flex">
-          {navLinks.map((link) => (
+          {filteredNavLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
@@ -113,17 +125,30 @@ export default function Navbar() {
             </Link>
           ))}
           {user ? (
-            <Link
-              href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
-                scrolled || !isHomePage
-                  ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
+            <div className="flex items-center gap-2">
+              <Link
+                href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+                  scrolled || !isHomePage
+                    ? "text-slate-900 bg-slate-100 hover:bg-slate-200"
+                    : "text-white bg-white/20 hover:bg-white/30"
+                }`}
+              >
                 <FiUser className="size-5" />
-                {user.name}
+                <span className="max-w-[100px] truncate">{user.name}</span>
               </Link>
+              <button
+                onClick={handleLogout}
+                className={`flex items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
+                  scrolled || !isHomePage
+                    ? "text-slate-600 hover:text-red-600 hover:bg-red-50"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
+                }`}
+                title="Logout"
+              >
+                <FiLogOut className="size-5" />
+              </button>
+            </div>
           ) : null}
           <Link
             href="/request"
@@ -161,7 +186,7 @@ export default function Navbar() {
           >
             <div className="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl">
               <div className="flex flex-col gap-2">
-                {navLinks.map((link) => (
+                {filteredNavLinks.map((link) => (
                   <Link
                     key={link.label}
                     href={link.href}
@@ -176,14 +201,26 @@ export default function Navbar() {
                   </Link>
                 ))}
                 {user ? (
-                  <Link
-                    href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
-                    onClick={() => setMenuOpen(false)}
-                    className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
-                  >
-                    <FiUser className="size-5" />
-                    {user.name}
-                  </Link>
+                  <div className="mt-2 flex flex-col gap-2">
+                    <Link
+                      href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-lg font-bold text-slate-700 shadow-sm"
+                    >
+                      <FiUser className="size-5 text-[#E91E63]" />
+                      <span className="truncate">{user.name}</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMenuOpen(false);
+                      }}
+                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-6 text-lg font-bold text-red-600 shadow-sm"
+                    >
+                      <FiLogOut className="size-5" />
+                      Logout
+                    </button>
+                  </div>
                 ) : null}
                 <Link
                   href="/request"
