@@ -77,8 +77,13 @@ export default function DashboardLayout({
   const router = useRouter();
 
   const handleLogout = async () => {
+    const isLoginPage = pathname.startsWith("/admin");
     await logout();
-    router.push("/login");
+    if (isLoginPage) {
+      router.push("/admin/login");
+    } else {
+      router.push("/login");
+    }
     router.refresh();
   };
 

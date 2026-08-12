@@ -9,7 +9,7 @@ export default async function BecomeTeacherPage() {
 
   return (
     <main className="min-h-screen bg-white text-[#121826]">
-      <div className="relative overflow-hidden bg-[#0f172a] pt-48 pb-32 text-white">
+      <div className="relative overflow-hidden bg-[#0f172a] pt-56 pb-40 text-white">
         {/* Background decorative elements */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#FF5733]/10 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-[#E91E63]/10 via-transparent to-transparent" />

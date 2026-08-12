@@ -22,7 +22,11 @@ export const requireAuth = cache(async (role?: string) => {
 });
 
 export const requireAdmin = cache(async () => {
-  return await requireAuth("ADMIN");
+  const user = await getSession();
+  if (!user || user.role !== "ADMIN") {
+    redirect("/admin/login");
+  }
+  return user;
 });
 
 export const requireTeacher = cache(async () => {

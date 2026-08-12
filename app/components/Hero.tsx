@@ -6,13 +6,13 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-16 md:pb-28">
+    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-32 pb-24 md:pt-40 md:pb-36">
       {/* Decorative background elements */}
       <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
       <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
       
-      <div className="mx-auto grid min-h-[300px] max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+      <div className="mx-auto grid min-h-[400px] max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div className="relative z-10 max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

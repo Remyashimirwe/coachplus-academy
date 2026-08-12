@@ -12,6 +12,7 @@ const navLinks = [
   { label: "How It Works", href: "/#how-it-works" },
   { label: "Why Choose Us", href: "/why-choose-us" },
   { label: "Categories", href: "/programs" },
+  { label: "Become a Teacher", href: "/become-a-teacher" },
 ];
 
 export default function Navbar() {
@@ -57,7 +58,7 @@ export default function Navbar() {
   }, [pathname]);
 
   const hiddenRoutes = ["/admin", "/teacher", "/student", "/login", "/setup-password"];
-  const shouldHide = hiddenRoutes.some(route => pathname.startsWith(route));
+  const shouldHide = hiddenRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`));
 
   if (shouldHide) return null;
 
@@ -123,18 +124,7 @@ export default function Navbar() {
                 <FiUser className="size-5" />
                 {user.name}
               </Link>
-          ) : (
-            <Link
-              href="/login"
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
-                scrolled || !isHomePage
-                  ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              Sign In
-            </Link>
-          )}
+          ) : null}
           <Link
             href="/request"
             className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-base font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
@@ -194,15 +184,7 @@ export default function Navbar() {
                     <FiUser className="size-5" />
                     {user.name}
                   </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
-                  >
-                    Sign In
-                  </Link>
-                )}
+                ) : null}
                 <Link
                   href="/request"
                   onClick={() => setMenuOpen(false)}
