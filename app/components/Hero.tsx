@@ -25,23 +25,6 @@ export default function Hero() {
             <p className="mt-6 max-w-lg text-lg text-white/90 leading-relaxed sm:text-base">
               Trusted educators providing personalized home and online coaching
             </p>
-
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href="/request"
-                className="group inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-[#E91E63] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/95 active:scale-95"
-              >
-                <FiSend className="size-5" />
-                Request a Teacher
-              </Link>
-              <Link
-                href="/become-a-teacher"
-                className="group inline-flex items-center gap-2 rounded-2xl border-2 border-white/30 bg-white/10 px-8 py-4 text-lg font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-white/20 active:scale-95"
-              >
-                <FiUser className="size-5" />
-                Become a Teacher
-              </Link>
-            </div>
           </motion.div>
         </div>
 
