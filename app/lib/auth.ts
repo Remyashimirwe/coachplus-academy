@@ -15,14 +15,19 @@ export async function encrypt(payload: any) {
     .sign(key);
 }
 
-export async function decrypt(input: string): Promise<any> {
-  const { payload } = await jwtVerify(input, key, {
-    algorithms: ["HS256"],
-  });
-  return payload;
+export async function decrypt(input: string | undefined): Promise<any> {
+  if (!input) return null;
+  try {
+    const { payload } = await jwtVerify(input, key, {
+      algorithms: ["HS256"],
+    });
+    return payload;
+  } catch (e) {
+    return null;
+  }
 }
 
-export async function login(user: { id: number; email: string; role: string; name: string }) {
+export async function login(user: { id: number; email: string; role: string; name: string; isFirstLogin?: boolean }) {
   const expires = new Date(Date.now() + 2 * 60 * 60 * 1000);
   const session = await encrypt({ user, expires });
 

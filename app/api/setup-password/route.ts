@@ -29,7 +29,6 @@ export async function POST(request: Request) {
         email: updatedUser.email,
         role: updatedUser.role,
         name: updatedUser.name,
-        // @ts-ignore
         isFirstLogin: false
     });
 
