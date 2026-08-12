@@ -82,7 +82,7 @@ export default function Navbar() {
           : "bg-transparent py-5"
       }`}
     >
-      <nav className="mx-auto flex max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-4">
+      <nav className="mx-auto flex max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="group flex items-center gap-3 font-normal">
           <div className="relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-0 blur transition duration-300 group-hover:opacity-100" />
@@ -113,6 +113,16 @@ export default function Navbar() {
             </Link>
           ))}
           <Link
+            href="/become-a-teacher"
+            className={`rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+              scrolled || !isHomePage
+                ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
+                : "text-white/80 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            Become a Teacher
+          </Link>
+          <Link
             href="/request"
             className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-base font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
               scrolled || !isHomePage
@@ -124,19 +134,17 @@ export default function Navbar() {
             Request a Teacher
           </Link>
           {user ? (
-            user.role !== "ADMIN" && (
-              <Link
-                href={user.role === "TEACHER" ? "/teacher" : "/student"}
-                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
-                  scrolled || !isHomePage
-                    ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
-              >
+            <Link
+              href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+                scrolled || !isHomePage
+                  ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
                 <FiUser className="size-5" />
                 {user.name}
               </Link>
-            )
           ) : (
             <Link
               href="/login"
@@ -146,7 +154,7 @@ export default function Navbar() {
                   : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
-              Teacher Login
+              Login
             </Link>
           )}
         </div>
@@ -189,6 +197,14 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <Link
+                  href="/become-a-teacher"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-4 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
+                >
+                  <FiUser className="size-5" />
+                  Become a Teacher
+                </Link>
+                <Link
                   href="/request"
                   onClick={() => setMenuOpen(false)}
                   className="mt-4 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-lg font-bold text-white shadow-lg shadow-rose-500/25"
@@ -197,23 +213,21 @@ export default function Navbar() {
                   Request a Teacher
                 </Link>
                 {user ? (
-                  user.role !== "ADMIN" && (
-                    <Link
-                      href={user.role === "TEACHER" ? "/teacher" : "/student"}
-                      onClick={() => setMenuOpen(false)}
-                      className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
-                    >
-                      <FiUser className="size-5" />
-                      {user.name}
-                    </Link>
-                  )
+                  <Link
+                    href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
+                  >
+                    <FiUser className="size-5" />
+                    {user.name}
+                  </Link>
                 ) : (
                   <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
                     className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
                   >
-                    Teacher Login
+                    Login
                   </Link>
                 )}
               </div>

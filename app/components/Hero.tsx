@@ -1,6 +1,6 @@
 "use client";
 
-import { FiArrowRight, FiMapPin } from "react-icons/fi";
+import { FiArrowRight, FiMapPin, FiSend, FiUser } from "react-icons/fi";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -26,6 +26,22 @@ export default function Hero() {
               Trusted educators providing personalized home and online coaching
             </p>
 
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                href="/request"
+                className="group inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-[#E91E63] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/95 active:scale-95"
+              >
+                <FiSend className="size-5" />
+                Request a Teacher
+              </Link>
+              <Link
+                href="/become-a-teacher"
+                className="group inline-flex items-center gap-2 rounded-2xl border-2 border-white/30 bg-white/10 px-8 py-4 text-lg font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-white/20 active:scale-95"
+              >
+                <FiUser className="size-5" />
+                Become a Teacher
+              </Link>
+            </div>
           </motion.div>
         </div>
 
@@ -76,8 +92,16 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Bottom straight line transition */}
-      <div className="absolute -bottom-px left-0 w-full h-12 bg-white" />
+      {/* Bottom non-straight transition */}
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+        <svg
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+          className="relative block h-[60px] w-full fill-white"
+        >
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.43,243.93,70.9,321.39,56.44Z"></path>
+        </svg>
+      </div>
     </section>
   );
 }
