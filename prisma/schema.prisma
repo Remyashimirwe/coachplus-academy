@@ -6,12 +6,53 @@ datasource db {
   provider = "postgresql"
 }
 
-model Admin {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  name         String
-  createdAt    DateTime @default(now())
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id              Int          @id @default(autoincrement())
+  email           String       @unique
+  passwordHash    String?      // Nullable for first-time users
+  name            String
+  role            Role
+  isFirstLogin    Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  
+  // Relations
+  teacherProfile  Teacher?     @relation("UserToTeacher")
+  studentProfile  Student?     @relation("UserToStudent")
+}
+
+model Teacher {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @unique
+  user        User         @relation("UserToTeacher", fields: [userId], references: [id])
+  students    Student[]    @relation("TeacherStudents")
+  attendances Attendance[]
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @unique
+  user        User         @relation("UserToStudent", fields: [userId], references: [id])
+  teacherId   Int?
+  teacher     Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
+  attendances Attendance[]
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  status    String   // "PRESENT", "ABSENT", "LATE"
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id])
+  teacherId Int
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  remarks   String?
+  createdAt DateTime @default(now())
 }
 
 model Program {

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiSend, FiMenu, FiX } from "react-icons/fi";
+import { FiSend, FiMenu, FiX, FiUser } from "react-icons/fi";
+import { getSession } from "@/app/lib/auth";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -19,6 +20,15 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSession();
+      if (session) setUser(session.user);
+    };
+    fetchSession();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -47,7 +57,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [pathname]);
 
-  if (pathname.startsWith("/admin")) return null;
+  const hiddenRoutes = ["/admin", "/teacher", "/student", "/login", "/setup-password"];
+  const shouldHide = hiddenRoutes.some(route => pathname.startsWith(route));
+
+  if (shouldHide) return null;
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -79,7 +92,7 @@ export default function Navbar() {
               className="relative size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
             />
           </div>
-          <span className={`text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-[#21121f]" : "text-white"}`}>
+          <span className={`text-xl sm:text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-[#21121f]" : "text-white"}`}>
             Wecoach <span className="text-[#E91E63]">Academy</span>
           </span>
         </Link>
@@ -110,6 +123,32 @@ export default function Navbar() {
             <FiSend className="size-4" />
             Request a Teacher
           </Link>
+          {user ? (
+            user.role !== "ADMIN" && (
+              <Link
+                href={user.role === "TEACHER" ? "/teacher" : "/student"}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+                  scrolled || !isHomePage
+                    ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <FiUser className="size-5" />
+                {user.name}
+              </Link>
+            )
+          ) : (
+            <Link
+              href="/login"
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+                scrolled || !isHomePage
+                  ? "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              Teacher Login
+            </Link>
+          )}
         </div>
 
         <button
@@ -157,6 +196,26 @@ export default function Navbar() {
                   <FiSend className="size-5" />
                   Request a Teacher
                 </Link>
+                {user ? (
+                  user.role !== "ADMIN" && (
+                    <Link
+                      href={user.role === "TEACHER" ? "/teacher" : "/student"}
+                      onClick={() => setMenuOpen(false)}
+                      className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
+                    >
+                      <FiUser className="size-5" />
+                      {user.name}
+                    </Link>
+                  )
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-2 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 text-lg font-bold text-slate-700 shadow-sm"
+                  >
+                    Teacher Login
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

@@ -29,6 +29,7 @@ import {
   FiTarget,
   FiInstagram,
   FiYoutube,
+  FiShield,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
 
@@ -117,7 +118,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
   };
 
   return (
-    <section className="py-24">
+    <section className="py-12 md:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="flex justify-center">
           {/* Right Side: Application Form or Status */}
@@ -152,10 +153,10 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                   key="form"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="relative rounded-[40px] bg-white p-8 md:p-12 shadow-2xl shadow-slate-200 border border-slate-100"
+                  className="relative rounded-[32px] md:rounded-[40px] bg-white p-6 md:p-12 shadow-2xl shadow-slate-200 border border-slate-100"
                 >
-                  <div className="mb-12 text-center">
-                    <h2 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">Application Form</h2>
+                  <div className="mb-8 md:mb-12 text-center">
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-[#0f172a] tracking-tight">Application Form</h2>
                     <p className="text-slate-500 mt-3 text-base">Tell us about your expertise and teaching journey</p>
                     <div className="mt-6 flex justify-center">
                       <div className="h-1.5 w-20 rounded-full bg-gradient-to-r from-[#FF5733] to-[#E91E63]" />
@@ -202,17 +203,17 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         setStatus("error");
                       }
                     }}
-                    className="space-y-12"
+                    className="space-y-10 md:space-y-12"
                   >
                     {/* 1. Personal Information */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiUser className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiUser className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Personal Information</h3>
-                          <p className="text-xs text-slate-500 font-medium">Basic details to identify you</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Personal Information</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Basic details to identify you</p>
                         </div>
                       </div>
                       <div className="grid gap-6">
@@ -271,14 +272,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     </div>
 
                     {/* 2. Education */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiBookOpen className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiBookOpen className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Education</h3>
-                          <p className="text-xs text-slate-500 font-medium">Your academic background</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Education</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Your academic background</p>
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -307,14 +308,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     </div>
 
                     {/* 3. Teaching Experience */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiBriefcase className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiBriefcase className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Teaching Experience</h3>
-                          <p className="text-xs text-slate-500 font-medium">Where and what you've taught</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Teaching Experience</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Where and what you've taught</p>
                         </div>
                       </div>
                       <Field icon={<FiClock />} label="Years of Teaching Experience *" htmlFor="experienceYears">
@@ -392,14 +393,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     </div>
 
                     {/* 4. Teaching Skills */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiStar className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiStar className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Teaching Skills</h3>
-                          <p className="text-xs text-slate-500 font-medium">Your pedagogical approach</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Teaching Skills</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Your pedagogical approach</p>
                         </div>
                       </div>
                       <Field icon={<FiActivity />} label="What teaching methods do you use? *" htmlFor="methods">
@@ -428,14 +429,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     </div>
 
                     {/* 5. Availability */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiCalendar className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiCalendar className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Availability</h3>
-                          <p className="text-xs text-slate-500 font-medium">When can you start teaching?</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Availability</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">When can you start teaching?</p>
                         </div>
                       </div>
                       <Field icon={<FiBriefcase />} label="Employment Type *" htmlFor="employmentType">
@@ -483,14 +484,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     </div>
 
                     {/* 6. Final Questions */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiMessageSquare className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiMessageSquare className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Final Questions</h3>
-                          <p className="text-xs text-slate-500 font-medium">Tell us a bit more about your motivation</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Final Questions</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Tell us a bit more about your motivation</p>
                         </div>
                       </div>
                       <Field label="Why do you want to teach at our institution? *" htmlFor="whyTeach" icon={<FiTarget />}>
@@ -505,14 +506,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     </div>
 
                     {/* 7. Application Documents */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
-                          <FiFileText className="size-6" />
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiFileText className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#0f172a]">Application Documents</h3>
-                          <p className="text-xs text-slate-500 font-medium">Supporting files for your application</p>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Application Documents</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Supporting files for your application</p>
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -568,6 +569,19 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                       <Field icon={<FiLink />} label="Portfolio / Sample Work (optional)" htmlFor="portfolio">
                         <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
                       </Field>
+                    </div>
+
+                    {/* Terms and Agreement Title */}
+                    <div className="space-y-6 md:space-y-8">
+                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                        <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
+                          <FiShield className="size-5 md:size-6" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Read about the Terms and Agreement carefully</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Please review our partnership policies</p>
+                        </div>
+                      </div>
                     </div>
 
                     {/* 8. Agreement */}

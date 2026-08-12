@@ -46,8 +46,8 @@ export async function getProgramById(id: number) {
   });
 }
 
-export async function getAdminByEmail(email: string) {
-  return prisma.admin.findUnique({
+export async function getUserByEmail(email: string) {
+  return prisma.user.findUnique({
     where: { email },
   });
 }

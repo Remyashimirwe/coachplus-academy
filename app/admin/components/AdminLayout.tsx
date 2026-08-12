@@ -15,11 +15,16 @@ import {
   FiSearch,
   FiBell,
   FiSettings,
+  FiUserPlus,
+  FiCalendar,
 } from "react-icons/fi";
 import { logout } from "@/app/actions/auth";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: FiGrid, href: "/admin" },
+  { id: "users-add", label: "Add User", icon: FiUserPlus, href: "/admin/users/add" },
+  { id: "users-assign", label: "Assign Student", icon: FiUserPlus, href: "/admin/users/assign" },
+  { id: "attendance", label: "View Attendance", icon: FiCalendar, href: "/admin/attendance" },
   { id: "programs", label: "Manage Learning", icon: FiBook, href: "/admin/programs" },
   { id: "requests", label: "Teacher Requests", icon: FiMessageSquare, href: "/admin/requests" },
   { id: "teachers", label: "Teacher Applications", icon: FiUsers, href: "/admin/teachers" },
@@ -47,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-[#0F172A] text-white transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-20 items-center gap-3 px-8 border-b border-slate-800">
           <img src="/logo.png" alt="Wecoach Academy" className="size-9 rounded-lg" />
-          <span className="text-xl font-bold tracking-tight">Wecoach Academy <span className="text-[#E91E63]">Admin</span></span>
+          <span className="text-xl font-bold tracking-tight">Wecoach <span className="text-[#E91E63]">Academy</span></span>
         </div>
         
         <nav className="mt-8 px-4 space-y-2">
