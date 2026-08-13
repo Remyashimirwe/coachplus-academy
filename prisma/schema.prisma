@@ -157,7 +157,8 @@ model TeacherApplicationDocument {
   kind          String   // "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license"
   fileName      String
   mimeType      String
-  data          Bytes
+  url           String   // Cloudinary secure URL
+  publicId      String   @default("") // Cloudinary public id (for future deletion/management)
   createdAt     DateTime @default(now())
 }
 

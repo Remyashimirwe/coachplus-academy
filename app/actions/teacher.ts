@@ -1,6 +1,7 @@
 "use server";
 
 import { db, getSetting } from "@/app/lib/db";
+import { uploadBufferToCloudinary } from "@/app/lib/cloudinary";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB per file
 
@@ -12,11 +13,16 @@ async function fileToDocumentInput(file: File | null | undefined, kind: DocKind)
     throw new Error(`"${file.name}" is too large. Max file size is 8MB.`);
   }
   const buffer = Buffer.from(await file.arrayBuffer());
+  const { url, publicId } = await uploadBufferToCloudinary(buffer, {
+    folder: "teacher-applications",
+    filename: file.name,
+  });
   return {
     kind,
     fileName: file.name || kind,
     mimeType: file.type || "application/octet-stream",
-    data: buffer,
+    url,
+    publicId,
   };
 }
 

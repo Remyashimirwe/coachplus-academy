@@ -25,11 +25,6 @@ export async function GET(
     return NextResponse.json({ message: "Document not found" }, { status: 404 });
   }
 
-  return new NextResponse(new Uint8Array(doc.data), {
-    headers: {
-      "Content-Type": doc.mimeType,
-      "Content-Disposition": `inline; filename="${doc.fileName.replace(/"/g, "")}"`,
-      "Cache-Control": "private, max-age=0, no-cache",
-    },
-  });
+  // Files are hosted on Cloudinary; redirect the (already auth-checked) request there.
+  return NextResponse.redirect(doc.url);
 }
