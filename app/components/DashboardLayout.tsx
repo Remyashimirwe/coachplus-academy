@@ -102,9 +102,9 @@ export default function DashboardLayout({
         }`}
       >
         <div className="flex h-20 items-center gap-3 px-8 border-b border-slate-800">
-          <img src="/logo.png" alt="Wecoach Academy" className="size-9 rounded-lg" />
+          <img src="/logo.png" alt="Coach Plus" className="size-9 rounded-lg" />
           <span className="text-xl font-bold tracking-tight">
-            Wecoach <span className="text-[#E91E63]">Academy</span>
+            Coach <span className="text-[#E91E63]">Plus</span>
           </span>
         </div>
 

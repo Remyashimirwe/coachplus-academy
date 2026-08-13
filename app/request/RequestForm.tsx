@@ -211,7 +211,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                     >
             <span
                 className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
-              Join Wecoach Academy
+              Join Coach Plus
             </span>
                         <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
                             Request a <span className="text-[#E91E63]">Teacher</span>

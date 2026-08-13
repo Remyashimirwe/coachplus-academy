@@ -30,7 +30,7 @@ export default function CookiePolicy() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">2. How We Use Cookies</h2>
                 <p>
-                  Wecoach Academy uses cookies for several reasons:
+                  Coach Plus uses cookies for several reasons:
                 </p>
                 <ul className="list-disc ml-6 space-y-2">
                   <li><strong className="text-slate-900">Essential Cookies:</strong> These are necessary for the website to function properly. They include, for example, cookies that enable you to log into secure areas of our website.</li>
@@ -63,7 +63,7 @@ export default function CookiePolicy() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">6. Contact Us</h2>
                 <p>
-                  If you have any questions about our use of cookies or other technologies, please email us at privacy@wecoachacademy.com.
+                  If you have any questions about our use of cookies or other technologies, please email us at privacy@coachplusacademy.com.
                 </p>
               </section>
 

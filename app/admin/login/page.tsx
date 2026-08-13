@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
                 <img
                   src="/logo.png"
-                  alt="Wecoach Academy"
+                  alt="Coach Plus"
                   className="relative size-16 rounded-2xl object-contain shadow-sm mb-6"
                 />
               </div>
@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
                     name="email"
                     type="email"
                     required
-                    placeholder="admin@wecoach.com"
+                    placeholder="admin@coachplusacademy.com"
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-11 pr-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
                   />
                 </div>

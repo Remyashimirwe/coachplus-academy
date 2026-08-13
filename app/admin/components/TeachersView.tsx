@@ -161,7 +161,7 @@ export default function TeachersView({ teacherApplications }: any) {
                         <p className="text-sm text-slate-600 leading-relaxed">{app.expDescription}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold text-indigo-500 uppercase mb-1">Why Wecoach Academy?</p>
+                        <p className="text-[10px] font-bold text-indigo-500 uppercase mb-1">Why Coach Plus?</p>
                         <p className="text-sm text-slate-600 leading-relaxed">{app.whyTeach}</p>
                       </div>
                     </div>

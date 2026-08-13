@@ -100,12 +100,12 @@ export default function Navbar() {
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-0 blur transition duration-300 group-hover:opacity-100" />
             <img
               src="/logo.png"
-              alt="Wecoach Academy"
+              alt="Coach Plus"
               className="relative h-10 w-auto rounded-xl object-contain shadow-sm transition-transform group-hover:scale-105 sm:h-12"
             />
           </div>
           <span className={`text-xl sm:text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-slate-900" : "text-white"}`}>
-            Wecoach <span className="text-[#E91E63]">Academy</span>
+            Coach <span className="text-[#E91E63]">Plus</span>
           </span>
         </Link>
 

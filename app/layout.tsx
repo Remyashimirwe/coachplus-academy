@@ -11,8 +11,8 @@ import WhatsAppButton from "./components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Wecoach Academy",
-    default: "Wecoach Academy | Find the Perfect Teacher",
+    template: "%s | Coach Plus",
+    default: "Coach Plus | Find the Perfect Teacher",
   },
   description:
     "Connect with verified home and online teachers for personalized learning.",

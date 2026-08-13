@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">1. Introduction</h2>
                 <p>
-                  At Wecoach Academy, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+                  At Coach Plus, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
                 </p>
               </section>
 
@@ -83,7 +83,7 @@ export default function PrivacyPolicy() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">7. Contact Us</h2>
                 <p>
-                  If you have any questions about this Privacy Policy, please contact us at privacy@wecoachacademy.com.
+                  If you have any questions about this Privacy Policy, please contact us at privacy@coachplusacademy.com.
                 </p>
               </section>
 

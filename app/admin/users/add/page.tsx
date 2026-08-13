@@ -20,12 +20,16 @@ export default function AddUserPage() {
       });
 
       if (res.ok) {
-        setMessage("User added successfully. They can login using their email as password.");
+        const data = await res.json();
+        setMessage(
+          data.message ||
+            "Invitation sent successfully. They'll receive an email to set up their own password."
+        );
         setName("");
         setEmail("");
       } else {
         const data = await res.json();
-        setMessage(data.message || "Failed to add user");
+        setMessage(data.message || "Failed to invite user");
       }
     } catch (err) {
       setMessage("Something went wrong");
@@ -34,7 +38,10 @@ export default function AddUserPage() {
 
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-bold">Add New Teacher or Student</h1>
+      <h1 className="mb-2 text-2xl font-bold">Invite New Teacher or Student</h1>
+      <p className="mb-6 text-sm text-slate-500">
+        They'll receive an email invitation with a link to set up their own password.
+      </p>
       <form onSubmit={handleSubmit} className="max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-sm">
         <div>
           <label className="block text-sm font-medium text-slate-700">Name</label>
@@ -72,7 +79,7 @@ export default function AddUserPage() {
           type="submit"
           className="w-full rounded-xl bg-[#E91E63] py-2 font-bold text-white hover:bg-[#D81B60]"
         >
-          Add User
+          Send Invitation
         </button>
       </form>
     </div>

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { prisma } from '@/app/lib/db';
 import { getSession } from '@/app/lib/auth';
+import { sendInviteEmail } from '@/app/lib/email';
+
+const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export async function POST(request: Request) {
   try {
@@ -15,17 +19,32 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
     }
 
+    const inviteToken = crypto.randomBytes(32).toString('hex');
+    const inviteTokenExpiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         role,
         isFirstLogin: true,
+        inviteToken,
+        inviteTokenExpiresAt,
         ...(role === 'TEACHER' ? { teacherProfile: { create: {} } } : { studentProfile: { create: {} } })
       },
     });
 
-    return NextResponse.json({ message: 'User created successfully', user });
+    const emailResult = await sendInviteEmail({ to: email, name, role, token: inviteToken });
+
+    const { passwordHash, inviteToken: _token, ...safeUser } = user;
+
+    return NextResponse.json({
+      message: emailResult.success
+        ? 'User invited successfully. An email has been sent so they can set their password.'
+        : 'User created, but the invite email could not be sent. Please share the invite link manually.',
+      user: safeUser,
+      emailSent: emailResult.success,
+    });
 
   } catch (error: any) {
     if (error.code === 'P2002') {

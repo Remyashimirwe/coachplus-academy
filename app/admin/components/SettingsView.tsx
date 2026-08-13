@@ -75,7 +75,7 @@ export default function SettingsView({ initialSettings }: { initialSettings: { t
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">Admin Email</label>
-              <input disabled value="admin@wecoach.com" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none opacity-60" />
+              <input disabled value="admin@coachplusacademy.com" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none opacity-60" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">Change Password</label>

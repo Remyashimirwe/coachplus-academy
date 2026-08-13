@@ -1,0 +1,78 @@
+import { Resend } from "resend";
+
+const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+const FROM_EMAIL = process.env.EMAIL_FROM || "Coach Plus <admin@coachplusacademy.com>";
+
+let resend: Resend | null = null;
+function getResendClient() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
+
+export async function sendInviteEmail({
+  to,
+  name,
+  role,
+  token,
+}: {
+  to: string;
+  name: string;
+  role: string;
+  token: string;
+}) {
+  const inviteUrl = `${APP_URL}/accept-invite?token=${token}`;
+  const roleLabel = role === "TEACHER" ? "Teacher" : "Student";
+
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(
+      `RESEND_API_KEY is not set. Invite link for ${to}: ${inviteUrl}`
+    );
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "You're invited to Coach Plus",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${name},</h2>
+          <p>
+            An administrator has invited you to join Coach Plus as a
+            <strong>${roleLabel}</strong>.
+          </p>
+          <p>
+            Click the button below to create your password and activate your
+            account.
+          </p>
+          <p style="text-align: center; margin: 32px 0;">
+            <a
+              href="${inviteUrl}"
+              style="background-color:#E91E63;color:#ffffff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:bold;"
+            >
+              Accept Invitation
+            </a>
+          </p>
+          <p>Or copy and paste this link into your browser:</p>
+          <p><a href="${inviteUrl}">${inviteUrl}</a></p>
+          <p>This invitation link will expire in 7 days.</p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send invite email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send invite email:", err);
+    return { success: false, message: err.message };
+  }
+}

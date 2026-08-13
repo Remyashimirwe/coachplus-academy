@@ -30,7 +30,7 @@ export default async function BecomeTeacherPage() {
               Inspire the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF5733] to-[#E91E63]">Next Generation</span>
             </h1>
             <p className="mt-10 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300 font-medium sm:text-lg">
-              Join Wecoach Academy's elite educator network. We connect exceptional teachers with students who are passionate about learning.
+              Join Coach Plus's elite educator network. We connect exceptional teachers with students who are passionate about learning.
             </p>
           </div>
         </div>

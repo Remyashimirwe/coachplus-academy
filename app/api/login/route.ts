@@ -25,12 +25,13 @@ export async function POST(request: Request) {
 
     // Handle first login where password is not yet set
     if (user.isFirstLogin && !user.passwordHash) {
-        // We expect the email to be the initial "password" if not set yet, 
-        // OR just allow login if passwordHash is null and it's first login
-        // The issue says: "the user for firtst time he will create the new password we will be telling him will be using his email"
-        if (password !== email) {
-            return NextResponse.json({ message: 'First time login: Use your email as password' }, { status: 401 });
-        }
+        // Accounts created by an admin must be activated via the emailed invite link
+        // before they can log in with a password.
+        return NextResponse.json({
+            message: user.inviteToken
+                ? 'Please check your email for an invitation link to set up your password.'
+                : 'Account not set up properly. Please contact your administrator.'
+        }, { status: 401 });
     } else {
         if (!user.passwordHash) {
              return NextResponse.json({ message: 'Account not set up properly' }, { status: 500 });

@@ -6,7 +6,7 @@ async function main() {
   console.log("Seeding database...");
 
   // 1. Create Admin
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@wecoach.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@coachplusacademy.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 

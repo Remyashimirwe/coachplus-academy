@@ -158,7 +158,7 @@ export default function ProgramsPage({
             </p>
             <h2 className="mt-5 text-3xl font-bold text-white">Need help choosing?</h2>
             <p className="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed">
-              Tell Wecoach Academy your goals and we&apos;ll recommend the
+              Tell Coach Plus your goals and we&apos;ll recommend the
               best category and tutor match.
             </p>
           </motion.div>

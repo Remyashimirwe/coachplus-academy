@@ -13,13 +13,15 @@ enum Role {
 }
 
 model User {
-  id              Int          @id @default(autoincrement())
-  email           String       @unique
-  passwordHash    String?      // Nullable for first-time users
-  name            String
-  role            Role
-  isFirstLogin    Boolean      @default(true)
-  createdAt       DateTime     @default(now())
+  id                   Int          @id @default(autoincrement())
+  email                String       @unique
+  passwordHash         String?      // Nullable for first-time users
+  name                 String
+  role                 Role
+  isFirstLogin         Boolean      @default(true)
+  inviteToken          String?      @unique
+  inviteTokenExpiresAt DateTime?
+  createdAt            DateTime     @default(now())
   
   // Relations
   teacherProfile  Teacher?     @relation("UserToTeacher")

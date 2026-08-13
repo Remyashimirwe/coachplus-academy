@@ -46,11 +46,11 @@ export default function Footer() {
             <Link href="/" className="group flex items-center gap-3 font-normal w-fit">
               <img
                 src="/logo.png"
-                alt="Wecoach Academy"
+                alt="Coach Plus"
                 className="size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
               />
               <span className="text-3xl font-bold tracking-tight text-white">
-                Wecoach <span className="text-[#E91E63]">Academy</span>
+                Coach <span className="text-[#E91E63]">Plus</span>
               </span>
             </Link>
             <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
@@ -84,7 +84,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-10 border-t border-white/10 pt-6 text-center text-sm text-slate-500">
-          <p>&copy; 2026 Wecoach Academy</p>
+          <p>&copy; 2026 Coach Plus</p>
         </div>
       </div>
     </footer>

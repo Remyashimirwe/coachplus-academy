@@ -23,14 +23,14 @@ export default function TermsOfService() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">1. Agreement to Terms</h2>
                 <p>
-                  By accessing or using Wecoach Academy&apos;s website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+                  By accessing or using Coach Plus&apos;s website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">2. Description of Service</h2>
                 <p>
-                  Wecoach Academy is a platform that matches students with qualified teachers for online and home-based coaching. We facilitate the discovery, booking, and management of educational sessions.
+                  Coach Plus is a platform that matches students with qualified teachers for online and home-based coaching. We facilitate the discovery, booking, and management of educational sessions.
                 </p>
               </section>
 
@@ -64,7 +64,7 @@ export default function TermsOfService() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">6. Limitation of Liability</h2>
                 <p>
-                  Wecoach Academy acts as a matching platform. While we vet our teacher partners, we are not liable for the actions, omissions, or conduct of any user, nor for any damages resulting from lessons conducted through our platform.
+                  Coach Plus acts as a matching platform. While we vet our teacher partners, we are not liable for the actions, omissions, or conduct of any user, nor for any damages resulting from lessons conducted through our platform.
                 </p>
               </section>
 

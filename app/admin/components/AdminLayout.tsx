@@ -16,7 +16,7 @@ import DashboardLayout from "@/app/components/DashboardLayout";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: FiGrid, href: "/admin" },
-  { id: "users-add", label: "Add User", icon: FiUserPlus, href: "/admin/users/add" },
+  { id: "users-add", label: "Invite User", icon: FiUserPlus, href: "/admin/users/add" },
   { id: "users-assign", label: "Assign Student", icon: FiUserPlus, href: "/admin/users/assign" },
   { id: "attendance", label: "View Attendance", icon: FiCalendar, href: "/admin/attendance" },
   { id: "programs", label: "Manage Learning", icon: FiBook, href: "/admin/programs" },
