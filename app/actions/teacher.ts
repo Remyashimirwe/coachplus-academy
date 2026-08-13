@@ -2,6 +2,24 @@
 
 import { db, getSetting } from "@/app/lib/db";
 
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB per file
+
+type DocKind = "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license";
+
+async function fileToDocumentInput(file: File | null | undefined, kind: DocKind) {
+  if (!file || file.size === 0) return null;
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`"${file.name}" is too large. Max file size is 8MB.`);
+  }
+  const buffer = Buffer.from(await file.arrayBuffer());
+  return {
+    kind,
+    fileName: file.name || kind,
+    mimeType: file.type || "application/octet-stream",
+    data: buffer,
+  };
+}
+
 export async function saveTeacherApplication(formData: FormData) {
   // Check if applications are open
   const isOpen = await getSetting("teacher_applications_open", "true") === "true";
@@ -59,14 +77,31 @@ export async function saveTeacherApplication(formData: FormData) {
   // 8. Declaration
   const agreedToTerms = formData.get("agreedToTerms") === "on";
 
-  // Placeholders for file upload logic (6. Application Documents + photo)
-  const photoUrl = "";
-  const academicCertificatesUrl = "";
-  const resumeUrl = "";
-  const coverLetterUrl = "";
-  const otherCertificatesUrl = "";
-  const licenseUrl = "";
-  const portfolioUrl = "";
+  // 6. Application Documents + photo
+  const portfolioUrl = String(formData.get("portfolio") || "").trim();
+
+  const photoFile = formData.get("photo") as File | null;
+  const resumeFile = formData.get("resume") as File | null;
+  const coverLetterFile = formData.get("coverLetter") as File | null;
+  const academicCertFile = formData.get("academicCert") as File | null;
+  const licenseFile = formData.get("license") as File | null;
+  const otherCertFiles = formData.getAll("otherCerts") as File[];
+
+  let documentInputs;
+  try {
+    documentInputs = (
+      await Promise.all([
+        fileToDocumentInput(photoFile, "photo"),
+        fileToDocumentInput(resumeFile, "resume"),
+        fileToDocumentInput(coverLetterFile, "coverLetter"),
+        fileToDocumentInput(academicCertFile, "academicCertificates"),
+        fileToDocumentInput(licenseFile, "license"),
+        ...otherCertFiles.map((f) => fileToDocumentInput(f, "otherCertificates")),
+      ])
+    ).filter((doc): doc is NonNullable<typeof doc> => doc !== null);
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to process uploaded files" };
+  }
 
   try {
     await db.teacherApplication.create({
@@ -84,12 +119,10 @@ export async function saveTeacherApplication(formData: FormData) {
         instagram,
         youtube,
         otherSocial,
-        photoUrl,
         educationLevel,
         fieldOfStudy,
         institution,
         graduationYear,
-        academicCertificatesUrl,
         experienceYears,
         subjects,
         grades,
@@ -105,16 +138,15 @@ export async function saveTeacherApplication(formData: FormData) {
         availableDays,
         availableHours,
         startDate,
-        resumeUrl,
-        coverLetterUrl,
-        otherCertificatesUrl,
-        licenseUrl,
         portfolioUrl,
         whyTeach,
         whySelect,
         contribution,
         agreedToTerms,
         status: "pending",
+        documents: {
+          create: documentInputs,
+        },
       },
     });
     return { success: true };

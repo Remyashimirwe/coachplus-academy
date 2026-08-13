@@ -76,3 +76,56 @@ export async function sendInviteEmail({
     return { success: false, message: err.message };
   }
 }
+
+export async function sendApplicantMessageEmail({
+  to,
+  name,
+  subject,
+  message,
+}: {
+  to: string;
+  name: string;
+  subject?: string;
+  message: string;
+}) {
+  const client = getResendClient();
+  const emailSubject = subject?.trim() || "Message from Coach Plus";
+  const messageHtml = message
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br/>")}</p>`)
+    .join("");
+
+  if (!client) {
+    console.warn(
+      `RESEND_API_KEY is not set. Message for ${to} (${name}): ${message}`
+    );
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: emailSubject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${name},</h2>
+          ${messageHtml}
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send applicant message email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send applicant message email:", err);
+    return { success: false, message: err.message };
+  }
+}

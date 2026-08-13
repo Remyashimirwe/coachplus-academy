@@ -1,10 +1,54 @@
 "use client";
 
-import { FiMail, FiPhone, FiLinkedin, FiMapPin, FiAward, FiBookOpen, FiClock, FiCalendar, FiGlobe, FiFileText, FiMessageSquare, FiStar, FiTarget, FiInstagram, FiYoutube, FiLink } from "react-icons/fi";
+import { FiMail, FiPhone, FiLinkedin, FiMapPin, FiAward, FiBookOpen, FiClock, FiCalendar, FiGlobe, FiFileText, FiMessageSquare, FiStar, FiTarget, FiInstagram, FiYoutube, FiLink, FiSend, FiDownload, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import { useState } from "react";
+
+const DOCUMENT_LABELS: Record<string, string> = {
+  photo: "Photo",
+  resume: "CV / Resume",
+  coverLetter: "Cover Letter",
+  academicCertificates: "Academic Certificates",
+  otherCertificates: "Other Certificate",
+  license: "Teaching License",
+};
+
+function documentUrl(docId: number) {
+  return `/api/admin/teacher-applications/documents/${docId}`;
+}
 
 export default function TeachersView({ teacherApplications }: any) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [messageDrafts, setMessageDrafts] = useState<Record<number, string>>({});
+  const [sendingId, setSendingId] = useState<number | null>(null);
+  const [sendStatus, setSendStatus] = useState<Record<number, { success: boolean; text: string }>>({});
+
+  async function handleSendMessage(appId: number) {
+    const message = (messageDrafts[appId] || "").trim();
+    if (!message) return;
+
+    setSendingId(appId);
+    setSendStatus((prev) => ({ ...prev, [appId]: undefined as any }));
+
+    try {
+      const res = await fetch(`/api/admin/teacher-applications/${appId}/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setSendStatus((prev) => ({ ...prev, [appId]: { success: true, text: "Message sent!" } }));
+        setMessageDrafts((prev) => ({ ...prev, [appId]: "" }));
+      } else {
+        setSendStatus((prev) => ({ ...prev, [appId]: { success: false, text: data.message || "Failed to send message" } }));
+      }
+    } catch (error) {
+      setSendStatus((prev) => ({ ...prev, [appId]: { success: false, text: "Failed to send message" } }));
+    } finally {
+      setSendingId(null);
+    }
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -15,8 +59,12 @@ export default function TeachersView({ teacherApplications }: any) {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex items-center gap-5">
                 <div className="size-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-2xl shrink-0">
-                  {app.photoUrl ? (
-                    <img src={app.photoUrl} alt="" className="size-full object-cover rounded-2xl" />
+                  {app.documents?.find((d: any) => d.kind === "photo") ? (
+                    <img
+                      src={documentUrl(app.documents.find((d: any) => d.kind === "photo").id)}
+                      alt=""
+                      className="size-full object-cover rounded-2xl"
+                    />
                   ) : (
                     app.fullName.charAt(0)
                   )}
@@ -185,19 +233,76 @@ export default function TeachersView({ teacherApplications }: any) {
                   </div>
                 </div>
 
-                {/* Documents / Files Placeholder */}
-                <div className="pt-4 flex flex-wrap gap-4">
-                   <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl text-slate-500">
-                     <FiFileText /> <span className="text-xs font-bold uppercase tracking-tight">CV/Resume Attached</span>
-                   </div>
-                   <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl text-slate-500">
-                     <FiFileText /> <span className="text-xs font-bold uppercase tracking-tight">Cover Letter Attached</span>
-                   </div>
-                   {app.academicCertificatesUrl && (
-                     <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-600 border border-emerald-100">
-                       <FiAward /> <span className="text-xs font-bold uppercase tracking-tight">Certificates Uploaded</span>
-                     </div>
-                   )}
+                {/* Documents */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <FiFileText /> Documents
+                  </h4>
+                  <div className="pt-1 flex flex-wrap gap-3">
+                    {app.documents && app.documents.length > 0 ? (
+                      app.documents
+                        .filter((doc: any) => doc.kind !== "photo")
+                        .map((doc: any) => (
+                          <a
+                            key={doc.id}
+                            href={documentUrl(doc.id)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={doc.fileName}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"
+                          >
+                            <FiDownload />
+                            <span className="text-xs font-bold uppercase tracking-tight">
+                              {DOCUMENT_LABELS[doc.kind] || doc.kind}
+                            </span>
+                          </a>
+                        ))
+                    ) : (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl text-slate-500">
+                        <FiFileText /> <span className="text-xs font-bold uppercase tracking-tight">No documents uploaded</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Send Message */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
+                    <FiSend /> Send a Message to {app.fullName.split(" ")[0]}
+                  </h4>
+                  <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+                    <textarea
+                      value={messageDrafts[app.id] || ""}
+                      onChange={(e) =>
+                        setMessageDrafts((prev) => ({ ...prev, [app.id]: e.target.value }))
+                      }
+                      placeholder={`Write a message to send to ${app.email}...`}
+                      rows={4}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all resize-none"
+                    />
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        {sendStatus[app.id] && (
+                          <p
+                            className={`text-xs font-bold flex items-center gap-1.5 ${
+                              sendStatus[app.id].success ? "text-emerald-600" : "text-rose-600"
+                            }`}
+                          >
+                            {sendStatus[app.id].success ? <FiCheckCircle /> : <FiAlertCircle />}
+                            {sendStatus[app.id].text}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleSendMessage(app.id)}
+                        disabled={sendingId === app.id || !(messageDrafts[app.id] || "").trim()}
+                        className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#0f172a] text-white text-sm font-bold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FiSend className="size-4" />
+                        {sendingId === app.id ? "Sending..." : "Send Message"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

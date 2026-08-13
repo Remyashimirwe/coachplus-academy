@@ -1,4 +1,3 @@
-import { TeacherApplication } from "@prisma/client";
 import { requireAdmin } from "@/app/lib/dal";
 import { db } from "@/app/lib/db";
 import TeachersView from "../components/TeachersView";
@@ -10,11 +9,16 @@ export default async function TeachersPage() {
 
   const teacherApplications = await db.teacherApplication.findMany({
     orderBy: { createdAt: "desc" },
+    include: {
+      documents: {
+        select: { id: true, kind: true, fileName: true, mimeType: true, createdAt: true },
+      },
+    },
   });
 
   return (
     <TeachersView 
-      teacherApplications={teacherApplications.map((t: TeacherApplication) => ({
+      teacherApplications={teacherApplications.map((t) => ({
         ...t,
         created_at: t.createdAt.toISOString()
       }))}

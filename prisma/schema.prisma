@@ -120,12 +120,10 @@ model TeacherApplication {
   instagram               String?
   youtube                 String?
   otherSocial             String?
-  photoUrl                String?
   educationLevel          String   @default("")
   fieldOfStudy            String   @default("")
   institution             String   @default("")
   graduationYear          String   @default("")
-  academicCertificatesUrl String?
   experienceYears         String   @default("")
   subjects                String
   grades                  String   @default("")
@@ -141,10 +139,6 @@ model TeacherApplication {
   availableDays           String   @default("")
   availableHours          String   @default("")
   startDate               String   @default("")
-  resumeUrl               String?
-  coverLetterUrl          String?
-  otherCertificatesUrl    String?
-  licenseUrl              String?
   portfolioUrl            String?
   whyTeach                String   @default("")
   whySelect               String   @default("")
@@ -152,6 +146,19 @@ model TeacherApplication {
   agreedToTerms           Boolean  @default(false)
   status                  String   @default("pending")
   createdAt               DateTime @default(now())
+
+  documents TeacherApplicationDocument[]
+}
+
+model TeacherApplicationDocument {
+  id            Int                @id @default(autoincrement())
+  applicationId Int
+  application   TeacherApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  kind          String   // "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license"
+  fileName      String
+  mimeType      String
+  data          Bytes
+  createdAt     DateTime @default(now())
 }
 
 model Setting {
