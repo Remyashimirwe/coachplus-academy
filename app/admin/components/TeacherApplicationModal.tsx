@@ -149,9 +149,9 @@ export default function TeacherApplicationModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-white/90 backdrop-blur px-6 sm:px-8 pt-6 sm:pt-8 pb-6 border-b border-slate-100">
-          <div className="flex items-center gap-5">
-            <div className="size-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-2xl shrink-0 overflow-hidden">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 sm:gap-4 bg-white/90 backdrop-blur px-5 sm:px-8 pt-6 sm:pt-8 pb-6 border-b border-slate-100">
+          <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+            <div className="size-14 sm:size-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl sm:text-2xl shrink-0 overflow-hidden">
               {app.documents?.find((d: any) => d.kind === "photo") ? (
                 <img
                   src={documentUrl(app.documents.find((d: any) => d.kind === "photo").id)}
@@ -162,8 +162,8 @@ export default function TeacherApplicationModal({
                 app.fullName.charAt(0)
               )}
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900">{app.fullName}</h3>
+            <div className="min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{app.fullName}</h3>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
                   <FiClock className="text-indigo-500" /> {app.experienceYears} Years
@@ -190,7 +190,7 @@ export default function TeacherApplicationModal({
           </button>
         </div>
 
-        <div className="px-6 sm:px-8 py-8 space-y-8">
+        <div className="px-5 sm:px-8 py-6 sm:py-8 space-y-8">
           {/* Contact + social row */}
           <div className="flex flex-wrap gap-2">
             <a href={`mailto:${app.email}`} title="Email" className="p-3 rounded-2xl bg-slate-50 text-slate-600 hover:bg-rose-50 hover:text-[#E91E63] border border-slate-100 transition-all">
@@ -221,25 +221,25 @@ export default function TeacherApplicationModal({
             )}
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-8">
             {/* Education & Experience */}
             <div className="space-y-4">
               <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
                 <FiAward /> Education & Experience
               </h4>
-              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Education</p>
-                  <p className="text-sm font-bold text-slate-700">{app.educationLevel} in {app.fieldOfStudy}</p>
-                  <p className="text-xs text-slate-500">{app.institution} ({app.graduationYear})</p>
+                  <p className="text-sm font-bold text-slate-700 break-words">{app.educationLevel} in {app.fieldOfStudy}</p>
+                  <p className="text-xs text-slate-500 break-words">{app.institution} ({app.graduationYear})</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Teaching Subjects</p>
-                  <p className="text-sm font-bold text-slate-700">{app.subjects}</p>
+                  <p className="text-sm font-bold text-slate-700 break-words">{app.subjects}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Target Grades</p>
-                  <p className="text-sm font-bold text-slate-700">{app.grades}</p>
+                  <p className="text-sm font-bold text-slate-700 break-words">{app.grades}</p>
                 </div>
               </div>
             </div>
@@ -249,7 +249,7 @@ export default function TeacherApplicationModal({
               <h4 className="text-xs font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
                 <FiStar /> Teaching Skills
               </h4>
-              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Methods</p>
                   <p className="text-xs text-slate-600 line-clamp-3" title={app.methods}>{app.methods}</p>
@@ -260,25 +260,25 @@ export default function TeacherApplicationModal({
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Tech Tools</p>
-                  <p className="text-xs text-slate-600">{app.techTools || "None specified"}</p>
+                  <p className="text-xs text-slate-600 break-words">{app.techTools || "None specified"}</p>
                 </div>
               </div>
             </div>
 
             {/* Availability */}
-            <div className="space-y-4">
+            <div className="space-y-4 sm:col-span-2 xl:col-span-1">
               <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
                 <FiCalendar /> Availability
               </h4>
-              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Type</p>
                   <p className="text-sm font-bold text-slate-700">{app.employmentType}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Schedule</p>
-                  <p className="text-xs text-slate-600">{app.availableDays}</p>
-                  <p className="text-xs text-slate-600">{app.availableHours}</p>
+                  <p className="text-xs text-slate-600 break-words">{app.availableDays}</p>
+                  <p className="text-xs text-slate-600 break-words">{app.availableHours}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Start Date</p>
@@ -288,20 +288,20 @@ export default function TeacherApplicationModal({
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-5 sm:gap-8">
             {/* Detailed Q&A */}
             <div className="space-y-4">
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <FiMessageSquare /> Motivation & Experience Description
               </h4>
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+              <div className="bg-slate-50 p-5 sm:p-6 rounded-3xl border border-slate-100 space-y-4 h-full">
                 <div>
                   <p className="text-[10px] font-bold text-indigo-500 uppercase mb-1">Teaching Experience</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{app.expDescription}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed break-words">{app.expDescription}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-indigo-500 uppercase mb-1">Why Coach Plus?</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{app.whyTeach}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed break-words">{app.whyTeach}</p>
                 </div>
               </div>
             </div>
@@ -311,14 +311,14 @@ export default function TeacherApplicationModal({
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <FiTarget /> Handling Students & Contribution
               </h4>
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+              <div className="bg-slate-50 p-5 sm:p-6 rounded-3xl border border-slate-100 space-y-4 h-full">
                 <div>
                   <p className="text-[10px] font-bold text-rose-500 uppercase mb-1">Difficult Students</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{app.difficultStudents}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed break-words">{app.difficultStudents}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-rose-500 uppercase mb-1">Contribution</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{app.contribution}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed break-words">{app.contribution}</p>
                 </div>
               </div>
             </div>
@@ -392,7 +392,7 @@ export default function TeacherApplicationModal({
         </div>
 
         {/* Decision footer */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-100 px-6 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-100 px-5 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="min-h-[1.25rem]">
             {decisionError && (
               <p className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
@@ -410,7 +410,7 @@ export default function TeacherApplicationModal({
               <button
                 onClick={handleDeny}
                 disabled={decision !== null}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white text-rose-600 border-2 border-rose-200 text-sm font-bold hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white text-rose-600 border-2 border-rose-200 text-sm font-bold hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {decision === "deny" ? <FiLoader className="size-4 animate-spin" /> : <FiUserX className="size-4" />}
                 {decision === "deny" ? "Denying..." : "Deny"}
@@ -418,7 +418,7 @@ export default function TeacherApplicationModal({
               <button
                 onClick={handleApprove}
                 disabled={decision !== null}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {decision === "approve" ? <FiLoader className="size-4 animate-spin" /> : <FiUserCheck className="size-4" />}
                 {decision === "approve" ? "Approving..." : "Approve & Invite"}
