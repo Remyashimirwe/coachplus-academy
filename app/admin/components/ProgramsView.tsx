@@ -1,7 +1,19 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { FiPlus, FiTrash2, FiEdit2, FiUpload, FiImage, FiX, FiCheck, FiLayers, FiBookOpen } from "react-icons/fi";
+import {
+  FiPlus,
+  FiTrash2,
+  FiEdit2,
+  FiUpload,
+  FiImage,
+  FiX,
+  FiCheck,
+  FiLayers,
+  FiBookOpen,
+  FiChevronDown,
+  FiChevronUp,
+} from "react-icons/fi";
 import {
   addProgram,
   updateProgram,
@@ -119,6 +131,16 @@ export default function ProgramsView({ programs }: any) {
   const [editingProgram, setEditingProgram] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<number | null>(null);
   const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
+  const [expandedSubjectId, setExpandedSubjectId] = useState<number | null>(null);
+  const [showAddSubjectForm, setShowAddSubjectForm] = useState(false);
+
+  const resetSelectionState = () => {
+    setEditingProgram(false);
+    setEditingSubjectId(null);
+    setEditingTopicId(null);
+    setExpandedSubjectId(null);
+    setShowAddSubjectForm(false);
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -131,21 +153,19 @@ export default function ProgramsView({ programs }: any) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
-          <section className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+          <section className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-200 lg:sticky lg:top-6">
             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
               <FiLayers className="text-[#E91E63]" /> Categories
             </h2>
-            <div className="space-y-2">
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 lg:mx-0 lg:px-0 lg:pb-0 lg:flex-col lg:overflow-visible lg:gap-2">
               {programs.map((program: any) => (
                 <button
                   key={program.id}
                   onClick={() => {
                     setSelectedProgramId(program.id);
-                    setEditingProgram(false);
-                    setEditingSubjectId(null);
-                    setEditingTopicId(null);
+                    resetSelectionState();
                   }}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${
+                  className={`w-60 sm:w-64 lg:w-full shrink-0 text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${
                     selectedProgramId === program.id
                       ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-500/20"
                       : "bg-slate-50 border-slate-100 text-slate-700 hover:border-[#E91E63]/30"
@@ -182,9 +202,9 @@ export default function ProgramsView({ programs }: any) {
               <button
                 onClick={() => {
                   setSelectedProgramId(null);
-                  setEditingProgram(false);
+                  resetSelectionState();
                 }}
-                className={`w-full p-4 rounded-2xl border border-dashed transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                className={`w-60 sm:w-64 lg:w-full shrink-0 p-4 rounded-2xl border border-dashed transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                   selectedProgramId === null
                     ? "bg-slate-100 border-slate-300 text-slate-900"
                     : "bg-white border-slate-200 text-slate-400 hover:border-[#E91E63]/30 hover:text-[#E91E63]"
@@ -207,9 +227,9 @@ export default function ProgramsView({ programs }: any) {
           </div>
 
           {!selectedProgramId ? (
-            <section className="rounded-3xl bg-white p-8 shadow-sm border border-slate-200">
+            <section className="rounded-3xl bg-white p-5 sm:p-8 shadow-sm border border-slate-200">
               <div className="flex items-center gap-3 mb-6">
-                <div className="size-10 rounded-xl bg-rose-50 text-[#E91E63] flex items-center justify-center">
+                <div className="size-10 rounded-xl bg-rose-50 text-[#E91E63] flex items-center justify-center shrink-0">
                   <FiPlus className="size-6" />
                 </div>
                 <h2 className="text-xl font-bold text-slate-900">Create New Category</h2>
@@ -243,7 +263,7 @@ export default function ProgramsView({ programs }: any) {
             </section>
           ) : (
             <div className="space-y-6">
-              <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+              <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-200">
                 {editingProgram ? (
                   <form
                     action={editProgramAction}
@@ -266,7 +286,7 @@ export default function ProgramsView({ programs }: any) {
                       <textarea name="text" rows={3} required defaultValue={selectedProgram?.text} className={`${inputClasses} resize-none`} />
                     </div>
                     <ImageUploadField name="image" existingImage={selectedProgram?.image} label="Category Image" />
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                       <button
                         type="submit"
                         disabled={editProgramPending}
@@ -285,8 +305,8 @@ export default function ProgramsView({ programs }: any) {
                   </form>
                 ) : (
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="size-14 shrink-0 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                      <div className="size-12 sm:size-14 shrink-0 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
                         {selectedProgram?.image ? (
                           <img src={selectedProgram.image} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -294,20 +314,20 @@ export default function ProgramsView({ programs }: any) {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h2 className="text-xl font-bold text-slate-900 truncate">{selectedProgram?.title}</h2>
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{selectedProgram?.title}</h2>
                         <p className="text-sm text-slate-500 truncate">{selectedProgram?.level}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       <button
                         onClick={() => setEditingProgram(true)}
-                        className="p-3 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-[#E91E63] transition-colors"
+                        className="p-2.5 sm:p-3 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-[#E91E63] transition-colors"
                       >
                         <FiEdit2 className="size-5" />
                       </button>
                       <form action={deleteProgram}>
                         <input type="hidden" name="id" value={selectedProgram?.id} />
-                        <button type="submit" className="p-3 rounded-xl text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
+                        <button type="submit" className="p-2.5 sm:p-3 rounded-xl text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
                           <FiTrash2 className="size-5" />
                         </button>
                       </form>
@@ -316,178 +336,228 @@ export default function ProgramsView({ programs }: any) {
                 )}
               </div>
 
-              <div className="grid gap-6">
-                {selectedProgram?.subjects.map((subject: any) => (
-                  <div key={subject.id} className="rounded-3xl bg-white shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="p-6 bg-slate-50/50 border-b border-slate-100">
-                      {editingSubjectId === subject.id ? (
-                        <form
-                          action={editSubjectAction}
-                          className="grid gap-4"
-                          onSubmit={() => setEditingSubjectId(null)}
-                        >
-                          <input type="hidden" name="id" value={subject.id} />
-                          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                            <input name="name" required defaultValue={subject.name} className={`${compactInputClasses} flex-1`} />
-                            <ImageUploadField name="image" existingImage={subject.image} compact />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="submit"
-                              disabled={editSubjectPending}
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-[#E91E63] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#c81854] disabled:opacity-50"
-                            >
-                              <FiCheck className="size-3.5" /> {editSubjectPending ? "Saving..." : "Save"}
-                            </button>
+              <div className="grid gap-4">
+                {selectedProgram?.subjects.map((subject: any) => {
+                  const isExpanded = expandedSubjectId === subject.id;
+                  return (
+                    <div key={subject.id} className="rounded-3xl bg-white shadow-sm border border-slate-200 overflow-hidden">
+                      <div className="p-4 sm:p-6 bg-slate-50/50 border-b border-slate-100">
+                        {editingSubjectId === subject.id ? (
+                          <form
+                            action={editSubjectAction}
+                            className="grid gap-4"
+                            onSubmit={() => setEditingSubjectId(null)}
+                          >
+                            <input type="hidden" name="id" value={subject.id} />
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                              <input name="name" required defaultValue={subject.name} className={`${compactInputClasses} flex-1`} />
+                              <ImageUploadField name="image" existingImage={subject.image} compact />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="submit"
+                                disabled={editSubjectPending}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#E91E63] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#c81854] disabled:opacity-50"
+                              >
+                                <FiCheck className="size-3.5" /> {editSubjectPending ? "Saving..." : "Save"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingSubjectId(null)}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-200"
+                              >
+                                <FiX className="size-3.5" /> Cancel
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
                             <button
                               type="button"
-                              onClick={() => setEditingSubjectId(null)}
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-200"
+                              onClick={() => setExpandedSubjectId(isExpanded ? null : subject.id)}
+                              className="flex flex-1 min-w-0 items-center gap-3 sm:gap-4 text-left"
                             >
-                              <FiX className="size-3.5" /> Cancel
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="size-10 shrink-0 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
-                              {subject.image ? (
-                                <img src={subject.image} alt="" className="h-full w-full object-cover" />
-                              ) : (
-                                <FiImage className="text-slate-300 size-4" />
-                              )}
-                            </div>
-                            <h3 className="font-bold text-slate-800">{subject.name}</h3>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => setEditingSubjectId(subject.id)}
-                              className="p-2 rounded-lg text-slate-400 hover:bg-white hover:text-[#E91E63] transition-colors"
-                            >
-                              <FiEdit2 className="size-4" />
-                            </button>
-                            <form action={deleteSubject}>
-                              <input type="hidden" name="id" value={subject.id} />
-                              <button type="submit" className="p-2 rounded-lg text-slate-400 hover:bg-white hover:text-rose-500 transition-colors">
-                                <FiTrash2 className="size-4" />
-                              </button>
-                            </form>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                        {subject.topics.map((topic: any) =>
-                          editingTopicId === topic.id ? (
-                            <form
-                              key={topic.id}
-                              action={editTopicAction}
-                              className="col-span-full flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-[#E91E63]/30"
-                              onSubmit={() => setEditingTopicId(null)}
-                            >
-                              <input type="hidden" name="id" value={topic.id} />
-                              <ImageUploadField name="image" existingImage={topic.image} compact />
-                              <input name="name" required defaultValue={topic.name} className={`${compactInputClasses} flex-1`} />
-                              <div className="flex items-center gap-2 shrink-0">
-                                <button
-                                  type="submit"
-                                  disabled={editTopicPending}
-                                  className="size-9 flex items-center justify-center rounded-lg bg-[#E91E63] text-white hover:bg-[#c81854] transition-colors disabled:opacity-50"
-                                >
-                                  <FiCheck className="size-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingTopicId(null)}
-                                  className="size-9 flex items-center justify-center rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors"
-                                >
-                                  <FiX className="size-4" />
-                                </button>
-                              </div>
-                            </form>
-                          ) : (
-                            <div
-                              key={topic.id}
-                              className="group relative flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 transition-all hover:bg-white hover:border-[#E91E63]/30"
-                            >
-                              <div className="size-10 shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
-                                {topic.image ? (
-                                  <img src={topic.image} alt={topic.name} className="h-full w-full object-cover" />
+                              <div className="size-10 shrink-0 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
+                                {subject.image ? (
+                                  <img src={subject.image} alt="" className="h-full w-full object-cover" />
                                 ) : (
                                   <FiImage className="text-slate-300 size-4" />
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-slate-700 truncate">{topic.name}</p>
+                                <h3 className="font-bold text-slate-800 truncate">{subject.name}</h3>
+                                <p className="text-xs text-slate-400">
+                                  {subject.topics.length} subject{subject.topics.length === 1 ? "" : "s"}
+                                </p>
                               </div>
+                              {isExpanded ? (
+                                <FiChevronUp className="size-4 text-slate-400 shrink-0" />
+                              ) : (
+                                <FiChevronDown className="size-4 text-slate-400 shrink-0" />
+                              )}
+                            </button>
+                            <div className="flex items-center gap-1 shrink-0">
                               <button
-                                onClick={() => setEditingTopicId(topic.id)}
-                                className="size-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-[#E91E63] hover:bg-rose-50 transition-all"
+                                onClick={() => {
+                                  setEditingSubjectId(subject.id);
+                                  setExpandedSubjectId(subject.id);
+                                }}
+                                className="p-2 rounded-lg text-slate-400 hover:bg-white hover:text-[#E91E63] transition-colors"
                               >
-                                <FiEdit2 className="size-3.5" />
+                                <FiEdit2 className="size-4" />
                               </button>
-                              <form action={deleteTopic}>
-                                <input type="hidden" name="id" value={topic.id} />
-                                <button type="submit" className="size-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all">
-                                  <FiTrash2 className="size-3.5" />
+                              <form action={deleteSubject}>
+                                <input type="hidden" name="id" value={subject.id} />
+                                <button type="submit" className="p-2 rounded-lg text-slate-400 hover:bg-white hover:text-rose-500 transition-colors">
+                                  <FiTrash2 className="size-4" />
                                 </button>
                               </form>
                             </div>
-                          )
-                        )}
-                        {subject.topics.length === 0 && (
-                          <div className="col-span-full py-4 text-center border-2 border-dashed border-slate-100 rounded-2xl">
-                            <p className="text-xs text-slate-400 italic">No subjects added yet.</p>
                           </div>
                         )}
                       </div>
+                      {isExpanded && editingSubjectId !== subject.id && (
+                        <div className="p-4 sm:p-6 space-y-4">
+                          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            {subject.topics.map((topic: any) =>
+                              editingTopicId === topic.id ? (
+                                <form
+                                  key={topic.id}
+                                  action={editTopicAction}
+                                  className="col-span-full flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-[#E91E63]/30"
+                                  onSubmit={() => setEditingTopicId(null)}
+                                >
+                                  <input type="hidden" name="id" value={topic.id} />
+                                  <ImageUploadField name="image" existingImage={topic.image} compact />
+                                  <input name="name" required defaultValue={topic.name} className={`${compactInputClasses} flex-1`} />
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                      type="submit"
+                                      disabled={editTopicPending}
+                                      className="size-9 flex items-center justify-center rounded-lg bg-[#E91E63] text-white hover:bg-[#c81854] transition-colors disabled:opacity-50"
+                                    >
+                                      <FiCheck className="size-4" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingTopicId(null)}
+                                      className="size-9 flex items-center justify-center rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors"
+                                    >
+                                      <FiX className="size-4" />
+                                    </button>
+                                  </div>
+                                </form>
+                              ) : (
+                                <div
+                                  key={topic.id}
+                                  className="group relative flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 transition-all hover:bg-white hover:border-[#E91E63]/30"
+                                >
+                                  <div className="size-10 shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
+                                    {topic.image ? (
+                                      <img src={topic.image} alt={topic.name} className="h-full w-full object-cover" />
+                                    ) : (
+                                      <FiImage className="text-slate-300 size-4" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold text-slate-700 truncate">{topic.name}</p>
+                                  </div>
+                                  <button
+                                    onClick={() => setEditingTopicId(topic.id)}
+                                    className="size-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-[#E91E63] hover:bg-rose-50 transition-all"
+                                  >
+                                    <FiEdit2 className="size-3.5" />
+                                  </button>
+                                  <form action={deleteTopic}>
+                                    <input type="hidden" name="id" value={topic.id} />
+                                    <button type="submit" className="size-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                                      <FiTrash2 className="size-3.5" />
+                                    </button>
+                                  </form>
+                                </div>
+                              )
+                            )}
+                            {subject.topics.length === 0 && (
+                              <div className="col-span-full py-4 text-center border-2 border-dashed border-slate-100 rounded-2xl">
+                                <p className="text-xs text-slate-400 italic">No subjects added yet.</p>
+                              </div>
+                            )}
+                          </div>
 
-                      <form action={addTopicAction} className="grid gap-2 sm:grid-cols-[auto_1fr_auto] sm:items-center">
-                        <input type="hidden" name="subjectId" value={subject.id} />
-                        <ImageUploadField name="image" compact />
-                        <input
-                          name="name"
-                          required
-                          placeholder="Subject name (e.g. Algebra)"
-                          className={compactInputClasses}
-                        />
-                        <button
-                          type="submit"
-                          disabled={addTopicPending}
-                          className="px-6 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-[#E91E63] transition-colors disabled:opacity-50"
-                        >
-                          Add
-                        </button>
-                      </form>
+                          <form action={addTopicAction} className="grid gap-2 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+                            <input type="hidden" name="subjectId" value={subject.id} />
+                            <ImageUploadField name="image" compact />
+                            <input
+                              name="name"
+                              required
+                              placeholder="Subject name (e.g. Algebra)"
+                              className={compactInputClasses}
+                            />
+                            <button
+                              type="submit"
+                              disabled={addTopicPending}
+                              className="px-6 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-[#E91E63] transition-colors disabled:opacity-50"
+                            >
+                              Add
+                            </button>
+                          </form>
+                        </div>
+                      )}
                     </div>
+                  );
+                })}
+                {selectedProgram?.subjects.length === 0 && (
+                  <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white py-8 text-center">
+                    <p className="text-sm text-slate-400 italic">No sub-categories added yet.</p>
                   </div>
-                ))}
+                )}
               </div>
 
-              <section className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
-                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <FiBookOpen /> Add Sub-category to {selectedProgram?.title}
-                </h4>
-                <form action={addSubjectAction} className="grid gap-4">
-                  <input type="hidden" name="programId" value={selectedProgram?.id} />
-                  <input
-                    name="name"
-                    required
-                    placeholder="Sub-category name (e.g. Mathematics)"
-                    className={`${inputClasses} py-3`}
-                  />
-                  <ImageUploadField name="image" label="Sub-category Image" />
-                  <button
-                    type="submit"
-                    disabled={addSubjectPending}
-                    className="w-full py-3 rounded-2xl bg-[#E91E63] text-white text-sm font-bold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+              {!showAddSubjectForm ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAddSubjectForm(true)}
+                  className="w-full flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-slate-200 bg-white py-5 text-sm font-bold text-slate-400 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-all"
+                >
+                  <FiPlus /> Add Sub-category to {selectedProgram?.title}
+                </button>
+              ) : (
+                <section className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-200">
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 min-w-0">
+                      <FiBookOpen className="shrink-0" /> <span className="truncate">Add Sub-category to {selectedProgram?.title}</span>
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddSubjectForm(false)}
+                      className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors shrink-0"
+                    >
+                      <FiX className="size-4" />
+                    </button>
+                  </div>
+                  <form
+                    action={addSubjectAction}
+                    className="grid gap-4"
+                    onSubmit={() => setShowAddSubjectForm(false)}
                   >
-                    Create Sub-category
-                  </button>
-                </form>
-              </section>
+                    <input type="hidden" name="programId" value={selectedProgram?.id} />
+                    <input
+                      name="name"
+                      required
+                      placeholder="Sub-category name (e.g. Mathematics)"
+                      className={`${inputClasses} py-3`}
+                    />
+                    <ImageUploadField name="image" label="Sub-category Image" />
+                    <button
+                      type="submit"
+                      disabled={addSubjectPending}
+                      className="w-full py-3 rounded-2xl bg-[#E91E63] text-white text-sm font-bold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                    >
+                      {addSubjectPending ? "Creating..." : "Create Sub-category"}
+                    </button>
+                  </form>
+                </section>
+              )}
             </div>
           )}
         </div>

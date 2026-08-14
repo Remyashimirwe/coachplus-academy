@@ -101,7 +101,7 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="CoachPlus Academy"
-              className="relative h-10 w-auto rounded-xl object-contain shadow-sm transition-transform group-hover:scale-105 sm:h-12"
+              className="relative h-10 w-auto rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105 sm:h-12"
             />
           </div>
           <span className={`text-xl sm:text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-slate-900" : "text-white"}`}>
