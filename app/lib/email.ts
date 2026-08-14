@@ -77,6 +77,117 @@ export async function sendInviteEmail({
   }
 }
 
+export async function sendApplicationApprovedEmail({
+  to,
+  name,
+  inviteUrl,
+}: {
+  to: string;
+  name: string;
+  inviteUrl: string;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(
+      `RESEND_API_KEY is not set. Approval invite link for ${to}: ${inviteUrl}`
+    );
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Congratulations! Your Coach Plus teacher application was approved",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Congratulations, ${name}!</h2>
+          <p>
+            We're excited to let you know that your application to become a
+            <strong>Teacher</strong> at Coach Plus has been <strong>approved</strong>.
+          </p>
+          <p>
+            Click the button below to set up your password and activate your official teacher account.
+          </p>
+          <p style="text-align: center; margin: 32px 0;">
+            <a
+              href="${inviteUrl}"
+              style="background-color:#E91E63;color:#ffffff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:bold;"
+            >
+              Activate My Account
+            </a>
+          </p>
+          <p>Or copy and paste this link into your browser:</p>
+          <p><a href="${inviteUrl}">${inviteUrl}</a></p>
+          <p>This invitation link will expire in 7 days.</p>
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send approval email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send approval email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendApplicationDeniedEmail({
+  to,
+  name,
+}: {
+  to: string;
+  name: string;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Denial notice not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Update on your Coach Plus teacher application",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${name},</h2>
+          <p>
+            Thank you for taking the time to apply to become a Teacher at Coach Plus.
+            After careful review, we're unable to move forward with your application at this time.
+          </p>
+          <p>
+            We truly appreciate your interest and encourage you to apply again in the future.
+          </p>
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send denial email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send denial email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
 export async function sendApplicantMessageEmail({
   to,
   name,
