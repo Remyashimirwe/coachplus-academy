@@ -29,6 +29,7 @@ export async function POST(request: Request) {
           teacherName: student.teacher.user.name,
           teacherEmail: student.teacher.user.email,
           teacherPhone: student.teacher.phone,
+          teacherBranch: student.teacher.branch,
           subjects: student.subjects,
         }),
         sendRequestAssignedToTeacherEmail({
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
           parentName: student.user.name,
           parentEmail: student.user.email,
           parentPhone: student.phone,
+          parentBranch: student.branch,
           subjects: student.subjects,
         }),
       ]);

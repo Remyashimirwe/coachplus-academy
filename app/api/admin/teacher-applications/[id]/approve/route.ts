@@ -74,6 +74,7 @@ export async function POST(
       to: application.email,
       name: application.fullName,
       inviteUrl,
+      branch: application.branch,
     });
 
     const { passwordHash, inviteToken: _token, ...safeUser } = user;

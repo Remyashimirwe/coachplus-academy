@@ -71,6 +71,7 @@ export async function POST(
     const emailResult = await sendRequestApprovedEmail({
       to: parentRequest.email,
       name: parentRequest.parentName,
+      branch: parentRequest.branch,
     });
 
     return NextResponse.json({
@@ -119,6 +120,7 @@ export async function POST(
       name: user.name,
       role: "STUDENT",
       token: inviteToken,
+      branch: parentRequest.branch,
     });
 
     return NextResponse.json({

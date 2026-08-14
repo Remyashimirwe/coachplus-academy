@@ -82,6 +82,7 @@ export async function POST(
       teacherName: teacher.user.name,
       teacherEmail: teacher.user.email,
       teacherPhone: teacher.phone,
+      teacherBranch: teacher.branch,
       subjects: parentRequest.subjects,
     }),
     sendRequestAssignedToTeacherEmail({
@@ -90,6 +91,7 @@ export async function POST(
       parentName: parentRequest.parentName,
       parentEmail: parentRequest.email,
       parentPhone: parentRequest.phone,
+      parentBranch: parentRequest.branch,
       subjects: parentRequest.subjects,
       details: parentRequest.details,
     }),

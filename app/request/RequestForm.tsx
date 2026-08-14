@@ -43,6 +43,7 @@ interface Program {
     subjects: Subject[];
 }
 
+
 const learningModes = [
     "At-Home",
     "Online",
