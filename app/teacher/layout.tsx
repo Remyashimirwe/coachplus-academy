@@ -1,9 +1,6 @@
-"use client";
-
-import { ReactNode, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { ReactNode } from "react";
 import { FiLayout, FiCheckSquare } from "react-icons/fi";
-import { getSession } from "@/app/lib/auth";
+import { requireTeacher } from "@/app/lib/dal";
 import DashboardLayout from "@/app/components/DashboardLayout";
 
 const navItems = [
@@ -11,27 +8,11 @@ const navItems = [
   { id: "attendance", label: "Mark Attendance", icon: FiCheckSquare, href: "/teacher/attendance" },
 ];
 
-export default function TeacherLayout({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const pathname = usePathname();
-
-  useEffect(() => {
-    getSession().then((session) => {
-      if (session) setUser(session.user);
-    });
-  }, []);
-
-  if (!user) return null;
-
-  const currentNavItem = navItems.find(item => item.href === pathname);
-  const title = currentNavItem ? currentNavItem.label : "Teacher Dashboard";
+export default async function TeacherLayout({ children }: { children: ReactNode }) {
+  const user = await requireTeacher();
 
   return (
-    <DashboardLayout
-      navItems={navItems}
-      user={user}
-      title={title}
-    >
+    <DashboardLayout navItems={navItems} user={user} fallbackTitle="Teacher Dashboard">
       {children}
     </DashboardLayout>
   );

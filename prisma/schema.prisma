@@ -34,6 +34,7 @@ model Teacher {
   user        User         @relation("UserToTeacher", fields: [userId], references: [id])
   students    Student[]    @relation("TeacherStudents")
   attendances Attendance[]
+  reports     Report[]
 }
 
 model Student {
@@ -43,6 +44,7 @@ model Student {
   teacherId      Int?
   teacher        Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
   attendances    Attendance[]
+  reports        Report[]
   parentRequest  Request?     @relation("RequestStudent")
 }
 
@@ -56,6 +58,22 @@ model Attendance {
   teacher   Teacher  @relation(fields: [teacherId], references: [id])
   remarks   String?
   createdAt DateTime @default(now())
+
+  @@unique([studentId, date])
+}
+
+model Report {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  student    Student  @relation(fields: [studentId], references: [id])
+  teacherId  Int?
+  teacher    Teacher? @relation(fields: [teacherId], references: [id])
+  category   String   @default("Other")
+  message    String
+  status     String   @default("new") // "new", "reviewed", "resolved"
+  adminReply String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Program {

@@ -374,6 +374,112 @@ export async function sendRequestAssignedToTeacherEmail({
   }
 }
 
+export async function sendReportSubmittedEmail({
+  to,
+  studentName,
+  category,
+  message,
+  teacherName,
+}: {
+  to: string;
+  studentName: string;
+  category: string;
+  message: string;
+  teacherName?: string | null;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. New report notice not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `New teacher report submitted by ${studentName}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>New report on Coach Plus</h2>
+          <p><strong>${studentName}</strong> has submitted a report${teacherName ? ` about <strong>${teacherName}</strong>` : ""}.</p>
+          <p><strong>Category:</strong> ${category}</p>
+          <p><strong>Message:</strong></p>
+          <p style="white-space: pre-wrap; background:#f8fafc; padding:12px 16px; border-radius:12px;">${message}</p>
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — Coach Plus System
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send report submitted email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send report submitted email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendReportUpdateEmail({
+  to,
+  name,
+  status,
+  adminReply,
+}: {
+  to: string;
+  name: string;
+  status: string;
+  adminReply?: string | null;
+}) {
+  const client = getResendClient();
+  const statusLabel = status === "resolved" ? "resolved" : status === "reviewed" ? "reviewed" : "updated";
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Report ${statusLabel} notice not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Update on your report to Coach Plus`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${name},</h2>
+          <p>
+            The report you submitted has been marked as <strong>${statusLabel}</strong> by our team.
+          </p>
+          ${
+            adminReply
+              ? `<p><strong>Response from the admin team:</strong></p>
+                 <p style="white-space: pre-wrap; background:#f8fafc; padding:12px 16px; border-radius:12px;">${adminReply}</p>`
+              : ""
+          }
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send report update email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send report update email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
 export async function sendMessageEmail({
   to,
   name,

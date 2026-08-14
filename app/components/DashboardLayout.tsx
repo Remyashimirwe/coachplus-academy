@@ -43,7 +43,8 @@ interface DashboardLayoutProps {
   children: ReactNode;
   navItems: NavItem[];
   user: User;
-  title: string;
+  title?: string;
+  fallbackTitle?: string;
 }
 
 export default function DashboardLayout({
@@ -51,6 +52,7 @@ export default function DashboardLayout({
   navItems,
   user,
   title,
+  fallbackTitle,
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -75,6 +77,9 @@ export default function DashboardLayout({
 
   const pathname = usePathname();
   const router = useRouter();
+
+  const currentNavItem = navItems.find((item) => item.href === pathname);
+  const resolvedTitle = title ?? currentNavItem?.label ?? fallbackTitle ?? "Dashboard";
 
   const handleLogout = async () => {
     const isLoginPage = pathname.startsWith("/admin");
@@ -167,7 +172,7 @@ export default function DashboardLayout({
             >
               <FiMenu className="size-6" />
             </button>
-            <h1 className="text-lg font-bold text-slate-800 hidden md:block">{title}</h1>
+            <h1 className="text-lg font-bold text-slate-800 hidden md:block">{resolvedTitle}</h1>
             <div className="hidden sm:flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl text-slate-500 ml-4">
               <FiSearch className="size-4" />
               <input

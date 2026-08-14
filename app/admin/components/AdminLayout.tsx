@@ -12,6 +12,7 @@ import {
   FiUserPlus,
   FiUserCheck,
   FiCalendar,
+  FiFlag,
 } from "react-icons/fi";
 import DashboardLayout from "@/app/components/DashboardLayout";
 
@@ -23,6 +24,7 @@ const baseNavItems = [
   { id: "programs", label: "Manage Learning", icon: FiBook, href: "/admin/programs" },
   { id: "requests", label: "Teacher Requests", icon: FiMessageSquare, href: "/admin/requests" },
   { id: "teachers", label: "Teacher Applications", icon: FiUsers, href: "/admin/teachers" },
+  { id: "reports", label: "Student Reports", icon: FiFlag, href: "/admin/reports" },
   { id: "settings", label: "Settings", icon: FiSettings, href: "/admin/settings" },
 ];
 
@@ -30,22 +32,31 @@ export default function AdminLayout({ children, user }: { children: React.ReactN
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
   const [pendingCount, setPendingCount] = useState(0);
+  const [pendingReports, setPendingReports] = useState(0);
 
   useEffect(() => {
     if (isLoginPage) return;
     let cancelled = false;
-    async function loadPendingCount() {
+    async function loadPendingCounts() {
       try {
-        const res = await fetch("/api/admin/teacher-applications/pending-count");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!cancelled) setPendingCount(data.count || 0);
+        const [appsRes, reportsRes] = await Promise.all([
+          fetch("/api/admin/teacher-applications/pending-count"),
+          fetch("/api/admin/reports/pending-count"),
+        ]);
+        if (appsRes.ok) {
+          const data = await appsRes.json();
+          if (!cancelled) setPendingCount(data.count || 0);
+        }
+        if (reportsRes.ok) {
+          const data = await reportsRes.json();
+          if (!cancelled) setPendingReports(data.count || 0);
+        }
       } catch {
         // ignore, badge is a non-critical enhancement
       }
     }
-    loadPendingCount();
-    const interval = setInterval(loadPendingCount, 60000);
+    loadPendingCounts();
+    const interval = setInterval(loadPendingCounts, 60000);
     return () => {
       cancelled = true;
       clearInterval(interval);
@@ -62,9 +73,11 @@ export default function AdminLayout({ children, user }: { children: React.ReactN
     );
   }
 
-  const navItems = baseNavItems.map((item) =>
-    item.id === "teachers" && pendingCount > 0 ? { ...item, badge: pendingCount } : item
-  );
+  const navItems = baseNavItems.map((item) => {
+    if (item.id === "teachers" && pendingCount > 0) return { ...item, badge: pendingCount };
+    if (item.id === "reports" && pendingReports > 0) return { ...item, badge: pendingReports };
+    return item;
+  });
 
   const currentNavItem = navItems.find(item => item.href === pathname);
   const title = currentNavItem ? currentNavItem.label : "Admin Dashboard";
