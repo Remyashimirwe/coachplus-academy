@@ -78,6 +78,7 @@ export async function POST(
         : "Application approved and the teacher account was created, but the notification email could not be sent. Please share the invite link manually.",
       user: safeUser,
       emailSent: emailResult.success,
+      inviteUrl: emailResult.success ? undefined : inviteUrl,
     });
   } catch (error: any) {
     if (error.code === "P2002") {

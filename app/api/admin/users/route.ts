@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     const emailResult = await sendInviteEmail({ to: email, name, role, token: inviteToken });
 
     const { passwordHash, inviteToken: _token, ...safeUser } = user;
+    const inviteUrl = `${process.env.APP_URL || 'https://www.coachplusacademy.com'}/accept-invite?token=${inviteToken}`;
 
     return NextResponse.json({
       message: emailResult.success
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
         : 'User created, but the invite email could not be sent. Please share the invite link manually.',
       user: safeUser,
       emailSent: emailResult.success,
+      inviteUrl: emailResult.success ? undefined : inviteUrl,
     });
 
   } catch (error: any) {

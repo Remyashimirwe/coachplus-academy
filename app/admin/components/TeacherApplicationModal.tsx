@@ -25,6 +25,8 @@ import {
   FiUserCheck,
   FiUserX,
   FiLoader,
+  FiCopy,
+  FiCheck,
 } from "react-icons/fi";
 
 const DOCUMENT_LABELS: Record<string, string> = {
@@ -56,6 +58,8 @@ export default function TeacherApplicationModal({
   const [sendStatus, setSendStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [decision, setDecision] = useState<"approve" | "deny" | null>(null);
   const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -106,6 +110,7 @@ export default function TeacherApplicationModal({
       const res = await fetch(`/api/admin/teacher-applications/${app.id}/approve`, { method: "POST" });
       const data = await res.json();
       if (res.ok) {
+        if (data.inviteUrl) setApproveInviteUrl(data.inviteUrl);
         onApproved(app.id);
       } else {
         setDecisionError(data.message || "Failed to approve application");
@@ -115,6 +120,13 @@ export default function TeacherApplicationModal({
     } finally {
       setDecision(null);
     }
+  }
+
+  function copyInviteLink() {
+    if (!approveInviteUrl) return;
+    navigator.clipboard.writeText(approveInviteUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleDeny() {
@@ -389,6 +401,26 @@ export default function TeacherApplicationModal({
               </div>
             </div>
           </div>
+
+          {approveInviteUrl && (
+            <div className="rounded-2xl p-4 border bg-emerald-50 border-emerald-100 text-emerald-700 space-y-3">
+              <p className="text-sm font-bold flex items-start gap-2">
+                <FiAlertCircle className="mt-0.5 shrink-0" />
+                Activation email could not be sent automatically. Share this link with {app.fullName.split(" ")[0]} manually:
+              </p>
+              <div className="flex items-center gap-2 bg-white rounded-xl border border-emerald-200 p-2 pl-3">
+                <span className="text-xs text-slate-500 truncate flex-1">{approveInviteUrl}</span>
+                <button
+                  type="button"
+                  onClick={copyInviteLink}
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-all"
+                >
+                  {copied ? <FiCheck className="size-3.5" /> : <FiCopy className="size-3.5" />}
+                  {copied ? "Copied" : "Copy Link"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Decision footer */}

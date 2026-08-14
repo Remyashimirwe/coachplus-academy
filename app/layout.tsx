@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description:
     "Connect with verified home and online teachers for personalized learning.",
   icons: {
-    apple: "/logo.png",
+    apple: "public/logo.png",
   },
 };
 

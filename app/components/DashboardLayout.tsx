@@ -97,18 +97,18 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-[#0F172A] text-white transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col transform bg-[#0F172A] text-white transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-20 items-center gap-3 px-8 border-b border-slate-800">
+        <div className="flex h-20 shrink-0 items-center gap-3 px-8 border-b border-slate-800">
           <img src="/logo.png" alt="Coach Plus" className="size-9 rounded-lg" />
           <span className="text-xl font-bold tracking-tight">
             Coach <span className="text-[#E91E63]">Plus</span>
           </span>
         </div>
 
-        <div className="px-6 py-4 border-b border-slate-800 lg:hidden">
+        <div className="px-6 py-4 border-b border-slate-800 lg:hidden shrink-0">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">User</p>
             <div className="flex items-center gap-3">
                 <div className="size-8 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] border border-white/20" />
@@ -119,7 +119,7 @@ export default function DashboardLayout({
             </div>
         </div>
 
-        <nav className="mt-8 px-4 space-y-2">
+        <nav className="flex-1 min-h-0 overflow-y-auto mt-8 px-4 space-y-2 pb-4">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -133,14 +133,19 @@ export default function DashboardLayout({
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <item.icon className="size-5" />
-                {item.label}
+                <item.icon className="size-5 shrink-0" />
+                <span className="truncate">{item.label}</span>
+                {!!(item as any).badge && (
+                  <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-amber-400 text-[#0F172A] text-[10px] font-black flex items-center justify-center">
+                    {(item as any).badge}
+                  </span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-8 w-full px-4">
+        <div className="shrink-0 border-t border-slate-800 w-full px-4 py-4">
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-500"

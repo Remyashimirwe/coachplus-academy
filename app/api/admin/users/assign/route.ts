@@ -11,14 +11,18 @@ export async function POST(request: Request) {
 
     const { teacherId, studentId } = await request.json();
 
-    await prisma.student.update({
+    const student = await prisma.student.update({
       where: { id: studentId },
       data: {
-        teacherId
+        teacherId: teacherId ?? null,
       },
+      include: { user: true, teacher: { include: { user: true } } },
     });
 
-    return NextResponse.json({ message: 'Student assigned successfully' });
+    return NextResponse.json({
+      message: teacherId ? 'Student assigned successfully' : 'Student unassigned successfully',
+      student,
+    });
 
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });

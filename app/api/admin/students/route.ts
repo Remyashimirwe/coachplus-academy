@@ -8,7 +8,10 @@ export async function GET() {
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    const students = await prisma.student.findMany({ include: { user: true } });
+    const students = await prisma.student.findMany({
+      include: { user: true, teacher: { include: { user: true } } },
+      orderBy: { user: { name: 'asc' } },
+    });
     return NextResponse.json(students);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });

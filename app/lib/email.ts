@@ -188,7 +188,7 @@ export async function sendApplicationDeniedEmail({
   }
 }
 
-export async function sendApplicantMessageEmail({
+export async function sendMessageEmail({
   to,
   name,
   subject,

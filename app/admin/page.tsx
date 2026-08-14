@@ -27,6 +27,12 @@ export default async function AdminPage() {
     take: 5,
   });
 
+  const pendingApplications = await db.teacherApplication.findMany({
+    where: { status: "pending" },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
+
   return (
     <OverviewView
       programs={programs}
@@ -36,6 +42,10 @@ export default async function AdminPage() {
         created_at: r.createdAt.toISOString(),
       }))}
       teacherApplications={teacherApplications.map((t) => ({
+        ...t,
+        created_at: t.createdAt.toISOString(),
+      }))}
+      pendingApplications={pendingApplications.map((t) => ({
         ...t,
         created_at: t.createdAt.toISOString(),
       }))}

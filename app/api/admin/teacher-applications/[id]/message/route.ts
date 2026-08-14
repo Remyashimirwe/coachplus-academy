@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getSession } from "@/app/lib/auth";
-import { sendApplicantMessageEmail } from "@/app/lib/email";
+import { sendMessageEmail } from "@/app/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -33,7 +33,7 @@ export async function POST(
     return NextResponse.json({ message: "Application not found" }, { status: 404 });
   }
 
-  const result = await sendApplicantMessageEmail({
+  const result = await sendMessageEmail({
     to: application.email,
     name: application.fullName,
     subject,
