@@ -23,23 +23,35 @@ export async function POST(
 
   const { teacherId } = await request.json();
 
-  const parentRequest = await db.request.findUnique({ where: { id: requestId } });
+  const parentRequest = await db.request.findUnique({
+    where: { id: requestId },
+    include: { student: { include: { user: true } } },
+  });
   if (!parentRequest) {
     return NextResponse.json({ message: "Request not found" }, { status: 404 });
   }
 
+  if (!parentRequest.studentId || !parentRequest.student) {
+    return NextResponse.json(
+      { message: "Approve this request first to create a student account before assigning a teacher." },
+      { status: 400 }
+    );
+  }
+
   // Unassign
   if (teacherId === null || teacherId === undefined) {
+    const student = await db.student.update({
+      where: { id: parentRequest.studentId },
+      data: { teacherId: null },
+      include: { user: true, teacher: { include: { user: true } } },
+    });
     const updated = await db.request.update({
       where: { id: requestId },
-      data: {
-        assignedTeacherId: null,
-        status: parentRequest.status === "assigned" ? "approved" : parentRequest.status,
-      },
+      data: { status: parentRequest.status === "assigned" ? "approved" : parentRequest.status },
     });
     return NextResponse.json({
-      message: "Teacher unassigned from this request",
-      request: updated,
+      message: "Teacher unassigned from this student",
+      request: { ...updated, student },
     });
   }
 
@@ -52,12 +64,15 @@ export async function POST(
     return NextResponse.json({ message: "Teacher not found" }, { status: 404 });
   }
 
+  const student = await db.student.update({
+    where: { id: parentRequest.studentId },
+    data: { teacherId: teacher.id },
+    include: { user: true, teacher: { include: { user: true } } },
+  });
+
   const updated = await db.request.update({
     where: { id: requestId },
-    data: {
-      assignedTeacherId: teacher.id,
-      status: "assigned",
-    },
+    data: { status: "assigned" },
   });
 
   const [parentEmailResult, teacherEmailResult] = await Promise.all([
@@ -84,7 +99,7 @@ export async function POST(
     message: emailSent
       ? `${teacher.user.name} has been assigned. Both the parent and teacher have been notified by email.`
       : `${teacher.user.name} has been assigned, but one or more notification emails could not be sent.`,
-    request: { ...updated, assignedTeacher: teacher },
+    request: { ...updated, student },
     emailSent,
   });
 }

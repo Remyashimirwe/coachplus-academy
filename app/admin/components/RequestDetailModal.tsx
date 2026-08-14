@@ -19,6 +19,9 @@ import {
   FiAward,
   FiSearch,
   FiXCircle,
+  FiUserPlus,
+  FiCopy,
+  FiCheck,
 } from "react-icons/fi";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -49,6 +52,8 @@ export default function RequestDetailModal({
   const [teacherSearch, setTeacherSearch] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [assignStatus, setAssignStatus] = useState<{ success: boolean; text: string } | null>(null);
+  const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -118,7 +123,12 @@ export default function RequestDetailModal({
       });
       const data = await res.json();
       if (res.ok) {
-        onUpdated(request.id, { status: data.status || "approved" });
+        onUpdated(request.id, {
+          status: data.status || "approved",
+          studentId: data.student?.id,
+          student: data.student,
+        });
+        if (data.inviteUrl) setApproveInviteUrl(data.inviteUrl);
         setApproveStatus({ success: true, text: data.message || "Request approved!" });
       } else {
         setApproveStatus({ success: false, text: data.message || "Failed to approve request" });
@@ -128,6 +138,13 @@ export default function RequestDetailModal({
     } finally {
       setApproving(false);
     }
+  }
+
+  function copyInviteLink() {
+    if (!approveInviteUrl) return;
+    navigator.clipboard.writeText(approveInviteUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleAssignTeacher(teacherId: number | null) {
@@ -144,8 +161,9 @@ export default function RequestDetailModal({
       if (res.ok) {
         onUpdated(request.id, {
           status: data.request?.status,
-          assignedTeacher: data.request?.assignedTeacher
-            ? { id: data.request.assignedTeacher.id, user: data.request.assignedTeacher.user }
+          student: data.request?.student,
+          assignedTeacher: data.request?.student?.teacher
+            ? { id: data.request.student.teacher.id, user: data.request.student.teacher.user }
             : null,
         });
         setAssignStatus({ success: true, text: data.message || "Teacher updated!" });
@@ -293,9 +311,9 @@ export default function RequestDetailModal({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-bold text-slate-700">
-                    {request.status === "new" || request.status === "contacted"
-                      ? "This request hasn't been approved yet."
-                      : "This request has been approved."}
+                    {request.studentId
+                      ? "A student account has been created for this request."
+                      : "This request hasn't been approved yet — approving creates a student account."}
                   </p>
                   {approveStatus && (
                     <p className={`mt-1.5 text-xs font-bold flex items-center gap-1.5 ${approveStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
@@ -304,7 +322,7 @@ export default function RequestDetailModal({
                     </p>
                   )}
                 </div>
-                {request.status === "new" || request.status === "contacted" ? (
+                {!request.studentId ? (
                   <button
                     onClick={handleApprove}
                     disabled={approving}
@@ -320,77 +338,111 @@ export default function RequestDetailModal({
                 )}
               </div>
 
-              <div className="border-t border-slate-200 pt-5 space-y-4">
-                {request.assignedTeacher ? (
-                  <div className="flex items-center gap-3 rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-4">
-                    <div className="size-11 rounded-xl bg-violet-500 text-white flex items-center justify-center font-bold shrink-0">
-                      {request.assignedTeacher.user.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-900 truncate">{request.assignedTeacher.user.name}</p>
-                      <p className="text-xs text-slate-500 truncate">{request.assignedTeacher.user.email}</p>
-                    </div>
+              {approveInviteUrl && (
+                <div className="rounded-2xl p-4 border bg-emerald-50 border-emerald-100 text-emerald-700 space-y-3">
+                  <p className="text-sm font-bold flex items-start gap-2">
+                    <FiAlertCircle className="shrink-0 mt-0.5" />
+                    The activation email couldn't be sent. Share this link with them manually so they can set their password:
+                  </p>
+                  <div className="flex items-center gap-2 bg-white rounded-xl border border-emerald-200 p-2 pl-3">
+                    <span className="text-xs text-slate-500 truncate flex-1">{approveInviteUrl}</span>
                     <button
-                      onClick={() => handleAssignTeacher(null)}
-                      disabled={assigning}
-                      title="Unassign teacher"
-                      className="shrink-0 p-2.5 rounded-xl bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50 transition-all disabled:opacity-50"
+                      type="button"
+                      onClick={copyInviteLink}
+                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-all"
                     >
-                      {assigning ? <FiLoader className="size-4 animate-spin" /> : <FiXCircle className="size-4" />}
+                      {copied ? <FiCheck className="size-3.5" /> : <FiCopy className="size-3.5" />}
+                      {copied ? "Copied" : "Copy Link"}
                     </button>
                   </div>
-                ) : (
-                  <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                    <FiAward className="text-violet-400" /> No teacher assigned yet.
-                  </p>
-                )}
-
-                <div className="relative">
-                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
-                  <input
-                    type="text"
-                    value={teacherSearch}
-                    onChange={(e) => setTeacherSearch(e.target.value)}
-                    placeholder="Search teachers to assign..."
-                    className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
-                  />
                 </div>
+              )}
 
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                  {filteredTeachers
-                    .filter((t) => t.id !== request.assignedTeacher?.id)
-                    .map((t) => (
+              {request.studentId && (
+                <div className="border-t border-slate-200 pt-5 space-y-4">
+                  <div className="flex items-center gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 p-4">
+                    <div className="size-11 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold shrink-0">
+                      <FiUserPlus className="size-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-slate-900 truncate">
+                        {request.student?.user?.name || request.parent_name} is now in the Student section
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">{request.student?.user?.email || request.email}</p>
+                    </div>
+                  </div>
+
+                  {request.assignedTeacher ? (
+                    <div className="flex items-center gap-3 rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-4">
+                      <div className="size-11 rounded-xl bg-violet-500 text-white flex items-center justify-center font-bold shrink-0">
+                        {request.assignedTeacher.user.name.charAt(0)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-slate-900 truncate">{request.assignedTeacher.user.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{request.assignedTeacher.user.email}</p>
+                      </div>
                       <button
-                        key={t.id}
-                        onClick={() => handleAssignTeacher(t.id)}
+                        onClick={() => handleAssignTeacher(null)}
                         disabled={assigning}
-                        className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Unassign teacher"
+                        className="shrink-0 p-2.5 rounded-xl bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50 transition-all disabled:opacity-50"
                       >
-                        <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
-                          {t.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-slate-900 truncate">{t.name}</p>
-                          <p className="text-xs text-slate-500 truncate">{t.email}</p>
-                        </div>
-                        <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
-                          <FiUserCheck className="size-4" />
-                          {request.assignedTeacher ? "Reassign" : "Assign"}
-                        </span>
+                        {assigning ? <FiLoader className="size-4 animate-spin" /> : <FiXCircle className="size-4" />}
                       </button>
-                    ))}
-                  {filteredTeachers.length === 0 && (
-                    <p className="text-sm text-slate-400 italic text-center py-4">No teachers found.</p>
+                    </div>
+                  ) : (
+                    <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                      <FiAward className="text-violet-400" /> No teacher assigned yet.
+                    </p>
+                  )}
+
+                  <div className="relative">
+                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+                    <input
+                      type="text"
+                      value={teacherSearch}
+                      onChange={(e) => setTeacherSearch(e.target.value)}
+                      placeholder="Search teachers to assign..."
+                      className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {filteredTeachers
+                      .filter((t) => t.id !== request.assignedTeacher?.id)
+                      .map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => handleAssignTeacher(t.id)}
+                          disabled={assigning}
+                          className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
+                            {t.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-bold text-slate-900 truncate">{t.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{t.email}</p>
+                          </div>
+                          <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
+                            <FiUserCheck className="size-4" />
+                            {request.assignedTeacher ? "Reassign" : "Assign"}
+                          </span>
+                        </button>
+                      ))}
+                    {filteredTeachers.length === 0 && (
+                      <p className="text-sm text-slate-400 italic text-center py-4">No teachers found.</p>
+                    )}
+                  </div>
+
+                  {assignStatus && (
+                    <p className={`text-xs font-bold flex items-center gap-1.5 ${assignStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+                      {assignStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
+                      {assignStatus.text}
+                    </p>
                   )}
                 </div>
-
-                {assignStatus && (
-                  <p className={`text-xs font-bold flex items-center gap-1.5 ${assignStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
-                    {assignStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
-                    {assignStatus.text}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
           </div>
 

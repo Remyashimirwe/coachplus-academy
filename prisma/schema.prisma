@@ -29,21 +29,21 @@ model User {
 }
 
 model Teacher {
-  id               Int          @id @default(autoincrement())
-  userId           Int          @unique
-  user             User         @relation("UserToTeacher", fields: [userId], references: [id])
-  students         Student[]    @relation("TeacherStudents")
-  attendances      Attendance[]
-  assignedRequests Request[]    @relation("RequestAssignedTeacher")
+  id          Int          @id @default(autoincrement())
+  userId      Int          @unique
+  user        User         @relation("UserToTeacher", fields: [userId], references: [id])
+  students    Student[]    @relation("TeacherStudents")
+  attendances Attendance[]
 }
 
 model Student {
-  id          Int          @id @default(autoincrement())
-  userId      Int          @unique
-  user        User         @relation("UserToStudent", fields: [userId], references: [id])
-  teacherId   Int?
-  teacher     Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
-  attendances Attendance[]
+  id             Int          @id @default(autoincrement())
+  userId         Int          @unique
+  user           User         @relation("UserToStudent", fields: [userId], references: [id])
+  teacherId      Int?
+  teacher        Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
+  attendances    Attendance[]
+  parentRequest  Request?     @relation("RequestStudent")
 }
 
 model Attendance {
@@ -104,8 +104,8 @@ model Request {
   village           String   @default("")
   idPassport        String   @default("")
   country           String   @default("")
-  assignedTeacherId Int?
-  assignedTeacher   Teacher? @relation("RequestAssignedTeacher", fields: [assignedTeacherId], references: [id])
+  studentId         Int?     @unique
+  student           Student? @relation("RequestStudent", fields: [studentId], references: [id])
 }
 
 model TeacherApplication {

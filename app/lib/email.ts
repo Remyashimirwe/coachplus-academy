@@ -191,9 +191,11 @@ export async function sendApplicationDeniedEmail({
 export async function sendRequestApprovedEmail({
   to,
   name,
+  inviteUrl,
 }: {
   to: string;
   name: string;
+  inviteUrl?: string;
 }) {
   const client = getResendClient();
 
@@ -214,10 +216,32 @@ export async function sendRequestApprovedEmail({
             Good news! Your request for a teacher on <strong>Coach Plus</strong> has been
             <strong>approved</strong>.
           </p>
+          ${
+            inviteUrl
+              ? `
+          <p>
+            We've also created your student account so you can log in to Coach Plus and follow
+            your teacher assignment and sessions from your own dashboard.
+          </p>
+          <p style="text-align: center; margin: 32px 0;">
+            <a
+              href="${inviteUrl}"
+              style="background-color:#E91E63;color:#ffffff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:bold;"
+            >
+              Activate My Account
+            </a>
+          </p>
+          <p>Or copy and paste this link into your browser:</p>
+          <p><a href="${inviteUrl}">${inviteUrl}</a></p>
+          <p>This invitation link will expire in 7 days.</p>
+          `
+              : `
           <p>
             Our team is now working on matching you with the right teacher. You'll receive
             another email as soon as a teacher has been assigned to you.
           </p>
+          `
+          }
           <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
             — The Coach Plus Team
           </p>

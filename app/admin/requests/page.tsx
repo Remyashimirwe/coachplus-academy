@@ -9,7 +9,7 @@ export default async function RequestsPage() {
 
   const [requests, teachers] = await Promise.all([
     db.request.findMany({
-      include: { assignedTeacher: { include: { user: true } } },
+      include: { student: { include: { user: true, teacher: { include: { user: true } } } } },
       orderBy: [
         { status: "asc" },
         { createdAt: "desc" },
@@ -27,6 +27,7 @@ export default async function RequestsPage() {
         ...r,
         parent_name: r.parentName,
         created_at: r.createdAt.toISOString(),
+        assignedTeacher: r.student?.teacher ?? null,
       }))}
       teachers={teachers.map((t) => ({
         id: t.id,
