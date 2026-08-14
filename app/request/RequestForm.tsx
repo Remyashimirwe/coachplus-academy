@@ -19,6 +19,8 @@ import {
     FiX,
     FiClipboard,
     FiGlobe,
+    FiStar,
+    FiLoader,
 } from "react-icons/fi";
 import {saveRequest} from "@/app/actions/request";
 import Footer from "../components/Footer";
@@ -41,6 +43,13 @@ interface Program {
     title: string;
     level: string;
     subjects: Subject[];
+}
+
+interface RecommendedTeacher {
+    name: string;
+    branch: string;
+    matchedSubjects: string[];
+    label: string | null;
 }
 
 
@@ -103,6 +112,9 @@ function RequestFormContent({programs}: { programs: Program[] }) {
     const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [selectionError, setSelectionError] = useState(false);
+    const [selectedBranch, setSelectedBranch] = useState("");
+    const [recommendedTeachers, setRecommendedTeachers] = useState<RecommendedTeacher[]>([]);
+    const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
     useEffect(() => {
         if (programIdParam) {
@@ -199,6 +211,40 @@ function RequestFormContent({programs}: { programs: Program[] }) {
             setSelectedCourses({});
         }
     }, [selectedProgramId]);
+
+    // Live-preview the teachers who best match the chosen branch (location/city)
+    // and course(s), so parents/students see a recommended teacher before submitting.
+    useEffect(() => {
+        if (!selectedBranch && selectedSubjects.length === 0) {
+            setRecommendedTeachers([]);
+            return;
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(async () => {
+            setLoadingRecommendations(true);
+            try {
+                const params = new URLSearchParams();
+                if (selectedBranch) params.set("branch", selectedBranch);
+                if (selectedSubjects.length > 0) params.set("subjects", selectedSubjects.join(","));
+
+                const res = await fetch(`/api/teachers/recommended?${params.toString()}`, {
+                    signal: controller.signal,
+                });
+                const data = await res.json();
+                setRecommendedTeachers(Array.isArray(data.teachers) ? data.teachers : []);
+            } catch {
+                // Ignore aborted/failed preview requests - not critical to submitting the form.
+            } finally {
+                setLoadingRecommendations(false);
+            }
+        }, 400);
+
+        return () => {
+            controller.abort();
+            clearTimeout(timeout);
+        };
+    }, [selectedBranch, selectedSubjects]);
 
     return (
         <main className="min-h-screen bg-slate-50 text-[#121826]">
@@ -367,7 +413,8 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                 <select
                                                     id="branch"
                                                     name="branch"
-                                                    defaultValue=""
+                                                    value={selectedBranch}
+                                                    onChange={(e) => setSelectedBranch(e.target.value)}
                                                     required
                                                     className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
                                                 >
@@ -568,6 +615,69 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             </p>
                                         )}
                                     </div>
+
+                                    {(selectedBranch || selectedSubjects.length > 0) && (
+                                        <motion.div
+                                            initial={{opacity: 0, y: 10}}
+                                            animate={{opacity: 1, y: 0}}
+                                            className="rounded-3xl bg-gradient-to-br from-[#fff0f3] to-white p-6 sm:p-8 border-2 border-[#E91E63]/10"
+                                        >
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <FiAward className="text-[#E91E63]"/>
+                                                <h3 className="text-sm font-bold text-[#0f172a]">Recommended Teachers Near
+                                                    You</h3>
+                                            </div>
+                                            <p className="text-xs text-slate-500 mb-6">
+                                                Based on your branch and chosen course - here's a preview of teachers who
+                                                could be a great fit.
+                                            </p>
+
+                                            {loadingRecommendations ? (
+                                                <div className="flex items-center gap-2 text-sm text-slate-400 py-4">
+                                                    <FiLoader className="size-4 animate-spin"/>
+                                                    Finding your best matches...
+                                                </div>
+                                            ) : recommendedTeachers.length > 0 ? (
+                                                <div className="grid gap-3 sm:grid-cols-2">
+                                                    {recommendedTeachers.map((t, i) => (
+                                                        <div
+                                                            key={`${t.name}-${i}`}
+                                                            className="flex items-center gap-3 rounded-2xl bg-white p-4 border border-slate-100 shadow-sm"
+                                                        >
+                                                            <div
+                                                                className="size-10 shrink-0 rounded-xl bg-[#E91E63]/10 text-[#E91E63] flex items-center justify-center font-bold">
+                                                                {t.name.charAt(0)}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-sm font-bold text-slate-900 truncate flex items-center gap-2">
+                                                                    {t.name}
+                                                                    {t.label && (
+                                                                        <span
+                                                                            className={`inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 ${
+                                                                                t.label === "Best match"
+                                                                                    ? "bg-amber-100 text-amber-700"
+                                                                                    : "bg-indigo-50 text-indigo-600"
+                                                                            }`}
+                                                                        >
+                                                                            <FiStar className="size-2.5"/> {t.label}
+                                                                        </span>
+                                                                    )}
+                                                                </p>
+                                                                <p className="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                                                                    <FiMapPin className="size-3 shrink-0"/> {t.branch}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-slate-400 italic">
+                                                    No exact match yet - don't worry, our team will still hand-pick the
+                                                    best teacher for you.
+                                                </p>
+                                            )}
+                                        </motion.div>
+                                    )}
 
                                     <div className="grid gap-8 md:grid-cols-2">
                                         <Field icon={<FiMapPin/>} label="Choose Learning Mode" htmlFor="mode">
