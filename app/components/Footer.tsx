@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useState, useEffect } from "react";
 import { getSession } from "@/app/lib/auth";
+import { BRANCHES } from "@/app/lib/constants";
 
 const footerGroups = [
   {
@@ -46,15 +47,19 @@ export default function Footer() {
             <Link href="/" className="group flex items-center gap-3 font-normal w-fit">
               <img
                 src="/logo.png"
-                alt="Coach Plus"
+                alt="CoachPlus Academy"
                 className="size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
               />
               <span className="text-3xl font-bold tracking-tight text-white">
-                Coach <span className="text-[#E91E63]">Plus</span>
+                CoachPlus <span className="text-[#E91E63]">Academy</span>
               </span>
             </Link>
             <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
               Your Success Starts with the Right Coach.
+            </p>
+            <p className="mt-6 text-xs font-bold uppercase tracking-widest text-slate-500">Our Branches</p>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-400">
+              {BRANCHES.join(" • ")}
             </p>
           </div>
           
@@ -84,7 +89,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-10 border-t border-white/10 pt-6 text-center text-sm text-slate-500">
-          <p>&copy; 2026 Coach Plus</p>
+          <p>&copy; 2026 CoachPlus Academy</p>
         </div>
       </div>
     </footer>

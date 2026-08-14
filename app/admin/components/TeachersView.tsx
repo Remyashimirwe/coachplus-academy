@@ -12,9 +12,12 @@ import {
   FiUsers,
   FiInbox,
   FiCheckCircle,
+  FiSearch,
+  FiBookOpen,
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import TeacherApplicationModal from "./TeacherApplicationModal";
+import { BRANCHES } from "@/app/lib/constants";
 
 function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
@@ -25,8 +28,35 @@ export default function TeachersView({ teacherApplications }: any) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [rowDecision, setRowDecision] = useState<Record<number, "approve" | "deny" | null>>({});
   const [rowError, setRowError] = useState<Record<number, string | undefined>>({});
+  const [search, setSearch] = useState("");
+  const [branchFilter, setBranchFilter] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState("");
 
   const selectedApp = applications.find((a) => a.id === selectedId) || null;
+
+  const subjectOptions = useMemo(() => {
+    const set = new Set<string>();
+    applications.forEach((a) =>
+      String(a.subjects || "")
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter(Boolean)
+        .forEach((s: string) => set.add(s))
+    );
+    return Array.from(set).sort();
+  }, [applications]);
+
+  const filteredApplications = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return applications.filter((a) => {
+      const matchesSearch =
+        !q || a.fullName.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
+      const matchesBranch = !branchFilter || a.branch === branchFilter;
+      const matchesSubject =
+        !subjectFilter || String(a.subjects || "").toLowerCase().includes(subjectFilter.toLowerCase());
+      return matchesSearch && matchesBranch && matchesSubject;
+    });
+  }, [applications, search, branchFilter, subjectFilter]);
 
   const stats = useMemo(() => {
     const pending = applications.filter((a) => a.status === "pending").length;
@@ -98,6 +128,39 @@ export default function TeachersView({ teacherApplications }: any) {
         <p className="text-slate-500">Review, message, and decide on incoming teacher applications.</p>
       </div>
 
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative w-full sm:w-72">
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or email..."
+            className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+          />
+        </div>
+        <select
+          value={branchFilter}
+          onChange={(e) => setBranchFilter(e.target.value)}
+          className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+        >
+          <option value="">All branches</option>
+          {BRANCHES.map((b) => (
+            <option key={b} value={b}>{b}</option>
+          ))}
+        </select>
+        <select
+          value={subjectFilter}
+          onChange={(e) => setSubjectFilter(e.target.value)}
+          className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+        >
+          <option value="">All subjects</option>
+          {subjectOptions.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="grid gap-6 sm:grid-cols-3">
         {stats.map((stat, i) => (
           <div key={i} className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
@@ -115,7 +178,7 @@ export default function TeachersView({ teacherApplications }: any) {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
-        {applications.map((app: any) => {
+        {filteredApplications.map((app: any) => {
           const isPending = app.status === "pending";
           const decision = rowDecision[app.id];
           return (
@@ -146,7 +209,14 @@ export default function TeachersView({ teacherApplications }: any) {
                       {app.status}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500 truncate">{app.email}</p>
+                  <p className="text-sm text-slate-500 truncate flex items-center gap-1.5">
+                    <FiMail className="size-3 shrink-0" /> {app.email}
+                  </p>
+                  {app.phone && (
+                    <p className="text-sm text-slate-500 truncate flex items-center gap-1.5">
+                      <FiPhone className="size-3 shrink-0" /> {app.phone}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -157,10 +227,17 @@ export default function TeachersView({ teacherApplications }: any) {
                 <span className="flex items-center gap-1.5 min-w-0">
                   <FiMapPin className="text-rose-500 shrink-0" />
                   <span className="truncate">
-                    {app.city}, {app.country} {app.location ? `(${app.location})` : ""}
+                    {[app.branch, app.district, app.province, app.country].filter(Boolean).join(", ")}
                   </span>
                 </span>
               </div>
+
+              {app.subjects && (
+                <div className="flex items-start gap-1.5 text-xs font-semibold text-slate-500">
+                  <FiBookOpen className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="line-clamp-2">{app.subjects}</span>
+                </div>
+              )}
 
               {rowError[app.id] && (
                 <p className="text-xs font-bold text-rose-600 flex items-center gap-1.5">

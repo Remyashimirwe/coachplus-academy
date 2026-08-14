@@ -177,11 +177,21 @@ export default function TeacherApplicationModal({
             <div className="min-w-0">
               <h3 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{app.fullName}</h3>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 min-w-0">
+                  <FiMail className="text-indigo-500 shrink-0" /> <span className="truncate">{app.email}</span>
+                </p>
+                {app.phone && (
+                  <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
+                    <FiPhone className="text-emerald-500 shrink-0" /> {app.phone}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
                   <FiClock className="text-indigo-500" /> {app.experienceYears} Years
                 </p>
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
-                  <FiMapPin className="text-rose-500" /> {app.district || app.country}
+                  <FiMapPin className="text-rose-500" /> {[app.branch, app.district || app.country].filter(Boolean).join(" · ")}
                 </p>
                 <span
                   className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
@@ -312,7 +322,7 @@ export default function TeacherApplicationModal({
                   <p className="text-sm text-slate-600 leading-relaxed break-words">{app.expDescription}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-indigo-500 uppercase mb-1">Why Coach Plus?</p>
+                  <p className="text-[10px] font-bold text-indigo-500 uppercase mb-1">Why CoachPlus Academy?</p>
                   <p className="text-sm text-slate-600 leading-relaxed break-words">{app.whyTeach}</p>
                 </div>
               </div>

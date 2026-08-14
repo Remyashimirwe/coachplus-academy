@@ -54,7 +54,13 @@ export async function POST(
         isFirstLogin: true,
         inviteToken,
         inviteTokenExpiresAt,
-        teacherProfile: { create: {} },
+        teacherProfile: {
+          create: {
+            phone: application.phone,
+            branch: application.branch,
+            subjects: application.subjects,
+          },
+        },
       },
     });
 

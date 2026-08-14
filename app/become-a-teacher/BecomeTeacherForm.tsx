@@ -32,6 +32,7 @@ import {
   FiShield,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
+import { BRANCHES } from "@/app/lib/constants";
 
 const subjectsList = [
   "Mathematics",
@@ -230,17 +231,27 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiMapPin />} label="Nearest Branch *" htmlFor="branch">
+                          <select id="branch" name="branch" required defaultValue="" className={`${inputClasses} appearance-none`}>
+                            <option value="" disabled>Choose the closest branch</option>
+                            {BRANCHES.map((b) => (
+                              <option key={b} value={b}>{b}</option>
+                            ))}
+                          </select>
+                        </Field>
                         <Field icon={<FiMapPin />} label="Country *" htmlFor="country">
                           <input id="country" name="country" required placeholder="e.g. Rwanda" className={inputClasses} />
                         </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiMapPin />} label="Province *" htmlFor="province">
                           <input id="province" name="province" required placeholder="e.g. Kigali / East" className={inputClasses} />
                         </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiMapPin />} label="District *" htmlFor="district">
                           <input id="district" name="district" required placeholder="e.g. Nyarugenge" className={inputClasses} />
                         </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiMapPin />} label="Sector *" htmlFor="sector">
                           <input id="sector" name="sector" required placeholder="e.g. Kanyinya" className={inputClasses} />
                         </Field>
@@ -682,7 +693,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
               
               <h2 className="text-3xl font-bold text-[#0f172a]">Application Sent!</h2>
               <p className="mt-6 text-lg leading-relaxed text-slate-500">
-                Thank you for applying to join Coach Plus. Our academic team will review your profile and get back to you within 3-5 business days.
+                Thank you for applying to join CoachPlus Academy. Our academic team will review your profile and get back to you within 3-5 business days.
               </p>
               
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -724,7 +735,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-[#0f172a]">Teacher Partner Terms & Conditions</h2>
-                  <p className="text-sm text-[#E91E63] font-bold uppercase tracking-widest mt-1">COACH PLUS</p>
+                  <p className="text-sm text-[#E91E63] font-bold uppercase tracking-widest mt-1">COACHPLUS ACADEMY</p>
                 </div>
                 <button
                   onClick={() => setShowTermsModal(false)}
@@ -741,12 +752,12 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     YOUR STATUS & PART-TIME DISPATCH
                   </h3>
                   <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Independent Educator:</strong> You are joining Coach Plus as an independent, part-time teacher partner, not as a permanent full-time employee.</li>
-                    <li><strong className="text-slate-900">Session-Based Work:</strong> Assignments are offered on a part-time, per-session basis depending on client demand and your location. Coach Plus does not guarantee a fixed monthly salary or a fixed number of hours.</li>
-                    <li><strong className="text-slate-900">Brand Representation:</strong> When dispatched to teach a Coach Plus student, you act as an official representative of our academy. You must arrive on time, dress professionally, and maintain high teaching standards.</li>
+                    <li><strong className="text-slate-900">Independent Educator:</strong> You are joining CoachPlus Academy as an independent, part-time teacher partner, not as a permanent full-time employee.</li>
+                    <li><strong className="text-slate-900">Session-Based Work:</strong> Assignments are offered on a part-time, per-session basis depending on client demand and your location. CoachPlus Academy does not guarantee a fixed monthly salary or a fixed number of hours.</li>
+                    <li><strong className="text-slate-900">Brand Representation:</strong> When dispatched to teach a CoachPlus Academy student, you act as an official representative of our academy. You must arrive on time, dress professionally, and maintain high teaching standards.</li>
                     <li><strong className="text-slate-900">No Fixed Monthly Salary:</strong> You pay teachers based on completed hours or matched sessions. You do not owe them a fixed monthly wage if there are no active clients in their area.</li>
-                    <li><strong className="text-slate-900">No Employment Liabilities:</strong> Because they are independent partners, Coach Plus is not legally required to provide full-time benefits, pension contributions, paid annual leave, or severance pay.</li>
-                    <li><strong className="text-slate-900">Platform Membership:</strong> Teachers are members of your certified Educator Network/Forum. They maintain their freedom to work elsewhere, but whenever they accept a Coach Plus dispatch, they must follow your code of conduct and represent your brand professionally.</li>
+                    <li><strong className="text-slate-900">No Employment Liabilities:</strong> Because they are independent partners, CoachPlus Academy is not legally required to provide full-time benefits, pension contributions, paid annual leave, or severance pay.</li>
+                    <li><strong className="text-slate-900">Platform Membership:</strong> Teachers are members of your certified Educator Network/Forum. They maintain their freedom to work elsewhere, but whenever they accept a CoachPlus Academy dispatch, they must follow your code of conduct and represent your brand professionally.</li>
                   </ul>
                 </section>
 
@@ -769,7 +780,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                   </h3>
                   <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
                     <li><strong className="text-slate-900">Respecting Client Homes:</strong> During home-coaching visits, you must respect the client&apos;s home, privacy, and family rules.</li>
-                    <li><strong className="text-slate-900">Theft and Property Damage:</strong> If a teacher steals, causes intentional property damage, or breaks the law, Coach Plus will immediately terminate their profile and report them to law enforcement.</li>
+                    <li><strong className="text-slate-900">Theft and Property Damage:</strong> If a teacher steals, causes intentional property damage, or breaks the law, CoachPlus Academy will immediately terminate their profile and report them to law enforcement.</li>
                     <li><strong className="text-slate-900">Personal Liability:</strong> You accept full legal and financial responsibility for your personal actions, damage, or misconduct during active coaching sessions.</li>
                   </ul>
                 </section>
@@ -780,9 +791,9 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     NO DIRECT CASH OR PRIVATE DEALS
                   </h3>
                   <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Client Ownership:</strong> All students, parents, and bookings matched through Coach Plus belong exclusively to the Coach Plus platform.</li>
-                    <li><strong className="text-slate-900">No Direct Payments:</strong> You must never ask for or accept direct cash, private mobile money, or bank transfers from parents. All client payments are collected directly by Coach Plus.</li>
-                    <li><strong className="text-slate-900">No Private Deals:</strong> You are strictly forbidden from making private offline coaching deals with Coach Plus clients outside our platform.</li>
+                    <li><strong className="text-slate-900">Client Ownership:</strong> All students, parents, and bookings matched through CoachPlus Academy belong exclusively to the CoachPlus Academy platform.</li>
+                    <li><strong className="text-slate-900">No Direct Payments:</strong> You must never ask for or accept direct cash, private mobile money, or bank transfers from parents. All client payments are collected directly by CoachPlus Academy.</li>
+                    <li><strong className="text-slate-900">No Private Deals:</strong> You are strictly forbidden from making private offline coaching deals with CoachPlus Academy clients outside our platform.</li>
                     <li><strong className="text-slate-900">Penalties:</strong> Attempting to bypass the platform will result in immediate profile deactivation, forfeiture of unpaid earnings, and potential legal recovery of lost fees.</li>
                   </ul>
                 </section>
@@ -794,7 +805,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                   </h3>
                   <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
                     <li><strong className="text-slate-900">Package Completion:</strong> Once you accept a student match, you commit to finishing the full scheduled package.</li>
-                    <li><strong className="text-slate-900">24-Hour Notice:</strong> If you face an emergency and cannot attend a lesson, you must inform Coach Plus at least 24 hours in advance. Unexcused absences will result in payment deductions or account suspension.</li>
+                    <li><strong className="text-slate-900">24-Hour Notice:</strong> If you face an emergency and cannot attend a lesson, you must inform CoachPlus Academy at least 24 hours in advance. Unexcused absences will result in payment deductions or account suspension.</li>
                   </ul>
                 </section>
 
@@ -804,7 +815,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                     HOW YOU GET PAID
                   </h3>
                   <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Central Billing:</strong> Coach Plus handles all client billing directly before lessons begin.</li>
+                    <li><strong className="text-slate-900">Central Billing:</strong> CoachPlus Academy handles all client billing directly before lessons begin.</li>
                     <li><strong className="text-slate-900">Teacher Payouts:</strong> You will receive your agreed partner payment after verified completion of your assigned coaching hours according to our standard payout schedule.</li>
                     <li><strong className="text-slate-900">Transport:</strong> The cost of transport will be conducted based on your Location provided during registration and it is paid once you start coaching.</li>
                   </ul>

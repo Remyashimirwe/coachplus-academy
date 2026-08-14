@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
                 <img
                   src="/logo.png"
-                  alt="Coach Plus"
+                  alt="CoachPlus Academy"
                   className="relative size-16 rounded-2xl object-contain shadow-sm mb-6"
                 />
               </div>

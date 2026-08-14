@@ -35,7 +35,7 @@ export default function WhatsAppButton() {
                     <FaWhatsapp className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Coach Plus</p>
+                    <p className="text-sm font-bold">CoachPlus Academy</p>
                     <p className="text-xs text-white/80">Typically replies in a few hours</p>
                   </div>
                 </div>

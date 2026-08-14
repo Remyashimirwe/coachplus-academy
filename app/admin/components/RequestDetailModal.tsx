@@ -22,7 +22,10 @@ import {
   FiUserPlus,
   FiCopy,
   FiCheck,
+  FiStar,
 } from "react-icons/fi";
+import { BRANCHES } from "@/app/lib/constants";
+import { scoreTeacherForStudent, matchLabel } from "@/app/lib/matching";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-100 text-amber-700",
@@ -39,7 +42,7 @@ export default function RequestDetailModal({
   onUpdated,
 }: {
   request: any;
-  teachers?: { id: number; name: string; email: string }[];
+  teachers?: { id: number; name: string; email: string; phone?: string; branch?: string; subjects?: string }[];
   onClose: () => void;
   onUpdated: (id: number, changes: any) => void;
 }) {
@@ -50,6 +53,8 @@ export default function RequestDetailModal({
   const [approving, setApproving] = useState(false);
   const [approveStatus, setApproveStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [teacherSearch, setTeacherSearch] = useState("");
+  const [teacherBranchFilter, setTeacherBranchFilter] = useState("");
+  const [teacherSubjectFilter, setTeacherSubjectFilter] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [assignStatus, setAssignStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
@@ -83,7 +88,7 @@ export default function RequestDetailModal({
       const data = await res.json();
 
       if (res.ok) {
-        setSendStatus({ success: true, text: "Email sent from Coach Plus!" });
+        setSendStatus({ success: true, text: "Email sent from CoachPlus Academy!" });
         setMessage("");
         if (request.status === "new") onUpdated(request.id, { status: "contacted" });
       } else {
@@ -178,12 +183,32 @@ export default function RequestDetailModal({
     }
   }
 
+  const teacherSubjectOptions = useMemo(() => {
+    const set = new Set<string>();
+    (teachers || []).forEach((t) =>
+      String(t.subjects || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .forEach((s) => set.add(s))
+    );
+    return Array.from(set).sort();
+  }, [teachers]);
+
   const filteredTeachers = useMemo(() => {
     const list = teachers || [];
     const q = teacherSearch.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter((t) => t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q));
-  }, [teachers, teacherSearch]);
+    return list
+      .filter((t) => (q ? t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q) : true))
+      .filter((t) => (teacherBranchFilter ? t.branch === teacherBranchFilter : true))
+      .filter((t) =>
+        teacherSubjectFilter
+          ? String(t.subjects || "").toLowerCase().includes(teacherSubjectFilter.toLowerCase())
+          : true
+      )
+      .map((t) => ({ ...t, match: scoreTeacherForStudent(t, { branch: request.branch, subjects: request.subjects }) }))
+      .sort((a, b) => b.match.score - a.match.score);
+  }, [teachers, teacherSearch, teacherBranchFilter, teacherSubjectFilter, request.branch, request.subjects]);
 
   const locationParts = [request.country, request.province, request.district, request.sector, request.cell, request.village]
     .filter(Boolean);
@@ -288,6 +313,12 @@ export default function RequestDetailModal({
                   <div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase">City</p>
                     <p className="text-sm font-bold text-slate-700 break-words">{request.location}</p>
+                  </div>
+                )}
+                {request.branch && (
+                  <div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Branch</p>
+                    <p className="text-sm font-bold text-slate-700 break-words">{request.branch}</p>
                   </div>
                 )}
                 {request.idPassport && (
@@ -396,40 +427,81 @@ export default function RequestDetailModal({
                     </p>
                   )}
 
-                  <div className="relative">
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
-                    <input
-                      type="text"
-                      value={teacherSearch}
-                      onChange={(e) => setTeacherSearch(e.target.value)}
-                      placeholder="Search teachers to assign..."
-                      className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
-                    />
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="relative sm:col-span-1">
+                      <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+                      <input
+                        type="text"
+                        value={teacherSearch}
+                        onChange={(e) => setTeacherSearch(e.target.value)}
+                        placeholder="Search teachers to assign..."
+                        className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                      />
+                    </div>
+                    <select
+                      value={teacherBranchFilter}
+                      onChange={(e) => setTeacherBranchFilter(e.target.value)}
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                    >
+                      <option value="">All branches</option>
+                      {BRANCHES.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={teacherSubjectFilter}
+                      onChange={(e) => setTeacherSubjectFilter(e.target.value)}
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                    >
+                      <option value="">All subjects</option>
+                      {teacherSubjectOptions.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                     {filteredTeachers
                       .filter((t) => t.id !== request.assignedTeacher?.id)
-                      .map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => handleAssignTeacher(t.id)}
-                          disabled={assigning}
-                          className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
-                            {t.name.charAt(0)}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-slate-900 truncate">{t.name}</p>
-                            <p className="text-xs text-slate-500 truncate">{t.email}</p>
-                          </div>
-                          <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
-                            <FiUserCheck className="size-4" />
-                            {request.assignedTeacher ? "Reassign" : "Assign"}
-                          </span>
-                        </button>
-                      ))}
+                      .map((t) => {
+                        const label = matchLabel(t.match);
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => handleAssignTeacher(t.id)}
+                            disabled={assigning}
+                            className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
+                              {t.name.charAt(0)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-bold text-slate-900 truncate flex items-center gap-2">
+                                {t.name}
+                                {label && (
+                                  <span
+                                    className={`inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+                                      label === "Best match" ? "bg-amber-100 text-amber-700" : "bg-indigo-50 text-indigo-600"
+                                    }`}
+                                  >
+                                    <FiStar className="size-2.5" /> {label}
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-xs text-slate-500 truncate">{t.email}{t.phone ? ` · ${t.phone}` : ""}</p>
+                              {(t.branch || t.subjects) && (
+                                <p className="text-[10px] text-slate-400 truncate">
+                                  {[t.branch, t.subjects].filter(Boolean).join(" · ")}
+                                </p>
+                              )}
+                            </div>
+                            <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
+                              <FiUserCheck className="size-4" />
+                              {request.assignedTeacher ? "Reassign" : "Assign"}
+                            </span>
+                          </button>
+                        );
+                      })}
                     {filteredTeachers.length === 0 && (
                       <p className="text-sm text-slate-400 italic text-center py-4">No teachers found.</p>
                     )}
@@ -467,7 +539,7 @@ export default function RequestDetailModal({
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder={`Write a reply to send to ${request.email} directly from Coach Plus...`}
+                placeholder={`Write a reply to send to ${request.email} directly from CoachPlus Academy...`}
                 rows={4}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all resize-none"
               />

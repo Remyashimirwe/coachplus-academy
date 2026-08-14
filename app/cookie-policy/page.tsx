@@ -30,7 +30,7 @@ export default function CookiePolicy() {
               <section>
                 <h2 className="text-xl font-bold text-[#21121f] mb-4">2. How We Use Cookies</h2>
                 <p>
-                  Coach Plus uses cookies for several reasons:
+                  CoachPlus Academy uses cookies for several reasons:
                 </p>
                 <ul className="list-disc ml-6 space-y-2">
                   <li><strong className="text-slate-900">Essential Cookies:</strong> These are necessary for the website to function properly. They include, for example, cookies that enable you to log into secure areas of our website.</li>

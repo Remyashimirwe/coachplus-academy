@@ -8,16 +8,19 @@ import "@fontsource/poppins/900.css";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import WhatsAppButton from "./components/WhatsAppButton";
+import { BRAND_NAME } from "./lib/constants";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Coach Plus",
-    default: "Coach Plus | Find the Perfect Teacher",
+    template: `%s | ${BRAND_NAME}`,
+    default: `${BRAND_NAME} | Find the Perfect Teacher`,
   },
   description:
     "Connect with verified home and online teachers for personalized learning.",
   icons: {
-    apple: "public/logo.png",
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

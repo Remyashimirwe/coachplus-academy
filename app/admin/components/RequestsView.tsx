@@ -14,6 +14,7 @@ import {
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import RequestDetailModal from "./RequestDetailModal";
+import { BRANCHES } from "@/app/lib/constants";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-100 text-amber-700",
@@ -37,6 +38,8 @@ export default function RequestsView({ requests, teachers }: any) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [branchFilter, setBranchFilter] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState("");
 
   const selectedRequest = items.find((r) => r.id === selectedId) || null;
 
@@ -54,6 +57,18 @@ export default function RequestsView({ requests, teachers }: any) {
     ];
   }, [items]);
 
+  const subjectOptions = useMemo(() => {
+    const set = new Set<string>();
+    (teachers || []).forEach((t: any) =>
+      String(t.subjects || "")
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter(Boolean)
+        .forEach((s: string) => set.add(s))
+    );
+    return Array.from(set).sort();
+  }, [teachers]);
+
   const filteredItems = useMemo(() => {
     return items.filter((r) => {
       const matchesFilter = filter === "all" || r.status === filter || (filter === "new" && !r.status);
@@ -63,9 +78,11 @@ export default function RequestsView({ requests, teachers }: any) {
         r.parent_name?.toLowerCase().includes(q) ||
         r.email?.toLowerCase().includes(q) ||
         r.subjects?.toLowerCase().includes(q);
-      return matchesFilter && matchesSearch;
+      const matchesBranch = !branchFilter || r.branch === branchFilter;
+      const matchesSubject = !subjectFilter || r.subjects?.toLowerCase().includes(subjectFilter.toLowerCase());
+      return matchesFilter && matchesSearch && matchesBranch && matchesSubject;
     });
-  }, [items, filter, search]);
+  }, [items, filter, search, branchFilter, subjectFilter]);
 
   function handleUpdated(id: number, changes: any) {
     setItems((prev) => prev.map((r) => (r.id === id ? { ...r, ...changes } : r)));
@@ -75,7 +92,7 @@ export default function RequestsView({ requests, teachers }: any) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Teacher Requests</h1>
-        <p className="text-slate-500">Review parent requests and reply straight from Coach Plus by email.</p>
+        <p className="text-slate-500">Review parent requests and reply straight from CoachPlus Academy by email.</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -110,15 +127,37 @@ export default function RequestsView({ requests, teachers }: any) {
             </button>
           ))}
         </div>
-        <div className="relative w-full sm:w-72">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, subject..."
-            className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, email, subject..."
+              className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+            />
+          </div>
+          <select
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+          >
+            <option value="">All branches</option>
+            {BRANCHES.map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </select>
+          <select
+            value={subjectFilter}
+            onChange={(e) => setSubjectFilter(e.target.value)}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+          >
+            <option value="">All subjects</option>
+            {subjectOptions.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -154,11 +193,11 @@ export default function RequestsView({ requests, teachers }: any) {
                   <span className="truncate">{request.grade}</span>
                 </span>
               )}
-              {(request.country || request.location) && (
+              {(request.branch || request.country || request.location) && (
                 <span className="flex items-center gap-1.5 min-w-0">
                   <FiMapPin className="text-rose-500 shrink-0" />
                   <span className="truncate">
-                    {[request.location, request.country].filter(Boolean).join(", ")}
+                    {[request.branch, request.location, request.country].filter(Boolean).join(", ")}
                   </span>
                 </span>
               )}

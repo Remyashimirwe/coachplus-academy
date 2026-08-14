@@ -95,13 +95,13 @@ function AcceptInviteContent() {
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
                 <img
                   src="/logo.png"
-                  alt="Coach Plus"
+                  alt="CoachPlus Academy"
                   className="relative size-16 rounded-2xl object-contain shadow-sm"
                 />
               </div>
               <h1 className="text-3xl font-bold text-[#21121f]">Accept Your Invitation</h1>
               <p className="text-slate-500 mt-2">
-                Welcome to Coach Plus! Create a password to activate your account.
+                Welcome to CoachPlus Academy! Create a password to activate your account.
               </p>
             </div>
 

@@ -83,7 +83,7 @@ export default function ReportTeacherPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Report a Teacher</h1>
         <p className="text-slate-500 mt-1 text-sm">
-          Let the admin team know about any issue, mistake, or concern — it goes straight to Coach Plus admins.
+          Let the admin team know about any issue, mistake, or concern — it goes straight to CoachPlus Academy admins.
         </p>
       </div>
 

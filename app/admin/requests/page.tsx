@@ -33,6 +33,9 @@ export default async function RequestsPage() {
         id: t.id,
         name: t.user.name,
         email: t.user.email,
+        phone: t.phone,
+        branch: t.branch,
+        subjects: t.subjects,
       }))}
     />
   );

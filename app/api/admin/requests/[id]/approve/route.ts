@@ -52,6 +52,17 @@ export async function POST(
       );
     }
 
+    if (!existingUser.studentProfile.branch || !existingUser.studentProfile.subjects || !existingUser.studentProfile.phone) {
+      await db.student.update({
+        where: { id: existingUser.studentProfile.id },
+        data: {
+          phone: existingUser.studentProfile.phone || parentRequest.phone,
+          branch: existingUser.studentProfile.branch || parentRequest.branch,
+          subjects: existingUser.studentProfile.subjects || parentRequest.subjects,
+        },
+      });
+    }
+
     const updated = await db.request.update({
       where: { id: requestId },
       data: { status: "approved", studentId: existingUser.studentProfile.id },
@@ -86,7 +97,13 @@ export async function POST(
         isFirstLogin: true,
         inviteToken,
         inviteTokenExpiresAt,
-        studentProfile: { create: {} },
+        studentProfile: {
+          create: {
+            phone: parentRequest.phone,
+            branch: parentRequest.branch,
+            subjects: parentRequest.subjects,
+          },
+        },
       },
       include: { studentProfile: true },
     });

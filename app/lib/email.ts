@@ -1,7 +1,9 @@
 import { Resend } from "resend";
+import { BRAND_NAME, BRANCHES } from "./constants";
 
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
-const FROM_EMAIL = process.env.EMAIL_FROM || "Coach Plus <admin@coachplusacademy.com>";
+const FROM_EMAIL = process.env.EMAIL_FROM || `${BRAND_NAME} <admin@coachplusacademy.com>`;
+const LOGO_URL = `${APP_URL}/logo.png`;
 
 let resend: Resend | null = null;
 function getResendClient() {
@@ -9,6 +11,41 @@ function getResendClient() {
     resend = new Resend(process.env.RESEND_API_KEY);
   }
   return resend;
+}
+
+/**
+ * Wraps the given body markup into a consistent, professional email shell:
+ * a header with the CoachPlus Academy logo, and a footer listing our branch
+ * locations so recipients always know how to find/reach us.
+ */
+function renderEmail({ preheader, bodyHtml }: { preheader?: string; bodyHtml: string }) {
+  return `
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader || ""}</div>
+    <div style="background-color:#f1f5f9;padding:32px 16px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+      <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.08);">
+        <div style="background-color:#0f172a;padding:28px 32px;text-align:center;">
+          <img src="${LOGO_URL}" alt="${BRAND_NAME}" width="56" height="56" style="border-radius:14px;display:inline-block;object-fit:contain;background:#ffffff;padding:6px;" />
+          <div style="color:#ffffff;font-size:18px;font-weight:700;margin-top:12px;letter-spacing:0.3px;">${BRAND_NAME}</div>
+        </div>
+        <div style="padding:36px 32px;color:#0f172a;font-size:15px;line-height:1.65;">
+          ${bodyHtml}
+        </div>
+        <div style="background-color:#f8fafc;padding:24px 32px;border-top:1px solid #e2e8f0;">
+          <p style="margin:0 0 8px 0;font-size:12px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.5px;">Our Branches</p>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.7;">${BRANCHES.join(" &nbsp;•&nbsp; ")}</p>
+          <p style="margin:16px 0 0 0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} ${BRAND_NAME}. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function signature(label = "The") {
+  return `
+    <p style="margin-top:32px;color:#64748b;font-size:13px;">
+      — ${label} ${BRAND_NAME} Team
+    </p>
+  `;
 }
 
 export async function sendInviteEmail({
@@ -38,12 +75,13 @@ export async function sendInviteEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: "You're invited to Coach Plus",
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${name},</h2>
+      subject: `You're invited to ${BRAND_NAME}`,
+      html: renderEmail({
+        preheader: `An administrator has invited you to join ${BRAND_NAME}.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${name},</h2>
           <p>
-            An administrator has invited you to join Coach Plus as a
+            An administrator has invited you to join <strong>${BRAND_NAME}</strong> as a
             <strong>${roleLabel}</strong>.
           </p>
           <p>
@@ -61,8 +99,9 @@ export async function sendInviteEmail({
           <p>Or copy and paste this link into your browser:</p>
           <p><a href="${inviteUrl}">${inviteUrl}</a></p>
           <p>This invitation link will expire in 7 days.</p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -99,13 +138,14 @@ export async function sendApplicationApprovedEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: "Congratulations! Your Coach Plus teacher application was approved",
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Congratulations, ${name}!</h2>
+      subject: `Congratulations! Your ${BRAND_NAME} teacher application was approved`,
+      html: renderEmail({
+        preheader: `Your application to become a teacher at ${BRAND_NAME} has been approved.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Congratulations, ${name}!</h2>
           <p>
             We're excited to let you know that your application to become a
-            <strong>Teacher</strong> at Coach Plus has been <strong>approved</strong>.
+            <strong>Teacher</strong> at ${BRAND_NAME} has been <strong>approved</strong>.
           </p>
           <p>
             Click the button below to set up your password and activate your official teacher account.
@@ -121,11 +161,9 @@ export async function sendApplicationApprovedEmail({
           <p>Or copy and paste this link into your browser:</p>
           <p><a href="${inviteUrl}">${inviteUrl}</a></p>
           <p>This invitation link will expire in 7 days.</p>
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -158,22 +196,21 @@ export async function sendApplicationDeniedEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: "Update on your Coach Plus teacher application",
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${name},</h2>
+      subject: `Update on your ${BRAND_NAME} teacher application`,
+      html: renderEmail({
+        preheader: `An update on your ${BRAND_NAME} teacher application.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${name},</h2>
           <p>
-            Thank you for taking the time to apply to become a Teacher at Coach Plus.
+            Thank you for taking the time to apply to become a Teacher at ${BRAND_NAME}.
             After careful review, we're unable to move forward with your application at this time.
           </p>
           <p>
             We truly appreciate your interest and encourage you to apply again in the future.
           </p>
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -208,19 +245,20 @@ export async function sendRequestApprovedEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: "Your Coach Plus teacher request has been approved",
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${name},</h2>
+      subject: `Your ${BRAND_NAME} teacher request has been approved`,
+      html: renderEmail({
+        preheader: `Your request for a teacher on ${BRAND_NAME} has been approved.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${name},</h2>
           <p>
-            Good news! Your request for a teacher on <strong>Coach Plus</strong> has been
+            Good news! Your request for a teacher on <strong>${BRAND_NAME}</strong> has been
             <strong>approved</strong>.
           </p>
           ${
             inviteUrl
               ? `
           <p>
-            We've also created your student account so you can log in to Coach Plus and follow
+            We've also created your student account so you can log in to ${BRAND_NAME} and follow
             your teacher assignment and sessions from your own dashboard.
           </p>
           <p style="text-align: center; margin: 32px 0;">
@@ -237,16 +275,15 @@ export async function sendRequestApprovedEmail({
           `
               : `
           <p>
-            Our team is now working on matching you with the right teacher. You'll receive
-            another email as soon as a teacher has been assigned to you.
+            Our team is now working on matching you with the right teacher, based on your
+            location and the subjects you'd like to learn. You'll receive another email as soon
+            as a teacher has been assigned to you.
           </p>
           `
           }
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -266,12 +303,14 @@ export async function sendTeacherAssignedToParentEmail({
   parentName,
   teacherName,
   teacherEmail,
+  teacherPhone,
   subjects,
 }: {
   to: string;
   parentName: string;
   teacherName: string;
   teacherEmail: string;
+  teacherPhone?: string;
   subjects?: string;
 }) {
   const client = getResendClient();
@@ -285,23 +324,23 @@ export async function sendTeacherAssignedToParentEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: "A teacher has been assigned to you on Coach Plus",
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${parentName},</h2>
+      subject: `A teacher has been assigned to you on ${BRAND_NAME}`,
+      html: renderEmail({
+        preheader: `${teacherName} has been assigned as your teacher on ${BRAND_NAME}.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${parentName},</h2>
           <p>
             We're happy to let you know that <strong>${teacherName}</strong> has been assigned
-            as your teacher on <strong>Coach Plus</strong>${subjects ? ` for <strong>${subjects}</strong>` : ""}.
+            as your teacher on <strong>${BRAND_NAME}</strong>${subjects ? ` for <strong>${subjects}</strong>` : ""}.
           </p>
-          <p>
-            You can reach your teacher directly at
-            <a href="mailto:${teacherEmail}">${teacherEmail}</a> to coordinate your sessions.
+          <p>You can reach your teacher directly using the contact details below to coordinate your sessions:</p>
+          <p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
+            <strong>Email:</strong> <a href="mailto:${teacherEmail}">${teacherEmail}</a>
+            ${teacherPhone ? `<br/><strong>Phone:</strong> <a href="tel:${teacherPhone}">${teacherPhone}</a>` : ""}
           </p>
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -321,6 +360,7 @@ export async function sendRequestAssignedToTeacherEmail({
   teacherName,
   parentName,
   parentEmail,
+  parentPhone,
   subjects,
   details,
 }: {
@@ -328,6 +368,7 @@ export async function sendRequestAssignedToTeacherEmail({
   teacherName: string;
   parentName: string;
   parentEmail: string;
+  parentPhone?: string;
   subjects?: string;
   details?: string;
 }) {
@@ -342,24 +383,28 @@ export async function sendRequestAssignedToTeacherEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: "You've been assigned a new student request on Coach Plus",
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${teacherName},</h2>
+      subject: `You've been assigned a new student request on ${BRAND_NAME}`,
+      html: renderEmail({
+        preheader: `You've been assigned a new student request on ${BRAND_NAME}.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${teacherName},</h2>
           <p>
-            You've been assigned to a new teacher request on <strong>Coach Plus</strong>.
+            You've been assigned to a new teacher request on <strong>${BRAND_NAME}</strong>,
+            matched to your location and the subjects you teach.
           </p>
-          <p><strong>Parent:</strong> ${parentName} (<a href="mailto:${parentEmail}">${parentEmail}</a>)</p>
+          <p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
+            <strong>Parent:</strong> ${parentName}<br/>
+            <strong>Email:</strong> <a href="mailto:${parentEmail}">${parentEmail}</a>
+            ${parentPhone ? `<br/><strong>Phone:</strong> <a href="tel:${parentPhone}">${parentPhone}</a>` : ""}
+          </p>
           ${subjects ? `<p><strong>Courses & Topics:</strong> ${subjects}</p>` : ""}
           ${details ? `<p><strong>Details:</strong> ${details}</p>` : ""}
           <p>
             Please reach out to the parent to introduce yourself and coordinate the next steps.
           </p>
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -399,18 +444,17 @@ export async function sendReportSubmittedEmail({
       from: FROM_EMAIL,
       to,
       subject: `New teacher report submitted by ${studentName}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>New report on Coach Plus</h2>
+      html: renderEmail({
+        preheader: `${studentName} has submitted a new report.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">New report on ${BRAND_NAME}</h2>
           <p><strong>${studentName}</strong> has submitted a report${teacherName ? ` about <strong>${teacherName}</strong>` : ""}.</p>
           <p><strong>Category:</strong> ${category}</p>
           <p><strong>Message:</strong></p>
           <p style="white-space: pre-wrap; background:#f8fafc; padding:12px 16px; border-radius:12px;">${message}</p>
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — Coach Plus System
-          </p>
-        </div>
-      `,
+          ${signature("The")}
+        `,
+      }),
     });
 
     if (error) {
@@ -448,10 +492,11 @@ export async function sendReportUpdateEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `Update on your report to Coach Plus`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${name},</h2>
+      subject: `Update on your report to ${BRAND_NAME}`,
+      html: renderEmail({
+        preheader: `Your report has been marked as ${statusLabel}.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${name},</h2>
           <p>
             The report you submitted has been marked as <strong>${statusLabel}</strong> by our team.
           </p>
@@ -461,11 +506,9 @@ export async function sendReportUpdateEmail({
                  <p style="white-space: pre-wrap; background:#f8fafc; padding:12px 16px; border-radius:12px;">${adminReply}</p>`
               : ""
           }
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {
@@ -492,7 +535,7 @@ export async function sendMessageEmail({
   message: string;
 }) {
   const client = getResendClient();
-  const emailSubject = subject?.trim() || "Message from Coach Plus";
+  const emailSubject = subject?.trim() || `Message from ${BRAND_NAME}`;
   const messageHtml = message
     .split(/\n{2,}/)
     .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br/>")}</p>`)
@@ -510,15 +553,14 @@ export async function sendMessageEmail({
       from: FROM_EMAIL,
       to,
       subject: emailSubject,
-      html: `
-        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2>Hi ${name},</h2>
+      html: renderEmail({
+        preheader: emailSubject,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${name},</h2>
           ${messageHtml}
-          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
-            — The Coach Plus Team
-          </p>
-        </div>
-      `,
+          ${signature()}
+        `,
+      }),
     });
 
     if (error) {

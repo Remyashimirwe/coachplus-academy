@@ -22,6 +22,7 @@ import {
 } from "react-icons/fi";
 import {saveRequest} from "@/app/actions/request";
 import Footer from "../components/Footer";
+import {BRANCHES} from "@/app/lib/constants";
 
 interface Topic {
     id: number;
@@ -211,7 +212,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                     >
             <span
                 className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
-              Join Coach Plus
+              Join CoachPlus Academy
             </span>
                         <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
                             Request a <span className="text-[#E91E63]">Teacher</span>
@@ -357,6 +358,30 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                        className={inputClasses}/>
                                             </Field>
                                         </div>
+
+                                        <Field icon={<FiMapPin/>} label="Nearest Branch" htmlFor="branch">
+                                            <div className="relative group">
+                                                <select
+                                                    id="branch"
+                                                    name="branch"
+                                                    defaultValue=""
+                                                    required
+                                                    className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
+                                                >
+                                                    <option value="" disabled>Choose the closest branch</option>
+                                                    {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+                                                </select>
+                                                <div
+                                                    className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor"
+                                                              strokeWidth="2" strokeLinecap="round"
+                                                              strokeLinejoin="round"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </Field>
                                     </div>
 
                                     <div className="grid gap-8">
