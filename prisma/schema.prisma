@@ -29,11 +29,12 @@ model User {
 }
 
 model Teacher {
-  id          Int          @id @default(autoincrement())
-  userId      Int          @unique
-  user        User         @relation("UserToTeacher", fields: [userId], references: [id])
-  students    Student[]    @relation("TeacherStudents")
-  attendances Attendance[]
+  id               Int          @id @default(autoincrement())
+  userId           Int          @unique
+  user             User         @relation("UserToTeacher", fields: [userId], references: [id])
+  students         Student[]    @relation("TeacherStudents")
+  attendances      Attendance[]
+  assignedRequests Request[]    @relation("RequestAssignedTeacher")
 }
 
 model Student {
@@ -85,24 +86,26 @@ model Topic {
 }
 
 model Request {
-  id         Int      @id @default(autoincrement())
-  parentName String
-  email      String
-  phone      String   @default("")
-  grade      String   @default("")
-  subjects   String   @default("")
-  details    String   @default("")
-  status     String   @default("new")
-  createdAt  DateTime @default(now())
-  location   String   @default("")
-  phone2     String   @default("")
-  cell       String   @default("")
-  district   String   @default("")
-  province   String   @default("")
-  sector     String   @default("")
-  village    String   @default("")
-  idPassport String   @default("")
-  country    String   @default("")
+  id                Int      @id @default(autoincrement())
+  parentName        String
+  email             String
+  phone             String   @default("")
+  grade             String   @default("")
+  subjects          String   @default("")
+  details           String   @default("")
+  status            String   @default("new")
+  createdAt         DateTime @default(now())
+  location          String   @default("")
+  phone2            String   @default("")
+  cell              String   @default("")
+  district          String   @default("")
+  province          String   @default("")
+  sector            String   @default("")
+  village           String   @default("")
+  idPassport        String   @default("")
+  country           String   @default("")
+  assignedTeacherId Int?
+  assignedTeacher   Teacher? @relation("RequestAssignedTeacher", fields: [assignedTeacherId], references: [id])
 }
 
 model TeacherApplication {

@@ -188,6 +188,168 @@ export async function sendApplicationDeniedEmail({
   }
 }
 
+export async function sendRequestApprovedEmail({
+  to,
+  name,
+}: {
+  to: string;
+  name: string;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Approval notice not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Your Coach Plus teacher request has been approved",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${name},</h2>
+          <p>
+            Good news! Your request for a teacher on <strong>Coach Plus</strong> has been
+            <strong>approved</strong>.
+          </p>
+          <p>
+            Our team is now working on matching you with the right teacher. You'll receive
+            another email as soon as a teacher has been assigned to you.
+          </p>
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send request approved email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send request approved email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendTeacherAssignedToParentEmail({
+  to,
+  parentName,
+  teacherName,
+  teacherEmail,
+  subjects,
+}: {
+  to: string;
+  parentName: string;
+  teacherName: string;
+  teacherEmail: string;
+  subjects?: string;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Teacher assignment notice not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "A teacher has been assigned to you on Coach Plus",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${parentName},</h2>
+          <p>
+            We're happy to let you know that <strong>${teacherName}</strong> has been assigned
+            as your teacher on <strong>Coach Plus</strong>${subjects ? ` for <strong>${subjects}</strong>` : ""}.
+          </p>
+          <p>
+            You can reach your teacher directly at
+            <a href="mailto:${teacherEmail}">${teacherEmail}</a> to coordinate your sessions.
+          </p>
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send teacher assignment email to parent:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send teacher assignment email to parent:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendRequestAssignedToTeacherEmail({
+  to,
+  teacherName,
+  parentName,
+  parentEmail,
+  subjects,
+  details,
+}: {
+  to: string;
+  teacherName: string;
+  parentName: string;
+  parentEmail: string;
+  subjects?: string;
+  details?: string;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. New request assignment not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "You've been assigned a new student request on Coach Plus",
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Hi ${teacherName},</h2>
+          <p>
+            You've been assigned to a new teacher request on <strong>Coach Plus</strong>.
+          </p>
+          <p><strong>Parent:</strong> ${parentName} (<a href="mailto:${parentEmail}">${parentEmail}</a>)</p>
+          ${subjects ? `<p><strong>Courses & Topics:</strong> ${subjects}</p>` : ""}
+          ${details ? `<p><strong>Details:</strong> ${details}</p>` : ""}
+          <p>
+            Please reach out to the parent to introduce yourself and coordinate the next steps.
+          </p>
+          <p style="margin-top: 32px; color: #64748b; font-size: 13px;">
+            — The Coach Plus Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Failed to send request assignment email to teacher:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send request assignment email to teacher:", err);
+    return { success: false, message: err.message };
+  }
+}
+
 export async function sendMessageEmail({
   to,
   name,

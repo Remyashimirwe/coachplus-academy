@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FiX,
   FiMail,
@@ -14,20 +14,29 @@ import {
   FiLoader,
   FiClock,
   FiCreditCard,
+  FiThumbsUp,
+  FiUserCheck,
+  FiAward,
+  FiSearch,
+  FiXCircle,
 } from "react-icons/fi";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-100 text-amber-700",
   contacted: "bg-indigo-100 text-indigo-700",
+  approved: "bg-sky-100 text-sky-700",
+  assigned: "bg-violet-100 text-violet-700",
   resolved: "bg-emerald-100 text-emerald-700",
 };
 
 export default function RequestDetailModal({
   request,
+  teachers,
   onClose,
   onUpdated,
 }: {
   request: any;
+  teachers?: { id: number; name: string; email: string }[];
   onClose: () => void;
   onUpdated: (id: number, changes: any) => void;
 }) {
@@ -35,6 +44,11 @@ export default function RequestDetailModal({
   const [sending, setSending] = useState(false);
   const [sendStatus, setSendStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [approveStatus, setApproveStatus] = useState<{ success: boolean; text: string } | null>(null);
+  const [teacherSearch, setTeacherSearch] = useState("");
+  const [assigning, setAssigning] = useState(false);
+  const [assignStatus, setAssignStatus] = useState<{ success: boolean; text: string } | null>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -93,6 +107,65 @@ export default function RequestDetailModal({
       setStatusUpdating(false);
     }
   }
+
+  async function handleApprove() {
+    if (approving) return;
+    setApproving(true);
+    setApproveStatus(null);
+    try {
+      const res = await fetch(`/api/admin/requests/${request.id}/approve`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onUpdated(request.id, { status: data.status || "approved" });
+        setApproveStatus({ success: true, text: data.message || "Request approved!" });
+      } else {
+        setApproveStatus({ success: false, text: data.message || "Failed to approve request" });
+      }
+    } catch {
+      setApproveStatus({ success: false, text: "Failed to approve request" });
+    } finally {
+      setApproving(false);
+    }
+  }
+
+  async function handleAssignTeacher(teacherId: number | null) {
+    if (assigning) return;
+    setAssigning(true);
+    setAssignStatus(null);
+    try {
+      const res = await fetch(`/api/admin/requests/${request.id}/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teacherId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onUpdated(request.id, {
+          status: data.request?.status,
+          assignedTeacher: data.request?.assignedTeacher
+            ? { id: data.request.assignedTeacher.id, user: data.request.assignedTeacher.user }
+            : null,
+        });
+        setAssignStatus({ success: true, text: data.message || "Teacher updated!" });
+        if (teacherId) setTeacherSearch("");
+      } else {
+        setAssignStatus({ success: false, text: data.message || "Failed to update teacher assignment" });
+      }
+    } catch {
+      setAssignStatus({ success: false, text: "Failed to update teacher assignment" });
+    } finally {
+      setAssigning(false);
+    }
+  }
+
+  const filteredTeachers = useMemo(() => {
+    const list = teachers || [];
+    const q = teacherSearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((t) => t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q));
+  }, [teachers, teacherSearch]);
 
   const locationParts = [request.country, request.province, request.district, request.sector, request.cell, request.village]
     .filter(Boolean);
@@ -206,6 +279,116 @@ export default function RequestDetailModal({
                     </p>
                     <p className="text-sm font-bold text-slate-700 break-words">{request.idPassport}</p>
                   </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Approve & Assign Teacher */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-black text-sky-500 uppercase tracking-widest flex items-center gap-2">
+              <FiThumbsUp /> Approve & Assign a Teacher
+            </h4>
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold text-slate-700">
+                    {request.status === "new" || request.status === "contacted"
+                      ? "This request hasn't been approved yet."
+                      : "This request has been approved."}
+                  </p>
+                  {approveStatus && (
+                    <p className={`mt-1.5 text-xs font-bold flex items-center gap-1.5 ${approveStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+                      {approveStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
+                      {approveStatus.text}
+                    </p>
+                  )}
+                </div>
+                {request.status === "new" || request.status === "contacted" ? (
+                  <button
+                    onClick={handleApprove}
+                    disabled={approving}
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white text-sm font-bold hover:bg-sky-600 transition-all shadow-lg shadow-sky-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {approving ? <FiLoader className="size-4 animate-spin" /> : <FiThumbsUp className="size-4" />}
+                    {approving ? "Approving..." : "Approve Request"}
+                  </button>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-xs font-black px-3 py-2 rounded-xl bg-sky-100 text-sky-700 shrink-0">
+                    <FiCheckCircle /> Approved
+                  </span>
+                )}
+              </div>
+
+              <div className="border-t border-slate-200 pt-5 space-y-4">
+                {request.assignedTeacher ? (
+                  <div className="flex items-center gap-3 rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-4">
+                    <div className="size-11 rounded-xl bg-violet-500 text-white flex items-center justify-center font-bold shrink-0">
+                      {request.assignedTeacher.user.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-slate-900 truncate">{request.assignedTeacher.user.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{request.assignedTeacher.user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => handleAssignTeacher(null)}
+                      disabled={assigning}
+                      title="Unassign teacher"
+                      className="shrink-0 p-2.5 rounded-xl bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50 transition-all disabled:opacity-50"
+                    >
+                      {assigning ? <FiLoader className="size-4 animate-spin" /> : <FiXCircle className="size-4" />}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <FiAward className="text-violet-400" /> No teacher assigned yet.
+                  </p>
+                )}
+
+                <div className="relative">
+                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+                  <input
+                    type="text"
+                    value={teacherSearch}
+                    onChange={(e) => setTeacherSearch(e.target.value)}
+                    placeholder="Search teachers to assign..."
+                    className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  {filteredTeachers
+                    .filter((t) => t.id !== request.assignedTeacher?.id)
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleAssignTeacher(t.id)}
+                        disabled={assigning}
+                        className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
+                          {t.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-slate-900 truncate">{t.name}</p>
+                          <p className="text-xs text-slate-500 truncate">{t.email}</p>
+                        </div>
+                        <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
+                          <FiUserCheck className="size-4" />
+                          {request.assignedTeacher ? "Reassign" : "Assign"}
+                        </span>
+                      </button>
+                    ))}
+                  {filteredTeachers.length === 0 && (
+                    <p className="text-sm text-slate-400 italic text-center py-4">No teachers found.</p>
+                  )}
+                </div>
+
+                {assignStatus && (
+                  <p className={`text-xs font-bold flex items-center gap-1.5 ${assignStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+                    {assignStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
+                    {assignStatus.text}
+                  </p>
                 )}
               </div>
             </div>

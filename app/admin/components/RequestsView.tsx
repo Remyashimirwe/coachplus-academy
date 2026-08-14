@@ -9,6 +9,8 @@ import {
   FiInbox,
   FiSend,
   FiCheckCircle,
+  FiUserCheck,
+  FiAward,
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import RequestDetailModal from "./RequestDetailModal";
@@ -16,6 +18,8 @@ import RequestDetailModal from "./RequestDetailModal";
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-100 text-amber-700",
   contacted: "bg-indigo-100 text-indigo-700",
+  approved: "bg-sky-100 text-sky-700",
+  assigned: "bg-violet-100 text-violet-700",
   resolved: "bg-emerald-100 text-emerald-700",
 };
 
@@ -23,10 +27,12 @@ const FILTERS = [
   { id: "all", label: "All" },
   { id: "new", label: "New" },
   { id: "contacted", label: "Contacted" },
+  { id: "approved", label: "Approved" },
+  { id: "assigned", label: "Assigned" },
   { id: "resolved", label: "Resolved" },
 ];
 
-export default function RequestsView({ requests }: any) {
+export default function RequestsView({ requests, teachers }: any) {
   const [items, setItems] = useState<any[]>(requests);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
@@ -37,11 +43,13 @@ export default function RequestsView({ requests }: any) {
   const stats = useMemo(() => {
     const newCount = items.filter((r) => r.status === "new").length;
     const contacted = items.filter((r) => r.status === "contacted").length;
+    const assigned = items.filter((r) => r.status === "assigned").length;
     const resolved = items.filter((r) => r.status === "resolved").length;
     return [
       { label: "Total Requests", value: items.length, icon: FiInbox, color: "bg-indigo-500" },
       { label: "New", value: newCount, icon: FiClock, color: "bg-amber-500" },
       { label: "Contacted", value: contacted, icon: FiSend, color: "bg-indigo-500" },
+      { label: "Assigned", value: assigned, icon: FiAward, color: "bg-violet-500" },
       { label: "Resolved", value: resolved, icon: FiCheckCircle, color: "bg-emerald-500" },
     ];
   }, [items]);
@@ -70,7 +78,7 @@ export default function RequestsView({ requests }: any) {
         <p className="text-slate-500">Review parent requests and reply straight from Coach Plus by email.</p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat, i) => (
           <div key={i} className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
             <div className="flex items-center gap-4">
@@ -161,6 +169,15 @@ export default function RequestsView({ requests }: any) {
               <p className="text-xs font-bold text-slate-700 leading-relaxed line-clamp-2">{request.subjects || "Not specified"}</p>
             </div>
 
+            {request.assignedTeacher && (
+              <div className="flex items-center gap-2 p-3 rounded-2xl bg-violet-50 border border-violet-100">
+                <FiUserCheck className="text-violet-500 shrink-0" />
+                <p className="text-xs font-bold text-violet-700 truncate">
+                  Assigned to {request.assignedTeacher.user.name}
+                </p>
+              </div>
+            )}
+
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100">
               <a
                 href={`mailto:${request.email}`}
@@ -182,7 +199,7 @@ export default function RequestsView({ requests }: any) {
                 onClick={() => setSelectedId(request.id)}
                 className="ml-auto px-4 py-2.5 rounded-xl bg-[#0f172a] text-white text-sm font-bold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200"
               >
-                View & Reply
+                View & Manage
               </button>
             </div>
           </div>
@@ -197,6 +214,7 @@ export default function RequestsView({ requests }: any) {
       {selectedRequest && (
         <RequestDetailModal
           request={selectedRequest}
+          teachers={teachers || []}
           onClose={() => setSelectedId(null)}
           onUpdated={handleUpdated}
         />
