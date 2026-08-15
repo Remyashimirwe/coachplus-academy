@@ -23,7 +23,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-[#fffaf8] py-24">
+    <section id="how-it-works" className="scroll-mt-24 bg-[#fffaf8] py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

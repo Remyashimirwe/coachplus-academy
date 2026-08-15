@@ -10,10 +10,40 @@ import { getSession, logout } from "@/app/lib/auth";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Categories", href: "/programs" },
-  { label: "How It Works", href: "/#how-it-works" },
+  { label: "How It Works", href: "/how-it-works" },
   { label: "Why Choose Us", href: "/why-choose-us" },
   { label: "Become a Teacher", href: "/become-a-teacher" },
 ];
+
+const menuVariants = {
+  hidden: { opacity: 0, y: -16, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1] as const,
+      staggerChildren: 0.06,
+      delayChildren: 0.08,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -16,
+    scale: 0.98,
+    transition: { duration: 0.2, ease: "easeIn" as const },
+  },
+};
+
+const menuItemVariants = {
+  hidden: { opacity: 0, x: -12 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const },
+  },
+};
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -64,6 +94,23 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   const hiddenRoutes = ["/admin", "/teacher", "/student", "/login", "/setup-password"];
   const shouldHide = hiddenRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`));
@@ -166,46 +213,76 @@ export default function Navbar() {
         <button
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle menu"
-          className={`grid size-11 place-items-center rounded-2xl border transition-all md:hidden ${
+          aria-expanded={menuOpen}
+          className={`grid size-11 place-items-center rounded-2xl border transition-all duration-300 active:scale-90 md:hidden ${
             scrolled || !isHomePage
               ? "border-slate-200 bg-white text-slate-900 hover:border-[#E91E63]"
               : "border-white/20 bg-white/10 text-white hover:bg-white/20"
           }`}
         >
-          {menuOpen ? <FiX className="size-6" /> : <FiMenu className="size-6" />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={menuOpen ? "close" : "open"}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="grid place-items-center"
+            >
+              {menuOpen ? <FiX className="size-6" /> : <FiMenu className="size-6" />}
+            </motion.span>
+          </AnimatePresence>
         </button>
       </nav>
 
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            key="menu-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed inset-0 z-[65] bg-slate-900/40 backdrop-blur-sm md:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="menu-panel"
+            variants={menuVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className={`fixed inset-x-0 z-[70] px-5 md:hidden transition-all duration-500 ${scrolled ? "top-[72px]" : "top-[88px]"}`}
           >
             <div className="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl">
               <div className="flex flex-col gap-2">
                 {filteredNavLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`rounded-2xl px-6 py-4 text-base font-bold transition-all w-fit ${
-                      isActive(link.href)
-                        ? "bg-[#fff0f3] text-[#E91E63]"
-                        : "text-slate-600 hover:bg-[#fff0f3] hover:text-[#E91E63]"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
+                  <motion.div key={link.label} variants={menuItemVariants}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`block rounded-2xl px-6 py-4 text-base font-bold transition-all duration-200 w-fit hover:translate-x-1 ${
+                        isActive(link.href)
+                          ? "bg-[#fff0f3] text-[#E91E63]"
+                          : "text-slate-600 hover:bg-[#fff0f3] hover:text-[#E91E63]"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
                 ))}
                 {user ? (
-                  <div className="mt-2 flex flex-col gap-2">
+                  <motion.div variants={menuItemVariants} className="mt-2 flex flex-col gap-2">
                     <Link
                       href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
                       onClick={() => setMenuOpen(false)}
-                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-lg font-bold text-slate-700 shadow-sm"
+                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-lg font-bold text-slate-700 shadow-sm transition-all duration-200 hover:border-[#E91E63]/40"
                     >
                       <FiUser className="size-5 text-[#E91E63]" />
                       <span className="truncate">{user.name}</span>
@@ -215,21 +292,23 @@ export default function Navbar() {
                         handleLogout();
                         setMenuOpen(false);
                       }}
-                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-6 text-lg font-bold text-red-600 shadow-sm"
+                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-6 text-lg font-bold text-red-600 shadow-sm transition-all duration-200 hover:bg-red-100"
                     >
                       <FiLogOut className="size-5" />
                       Logout
                     </button>
-                  </div>
+                  </motion.div>
                 ) : null}
-                <Link
-                  href="/request"
-                  onClick={() => setMenuOpen(false)}
-                  className="mt-4 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-lg font-bold text-white shadow-lg shadow-rose-500/25"
-                >
-                  <FiSend className="size-5" />
-                  Request a Teacher
-                </Link>
+                <motion.div variants={menuItemVariants}>
+                  <Link
+                    href="/request"
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-lg font-bold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#7B1FA2] active:scale-95"
+                  >
+                    <FiSend className="size-5" />
+                    Request a Teacher
+                  </Link>
+                </motion.div>
               </div>
             </div>
           </motion.div>
