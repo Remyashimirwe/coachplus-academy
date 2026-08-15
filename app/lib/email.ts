@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { BRAND_NAME, BRANCHES, CONTACT_EMAIL } from "./constants";
+import { BRAND_NAME, CONTACT_EMAIL } from "./constants";
 
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
 const FROM_EMAIL = process.env.EMAIL_FROM || `${BRAND_NAME} <admin@coachplusacademy.com>`;
@@ -15,9 +15,9 @@ function getResendClient() {
 
 /**
  * Wraps the given body markup into a consistent, professional email shell:
- * a header with the CoachPlus Academy logo, and a footer that lists all of
- * our Location Branches plus an official contact email, so every message we
- * send reads as a complete, professional communication from the company.
+ * a header with the CoachPlus Academy logo, and a footer with an official
+ * contact email, so every message we send reads as a complete, professional
+ * communication from the company.
  */
 function renderEmail({ preheader, bodyHtml }: { preheader?: string; bodyHtml: string }) {
   return `
@@ -32,8 +32,6 @@ function renderEmail({ preheader, bodyHtml }: { preheader?: string; bodyHtml: st
           ${bodyHtml}
         </div>
         <div style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;">
-          <p style="margin:0 0 10px 0;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#64748b;">Location Branch</p>
-          <p style="margin:0 0 16px 0;font-size:12px;color:#94a3b8;">${BRANCHES.join(" &nbsp;•&nbsp; ")}</p>
           <p style="margin:0 0 8px 0;font-size:12px;color:#64748b;">
             Questions? Reach out to us at
             <a href="mailto:${CONTACT_EMAIL}" style="color:#E91E63;text-decoration:none;font-weight:700;">${CONTACT_EMAIL}</a>

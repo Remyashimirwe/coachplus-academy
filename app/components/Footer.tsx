@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { useState, useEffect } from "react";
 import { getSession } from "@/app/lib/auth";
-import { BRANCHES } from "@/app/lib/constants";
 
 const footerGroups = [
   {
@@ -56,10 +55,6 @@ export default function Footer() {
             </Link>
             <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
               Your Success Starts with the Right Coach.
-            </p>
-            <p className="mt-6 text-xs font-bold uppercase tracking-widest text-slate-500">Our Branches</p>
-            <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-400">
-              {BRANCHES.join(" • ")}
             </p>
           </div>
           
