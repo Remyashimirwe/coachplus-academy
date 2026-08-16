@@ -64,7 +64,8 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                 {program.level}
               </p>
               <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                {program.title}
+                {program.title}{" "}
+                <span className="text-white/80">({program.level})</span>
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed">
                 {program.text}

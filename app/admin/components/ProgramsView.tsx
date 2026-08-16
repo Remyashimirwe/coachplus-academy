@@ -379,7 +379,12 @@ export default function ProgramsView({ programs }: any) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold truncate">{program.title}</span>
+                      <span className="font-bold truncate">
+                        {program.title}{" "}
+                        <span className={`font-medium ${selectedProgramId === program.id ? "text-white/70" : "text-slate-400"}`}>
+                          ({program.level})
+                        </span>
+                      </span>
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
                           selectedProgramId === program.id ? "bg-white/20" : "bg-slate-200 text-slate-500"
@@ -388,9 +393,6 @@ export default function ProgramsView({ programs }: any) {
                         {program.subjects.length}
                       </span>
                     </div>
-                    <p className={`text-xs mt-1 truncate ${selectedProgramId === program.id ? "text-white/80" : "text-slate-500"}`}>
-                      {program.level}
-                    </p>
                   </div>
                 </button>
               ))}

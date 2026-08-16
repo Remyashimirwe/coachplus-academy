@@ -5,6 +5,8 @@ import CTA from "./components/CTA";
 import Footer from "./components/Footer";
 import {getPrograms} from "./lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
     const programs = await getPrograms();
 

@@ -90,7 +90,10 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                     {program.level}
                   </div>
                 </div>
-                <h2 className="text-lg font-medium text-[#0f172a] mb-4">{program.title}</h2>
+                <h2 className="text-lg font-medium text-[#0f172a] mb-4">
+                  {program.title}{" "}
+                  <span className="text-[#E91E63]">({program.level})</span>
+                </h2>
                 <p className="text-slate-600 leading-relaxed text-xs">
                   {program.text}
                 </p>
@@ -100,7 +103,10 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
               <div className="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar bg-white">
                 <div className="md:hidden mb-8">
                    <span className="text-xs font-bold text-[#E91E63] uppercase tracking-widest">{program.level}</span>
-                   <h2 className="text-xl font-medium text-[#0f172a] mt-1">{program.title}</h2>
+                   <h2 className="text-xl font-medium text-[#0f172a] mt-1">
+                     {program.title}{" "}
+                     <span className="text-[#E91E63]">({program.level})</span>
+                   </h2>
                 </div>
 
                 <div className="mb-6 flex items-center justify-between">
