@@ -24,7 +24,6 @@ import {
 } from "react-icons/fi";
 import {saveRequest} from "@/app/actions/request";
 import Footer from "../components/Footer";
-import {BRANCHES} from "@/app/lib/constants";
 
 interface Topic {
     id: number;
@@ -112,7 +111,6 @@ function RequestFormContent({programs}: { programs: Program[] }) {
     const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [selectionError, setSelectionError] = useState(false);
-    const [selectedBranch, setSelectedBranch] = useState("");
     const [recommendedTeachers, setRecommendedTeachers] = useState<RecommendedTeacher[]>([]);
     const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
@@ -212,10 +210,10 @@ function RequestFormContent({programs}: { programs: Program[] }) {
         }
     }, [selectedProgramId]);
 
-    // Live-preview the teachers who best match the chosen branch (location/city)
-    // and course(s), so parents/students see a recommended teacher before submitting.
+    // Live-preview the teachers who best match the chosen course(s), so
+    // parents/students see a recommended teacher before submitting.
     useEffect(() => {
-        if (!selectedBranch && selectedSubjects.length === 0) {
+        if (selectedSubjects.length === 0) {
             setRecommendedTeachers([]);
             return;
         }
@@ -225,8 +223,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
             setLoadingRecommendations(true);
             try {
                 const params = new URLSearchParams();
-                if (selectedBranch) params.set("branch", selectedBranch);
-                if (selectedSubjects.length > 0) params.set("subjects", selectedSubjects.join(","));
+                params.set("subjects", selectedSubjects.join(","));
 
                 const res = await fetch(`/api/teachers/recommended?${params.toString()}`, {
                     signal: controller.signal,
@@ -244,7 +241,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
             controller.abort();
             clearTimeout(timeout);
         };
-    }, [selectedBranch, selectedSubjects]);
+    }, [selectedSubjects]);
 
     return (
         <main className="min-h-screen bg-slate-50 text-[#121826]">
@@ -407,31 +404,6 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                        className={inputClasses}/>
                                             </Field>
                                         </div>
-
-                                        <Field icon={<FiMapPin/>} label="Nearest Branch" htmlFor="branch">
-                                            <div className="relative group">
-                                                <select
-                                                    id="branch"
-                                                    name="branch"
-                                                    value={selectedBranch}
-                                                    onChange={(e) => setSelectedBranch(e.target.value)}
-                                                    required
-                                                    className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
-                                                >
-                                                    <option value="" disabled>Choose the closest branch</option>
-                                                    {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-                                                </select>
-                                                <div
-                                                    className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
-                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                                         xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor"
-                                                              strokeWidth="2" strokeLinecap="round"
-                                                              strokeLinejoin="round"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </Field>
                                     </div>
 
                                     <div className="grid gap-8">
@@ -616,7 +588,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                         )}
                                     </div>
 
-                                    {(selectedBranch || selectedSubjects.length > 0) && (
+                                    {selectedSubjects.length > 0 && (
                                         <motion.div
                                             initial={{opacity: 0, y: 10}}
                                             animate={{opacity: 1, y: 0}}
@@ -624,11 +596,11 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                         >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <FiAward className="text-[#E91E63]"/>
-                                                <h3 className="text-sm font-bold text-[#0f172a]">Recommended Teachers Near
-                                                    You</h3>
+                                                <h3 className="text-sm font-bold text-[#0f172a]">Recommended Teachers
+                                                    For You</h3>
                                             </div>
                                             <p className="text-xs text-slate-500 mb-6">
-                                                Based on your branch and chosen course - here's a preview of teachers who
+                                                Based on your chosen course - here's a preview of teachers who
                                                 could be a great fit.
                                             </p>
 

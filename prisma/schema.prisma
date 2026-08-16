@@ -96,6 +96,7 @@ model Subject {
   id        Int     @id @default(autoincrement())
   name      String
   image     String?
+  sortOrder Int     @default(0)
   programId Int
   program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
   topics    Topic[]
@@ -105,6 +106,7 @@ model Topic {
   id        Int     @id @default(autoincrement())
   name      String
   image     String?
+  sortOrder Int     @default(0)
   subjectId Int
   subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 }

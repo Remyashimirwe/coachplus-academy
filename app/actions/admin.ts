@@ -214,11 +214,14 @@ export async function addSubject(
     return { error: error.message || "Failed to upload image." };
   }
 
+  const sortOrder = await db.subject.count({ where: { programId } });
+
   await db.subject.create({
     data: {
       name,
       image,
       programId,
+      sortOrder,
     },
   });
 
@@ -312,11 +315,14 @@ export async function addTopic(
     return { error: error.message || "Failed to upload image." };
   }
 
+  const sortOrder = await db.topic.count({ where: { subjectId } });
+
   await db.topic.create({
     data: {
       name,
       image,
       subjectId,
+      sortOrder,
     },
   });
 
@@ -370,6 +376,44 @@ export async function deleteTopic(formData: FormData) {
       where: { id },
     });
   }
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+}
+
+/**
+ * Persists the new drag-and-drop order for Categories, Sub-categories, or
+ * Subjects. `ids` is the full list of ids for the reordered group, already
+ * sorted the way the admin dropped them; we just save their new index.
+ */
+export async function reorderPrograms(ids: number[]) {
+  await requireAdmin();
+
+  await db.$transaction(
+    ids.map((id, index) => db.program.update({ where: { id }, data: { sortOrder: index } }))
+  );
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+}
+
+export async function reorderSubjects(ids: number[]) {
+  await requireAdmin();
+
+  await db.$transaction(
+    ids.map((id, index) => db.subject.update({ where: { id }, data: { sortOrder: index } }))
+  );
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+}
+
+export async function reorderTopics(ids: number[]) {
+  await requireAdmin();
+
+  await db.$transaction(
+    ids.map((id, index) => db.topic.update({ where: { id }, data: { sortOrder: index } }))
+  );
 
   revalidatePath("/programs");
   revalidatePath("/admin");

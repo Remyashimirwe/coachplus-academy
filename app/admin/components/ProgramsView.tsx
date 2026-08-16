@@ -13,6 +13,7 @@ import {
   FiBookOpen,
   FiChevronDown,
   FiChevronUp,
+  FiMove,
 } from "react-icons/fi";
 import {
   addProgram,
@@ -24,7 +25,22 @@ import {
   addTopic,
   updateTopic,
   deleteTopic,
+  reorderPrograms,
+  reorderSubjects,
+  reorderTopics,
 } from "@/app/actions/admin";
+
+/** Moves the item with `draggedId` to sit right before/after the item with `targetId`, keeping every other item's relative order untouched. */
+function reorderById<T extends { id: number }>(items: T[], draggedId: number, targetId: number): T[] {
+  const fromIndex = items.findIndex((item) => item.id === draggedId);
+  const toIndex = items.findIndex((item) => item.id === targetId);
+  if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return items;
+
+  const updated = [...items];
+  const [moved] = updated.splice(fromIndex, 1);
+  updated.splice(toIndex, 0, moved);
+  return updated;
+}
 
 const inputClasses =
   "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63]";
@@ -282,14 +298,70 @@ export default function ProgramsView({ programs }: any) {
     undefined as undefined | { error?: string; success?: boolean }
   );
 
+  // A locally reorderable copy of `programs`, so drag-and-drop can update the
+  // order instantly instead of waiting on the server round-trip. Kept in
+  // sync whenever fresh data arrives from the server (e.g. after a save).
+  const [localPrograms, setLocalPrograms] = useState<any[]>(programs);
+  useEffect(() => {
+    setLocalPrograms(programs);
+  }, [programs]);
+
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(null);
-  const selectedProgram = programs.find((p: any) => p.id === selectedProgramId);
+  const selectedProgram = localPrograms.find((p: any) => p.id === selectedProgramId);
 
   const [editingProgram, setEditingProgram] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<number | null>(null);
   const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
   const [expandedSubjectId, setExpandedSubjectId] = useState<number | null>(null);
   const [showAddSubjectForm, setShowAddSubjectForm] = useState(false);
+
+  // Drag-and-drop reordering: which item id is currently being dragged, per list.
+  const [draggedProgramId, setDraggedProgramId] = useState<number | null>(null);
+  const [draggedSubjectId, setDraggedSubjectId] = useState<number | null>(null);
+  const [draggedTopicId, setDraggedTopicId] = useState<number | null>(null);
+
+  const handleProgramDrop = (targetId: number) => {
+    if (draggedProgramId === null || draggedProgramId === targetId) return;
+    const reordered = reorderById(localPrograms, draggedProgramId, targetId);
+    setLocalPrograms(reordered);
+    setDraggedProgramId(null);
+    startTransition(() => {
+      reorderPrograms(reordered.map((p: any) => p.id));
+    });
+  };
+
+  const handleSubjectDrop = (targetId: number) => {
+    if (draggedSubjectId === null || draggedSubjectId === targetId || !selectedProgram) return;
+    const reorderedSubjects = reorderById(selectedProgram.subjects, draggedSubjectId, targetId);
+    setLocalPrograms((prev) =>
+      prev.map((p: any) => (p.id === selectedProgram.id ? { ...p, subjects: reorderedSubjects } : p))
+    );
+    setDraggedSubjectId(null);
+    startTransition(() => {
+      reorderSubjects(reorderedSubjects.map((s: any) => s.id));
+    });
+  };
+
+  const handleTopicDrop = (subjectId: number, targetId: number) => {
+    if (draggedTopicId === null || draggedTopicId === targetId || !selectedProgram) return;
+    const subject = selectedProgram.subjects.find((s: any) => s.id === subjectId);
+    if (!subject) return;
+    const reorderedTopics = reorderById(subject.topics, draggedTopicId, targetId);
+    setLocalPrograms((prev) =>
+      prev.map((p: any) =>
+        p.id === selectedProgram.id
+          ? {
+              ...p,
+              subjects: p.subjects.map((s: any) => (s.id === subjectId ? { ...s, topics: reorderedTopics } : s)),
+            }
+          : p
+      )
+    );
+    setDraggedTopicId(null);
+    startTransition(() => {
+      reorderTopics(reorderedTopics.map((t: any) => t.id));
+    });
+  };
 
   const resetSelectionState = () => {
     setEditingProgram(false);
@@ -353,19 +425,32 @@ export default function ProgramsView({ programs }: any) {
               <FiLayers className="text-[#E91E63]" /> Categories
             </h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 min-w-0 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:gap-3 lg:grid-cols-1 lg:gap-2">
-              {programs.map((program: any) => (
+              {localPrograms.map((program: any) => (
                 <button
                   key={program.id}
+                  draggable
+                  onDragStart={() => setDraggedProgramId(program.id)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleProgramDrop(program.id);
+                  }}
+                  onDragEnd={() => setDraggedProgramId(null)}
                   onClick={() => {
                     setSelectedProgramId(program.id);
                     resetSelectionState();
                   }}
-                  className={`w-64 shrink-0 sm:w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${
+                  className={`w-64 shrink-0 sm:w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 cursor-grab active:cursor-grabbing ${
+                    draggedProgramId === program.id ? "opacity-50" : ""
+                  } ${
                     selectedProgramId === program.id
                       ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-500/20"
                       : "bg-slate-50 border-slate-100 text-slate-700 hover:border-[#E91E63]/30"
                   }`}
                 >
+                  <FiMove
+                    className={`shrink-0 size-4 ${selectedProgramId === program.id ? "text-white/60" : "text-slate-300"}`}
+                  />
                   <div
                     className={`size-10 shrink-0 rounded-xl overflow-hidden border flex items-center justify-center ${
                       selectedProgramId === program.id ? "border-white/30 bg-white/10" : "border-slate-200 bg-white"
@@ -589,7 +674,20 @@ export default function ProgramsView({ programs }: any) {
                 {selectedProgram?.subjects.map((subject: any) => {
                   const isExpanded = expandedSubjectId === subject.id;
                   return (
-                    <div key={subject.id} className="rounded-3xl bg-white shadow-sm border border-slate-200 overflow-hidden">
+                    <div
+                      key={subject.id}
+                      draggable
+                      onDragStart={() => setDraggedSubjectId(subject.id)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        handleSubjectDrop(subject.id);
+                      }}
+                      onDragEnd={() => setDraggedSubjectId(null)}
+                      className={`rounded-3xl bg-white shadow-sm border border-slate-200 overflow-hidden cursor-grab active:cursor-grabbing ${
+                        draggedSubjectId === subject.id ? "opacity-50" : ""
+                      }`}
+                    >
                       <div className="p-4 sm:p-6 bg-slate-50/50 border-b border-slate-100">
                         {editingSubjectId === subject.id ? (
                           <form
@@ -626,6 +724,7 @@ export default function ProgramsView({ programs }: any) {
                               onClick={() => setExpandedSubjectId(isExpanded ? null : subject.id)}
                               className="flex flex-1 min-w-0 items-center gap-3 sm:gap-4 text-left"
                             >
+                              <FiMove className="shrink-0 size-4 text-slate-300" />
                               <div className="size-10 shrink-0 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
                                 {subject.image ? (
                                   <img src={subject.image} alt="" className="h-full w-full object-cover" />
@@ -699,8 +798,19 @@ export default function ProgramsView({ programs }: any) {
                               ) : (
                                 <div
                                   key={topic.id}
-                                  className="group relative flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 transition-all hover:bg-white hover:border-[#E91E63]/30"
+                                  draggable
+                                  onDragStart={() => setDraggedTopicId(topic.id)}
+                                  onDragOver={(e) => e.preventDefault()}
+                                  onDrop={(e) => {
+                                    e.preventDefault();
+                                    handleTopicDrop(subject.id, topic.id);
+                                  }}
+                                  onDragEnd={() => setDraggedTopicId(null)}
+                                  className={`group relative flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 transition-all hover:bg-white hover:border-[#E91E63]/30 cursor-grab active:cursor-grabbing ${
+                                    draggedTopicId === topic.id ? "opacity-50" : ""
+                                  }`}
                                 >
+                                  <FiMove className="shrink-0 size-3.5 text-slate-300" />
                                   <div className="size-10 shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
                                     {topic.image ? (
                                       <img src={topic.image} alt={topic.name} className="h-full w-full object-cover" />

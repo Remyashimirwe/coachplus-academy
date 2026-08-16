@@ -46,10 +46,13 @@ export async function getPrograms() {
     orderBy: { sortOrder: "asc" },
     include: {
       subjects: {
+        orderBy: { sortOrder: "asc" },
         include: {
-          topics: true
-        }
-      }
+          topics: {
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      },
     },
   });
 }
@@ -59,10 +62,13 @@ export async function getProgramById(id: number) {
     where: { id },
     include: {
       subjects: {
+        orderBy: { sortOrder: "asc" },
         include: {
-          topics: true
-        }
-      }
+          topics: {
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      },
     },
   });
 }
