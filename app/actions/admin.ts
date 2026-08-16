@@ -35,6 +35,57 @@ async function uploadImageIfProvided(
   return url;
 }
 
+type DraftTopicInput = { name: string; imageFile: File | null };
+type DraftSubjectInput = { name: string; imageFile: File | null; topics: DraftTopicInput[] };
+
+/**
+ * The "Create Category" form lets admins optionally draft sub-categories
+ * (and their subjects) inline, in the same card/popup, instead of having to
+ * create the category first and add each one separately afterwards. Those
+ * drafts are sent as indexed fields, e.g. `subjects[0][name]`,
+ * `subjects[0][image]`, `subjects[0][topics][0][name]`. This parses that
+ * shape back into a plain array, keyed by index so entries stay ordered.
+ */
+function parseDraftSubjects(formData: FormData): DraftSubjectInput[] {
+  const subjectMatcher = /^subjects\[(\d+)\]\[(name|image)\]$/;
+  const topicMatcher = /^subjects\[(\d+)\]\[topics\]\[(\d+)\]\[(name|image)\]$/;
+
+  const subjectsByIndex = new Map<number, DraftSubjectInput>();
+  const getSubject = (index: number) => {
+    let subject = subjectsByIndex.get(index);
+    if (!subject) {
+      subject = { name: "", imageFile: null, topics: [] };
+      subjectsByIndex.set(index, subject);
+    }
+    return subject;
+  };
+
+  for (const [key, value] of formData.entries()) {
+    const subjectMatch = key.match(subjectMatcher);
+    if (subjectMatch) {
+      const subject = getSubject(Number(subjectMatch[1]));
+      if (subjectMatch[2] === "name") subject.name = String(value).trim();
+      else subject.imageFile = value instanceof File ? value : null;
+      continue;
+    }
+
+    const topicMatch = key.match(topicMatcher);
+    if (topicMatch) {
+      const subject = getSubject(Number(topicMatch[1]));
+      const topicIndex = Number(topicMatch[2]);
+      const topic = subject.topics[topicIndex] || { name: "", imageFile: null };
+      if (topicMatch[3] === "name") topic.name = String(value).trim();
+      else topic.imageFile = value instanceof File ? value : null;
+      subject.topics[topicIndex] = topic;
+    }
+  }
+
+  return Array.from(subjectsByIndex.keys())
+    .sort((a, b) => a - b)
+    .map((index) => subjectsByIndex.get(index)!)
+    .filter((subject) => subject.name);
+}
+
 export async function addProgram(
   _prevState: AdminActionState | undefined,
   formData: FormData
@@ -45,6 +96,7 @@ export async function addProgram(
   const level = String(formData.get("level") || "").trim();
   const text = String(formData.get("text") || "").trim();
   const imageFile = formData.get("image") as File | null;
+  const draftSubjects = parseDraftSubjects(formData);
 
   if (!title || !level || !text) {
     return { error: "Please fill in all fields." };
@@ -57,17 +109,44 @@ export async function addProgram(
     return { error: error.message || "Failed to upload image." };
   }
 
-  const sortOrder = await db.program.count();
+  try {
+    const sortOrder = await db.program.count();
 
-  await db.program.create({
-    data: {
-      title,
-      level,
-      text,
-      image,
-      sortOrder,
-    },
-  });
+    const program = await db.program.create({
+      data: {
+        title,
+        level,
+        text,
+        image,
+        sortOrder,
+      },
+    });
+
+    for (const draftSubject of draftSubjects) {
+      const subjectImage = await uploadImageIfProvided(draftSubject.imageFile, "subjects");
+      const subject = await db.subject.create({
+        data: {
+          name: draftSubject.name,
+          image: subjectImage,
+          programId: program.id,
+        },
+      });
+
+      for (const draftTopic of draftSubject.topics) {
+        if (!draftTopic.name) continue;
+        const topicImage = await uploadImageIfProvided(draftTopic.imageFile, "topics");
+        await db.topic.create({
+          data: {
+            name: draftTopic.name,
+            image: topicImage,
+            subjectId: subject.id,
+          },
+        });
+      }
+    }
+  } catch (error: any) {
+    return { error: error.message || "Failed to create category." };
+  }
 
   revalidatePath("/programs");
   revalidatePath("/admin");

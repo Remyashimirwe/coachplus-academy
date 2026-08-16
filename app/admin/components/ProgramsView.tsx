@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import {
   FiPlus,
   FiTrash2,
@@ -51,11 +51,13 @@ function ImageUploadField({
   existingImage,
   label = "Image",
   compact = false,
+  onFileChange,
 }: {
   name: string;
   existingImage?: string | null;
   label?: string;
   compact?: boolean;
+  onFileChange?: (file: File | null) => void;
 }) {
   const [preview, setPreview] = useState<string | null>(existingImage || null);
 
@@ -81,7 +83,8 @@ function ImageUploadField({
             accept="image/*"
             className="hidden"
             onChange={(e) => {
-              const file = e.target.files?.[0];
+              const file = e.target.files?.[0] || null;
+              onFileChange?.(file);
               if (!file) return;
               const reader = new FileReader();
               reader.onload = () => setPreview(reader.result as string);
@@ -92,6 +95,160 @@ function ImageUploadField({
             <FiUpload className="size-3.5" /> {existingImage ? "Change Image" : "Upload Image"}
           </span>
         </label>
+      </div>
+    </div>
+  );
+}
+
+type DraftTopic = { tempId: number; name: string; imageFile: File | null };
+type DraftSubject = { tempId: number; name: string; imageFile: File | null; topics: DraftTopic[] };
+
+/** Small thumbnail that renders a live preview for a `File` picked in the draft sub-category popup. */
+function FilePreviewThumb({ file, size = "size-10" }: { file: File | null; size?: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) {
+      setUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  return (
+    <div className={`${size} shrink-0 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center`}>
+      {url ? <img src={url} alt="" className="h-full w-full object-cover" /> : <FiImage className="text-slate-300 size-4" />}
+    </div>
+  );
+}
+
+/**
+ * Popup used from the "Create New Category" card so admins can draft a
+ * sub-category (and its subjects) inline, without leaving the category form
+ * or having to create the category first. Confirmed drafts are held in
+ * memory and only actually created once the category itself is submitted.
+ */
+function AddSubCategoryModal({
+  categoryTitle,
+  onClose,
+  onAdd,
+}: {
+  categoryTitle?: string;
+  onClose: () => void;
+  onAdd: (subject: DraftSubject) => void;
+}) {
+  const [name, setName] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [topics, setTopics] = useState<DraftTopic[]>([]);
+  const [topicName, setTopicName] = useState("");
+  const [topicImageFile, setTopicImageFile] = useState<File | null>(null);
+
+  const addTopicDraft = () => {
+    const trimmed = topicName.trim();
+    if (!trimmed) return;
+    setTopics((prev) => [...prev, { tempId: Date.now() + Math.random(), name: trimmed, imageFile: topicImageFile }]);
+    setTopicName("");
+    setTopicImageFile(null);
+  };
+
+  const removeTopicDraft = (tempId: number) => {
+    setTopics((prev) => prev.filter((topic) => topic.tempId !== tempId));
+  };
+
+  const handleConfirm = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onAdd({ tempId: Date.now(), name: trimmed, imageFile, topics });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+      <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <h3 className="text-lg font-bold text-slate-900">
+            Add Sub-category{categoryTitle ? ` to ${categoryTitle}` : ""}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          >
+            <FiX className="size-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-slate-700">Sub-category Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Mathematics"
+              className={inputClasses}
+            />
+          </div>
+          <ImageUploadField name="__draft-subject-image" label="Sub-category Image" onFileChange={setImageFile} />
+
+          <div className="border-t border-slate-100 pt-4 space-y-3">
+            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <FiBookOpen /> Subjects in this Sub-category
+            </h4>
+            {topics.length > 0 && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {topics.map((topic) => (
+                  <div key={topic.tempId} className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <FilePreviewThumb file={topic.imageFile} size="size-8" />
+                    <span className="flex-1 min-w-0 text-xs font-bold text-slate-700 truncate">{topic.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeTopicDraft(topic.tempId)}
+                      className="p-1 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-white transition-colors"
+                    >
+                      <FiTrash2 className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <ImageUploadField name="__draft-topic-image" compact onFileChange={setTopicImageFile} />
+              <input
+                value={topicName}
+                onChange={(e) => setTopicName(e.target.value)}
+                placeholder="Subject name (e.g. Algebra)"
+                className={`${compactInputClasses} flex-1`}
+              />
+              <button
+                type="button"
+                onClick={addTopicDraft}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-[#E91E63] transition-colors shrink-0 inline-flex items-center gap-1.5"
+              >
+                <FiPlus className="size-3.5" /> Add
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={!name.trim()}
+              className="flex-1 py-3 rounded-2xl bg-[#E91E63] text-white text-sm font-bold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+            >
+              Add Sub-category
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="py-3 px-6 rounded-2xl bg-slate-100 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -140,6 +297,44 @@ export default function ProgramsView({ programs }: any) {
     setEditingTopicId(null);
     setExpandedSubjectId(null);
     setShowAddSubjectForm(false);
+  };
+
+  // Draft sub-categories (with their subjects) added from the popup while
+  // creating a new category, so they can be submitted together with it.
+  const [draftSubjects, setDraftSubjects] = useState<DraftSubject[]>([]);
+  const [showAddSubCategoryModal, setShowAddSubCategoryModal] = useState(false);
+  const addFormRef = useRef<HTMLFormElement>(null);
+  const [, startTransition] = useTransition();
+
+  const removeDraftSubject = (tempId: number) => {
+    setDraftSubjects((prev) => prev.filter((subject) => subject.tempId !== tempId));
+  };
+
+  useEffect(() => {
+    if (addState?.success) {
+      setDraftSubjects([]);
+      addFormRef.current?.reset();
+    }
+  }, [addState]);
+
+  const handleCreateCategorySubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    draftSubjects.forEach((subject, subjectIndex) => {
+      formData.append(`subjects[${subjectIndex}][name]`, subject.name);
+      if (subject.imageFile) {
+        formData.append(`subjects[${subjectIndex}][image]`, subject.imageFile, subject.imageFile.name);
+      }
+      subject.topics.forEach((topic, topicIndex) => {
+        formData.append(`subjects[${subjectIndex}][topics][${topicIndex}][name]`, topic.name);
+        if (topic.imageFile) {
+          formData.append(`subjects[${subjectIndex}][topics][${topicIndex}][image]`, topic.imageFile, topic.imageFile.name);
+        }
+      });
+    });
+    startTransition(() => {
+      addAction(formData);
+    });
   };
 
   return (
@@ -234,7 +429,7 @@ export default function ProgramsView({ programs }: any) {
                 </div>
                 <h2 className="text-xl font-bold text-slate-900">Create New Category</h2>
               </div>
-              <form action={addAction} className="grid gap-6">
+              <form ref={addFormRef} onSubmit={handleCreateCategorySubmit} className="grid gap-6">
                 <input type="hidden" name="action" value="add" />
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
@@ -251,6 +446,52 @@ export default function ProgramsView({ programs }: any) {
                   <textarea name="text" rows={3} required placeholder="What is this category about?" className={`${inputClasses} resize-none`} />
                 </div>
                 <ImageUploadField name="image" label="Category Image" />
+
+                <div className="space-y-3 border-t border-slate-100 pt-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                      <FiBookOpen /> Sub-categories & Subjects
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddSubCategoryModal(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-500 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors"
+                    >
+                      <FiPlus className="size-3.5" /> Add Sub-category
+                    </button>
+                  </div>
+                  {draftSubjects.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">
+                      Optional — you can add sub-categories and their subjects now, or later after creating the category.
+                    </p>
+                  ) : (
+                    <div className="grid gap-2">
+                      {draftSubjects.map((subject) => (
+                        <div key={subject.tempId} className="flex items-start gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                          <FilePreviewThumb file={subject.imageFile} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-slate-800 truncate">{subject.name}</p>
+                            {subject.topics.length > 0 ? (
+                              <p className="text-xs text-slate-400 truncate">
+                                {subject.topics.map((topic) => topic.name).join(", ")}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-slate-400 italic">No subjects added yet.</p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeDraftSubject(subject.tempId)}
+                            className="p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-white transition-colors shrink-0"
+                          >
+                            <FiTrash2 className="size-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   disabled={addPending}
@@ -260,6 +501,12 @@ export default function ProgramsView({ programs }: any) {
                   {addPending ? "Creating..." : "Create Category"}
                 </button>
               </form>
+              {showAddSubCategoryModal && (
+                <AddSubCategoryModal
+                  onClose={() => setShowAddSubCategoryModal(false)}
+                  onAdd={(subject) => setDraftSubjects((prev) => [...prev, subject])}
+                />
+              )}
             </section>
           ) : (
             <div className="space-y-6">
