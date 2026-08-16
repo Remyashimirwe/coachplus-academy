@@ -346,13 +346,13 @@ export default function ProgramsView({ programs }: any) {
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-        <div className="space-y-6">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <div className="space-y-6 min-w-0">
           <section className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-200 lg:sticky lg:top-6">
             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
               <FiLayers className="text-[#E91E63]" /> Categories
             </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 lg:mx-0 lg:px-0 lg:pb-0 lg:flex-col lg:overflow-visible lg:gap-2">
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 min-w-0 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:gap-3 lg:grid-cols-1 lg:gap-2">
               {programs.map((program: any) => (
                 <button
                   key={program.id}
@@ -360,7 +360,7 @@ export default function ProgramsView({ programs }: any) {
                     setSelectedProgramId(program.id);
                     resetSelectionState();
                   }}
-                  className={`w-60 sm:w-64 lg:w-full shrink-0 text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${
+                  className={`w-64 shrink-0 sm:w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${
                     selectedProgramId === program.id
                       ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-500/20"
                       : "bg-slate-50 border-slate-100 text-slate-700 hover:border-[#E91E63]/30"
@@ -399,7 +399,7 @@ export default function ProgramsView({ programs }: any) {
                   setSelectedProgramId(null);
                   resetSelectionState();
                 }}
-                className={`w-60 sm:w-64 lg:w-full shrink-0 p-4 rounded-2xl border border-dashed transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                className={`w-64 shrink-0 sm:w-full p-4 rounded-2xl border border-dashed transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                   selectedProgramId === null
                     ? "bg-slate-100 border-slate-300 text-slate-900"
                     : "bg-white border-slate-200 text-slate-400 hover:border-[#E91E63]/30 hover:text-[#E91E63]"
@@ -411,7 +411,7 @@ export default function ProgramsView({ programs }: any) {
           </section>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <div className="space-y-4">
             <StatusBanner state={addState} successMessage="Category successfully created." />
             <StatusBanner state={editProgramState} successMessage="Category successfully updated." />
