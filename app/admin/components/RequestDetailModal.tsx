@@ -389,8 +389,8 @@ export default function RequestDetailModal({
                 </div>
               )}
 
-              {request.studentId && (
-                <div className="border-t border-slate-200 pt-5 space-y-4">
+              <div className="border-t border-slate-200 pt-5 space-y-4">
+                {request.studentId && (
                   <div className="flex items-center gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 p-4">
                     <div className="size-11 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold shrink-0">
                       <FiUserPlus className="size-5" />
@@ -402,8 +402,9 @@ export default function RequestDetailModal({
                       <p className="text-xs text-slate-500 truncate">{request.student?.user?.email || request.email}</p>
                     </div>
                   </div>
+                )}
 
-                  {request.assignedTeacher ? (
+                {request.assignedTeacher ? (
                     <div className="flex items-center gap-3 rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-4">
                       <div className="size-11 rounded-xl bg-violet-500 text-white flex items-center justify-center font-bold shrink-0">
                         {request.assignedTeacher.user.name.charAt(0)}
@@ -425,7 +426,7 @@ export default function RequestDetailModal({
                     <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
                       <FiAward className="text-violet-400" /> No teacher assigned yet.
                     </p>
-                  )}
+                )}
 
                   <div className="grid gap-2 sm:grid-cols-3">
                     <div className="relative sm:col-span-1">
@@ -469,7 +470,8 @@ export default function RequestDetailModal({
                           <button
                             key={t.id}
                             onClick={() => handleAssignTeacher(t.id)}
-                            disabled={assigning}
+                            disabled={assigning || !request.studentId}
+                            title={request.studentId ? "Assign teacher" : "Approve this request before assigning"}
                             className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
@@ -497,7 +499,7 @@ export default function RequestDetailModal({
                             </div>
                             <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
                               <FiUserCheck className="size-4" />
-                              {request.assignedTeacher ? "Reassign" : "Assign"}
+                              {!request.studentId ? "Approve first" : request.assignedTeacher ? "Reassign" : "Assign"}
                             </span>
                           </button>
                         );
@@ -514,7 +516,6 @@ export default function RequestDetailModal({
                     </p>
                   )}
                 </div>
-              )}
             </div>
           </div>
 
