@@ -105,30 +105,21 @@ function RequestFormContent({programs}: { programs: Program[] }) {
     const searchParams = useSearchParams();
     const programIdParam = searchParams.get("programId");
     const subjectIdParam = searchParams.get("subjectId");
+    const initialProgram = programIdParam
+        ? programs.find(p => p.id.toString() === programIdParam)
+        : undefined;
+    const initialSubject = subjectIdParam
+        ? initialProgram?.subjects.find(s => s.id.toString() === subjectIdParam)
+        : undefined;
 
-    const [selectedProgramId, setSelectedProgramId] = useState<string>("");
-    const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-    const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [selectedProgramId, setSelectedProgramId] = useState<string>(programIdParam || "");
+    const [selectedSubjects, setSelectedSubjects] = useState<string[]>(initialSubject ? [initialSubject.name] : []);
+    const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>(
+        initialSubject ? {[initialSubject.name]: initialSubject.topics.map(t => t.name)} : {}
+    );
     const [selectionError, setSelectionError] = useState(false);
     const [recommendedTeachers, setRecommendedTeachers] = useState<RecommendedTeacher[]>([]);
     const [loadingRecommendations, setLoadingRecommendations] = useState(false);
-
-    useEffect(() => {
-        if (programIdParam) {
-            setSelectedProgramId(programIdParam);
-
-            if (subjectIdParam) {
-                const program = programs.find(p => p.id.toString() === programIdParam);
-                const subject = program?.subjects.find(s => s.id.toString() === subjectIdParam);
-                if (subject) {
-                    setSelectedSubjects([subject.name]);
-                    setSelectedCourses({[subject.name]: subject.topics.map(t => t.name)});
-                }
-            }
-        }
-        setIsInitialLoad(false);
-    }, []);
 
     const availableSubjects = selectedProgramId === ""
         ? []
@@ -202,13 +193,6 @@ function RequestFormContent({programs}: { programs: Program[] }) {
             setSelectedCourses(allCourses);
         }
     };
-
-    useEffect(() => {
-        if (!isInitialLoad) {
-            setSelectedSubjects([]);
-            setSelectedCourses({});
-        }
-    }, [selectedProgramId]);
 
     // Live-preview the teachers who best match the chosen course(s), so
     // parents/students see a recommended teacher before submitting.
@@ -414,7 +398,11 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                     name="programId"
                                                     required
                                                     value={selectedProgramId}
-                                                    onChange={(e) => setSelectedProgramId(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setSelectedProgramId(e.target.value);
+                                                        setSelectedSubjects([]);
+                                                        setSelectedCourses({});
+                                                    }}
                                                     className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
                                                 >
                                                     <option value="" disabled>Choose a Category</option>
