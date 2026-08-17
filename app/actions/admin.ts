@@ -96,6 +96,7 @@ export async function addProgram(
   const level = String(formData.get("level") || "").trim();
   const text = String(formData.get("text") || "").trim();
   const imageFile = formData.get("image") as File | null;
+  const featuredInHero = formData.get("featuredInHero") === "on";
   const draftSubjects = parseDraftSubjects(formData);
 
   if (!title || !level || !text) {
@@ -119,6 +120,7 @@ export async function addProgram(
         text,
         image,
         sortOrder,
+        featuredInHero,
       },
     });
 
@@ -150,6 +152,7 @@ export async function addProgram(
 
   revalidatePath("/programs");
   revalidatePath("/admin");
+  revalidatePath("/");
 
   return { success: true };
 }
@@ -165,6 +168,7 @@ export async function updateProgram(
   const level = String(formData.get("level") || "").trim();
   const text = String(formData.get("text") || "").trim();
   const imageFile = formData.get("image") as File | null;
+  const featuredInHero = formData.get("featuredInHero") === "on";
 
   if (!id || !title || !level || !text) {
     return { error: "Please fill in all fields." };
@@ -183,12 +187,30 @@ export async function updateProgram(
       title,
       level,
       text,
+      featuredInHero,
       ...(image ? { image } : {}),
     },
   });
 
   revalidatePath("/programs");
   revalidatePath("/admin");
+  revalidatePath("/");
+
+  return { success: true };
+}
+
+/** Quick on/off toggle for whether a Category is featured in the homepage Hero slideshow, used by the switch in the admin list without opening the full edit form. */
+export async function toggleProgramFeatured(id: number, featured: boolean) {
+  await requireAdmin();
+
+  await db.program.update({
+    where: { id },
+    data: { featuredInHero: featured },
+  });
+
+  revalidatePath("/programs");
+  revalidatePath("/admin");
+  revalidatePath("/");
 
   return { success: true };
 }

@@ -14,6 +14,7 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiMove,
+  FiStar,
 } from "react-icons/fi";
 import {
   addProgram,
@@ -28,6 +29,7 @@ import {
   reorderPrograms,
   reorderSubjects,
   reorderTopics,
+  toggleProgramFeatured,
 } from "@/app/actions/admin";
 
 /** Moves the item with `draggedId` to sit right before/after the item with `targetId`, keeping every other item's relative order untouched. */
@@ -47,6 +49,21 @@ const inputClasses =
 
 const compactInputClasses =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-[#E91E63]/20";
+
+/** Checkbox styled like a mini switch, used to let admins mark a Category as featured in the homepage Hero slideshow. */
+function FeaturedInHeroField({ defaultChecked }: { defaultChecked?: boolean }) {
+  return (
+    <label className="flex items-center gap-3 rounded-2xl border border-dashed border-[#E91E63]/30 bg-rose-50/50 px-4 py-3 cursor-pointer select-none">
+      <input type="checkbox" name="featuredInHero" defaultChecked={defaultChecked} className="peer sr-only" />
+      <span className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-slate-300 transition-colors peer-checked:bg-[#E91E63]">
+        <span className="inline-block size-4.5 translate-x-1 rounded-full bg-white shadow-md transition-transform peer-checked:translate-x-[22px]" />
+      </span>
+      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+        <FiStar className="size-3.5 text-[#E91E63]" /> Show in Homepage Slideshow
+      </span>
+    </label>
+  );
+}
 
 function StatusBanner({ state, successMessage }: { state: any; successMessage: string }) {
   if (!state?.error && !state?.success) return null;
@@ -320,6 +337,13 @@ export default function ProgramsView({ programs }: any) {
   const [draggedSubjectId, setDraggedSubjectId] = useState<number | null>(null);
   const [draggedTopicId, setDraggedTopicId] = useState<number | null>(null);
 
+  const handleToggleFeatured = (id: number, nextFeatured: boolean) => {
+    setLocalPrograms((prev) => prev.map((p: any) => (p.id === id ? { ...p, featuredInHero: nextFeatured } : p)));
+    startTransition(() => {
+      toggleProgramFeatured(id, nextFeatured);
+    });
+  };
+
   const handleProgramDrop = (targetId: number) => {
     if (draggedProgramId === null || draggedProgramId === targetId) return;
     const reordered = reorderById(localPrograms, draggedProgramId, targetId);
@@ -452,7 +476,7 @@ export default function ProgramsView({ programs }: any) {
                     className={`shrink-0 size-4 ${selectedProgramId === program.id ? "text-white/60" : "text-slate-300"}`}
                   />
                   <div
-                    className={`size-10 shrink-0 rounded-xl overflow-hidden border flex items-center justify-center ${
+                    className={`relative size-10 shrink-0 rounded-xl overflow-hidden border flex items-center justify-center ${
                       selectedProgramId === program.id ? "border-white/30 bg-white/10" : "border-slate-200 bg-white"
                     }`}
                   >
@@ -460,6 +484,11 @@ export default function ProgramsView({ programs }: any) {
                       <img src={program.image} alt="" className="h-full w-full object-cover" />
                     ) : (
                       <FiImage className={selectedProgramId === program.id ? "text-white/70" : "text-slate-300"} />
+                    )}
+                    {program.featuredInHero && (
+                      <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-[#E91E63] text-white shadow ring-2 ring-white">
+                        <FiStar className="size-2.5" />
+                      </span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -533,6 +562,7 @@ export default function ProgramsView({ programs }: any) {
                   <textarea name="text" rows={3} required placeholder="What is this category about?" className={`${inputClasses} resize-none`} />
                 </div>
                 <ImageUploadField name="image" label="Category Image" />
+                <FeaturedInHeroField />
 
                 <div className="space-y-3 border-t border-slate-100 pt-6">
                   <div className="flex items-center justify-between gap-2">
@@ -620,6 +650,7 @@ export default function ProgramsView({ programs }: any) {
                       <textarea name="text" rows={3} required defaultValue={selectedProgram?.text} className={`${inputClasses} resize-none`} />
                     </div>
                     <ImageUploadField name="image" existingImage={selectedProgram?.image} label="Category Image" />
+                    <FeaturedInHeroField defaultChecked={selectedProgram?.featuredInHero} />
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                       <button
                         type="submit"
@@ -648,11 +679,32 @@ export default function ProgramsView({ programs }: any) {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{selectedProgram?.title}</h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{selectedProgram?.title}</h2>
+                          {selectedProgram?.featuredInHero && (
+                            <span className="hidden sm:flex items-center gap-1 shrink-0 text-[10px] font-bold text-[#E91E63] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+                              <FiStar className="size-2.5" /> IN SLIDESHOW
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-slate-500 truncate">{selectedProgram?.level}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeatured(selectedProgram!.id, !selectedProgram?.featuredInHero)}
+                        title="Toggle homepage slideshow"
+                        className={`w-12 h-7 rounded-full relative transition-all duration-300 ${
+                          selectedProgram?.featuredInHero ? "bg-[#E91E63]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 size-5 bg-white rounded-full shadow-md transition-all duration-300 ${
+                            selectedProgram?.featuredInHero ? "left-6" : "left-1"
+                          }`}
+                        />
+                      </button>
                       <button
                         onClick={() => setEditingProgram(true)}
                         className="p-2.5 sm:p-3 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-[#E91E63] transition-colors"

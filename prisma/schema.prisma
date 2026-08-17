@@ -83,13 +83,14 @@ model Report {
 }
 
 model Program {
-  id        Int       @id @default(autoincrement())
-  title     String
-  level     String
-  text      String
-  image     String?
-  sortOrder Int       @default(0)
-  subjects  Subject[]
+  id             Int       @id @default(autoincrement())
+  title          String
+  level          String
+  text           String
+  image          String?
+  sortOrder      Int       @default(0)
+  featuredInHero Boolean   @default(false) // Shown in the homepage Hero slideshow when true
+  subjects       Subject[]
 }
 
 model Subject {
