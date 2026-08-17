@@ -118,7 +118,7 @@ function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
 
 export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
   return (
-    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-16 pb-16 md:pt-20 md:pb-20">
+    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-20 pb-16 md:pt-24 md:pb-20">
       {/* Decorative background elements */}
       <div className="absolute inset-0 bg-black/40" />
       <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/5 blur-3xl" />
