@@ -99,19 +99,10 @@ function RequestFormContent({programs}: { programs: Program[] }) {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const searchParams = useSearchParams();
     const programIdParam = searchParams.get("programId");
-    const subjectIdParam = searchParams.get("subjectId");
-    const initialProgram = programIdParam
-        ? programs.find(p => p.id.toString() === programIdParam)
-        : undefined;
-    const initialSubject = subjectIdParam
-        ? initialProgram?.subjects.find(s => s.id.toString() === subjectIdParam)
-        : undefined;
 
     const [selectedProgramId, setSelectedProgramId] = useState<string>(programIdParam || "");
-    const [selectedSubjects, setSelectedSubjects] = useState<string[]>(initialSubject ? [initialSubject.name] : []);
-    const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>(
-        initialSubject ? {[initialSubject.name]: initialSubject.topics.map(t => t.name)} : {}
-    );
+    const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+    const [selectedCourses, setSelectedCourses] = useState<Record<string, string[]>>({});
     const [selectionError, setSelectionError] = useState(false);
     const [selectedMode, setSelectedMode] = useState<string>("");
     const [modeError, setModeError] = useState(false);
@@ -161,7 +152,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                 if (subCategory) {
                     setSelectedCourses(c => ({
                         ...c,
-                        [subCategoryName]: subCategory.topics.map(t => t.name)
+                        [subCategoryName]: []
                     }));
                 }
                 return [...prev, subCategoryName];
