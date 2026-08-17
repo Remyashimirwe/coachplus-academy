@@ -26,7 +26,7 @@ export default function PageHero({
           <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
             {badge}
           </span>
-          <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+          <h1 className="text-2xl font-medium leading-tight sm:text-3xl lg:text-4xl">
             {title}
           </h1>
           {subtitle && (

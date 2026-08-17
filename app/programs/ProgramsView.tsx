@@ -9,10 +9,12 @@ import {
 } from "react-icons/fi";
 import { useState } from "react";
 import ProgramModal from "../components/ProgramModal";
+import PageHero from "../components/PageHero";
 
 type Topic = {
   id: number;
   name: string;
+  image: string | null;
 };
 
 type Subject = {
@@ -36,38 +38,16 @@ export default function ProgramsPage({
 }: {
   programs: Program[];
 }) {
-  const [selectedProgram, setSelectedProgram] = useState<any>(null);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#7B1FA2] via-[#5B1380] to-[#21121f] pt-24 pb-12 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.08),transparent_45%)]" />
-        <div className="absolute -left-32 top-24 size-96 rounded-full bg-[#E91E63]/20 blur-3xl" />
-        <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-black/25 blur-3xl" />
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-14">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-3xl"
-          >
-            <div className="relative inline-flex items-center justify-center px-10 py-4 mb-8">
-              <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-full border border-white/20" />
-              <p className="relative flex items-center gap-2 text-sm font-medium text-white uppercase tracking-widest">
-                <FiBookOpen className="size-4 text-[#E91E63]" />
-                Our Categories
-              </p>
-            </div>
-            <h1 className="mt-10 text-sm font-semibold tracking-tight sm:text-xl md:text-2xl">
-              Learning paths for every goal
-            </h1>
-          </motion.div>
-        </div>
-
-        {/* Bottom straight transition */}
-        <div className="absolute -bottom-px left-0 w-full h-12 bg-white" />
-      </section>
+      <PageHero
+        badge="Our Categories"
+        title={<>Learning paths for <span className="text-[#E91E63]">every goal</span></>}
+        subtitle="Explore our learning categories and find the perfect fit for you."
+      />
 
       <section className="bg-white py-12 md:py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
@@ -78,7 +58,7 @@ export default function ProgramsPage({
               </div>
               <h3 className="text-2xl font-bold text-slate-900">No Programs Available</h3>
               <p className="mt-2 text-slate-600 max-w-md px-6">
-                We're currently expanding our offerings. Please check back later or contact us for custom tutoring needs.
+                We&apos;re currently expanding our offerings. Please check back later or contact us for custom tutoring needs.
               </p>
               <Link
                 href="/request"

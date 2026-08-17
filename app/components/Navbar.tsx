@@ -151,7 +151,7 @@ export default function Navbar() {
               className="relative h-10 w-auto rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105 sm:h-12"
             />
           </div>
-          <span className={`text-xl sm:text-2xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-slate-900" : "text-white"}`}>
+          <span className={`text-lg sm:text-xl font-bold tracking-tight transition-colors duration-300 ${scrolled || !isHomePage ? "text-slate-900" : "text-white"}`}>
             CoachPlus <span className="text-[#E91E63]">Academy</span>
           </span>
         </Link>
@@ -162,7 +162,7 @@ export default function Navbar() {
               key={link.label}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`group relative rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+              className={`group relative rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
                 scrolled || !isHomePage
                   ? (isActive(link.href) ? "text-[#E91E63] bg-[#fff0f3]" : "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]") 
                   : (isActive(link.href) ? "text-white bg-white/20" : "text-white/80 hover:text-white hover:bg-white/10")
@@ -175,7 +175,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
-                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-all duration-300 ${
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
                   scrolled || !isHomePage
                     ? "text-slate-900 bg-slate-100 hover:bg-slate-200"
                     : "text-white bg-white/20 hover:bg-white/30"
@@ -199,7 +199,7 @@ export default function Navbar() {
           ) : null}
           <Link
             href="/request"
-            className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-base font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
+            className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
               scrolled || !isHomePage
                 ? "bg-[#E91E63] text-white hover:bg-[#7B1FA2] hover:shadow-rose-500/25"
                 : "bg-white text-[#E91E63] hover:bg-white/90 hover:shadow-white/10"
@@ -267,7 +267,7 @@ export default function Navbar() {
                     <Link
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className={`block rounded-2xl px-6 py-4 text-base font-bold transition-all duration-200 w-fit hover:translate-x-1 ${
+                      className={`block rounded-2xl px-6 py-4 text-sm font-semibold transition-all duration-200 w-fit hover:translate-x-1 ${
                         isActive(link.href)
                           ? "bg-[#fff0f3] text-[#E91E63]"
                           : "text-slate-600 hover:bg-[#fff0f3] hover:text-[#E91E63]"
@@ -282,7 +282,7 @@ export default function Navbar() {
                     <Link
                       href={user.role === "TEACHER" ? "/teacher" : user.role === "ADMIN" ? "/admin" : "/student"}
                       onClick={() => setMenuOpen(false)}
-                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-lg font-bold text-slate-700 shadow-sm transition-all duration-200 hover:border-[#E91E63]/40"
+                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-base font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-[#E91E63]/40"
                     >
                       <FiUser className="size-5 text-[#E91E63]" />
                       <span className="truncate">{user.name}</span>
@@ -292,7 +292,7 @@ export default function Navbar() {
                         handleLogout();
                         setMenuOpen(false);
                       }}
-                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-6 text-lg font-bold text-red-600 shadow-sm transition-all duration-200 hover:bg-red-100"
+                      className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-6 text-base font-semibold text-red-600 shadow-sm transition-all duration-200 hover:bg-red-100"
                     >
                       <FiLogOut className="size-5" />
                       Logout
@@ -303,7 +303,7 @@ export default function Navbar() {
                   <Link
                     href="/request"
                     onClick={() => setMenuOpen(false)}
-                    className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-lg font-bold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#7B1FA2] active:scale-95"
+                    className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-base font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#7B1FA2] active:scale-95"
                   >
                     <FiSend className="size-5" />
                     Request a Teacher

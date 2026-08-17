@@ -72,7 +72,7 @@ function Field({
 }) {
     return (
         <div className={`space-y-2 ${className}`}>
-            <label htmlFor={htmlFor} className="text-sm font-bold text-slate-700 flex items-center gap-2">
+            <label htmlFor={htmlFor} className="text-xs font-semibold text-slate-700 flex items-center gap-2">
                 <span className="text-[#E91E63]">{icon}</span>
                 {label}
             </label>
@@ -224,13 +224,13 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                         transition={{duration: 0.5}}
                     >
             <span
-                className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
+                className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
               Join CoachPlus Academy
             </span>
-                        <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+                        <h1 className="text-2xl font-medium leading-tight sm:text-3xl lg:text-4xl">
                             Request a <span className="text-[#E91E63]">Teacher</span>
                         </h1>
-                        <p className="mt-8 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300">
+                        <p className="mt-6 mx-auto max-w-2xl text-base leading-relaxed text-slate-300">
                             Tell us your learning goals and we&apos;ll find the perfect match from our network of elite
                             educators.
                         </p>
@@ -253,14 +253,14 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-green-50 text-green-500 mb-8">
                                     <FiCheckCircle className="size-12"/>
                                 </div>
-                                <h2 className="text-3xl font-bold text-[#0f172a]">Request Sent Successfully!</h2>
+                                <h2 className="text-xl font-semibold text-[#0f172a]">Request Sent Successfully!</h2>
                                 <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
                                     Our team is already working on finding the best teacher for you. Expect an update
                                     within 24 hours.
                                 </p>
                                 <Link
                                     href="/"
-                                    className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#0f172a] px-8 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                                    className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#0f172a] px-8 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                                 >
                                     Return Home
                                 </Link>
@@ -277,14 +277,14 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-red-50 text-red-500 mb-8">
                                     <FiX className="size-12"/>
                                 </div>
-                                <h2 className="text-3xl font-bold text-[#0f172a]">Form is not Submited</h2>
+                                <h2 className="text-xl font-semibold text-[#0f172a]">Form is not Submited</h2>
                                 <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
                                     Something went wrong while sending your request. Please try again later or contact
                                     us directly.
                                 </p>
                                 <button
                                     onClick={() => setStatus("idle")}
-                                    className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#E91E63] px-8 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#0f172a]"
+                                    className="mt-10 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#E91E63] px-8 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#0f172a]"
                                 >
                                     Try Again
                                 </button>
@@ -378,7 +378,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     </div>
 
                                     <div className="space-y-6">
-                                        <h3 className="text-lg font-bold text-[#0f172a] flex items-center gap-2">
+                                        <h3 className="text-base font-semibold text-[#0f172a] flex items-center gap-2">
                                             <FiMapPin className="text-[#E91E63]"/>
                                             Location Details
                                         </h3>
@@ -430,14 +430,14 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     <div className="space-y-4" id="subject-selection">
                                         <div className="flex items-center justify-between">
                                             <label
-                                                className={`text-sm font-bold flex items-center gap-2 transition-colors ${selectionError ? 'text-red-500' : 'text-slate-700'}`}>
+                                                className={`text-xs font-semibold flex items-center gap-2 transition-colors ${selectionError ? 'text-red-500' : 'text-slate-700'}`}>
                                                 <FiBookOpen
                                                     className={selectionError ? 'text-red-500' : 'text-[#E91E63]'}/>
                                                 Choose a Course or Subject *
                                             </label>
                                             {selectionError && (
                                                 <span
-                                                    className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please select at least one course</span>
+                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">Please select at least one course</span>
                                             )}
                                         </div>
 
@@ -452,7 +452,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                                 : "bg-white border-slate-100 hover:border-[#E91E63]/30"
                                                         }`}
                                                     >
-                            <span className="text-sm font-bold text-slate-800">
+                            <span className="text-xs font-semibold text-slate-800">
                               All Courses
                             </span>
                                                         <div
@@ -499,7 +499,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                                                 className="text-white size-3"/>}
                                                                         </div>
                                                                         <span
-                                                                            className="absolute bottom-3 left-4 text-xs sm:text-sm font-bold text-white truncate right-4">
+                                                                            className="absolute bottom-3 left-4 text-xs sm:text-xs font-semibold text-white truncate right-4">
                                       {s.name}
                                     </span>
                                                                     </div>
@@ -517,7 +517,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                     >
                                                         <div className="flex items-center gap-2 mb-6">
                                                             <FiLayers className="text-[#E91E63]"/>
-                                                            <h3 className="text-sm font-bold text-slate-700">Refine
+                                                            <h3 className="text-xs font-semibold text-slate-700">Refine
                                                                 Topics to Cover</h3>
                                                         </div>
 
@@ -541,7 +541,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                                                     key={topic.id}
                                                                                     type="button"
                                                                                     onClick={() => toggleTopic(subName, topic.name)}
-                                                                                    className={`group/btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all ${
+                                                                                    className={`group/btn flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] sm:text-xs font-medium transition-all ${
                                                                                         selectedCourses[subName]?.includes(topic.name)
                                                                                             ? "bg-[#E91E63] text-white shadow-lg shadow-rose-200"
                                                                                             : "bg-white text-slate-500 border border-slate-200 hover:border-[#E91E63]/30"
@@ -578,13 +578,13 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     <div className="space-y-4" id="learning-mode">
                                         <div className="flex items-center justify-between">
                                             <label
-                                                className={`text-sm font-bold flex items-center gap-2 transition-colors ${modeError ? 'text-red-500' : 'text-slate-700'}`}>
+                                                className={`text-xs font-semibold flex items-center gap-2 transition-colors ${modeError ? 'text-red-500' : 'text-slate-700'}`}>
                                                 <FiMapPin className={modeError ? 'text-red-500' : 'text-[#E91E63]'}/>
                                                 Choose Learning Mode *
                                             </label>
                                             {modeError && (
                                                 <span
-                                                    className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please choose a learning mode</span>
+                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">Please choose a learning mode</span>
                                             )}
                                         </div>
                                         <div className="grid gap-4 sm:grid-cols-2">
@@ -598,7 +598,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                             setSelectedMode(m);
                                                             setModeError(false);
                                                         }}
-                                                        className={`flex items-center justify-between rounded-2xl border-2 px-5 py-4 text-sm font-bold transition-all ${
+                                                        className={`flex items-center justify-between rounded-2xl border-2 px-5 py-4 text-xs font-semibold transition-all ${
                                                             isSelected
                                                                 ? "bg-[#E91E63]/5 border-[#E91E63] text-[#21121f] shadow-md"
                                                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -622,13 +622,13 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     <div className="space-y-4" id="preferred-days">
                                         <div className="flex items-center justify-between">
                                             <label
-                                                className={`text-sm font-bold flex items-center gap-2 transition-colors ${daysError ? 'text-red-500' : 'text-slate-700'}`}>
+                                                className={`text-xs font-semibold flex items-center gap-2 transition-colors ${daysError ? 'text-red-500' : 'text-slate-700'}`}>
                                                 <FiCalendar className={daysError ? 'text-red-500' : 'text-[#E91E63]'}/>
                                                 Preferred Days &amp; Time *
                                             </label>
                                             {daysError && (
                                                 <span
-                                                    className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Select days and set times</span>
+                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">Select days and set times</span>
                                             )}
                                         </div>
                                         <p className="text-xs text-slate-500">
@@ -642,7 +642,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                         key={d}
                                                         type="button"
                                                         onClick={() => toggleDay(d)}
-                                                        className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
+                                                        className={`rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
                                                             isSelected
                                                                 ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                                                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -658,13 +658,13 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             <div className="grid gap-4 sm:grid-cols-2">
                                                 {selectedDays.map(d => (
                                                     <div key={d} className="rounded-2xl border-2 border-slate-100 bg-slate-50 p-4">
-                                                        <p className="mb-3 flex items-center gap-2 text-xs font-bold text-slate-700">
+                                                        <p className="mb-3 flex items-center gap-2 text-xs font-medium text-slate-700">
                                                             <FiCalendar className="text-[#E91E63]"/>
                                                             {d}
                                                         </p>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <div>
-                                                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</label>
+                                                                <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
                                                                 <input
                                                                     type="time"
                                                                     value={dayTimes[d]?.from || ""}
@@ -674,7 +674,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To</label>
+                                                                <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
                                                                 <input
                                                                     type="time"
                                                                     value={dayTimes[d]?.to || ""}
@@ -685,7 +685,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                             </div>
                                                         </div>
                                                         {daysError && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
-                                                            <p className="mt-2 text-[10px] font-bold text-red-500">Set a from and to time for {d}</p>
+                                                            <p className="mt-2 text-[10px] font-medium text-red-500">Set a from and to time for {d}</p>
                                                         )}
                                                     </div>
                                                 ))}
@@ -713,7 +713,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     <button
                                         type="submit"
                                         disabled={status === "submitting"}
-                                        className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-4 text-lg font-bold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+                                        className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-4 text-base font-semibold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
                                         <div
                                             className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-500 group-hover:translate-x-full"/>
@@ -760,7 +760,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                 <FiCheckCircle className="size-12"/>
                             </div>
 
-                            <h2 className="text-3xl font-bold text-[#0f172a]">Request Sent!</h2>
+                            <h2 className="text-xl font-semibold text-[#0f172a]">Request Sent!</h2>
                             <p className="mt-6 text-lg leading-relaxed text-slate-500">
                                 Our team is already working on finding the best teacher for you. Expect an update within
                                 24 hours.
@@ -769,13 +769,13 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                                 <button
                                     onClick={() => setShowSuccessModal(false)}
-                                    className="flex-1 rounded-2xl bg-[#0f172a] py-4 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                                    className="flex-1 rounded-2xl bg-[#0f172a] py-4 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                                 >
                                     Got it, thanks!
                                 </button>
                                 <Link
                                     href="/"
-                                    className="flex-1 rounded-2xl bg-slate-100 py-4 text-lg font-bold text-slate-600 transition-all hover:bg-slate-200"
+                                    className="flex-1 rounded-2xl bg-slate-100 py-4 text-base font-semibold text-slate-600 transition-all hover:bg-slate-200"
                                 >
                                     Return Home
                                 </Link>

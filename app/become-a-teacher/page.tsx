@@ -10,17 +10,21 @@ export default async function BecomeTeacherPage() {
   const programs = rawPrograms.map((p) => ({
     id: p.id,
     title: p.title,
-    subjects: p.subjects.map((s) => ({ id: s.id, name: s.name })),
+    subjects: p.subjects.map((s) => ({
+      id: s.id,
+      name: s.name,
+      topics: s.topics.map((t) => ({ id: t.id, name: t.name })),
+    })),
   }));
   const levels = Array.from(new Set(rawPrograms.map((p) => p.level).filter(Boolean)));
 
   return (
     <main className="min-h-screen bg-white text-[#121826]">
-      <div className="relative overflow-hidden bg-[#0f172a] pt-56 pb-40 text-white">
+      <div className="relative overflow-hidden bg-[#0f172a] pt-40 pb-24 text-white">
         {/* Background decorative elements */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#FF5733]/10 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-[#E91E63]/10 via-transparent to-transparent" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[url('/grid.svg')] opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FF5733]/20 via-[#E91E63]/20 to-[#7B1FA2]/20" />
+        <div className="absolute -left-32 top-24 size-96 rounded-full bg-[#E91E63]/10 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/10 blur-3xl" />
         
         <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 text-center">
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -33,10 +37,10 @@ export default async function BecomeTeacherPage() {
                 Hiring Now
               </span>
             </div>
-            <h1 className="text-5xl font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl tracking-tight">
+            <h1 className="text-2xl font-medium leading-[1.1] sm:text-3xl tracking-tight">
               Inspire the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF5733] to-[#E91E63]">Next Generation</span>
             </h1>
-            <p className="mt-10 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300 font-medium sm:text-lg">
+            <p className="mt-8 mx-auto max-w-2xl text-lg leading-relaxed text-slate-300 font-medium">
               Join CoachPlus Academy&apos;s elite educator network. We connect exceptional teachers with students who are passionate about learning.
             </p>
           </div>

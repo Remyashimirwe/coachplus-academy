@@ -33,10 +33,17 @@ import {
 import { saveTeacherApplication } from "@/app/actions/teacher";
 
 const MAX_SUBJECTS_PER_PROGRAM = 4;
+const MAX_TOPICS_PER_SUBJECT = 4;
+
+type ProgramTopic = {
+  id: number;
+  name: string;
+};
 
 type ProgramSubject = {
   id: number;
   name: string;
+  topics: ProgramTopic[];
 };
 
 type TeacherProgram = {
@@ -69,7 +76,7 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <label htmlFor={htmlFor} className="text-xs font-bold text-[#0f172a] flex items-center gap-2 mb-1">
+      <label htmlFor={htmlFor} className="text-xs font-medium text-[#0f172a] flex items-center gap-2 mb-1">
         <span className="flex items-center justify-center size-6 rounded-lg bg-[#E91E63]/5 text-[#E91E63]">{icon}</span>
         {label}
       </label>
@@ -157,10 +164,10 @@ function UploadField({
               ) : (
                 <div className="h-20 w-full rounded-lg bg-white border border-slate-100 flex flex-col items-center justify-center gap-1">
                   <FiFileText className="size-6 text-[#E91E63]" />
-                  <span className="text-[8px] font-bold text-slate-400 uppercase">PDF / Document</span>
+                  <span className="text-[8px] font-medium text-slate-400 uppercase">PDF / Document</span>
                 </div>
               )}
-              <span className="text-[10px] font-bold text-slate-600 truncate w-full text-center">{file.name}</span>
+              <span className="text-[10px] font-medium text-slate-600 truncate w-full text-center">{file.name}</span>
               <span className="text-[9px] text-slate-400 font-medium">{formatFileSize(file.size)}</span>
             </div>
           ))}
@@ -177,6 +184,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [selectedProgramIds, setSelectedProgramIds] = useState<number[]>([]);
   const [programSubjects, setProgramSubjects] = useState<Record<number, string[]>>({});
+  const [programTopics, setProgramTopics] = useState<Record<string, string[]>>({});
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [dayTimes, setDayTimes] = useState<Record<string, { from: string; to: string }>>({});
@@ -200,6 +208,13 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
           delete copy[programId];
           return copy;
         });
+        setProgramTopics(ts => {
+          const copy = { ...ts };
+          Object.keys(copy).forEach(k => {
+            if (k.startsWith(`${programId}:`)) delete copy[k];
+          });
+          return copy;
+        });
         return prev.filter(id => id !== programId);
       }
       return [...prev, programId];
@@ -210,10 +225,28 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
     setProgramSubjects(prev => {
       const current = prev[programId] || [];
       if (current.includes(subjectName)) {
+        const key = `${programId}:${subjectName}`;
+        setProgramTopics(ts => {
+          const copy = { ...ts };
+          delete copy[key];
+          return copy;
+        });
         return { ...prev, [programId]: current.filter(s => s !== subjectName) };
       }
       if (current.length >= MAX_SUBJECTS_PER_PROGRAM) return prev;
       return { ...prev, [programId]: [...current, subjectName] };
+    });
+  };
+
+  const toggleProgramTopic = (programId: number, subjectName: string, topicName: string) => {
+    const key = `${programId}:${subjectName}`;
+    setProgramTopics(prev => {
+      const current = prev[key] || [];
+      if (current.includes(topicName)) {
+        return { ...prev, [key]: current.filter(t => t !== topicName) };
+      }
+      if (current.length >= MAX_TOPICS_PER_SUBJECT) return prev;
+      return { ...prev, [key]: [...current, topicName] };
     });
   };
 
@@ -256,13 +289,13 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                   <div className="size-24 rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center mb-8">
                     <FiAlertCircle className="size-12" />
                   </div>
-                  <h2 className="text-3xl font-bold text-[#0f172a]">Applications are Closed</h2>
+                  <h2 className="text-xl font-semibold text-[#0f172a]">Applications are Closed</h2>
                   <p className="mt-6 text-lg text-slate-500 max-w-sm mx-auto leading-relaxed">
                     We are currently not accepting new teacher applications. Please check back later or follow us for updates on future recruitment cycles.
                   </p>
                   <Link
                     href="/"
-                    className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#0f172a] px-10 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                    className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#0f172a] px-10 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                   >
                     Return Home
                   </Link>
@@ -315,7 +348,11 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                       const formData = new FormData(e.currentTarget);
                       Object.entries(programSubjects).forEach(([programId, subs]) => {
                         const program = programs.find(p => p.id === Number(programId));
-                        subs.forEach(s => formData.append('subjects', program ? `${program.title}: ${s}` : s));
+                        subs.forEach(s => {
+                          formData.append('subjects', program ? `${program.title}: ${s}` : s);
+                          const topics = programTopics[`${programId}:${s}`] || [];
+                          topics.forEach(t => formData.append('subjects', program ? `${program.title}: ${s} - ${t}` : `${s} - ${t}`));
+                        });
                       });
                       selectedGrades.forEach(g => formData.append('grades', g));
                       selectedDays.forEach(d => {
@@ -330,6 +367,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         e.currentTarget.reset();
                         setSelectedProgramIds([]);
                         setProgramSubjects({});
+                        setProgramTopics({});
                         setSelectedGrades([]);
                         setSelectedDays([]);
                         setDayTimes({});
@@ -352,7 +390,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiUser className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Personal Information</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Personal Information</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Basic details to identify you</p>
                         </div>
                       </div>
@@ -418,7 +456,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiBookOpen className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Education</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Education</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Your academic background</p>
                         </div>
                       </div>
@@ -454,7 +492,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiBriefcase className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Teaching Experience</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Teaching Experience</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Where and what you&apos;ve taught</p>
                         </div>
                       </div>
@@ -470,10 +508,10 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
 
                       <div className="space-y-4" data-error={selectionErrors.grades}>
                         <div className="flex items-center justify-between">
-                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.grades ? 'text-red-500' : 'text-slate-700'}`}>
+                          <label className={`text-xs font-semibold flex items-center gap-2 ${selectionErrors.grades ? 'text-red-500' : 'text-slate-700'}`}>
                             Grade/Level You Can Teach *
                           </label>
-                          {selectionErrors.grades && <span className="text-[10px] font-bold text-red-500 uppercase">Select at least one</span>}
+                          {selectionErrors.grades && <span className="text-[10px] font-medium text-red-500 uppercase">Select at least one</span>}
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {levels.map(g => (
@@ -481,7 +519,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                               key={g}
                               type="button"
                               onClick={() => toggleItem(g, selectedGrades, setSelectedGrades)}
-                              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
+                              className={`rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
                                 selectedGrades.includes(g)
                                 ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -495,16 +533,16 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
 
                       <div className="space-y-4" data-error={selectionErrors.subjects}>
                         <div className="flex items-center justify-between">
-                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.subjects ? 'text-red-500' : 'text-slate-700'}`}>
+                          <label className={`text-xs font-semibold flex items-center gap-2 ${selectionErrors.subjects ? 'text-red-500' : 'text-slate-700'}`}>
                             Programs &amp; Subjects You Can Teach *
                           </label>
-                          {selectionErrors.subjects && <span className="text-[10px] font-bold text-red-500 uppercase">Select at least one</span>}
+                          {selectionErrors.subjects && <span className="text-[10px] font-medium text-red-500 uppercase">Select at least one</span>}
                         </div>
                         <p className="text-xs text-slate-500">
-                          Choose a program, then pick up to {MAX_SUBJECTS_PER_PROGRAM} subjects within it. You can select more than one program.
+                          Choose a program, then pick up to {MAX_SUBJECTS_PER_PROGRAM} subjects within it. Select a subject to reveal its available topics.
                         </p>
                         <div className="space-y-4">
-                          {programs.map(p => {
+                          {programs.filter(p => p.subjects.length > 0).map(p => {
                             const isProgramSelected = selectedProgramIds.includes(p.id);
                             const count = programSubjects[p.id]?.length || 0;
                             return (
@@ -521,7 +559,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                                   onClick={() => toggleProgram(p.id)}
                                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
                                 >
-                                  <span className={`text-sm font-bold ${isProgramSelected ? "text-[#E91E63]" : "text-slate-800"}`}>
+                                  <span className={`text-xs font-semibold ${isProgramSelected ? "text-[#E91E63]" : "text-slate-800"}`}>
                                     {p.title}
                                   </span>
                                   <span className={`size-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
@@ -538,26 +576,66 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                         Subjects (max {MAX_SUBJECTS_PER_PROGRAM})
                                       </span>
-                                      <span className={`text-xs font-bold ${count >= MAX_SUBJECTS_PER_PROGRAM ? "text-[#E91E63]" : "text-slate-400"}`}>
+                                      <span className={`text-xs font-medium ${count >= MAX_SUBJECTS_PER_PROGRAM ? "text-[#E91E63]" : "text-slate-400"}`}>
                                         {count}/{MAX_SUBJECTS_PER_PROGRAM}
                                       </span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                       {p.subjects.map(s => {
                                         const isSelected = programSubjects[p.id]?.includes(s.name);
+                                        const hasTopics = s.topics.length > 0;
+                                        const selTopics = programTopics[`${p.id}:${s.name}`] || [];
                                         return (
-                                          <button
+                                          <div
                                             key={s.id}
-                                            type="button"
-                                            onClick={() => toggleProgramSubject(p.id, s.name)}
-                                            className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
+                                            className={`rounded-xl border-2 transition-all overflow-hidden ${
                                               isSelected
-                                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
-                                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                                                ? "border-[#E91E63]/50 bg-white"
+                                                : "border-slate-100 bg-slate-50"
                                             }`}
                                           >
-                                            {s.name}
-                                          </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => toggleProgramSubject(p.id, s.name)}
+                                              className={`flex w-full items-center justify-between gap-3 px-4 py-2 text-xs font-medium transition-all ${
+                                                isSelected ? "text-[#E91E63]" : "text-slate-600 hover:text-slate-800"
+                                              }`}
+                                            >
+                                              <span>{s.name}</span>
+                                              {isSelected && <FiCheckCircle className="size-3.5 shrink-0" />}
+                                            </button>
+                                            {isSelected && hasTopics && (
+                                              <div className="border-t border-slate-100 px-4 py-3">
+                                                <div className="flex items-center justify-between">
+                                                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                                                    Topics (max {MAX_TOPICS_PER_SUBJECT})
+                                                  </span>
+                                                  <span className={`text-xs font-medium ${selTopics.length >= MAX_TOPICS_PER_SUBJECT ? "text-[#E91E63]" : "text-slate-400"}`}>
+                                                    {selTopics.length}/{MAX_TOPICS_PER_SUBJECT}
+                                                  </span>
+                                                </div>
+                                                <div className="mt-2 flex flex-wrap gap-2">
+                                                  {s.topics.map(t => {
+                                                    const isTopicSelected = selTopics.includes(t.name);
+                                                    return (
+                                                      <button
+                                                        key={t.id}
+                                                        type="button"
+                                                        onClick={() => toggleProgramTopic(p.id, s.name, t.name)}
+                                                        className={`rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all border ${
+                                                          isTopicSelected
+                                                            ? "bg-[#E91E63] border-[#E91E63] text-white"
+                                                            : "bg-white border-slate-200 text-slate-500 hover:border-[#E91E63]/40 hover:text-slate-700"
+                                                        }`}
+                                                      >
+                                                        {t.name}
+                                                      </button>
+                                                    );
+                                                  })}
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
                                         );
                                       })}
                                     </div>
@@ -590,7 +668,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiStar className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Teaching Skills</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Teaching Skills</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Your pedagogical approach</p>
                         </div>
                       </div>
@@ -607,7 +685,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         <input id="techTools" name="techTools" placeholder="e.g. Google Classroom, Kahoot, Zoom" className={inputClasses} />
                       </Field>
                       <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Are you able to teach online? *</label>
+                        <label className="text-xs font-semibold text-slate-700">Are you able to teach online? *</label>
                         <div className="flex gap-6">
                           {["Yes", "No"].map(option => (
                             <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -626,7 +704,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiCalendar className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Availability</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Availability</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">When can you start teaching?</p>
                         </div>
                       </div>
@@ -641,10 +719,10 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                       
                       <div className="space-y-4" data-error={selectionErrors.days || selectionErrors.dayTimes}>
                         <div className="flex items-center justify-between">
-                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.days || selectionErrors.dayTimes ? 'text-red-500' : 'text-slate-700'}`}>
+                          <label className={`text-xs font-semibold flex items-center gap-2 ${selectionErrors.days || selectionErrors.dayTimes ? 'text-red-500' : 'text-slate-700'}`}>
                             Available Days &amp; Time *
                           </label>
-                          {(selectionErrors.days || selectionErrors.dayTimes) && <span className="text-[10px] font-bold text-red-500 uppercase">Select days and set times</span>}
+                          {(selectionErrors.days || selectionErrors.dayTimes) && <span className="text-[10px] font-medium text-red-500 uppercase">Select days and set times</span>}
                         </div>
                         <p className="text-xs text-slate-500">
                           Pick the days you are available, then choose your working hours (from - to) for each selected day.
@@ -655,7 +733,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                               key={d}
                               type="button"
                               onClick={() => toggleDay(d)}
-                              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
+                              className={`rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
                                 selectedDays.includes(d)
                                 ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -670,13 +748,13 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <div className="grid gap-4 sm:grid-cols-2">
                             {selectedDays.map(d => (
                               <div key={d} className="rounded-2xl border-2 border-slate-100 bg-slate-50 p-4">
-                                <p className="mb-3 flex items-center gap-2 text-xs font-bold text-slate-700">
+                                <p className="mb-3 flex items-center gap-2 text-xs font-medium text-slate-700">
                                   <FiCalendar className="text-[#E91E63]" />
                                   {d}
                                 </p>
                                 <div className="grid grid-cols-2 gap-3">
                                   <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</label>
+                                    <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
                                     <input
                                       type="time"
                                       value={dayTimes[d]?.from || ""}
@@ -686,7 +764,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                                     />
                                   </div>
                                   <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To</label>
+                                    <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
                                     <input
                                       type="time"
                                       value={dayTimes[d]?.to || ""}
@@ -697,7 +775,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                                   </div>
                                 </div>
                                 {selectionErrors.dayTimes && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
-                                  <p className="mt-2 text-[10px] font-bold text-red-500">Set a from and to time for {d}</p>
+                                  <p className="mt-2 text-[10px] font-medium text-red-500">Set a from and to time for {d}</p>
                                 )}
                               </div>
                             ))}
@@ -717,7 +795,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiMessageSquare className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Final Questions</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Final Questions</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Tell us a bit more about your motivation</p>
                         </div>
                       </div>
@@ -739,7 +817,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiFileText className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Application Documents</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Application Documents</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Supporting files for your application</p>
                         </div>
                       </div>
@@ -768,7 +846,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <FiShield className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Read about the Terms and Agreement carefully</h3>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Read about the Terms and Agreement carefully</h3>
                           <p className="text-[10px] md:text-xs text-slate-500 font-medium">Please review our partnership policies</p>
                         </div>
                       </div>
@@ -816,7 +894,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                       <button
                         type="submit"
                         disabled={status === "submitting" || !agreedToTerms}
-                        className="group relative w-full overflow-hidden rounded-3xl bg-[#0f172a] p-4 text-lg font-bold text-white shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        className="group relative w-full overflow-hidden rounded-3xl bg-[#0f172a] p-4 text-base font-semibold text-white shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                       >
                         <span className="relative flex items-center justify-center gap-3">
                           {status === "submitting" ? (
@@ -874,7 +952,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                 <FiCheckCircle className="size-12" />
               </div>
               
-              <h2 className="text-3xl font-bold text-[#0f172a]">Application Sent!</h2>
+              <h2 className="text-xl font-semibold text-[#0f172a]">Application Sent!</h2>
               <p className="mt-6 text-lg leading-relaxed text-slate-500">
                 Thank you for applying to join CoachPlus Academy. Our academic team will review your profile and get back to you within 3-5 business days.
               </p>
@@ -882,13 +960,13 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <button
                   onClick={() => setShowSuccessModal(false)}
-                  className="flex-1 rounded-2xl bg-[#0f172a] py-5 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                  className="flex-1 rounded-2xl bg-[#0f172a] py-5 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                 >
                   Got it, thanks!
                 </button>
                 <Link
                   href="/"
-                  className="flex-1 rounded-2xl bg-slate-100 py-5 text-lg font-bold text-slate-600 transition-all hover:bg-slate-200"
+                  className="flex-1 rounded-2xl bg-slate-100 py-5 text-base font-semibold text-slate-600 transition-all hover:bg-slate-200"
                 >
                   Return Home
                 </Link>
@@ -917,7 +995,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
             >
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#0f172a]">Teacher Partner Terms & Conditions</h2>
+                  <h2 className="text-lg font-semibold text-[#0f172a]">Teacher Partner Terms & Conditions</h2>
                   <p className="text-sm text-[#E91E63] font-bold uppercase tracking-widest mt-1">COACHPLUS ACADEMY</p>
                 </div>
                 <button
@@ -930,7 +1008,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
               
               <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                 <section>
-                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">1</span>
                     YOUR STATUS & PART-TIME DISPATCH
                   </h3>
@@ -945,7 +1023,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">2</span>
                     TEACHING STANDARDS & CONDUCT
                   </h3>
@@ -957,7 +1035,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">3</span>
                     SAFETY, THEFT & LEGAL RESPONSIBILITY
                   </h3>
@@ -969,7 +1047,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">4</span>
                     NO DIRECT CASH OR PRIVATE DEALS
                   </h3>
@@ -982,7 +1060,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">5</span>
                     LESSON SCHEDULES & CANCELLATIONS
                   </h3>
@@ -993,7 +1071,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">6</span>
                     HOW YOU GET PAID
                   </h3>
@@ -1018,7 +1096,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                     setAgreedToTerms(true);
                     setShowTermsModal(false);
                   }}
-                  className="w-full rounded-2xl bg-[#0f172a] py-5 text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
+                  className="w-full rounded-2xl bg-[#0f172a] py-5 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                 >
                   I Understand & Agree
                 </button>
