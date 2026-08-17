@@ -118,14 +118,14 @@ function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
 
 export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
   return (
-    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-16 md:pt-28 md:pb-20">
+    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-16 pb-16 md:pt-20 md:pb-20">
       {/* Decorative background elements */}
       <div className="absolute inset-0 bg-black/40" />
       <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/5 blur-3xl" />
       <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/30 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]" />
       
-      <div className="mx-auto grid min-h-[400px] max-w-7xl items-center gap-10 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-8">
+      <div className="mx-auto grid min-h-[340px] max-w-7xl items-center gap-10 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-8">
         <div className="relative z-10 order-2 max-w-2xl lg:order-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
