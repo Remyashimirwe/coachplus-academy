@@ -118,11 +118,12 @@ function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
 
 export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
   return (
-    <section id="home" className="relative overflow-hidden bg-[#0f172a] pt-20 pb-16 text-white md:pt-24 md:pb-20">
+    <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-20 pb-16 text-white md:pt-24 md:pb-20">
       {/* Decorative background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FF5733]/20 via-[#E91E63]/20 to-[#7B1FA2]/20" />
-      <div className="absolute -left-32 top-24 size-96 rounded-full bg-[#E91E63]/10 blur-3xl" />
-      <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/10 blur-3xl" />
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/5 blur-3xl" />
+      <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/30 blur-3xl" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]" />
       
       <div className="mx-auto mt-1 grid min-h-[440px] max-w-7xl items-center gap-10 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-8">
         <div className="relative z-10 order-2 max-w-2xl lg:order-1">

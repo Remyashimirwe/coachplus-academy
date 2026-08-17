@@ -123,6 +123,12 @@ function RequestFormContent({programs}: { programs: Program[] }) {
         ? []
         : programs.find(p => p.id.toString() === selectedProgramId)?.subjects.map(s => s.name) || [];
 
+    const hasTopicsInSelection = selectedProgramId !== ""
+        ? (programs.find(p => p.id.toString() === selectedProgramId)?.subjects.some(
+            s => selectedSubjects.includes(s.name) && s.topics.length > 0
+        ) ?? false)
+        : false;
+
     const toggleDay = (day: string) => {
         setSelectedDays(prev => {
             if (prev.includes(day)) {
@@ -180,13 +186,6 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                 newTopicsForSubCategory = [...current, topicName];
             } else {
                 newTopicsForSubCategory = current.filter(c => c !== topicName);
-            }
-
-            // If a topic is selected/deselected, the sub-category must be selected
-            if (newTopicsForSubCategory.length > 0 && !selectedSubjects.includes(subCategoryName)) {
-                setSelectedSubjects(s => [...s, subCategoryName]);
-            } else if (newTopicsForSubCategory.length === 0 && selectedSubjects.includes(subCategoryName)) {
-                setSelectedSubjects(s => s.filter(name => name !== subCategoryName));
             }
 
             return {
@@ -506,11 +505,11 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                                     </div>
                                                                 </div>
                                                             );
-                                                        })}
+                                                         })}
                                                 </div>
 
                                                 {/* Additional Topic Selection Section */}
-                                                {selectedSubjects.length > 0 && (
+                                                {hasTopicsInSelection && (
                                                     <motion.div
                                                         initial={{opacity: 0, y: 10}}
                                                         animate={{opacity: 1, y: 0}}
@@ -565,12 +564,6 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                                     </div>
                                                                 );
                                                             })}
-
-                                                            {Object.values(selectedCourses).every(topics => topics.length === 0) && (
-                                                                <p className="text-sm text-slate-400 italic">No topics
-                                                                    selected. Please select at least one topic for your
-                                                                    chosen courses.</p>
-                                                            )}
                                                         </div>
                                                     </motion.div>
                                                 )}

@@ -57,13 +57,7 @@ export async function saveTeacherApplication(formData: FormData) {
 
   // 3. Teaching Experience
   const experienceYears = String(formData.get("experienceYears") || "").trim();
-  let subjects = formData.getAll("subjects").map(s => String(s)).join(", ");
-  const otherPrograms = String(formData.get("otherPrograms") || "").trim();
-  const otherProgramSubjects = String(formData.get("otherProgramSubjects") || "").trim();
-  if (otherPrograms || otherProgramSubjects) {
-    const otherPart = `Other Program: ${otherPrograms}${otherProgramSubjects ? ` (Subjects: ${otherProgramSubjects})` : ""}`;
-    subjects = subjects ? `${subjects}; ${otherPart}` : otherPart;
-  }
+  const subjects = formData.getAll("subjects").map(s => String(s)).join(", ");
   const grades = formData.getAll("grades").map(g => String(g)).join(", ");
   const previousOrg = String(formData.get("previousOrg") || "").trim();
   const previousPos = String(formData.get("previousPos") || "").trim();
@@ -98,7 +92,6 @@ export async function saveTeacherApplication(formData: FormData) {
   const coverLetterFile = formData.get("coverLetter") as File | null;
   const idPassportFile = formData.get("idPassport") as File | null;
   const academicCertFiles = formData.getAll("academicCert") as File[];
-  const licenseFile = formData.get("license") as File | null;
   const otherCertFiles = formData.getAll("otherCerts") as File[];
 
   let documentInputs;
@@ -109,13 +102,12 @@ export async function saveTeacherApplication(formData: FormData) {
         fileToDocumentInput(resumeFile, "resume"),
         fileToDocumentInput(coverLetterFile, "coverLetter"),
         fileToDocumentInput(idPassportFile, "idPassport"),
-        fileToDocumentInput(licenseFile, "license"),
         ...academicCertFiles.map((f) => fileToDocumentInput(f, "academicCertificates")),
         ...otherCertFiles.map((f) => fileToDocumentInput(f, "otherCertificates")),
       ])
     ).filter((doc): doc is NonNullable<typeof doc> => doc !== null);
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to process uploaded files" };
+  } catch (error: unknown) {
+    return { success: false, error: error instanceof Error ? error.message : "Failed to process uploaded files" };
   }
 
   try {

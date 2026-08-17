@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiUser,
@@ -83,6 +83,93 @@ function Field({
 const inputClasses =
   "w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-4 focus:ring-[#E91E63]/10";
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function UploadField({
+  icon,
+  label,
+  htmlFor,
+  name,
+  required,
+  multiple,
+  accept,
+  files,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  htmlFor: string;
+  name: string;
+  required?: boolean;
+  multiple?: boolean;
+  accept?: string;
+  files: { file: File; url: string }[];
+  onChange: (files: { file: File; url: string }[]) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const removeFile = (index: number) => {
+    const remaining = files.filter((_, i) => i !== index);
+    onChange(remaining);
+    if (inputRef.current) {
+      const dt = new DataTransfer();
+      remaining.forEach(f => dt.items.add(f.file));
+      inputRef.current.files = dt.files;
+    }
+  };
+
+  return (
+    <Field icon={icon} label={label} htmlFor={htmlFor}>
+      <input
+        ref={inputRef}
+        id={htmlFor}
+        name={name}
+        type="file"
+        required={required}
+        multiple={multiple}
+        accept={accept}
+        onChange={(e) => {
+          const selected = Array.from(e.target.files || []);
+          onChange(selected.map(f => ({ file: f, url: URL.createObjectURL(f) })));
+        }}
+        className={`${inputClasses} py-3 cursor-pointer`}
+      />
+      {files.length > 0 && (
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {files.map(({ file, url }, i) => (
+            <div key={i} className="relative group/preview rounded-xl border-2 border-slate-100 bg-slate-50 p-2 flex flex-col items-center gap-1 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => removeFile(i)}
+                aria-label={`Remove ${file.name}`}
+                className="absolute -top-2 -right-2 z-10 grid size-6 place-items-center rounded-full bg-[#E91E63] text-white shadow-lg shadow-rose-200 transition-all hover:bg-red-600 hover:scale-110"
+              >
+                <FiX className="size-3.5" />
+              </button>
+              {file.type.startsWith("image/") ? (
+                <div className="h-20 w-full overflow-hidden rounded-lg">
+                  <img src={url} alt={file.name} className="h-full w-full object-cover transition-transform duration-300 group-hover/preview:scale-110" />
+                </div>
+              ) : (
+                <div className="h-20 w-full rounded-lg bg-white border border-slate-100 flex flex-col items-center justify-center gap-1">
+                  <FiFileText className="size-6 text-[#E91E63]" />
+                  <span className="text-[8px] font-bold text-slate-400 uppercase">PDF / Document</span>
+                </div>
+              )}
+              <span className="text-[10px] font-bold text-slate-600 truncate w-full text-center">{file.name}</span>
+              <span className="text-[9px] text-slate-400 font-medium">{formatFileSize(file.size)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Field>
+  );
+}
+
 export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen: boolean; programs: TeacherProgram[]; levels: string[] }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -90,12 +177,16 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [selectedProgramIds, setSelectedProgramIds] = useState<number[]>([]);
   const [programSubjects, setProgramSubjects] = useState<Record<number, string[]>>({});
-  const [otherProgram, setOtherProgram] = useState("");
-  const [otherProgramSubjects, setOtherProgramSubjects] = useState("");
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [dayTimes, setDayTimes] = useState<Record<string, { from: string; to: string }>>({});
   const [selectionErrors, setSelectionErrors] = useState<{ subjects?: boolean; grades?: boolean; days?: boolean; dayTimes?: boolean }>({});
+  const [diplomaFiles, setDiplomaFiles] = useState<{ file: File; url: string }[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<{ file: File; url: string }[]>([]);
+  const [idPassportFiles, setIdPassportFiles] = useState<{ file: File; url: string }[]>([]);
+  const [resumeFiles, setResumeFiles] = useState<{ file: File; url: string }[]>([]);
+  const [coverLetterFiles, setCoverLetterFiles] = useState<{ file: File; url: string }[]>([]);
+  const [otherCertFiles, setOtherCertFiles] = useState<{ file: File; url: string }[]>([]);
 
   const toggleItem = (item: string, list: string[], setter: (val: string[]) => void) => {
     setter(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
@@ -195,8 +286,7 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                     onSubmit={async (e) => {
                       e.preventDefault();
                       const totalSubjects =
-                        Object.values(programSubjects).reduce((sum, list) => sum + list.length, 0) +
-                        (otherProgramSubjects.trim() ? 1 : 0);
+                        Object.values(programSubjects).reduce((sum, list) => sum + list.length, 0);
                       const errors: typeof selectionErrors = {};
                       if (totalSubjects === 0) errors.subjects = true;
                       if (selectedGrades.length === 0) errors.grades = true;
@@ -227,10 +317,6 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         const program = programs.find(p => p.id === Number(programId));
                         subs.forEach(s => formData.append('subjects', program ? `${program.title}: ${s}` : s));
                       });
-                      if (otherProgram.trim() || otherProgramSubjects.trim()) {
-                        formData.append('otherPrograms', otherProgram.trim());
-                        formData.append('otherProgramSubjects', otherProgramSubjects.trim());
-                      }
                       selectedGrades.forEach(g => formData.append('grades', g));
                       selectedDays.forEach(d => {
                         formData.append('availableDays', d);
@@ -244,11 +330,15 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         e.currentTarget.reset();
                         setSelectedProgramIds([]);
                         setProgramSubjects({});
-                        setOtherProgram("");
-                        setOtherProgramSubjects("");
                         setSelectedGrades([]);
                         setSelectedDays([]);
                         setDayTimes({});
+                        setDiplomaFiles([]);
+                        setPhotoFiles([]);
+                        setIdPassportFiles([]);
+                        setResumeFiles([]);
+                        setCoverLetterFiles([]);
+                        setOtherCertFiles([]);
                       } else {
                         setStatus("error");
                       }
@@ -477,29 +567,6 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                             );
                           })}
                         </div>
-
-                        <div className="grid gap-6 md:grid-cols-2">
-                          <Field icon={<FiBriefcase />} label="Other Program(s) You Can Teach" htmlFor="otherProgram">
-                            <input
-                              id="otherProgram"
-                              name="otherProgram"
-                              value={otherProgram}
-                              onChange={(e) => setOtherProgram(e.target.value)}
-                              placeholder="e.g. Professional Training, Adult Literacy"
-                              className={inputClasses}
-                            />
-                          </Field>
-                          <Field icon={<FiBookOpen />} label="Subjects in Other Program(s)" htmlFor="otherProgramSubjects">
-                            <input
-                              id="otherProgramSubjects"
-                              name="otherProgramSubjects"
-                              value={otherProgramSubjects}
-                              onChange={(e) => setOtherProgramSubjects(e.target.value)}
-                              placeholder="e.g. Algebra, Statistics, Public Speaking"
-                              className={inputClasses}
-                            />
-                          </Field>
-                        </div>
                       </div>
 
                       <div className="grid gap-6 md:grid-cols-2">
@@ -677,64 +744,21 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo">
-                          <div className="flex items-center gap-4">
-                            <input 
-                              id="photo" 
-                              name="photo" 
-                              type="file" 
-                              accept="image/*" 
-                              required
-                              className={`${inputClasses} py-3`} 
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = (event) => {
-                                    const preview = document.getElementById('photo-preview') as HTMLImageElement;
-                                    if (preview) preview.src = event.target?.result as string;
-                                    const placeholder = document.getElementById('photo-placeholder');
-                                    if (placeholder) placeholder.style.display = 'none';
-                                    if (preview) preview.style.display = 'block';
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                            <div className="size-16 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
-                              <FiUser id="photo-placeholder" className="size-8 text-slate-400" />
-                              <img id="photo-preview" alt="Preview" className="size-full object-cover hidden" />
-                            </div>
-                          </div>
-                        </Field>
-                        <Field icon={<FiFileText />} label="Upload Passport / National ID *" htmlFor="idPassport">
-                          <input id="idPassport" name="idPassport" type="file" required accept=".pdf,image/*" className={`${inputClasses} py-3`} />
-                        </Field>
+                        <UploadField icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo" name="photo" required accept="image/*" files={photoFiles} onChange={setPhotoFiles} />
+                        <UploadField icon={<FiFileText />} label="Upload Passport / National ID *" htmlFor="idPassport" name="idPassport" required accept=".pdf,image/*" files={idPassportFiles} onChange={setIdPassportFiles} />
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiFileText />} label="Upload CV/Resume *" htmlFor="resume">
-                          <input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
-                        </Field>
-                        <Field icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter">
-                          <input id="coverLetter" name="coverLetter" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
-                        </Field>
+                        <UploadField icon={<FiFileText />} label="Upload CV/Resume *" htmlFor="resume" name="resume" required accept=".pdf,.doc,.docx" files={resumeFiles} onChange={setResumeFiles} />
+                        <UploadField icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter" name="coverLetter" required accept=".pdf,.doc,.docx" files={coverLetterFiles} onChange={setCoverLetterFiles} />
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiAward />} label="Academic Certificates (Upload Multiple) *" htmlFor="academicCert">
-                          <input id="academicCert" name="academicCert" type="file" required multiple accept=".pdf,image/*" className={`${inputClasses} py-3`} />
-                        </Field>
-                        <Field icon={<FiAward />} label="Other Certificates (Optional)" htmlFor="otherCerts">
-                          <input id="otherCerts" name="otherCerts" type="file" accept=".pdf,image/*" multiple className={`${inputClasses} py-3`} />
-                        </Field>
+                        <UploadField icon={<FiAward />} label="Diploma Upload *" htmlFor="academicCert" name="academicCert" required multiple accept=".pdf,image/*" files={diplomaFiles} onChange={setDiplomaFiles} />
+                        <UploadField icon={<FiAward />} label="Other Certificates (Optional)" htmlFor="otherCerts" name="otherCerts" multiple accept=".pdf,image/*" files={otherCertFiles} onChange={setOtherCertFiles} />
                       </div>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiStar />} label="Teaching License/Certification" htmlFor="license">
-                          <input id="license" name="license" type="file" accept=".pdf,image/*" className={`${inputClasses} py-3`} />
-                        </Field>
-                        <Field icon={<FiLink />} label="Portfolio / Sample Work (Optional)" htmlFor="portfolio">
-                          <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
-                        </Field>
-                      </div>
+
+                      <Field icon={<FiLink />} label="Portfolio / Sample Work (Optional)" htmlFor="portfolio">
+                        <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
+                      </Field>
                     </div>
 
                     {/* Terms and Agreement Title */}
