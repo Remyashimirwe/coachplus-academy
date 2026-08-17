@@ -125,7 +125,7 @@ export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
       <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/30 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]" />
       
-      <div className="mx-auto mt-1 grid min-h-[340px] max-w-7xl items-center gap-10 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-8">
+      <div className="mx-auto mt-1 grid min-h-[440px] max-w-7xl items-center gap-10 px-5 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-8">
         <div className="relative z-10 order-2 max-w-2xl lg:order-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
