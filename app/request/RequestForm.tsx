@@ -42,11 +42,19 @@ interface Program {
 }
 
 const learningModes = [
-    "At-Home",
-    "Online",
-    "Group",
-    "Intensive",
-    "In-Person"
+    "Home Coaching",
+    "Online Coaching",
+    "Coaching Center",
+];
+
+const daysList = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
 ];
 
 function Field({
@@ -105,10 +113,34 @@ function RequestFormContent({programs}: { programs: Program[] }) {
         initialSubject ? {[initialSubject.name]: initialSubject.topics.map(t => t.name)} : {}
     );
     const [selectionError, setSelectionError] = useState(false);
+    const [selectedMode, setSelectedMode] = useState<string>("");
+    const [modeError, setModeError] = useState(false);
+    const [selectedDays, setSelectedDays] = useState<string[]>([]);
+    const [dayTimes, setDayTimes] = useState<Record<string, { from: string; to: string }>>({});
+    const [daysError, setDaysError] = useState(false);
 
     const availableSubjects = selectedProgramId === ""
         ? []
         : programs.find(p => p.id.toString() === selectedProgramId)?.subjects.map(s => s.name) || [];
+
+    const toggleDay = (day: string) => {
+        setSelectedDays(prev => {
+            if (prev.includes(day)) {
+                setDayTimes(dt => {
+                    const copy = {...dt};
+                    delete copy[day];
+                    return copy;
+                });
+                return prev.filter(d => d !== day);
+            }
+            setDayTimes(dt => ({...dt, [day]: dt[day] || {from: "", to: ""}}));
+            return [...prev, day];
+        });
+    };
+
+    const updateDayTime = (day: string, field: "from" | "to", value: string) => {
+        setDayTimes(prev => ({...prev, [day]: {...(prev[day] || {from: "", to: ""}), [field]: value}}));
+    };
 
     const toggleSubCategory = (subCategoryName: string) => {
         setSelectedSubjects(prev => {
@@ -200,7 +232,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                             Request a <span className="text-[#E91E63]">Teacher</span>
                         </h1>
                         <p className="mt-8 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300">
-                            Tell us your learning goals and we'll find the perfect match from our network of elite
+                            Tell us your learning goals and we&apos;ll find the perfect match from our network of elite
                             educators.
                         </p>
                     </motion.div>
@@ -274,7 +306,21 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             el?.scrollIntoView({behavior: 'smooth', block: 'center'});
                                             return;
                                         }
+                                        if (selectedMode === "") {
+                                            setModeError(true);
+                                            const el = document.getElementById('learning-mode');
+                                            el?.scrollIntoView({behavior: 'smooth', block: 'center'});
+                                            return;
+                                        }
+                                        if (selectedDays.length === 0 || selectedDays.some(d => !dayTimes[d]?.from || !dayTimes[d]?.to)) {
+                                            setDaysError(true);
+                                            const el = document.getElementById('preferred-days');
+                                            el?.scrollIntoView({behavior: 'smooth', block: 'center'});
+                                            return;
+                                        }
                                         setSelectionError(false);
+                                        setModeError(false);
+                                        setDaysError(false);
                                         setStatus("submitting");
 
                                         const formData = new FormData(e.currentTarget);
@@ -286,6 +332,11 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                         });
 
                                         formData.append('programId', selectedProgramId);
+                                        formData.append('mode', selectedMode);
+                                        selectedDays.forEach(d => {
+                                            formData.append('availableDays', d);
+                                            formData.append('dayTimeSlots', `${d}: ${dayTimes[d]?.from || ''} - ${dayTimes[d]?.to || ''}`);
+                                        });
                                         const result = await saveRequest(formData);
 
                                         if (result && result.success) {
@@ -295,6 +346,9 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             e.currentTarget.reset();
                                             setSelectedSubjects([]);
                                             setSelectedCourses({});
+                                            setSelectedMode("");
+                                            setSelectedDays([]);
+                                            setDayTimes({});
                                         } else {
                                             setStatus("error");
                                         }
@@ -528,36 +582,128 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                         )}
                                     </div>
 
-                                    <div className="grid gap-8 md:grid-cols-2">
-                                        <Field icon={<FiMapPin/>} label="Choose Learning Mode" htmlFor="mode">
-                                            <div className="relative group">
-                                                <select
-                                                    id="mode"
-                                                    name="mode"
-                                                    defaultValue=""
-                                                    required
-                                                    className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
-                                                >
-                                                    <option value="" disabled>Choose Learning Mode</option>
-                                                    {learningModes.map(m => <option key={m} value={m}>{m}</option>)}
-                                                </select>
-                                                <div
-                                                    className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
-                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                                         xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor"
-                                                              strokeWidth="2" strokeLinecap="round"
-                                                              strokeLinejoin="round"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </Field>
-
-                                        <Field icon={<FiCalendar/>} label="Preferred Start Date" htmlFor="start-date">
-                                            <input id="start-date" name="startDate" type="date" required
-                                                   className={inputClasses}/>
-                                        </Field>
+                                    <div className="space-y-4" id="learning-mode">
+                                        <div className="flex items-center justify-between">
+                                            <label
+                                                className={`text-sm font-bold flex items-center gap-2 transition-colors ${modeError ? 'text-red-500' : 'text-slate-700'}`}>
+                                                <FiMapPin className={modeError ? 'text-red-500' : 'text-[#E91E63]'}/>
+                                                Choose Learning Mode *
+                                            </label>
+                                            {modeError && (
+                                                <span
+                                                    className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Please choose a learning mode</span>
+                                            )}
+                                        </div>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            {learningModes.map(m => {
+                                                const isSelected = selectedMode === m;
+                                                return (
+                                                    <button
+                                                        key={m}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedMode(m);
+                                                            setModeError(false);
+                                                        }}
+                                                        className={`flex items-center justify-between rounded-2xl border-2 px-5 py-4 text-sm font-bold transition-all ${
+                                                            isSelected
+                                                                ? "bg-[#E91E63]/5 border-[#E91E63] text-[#21121f] shadow-md"
+                                                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                                                        }`}
+                                                    >
+                                                        {m}
+                                                        <div
+                                                            className={`size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                                                isSelected
+                                                                    ? "bg-[#E91E63] border-[#E91E63]"
+                                                                    : "bg-slate-100 border-slate-200"
+                                                            }`}>
+                                                            {isSelected && <FiCheckCircle className="text-white size-3"/>}
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
+
+                                    <div className="space-y-4" id="preferred-days">
+                                        <div className="flex items-center justify-between">
+                                            <label
+                                                className={`text-sm font-bold flex items-center gap-2 transition-colors ${daysError ? 'text-red-500' : 'text-slate-700'}`}>
+                                                <FiCalendar className={daysError ? 'text-red-500' : 'text-[#E91E63]'}/>
+                                                Preferred Days &amp; Time *
+                                            </label>
+                                            {daysError && (
+                                                <span
+                                                    className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Select days and set times</span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-slate-500">
+                                            Pick the days you would like lessons, then choose your preferred hours (from - to) for each selected day.
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {daysList.map(d => {
+                                                const isSelected = selectedDays.includes(d);
+                                                return (
+                                                    <button
+                                                        key={d}
+                                                        type="button"
+                                                        onClick={() => toggleDay(d)}
+                                                        className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
+                                                            isSelected
+                                                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
+                                                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                                                        }`}
+                                                    >
+                                                        {d}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {selectedDays.length > 0 && (
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                {selectedDays.map(d => (
+                                                    <div key={d} className="rounded-2xl border-2 border-slate-100 bg-slate-50 p-4">
+                                                        <p className="mb-3 flex items-center gap-2 text-xs font-bold text-slate-700">
+                                                            <FiCalendar className="text-[#E91E63]"/>
+                                                            {d}
+                                                        </p>
+                                                        <div className="grid grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</label>
+                                                                <input
+                                                                    type="time"
+                                                                    value={dayTimes[d]?.from || ""}
+                                                                    onChange={(e) => updateDayTime(d, "from", e.target.value)}
+                                                                    aria-label={`${d} from time`}
+                                                                    className={`${inputClasses} py-2`}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To</label>
+                                                                <input
+                                                                    type="time"
+                                                                    value={dayTimes[d]?.to || ""}
+                                                                    onChange={(e) => updateDayTime(d, "to", e.target.value)}
+                                                                    aria-label={`${d} to time`}
+                                                                    className={`${inputClasses} py-2`}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        {daysError && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
+                                                            <p className="mt-2 text-[10px] font-bold text-red-500">Set a from and to time for {d}</p>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <Field icon={<FiCalendar/>} label="Preferred Start Date" htmlFor="start-date">
+                                        <input id="start-date" name="startDate" type="date" required
+                                               className={inputClasses}/>
+                                    </Field>
 
                                     <Field icon={<FiMessageSquare/>} label="Anything else we should know?"
                                            htmlFor="details">

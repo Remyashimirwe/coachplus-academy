@@ -14,7 +14,6 @@ import {
   FiAward,
   FiBriefcase,
   FiStar,
-  FiXCircle,
   FiAlertCircle,
   FiFileText,
   FiImage,
@@ -32,39 +31,19 @@ import {
   FiShield,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
-import { BRANCHES } from "@/app/lib/constants";
 
-const subjectsList = [
-  "Mathematics",
-  "English",
-  "Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Geography",
-  "History",
-  "Civics",
-  "Coding",
-  "ICT",
-  "French",
-  "Swahili",
-  "Kinyarwanda",
-  "Economics",
-  "Entrepreneurship",
-  "Literature",
-  "Art & Music",
-  "Special Needs Education",
-  "Exam Prep (e.g. TOEFL, IELTS, GRE)",
-];
+const MAX_SUBJECTS_PER_PROGRAM = 4;
 
-const gradesList = [
-  "Kindergarten / Nursery",
-  "Primary (P1 - P6)",
-  "Lower Secondary (S1 - S3)",
-  "Upper Secondary (S4 - S6)",
-  "University / College",
-  "Adult Learners",
-];
+type ProgramSubject = {
+  id: number;
+  name: string;
+};
+
+type TeacherProgram = {
+  id: number;
+  title: string;
+  subjects: ProgramSubject[];
+};
 
 const daysList = [
   "Monday",
@@ -104,18 +83,66 @@ function Field({
 const inputClasses =
   "w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-4 focus:ring-[#E91E63]/10";
 
-export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
+export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen: boolean; programs: TeacherProgram[]; levels: string[] }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [selectedProgramIds, setSelectedProgramIds] = useState<number[]>([]);
+  const [programSubjects, setProgramSubjects] = useState<Record<number, string[]>>({});
+  const [otherProgram, setOtherProgram] = useState("");
+  const [otherProgramSubjects, setOtherProgramSubjects] = useState("");
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [selectionErrors, setSelectionErrors] = useState<{ subjects?: boolean; grades?: boolean; days?: boolean }>({});
+  const [dayTimes, setDayTimes] = useState<Record<string, { from: string; to: string }>>({});
+  const [selectionErrors, setSelectionErrors] = useState<{ subjects?: boolean; grades?: boolean; days?: boolean; dayTimes?: boolean }>({});
 
   const toggleItem = (item: string, list: string[], setter: (val: string[]) => void) => {
     setter(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
+  };
+
+  const toggleProgram = (programId: number) => {
+    setSelectedProgramIds(prev => {
+      if (prev.includes(programId)) {
+        setProgramSubjects(ps => {
+          const copy = { ...ps };
+          delete copy[programId];
+          return copy;
+        });
+        return prev.filter(id => id !== programId);
+      }
+      return [...prev, programId];
+    });
+  };
+
+  const toggleProgramSubject = (programId: number, subjectName: string) => {
+    setProgramSubjects(prev => {
+      const current = prev[programId] || [];
+      if (current.includes(subjectName)) {
+        return { ...prev, [programId]: current.filter(s => s !== subjectName) };
+      }
+      if (current.length >= MAX_SUBJECTS_PER_PROGRAM) return prev;
+      return { ...prev, [programId]: [...current, subjectName] };
+    });
+  };
+
+  const toggleDay = (day: string) => {
+    setSelectedDays(prev => {
+      if (prev.includes(day)) {
+        setDayTimes(dt => {
+          const copy = { ...dt };
+          delete copy[day];
+          return copy;
+        });
+        return prev.filter(d => d !== day);
+      }
+      setDayTimes(dt => ({ ...dt, [day]: dt[day] || { from: "", to: "" } }));
+      return [...prev, day];
+    });
+  };
+
+  const updateDayTime = (day: string, field: "from" | "to", value: string) => {
+    setDayTimes(prev => ({ ...prev, [day]: { ...(prev[day] || { from: "", to: "" }), [field]: value } }));
   };
 
   return (
@@ -167,10 +194,18 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                   <form 
                     onSubmit={async (e) => {
                       e.preventDefault();
+                      const totalSubjects =
+                        Object.values(programSubjects).reduce((sum, list) => sum + list.length, 0) +
+                        (otherProgramSubjects.trim() ? 1 : 0);
                       const errors: typeof selectionErrors = {};
-                      if (selectedSubjects.length === 0) errors.subjects = true;
+                      if (totalSubjects === 0) errors.subjects = true;
                       if (selectedGrades.length === 0) errors.grades = true;
-                      if (selectedDays.length === 0) errors.days = true;
+                      if (selectedDays.length === 0) {
+                        errors.days = true;
+                      } else {
+                        const missingTime = selectedDays.some(d => !dayTimes[d]?.from || !dayTimes[d]?.to);
+                        if (missingTime) errors.dayTimes = true;
+                      }
                       
                       if (Object.keys(errors).length > 0) {
                         setSelectionErrors(errors);
@@ -188,18 +223,32 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                       setStatus("submitting");
 
                       const formData = new FormData(e.currentTarget);
-                      selectedSubjects.forEach(s => formData.append('subjects', s));
+                      Object.entries(programSubjects).forEach(([programId, subs]) => {
+                        const program = programs.find(p => p.id === Number(programId));
+                        subs.forEach(s => formData.append('subjects', program ? `${program.title}: ${s}` : s));
+                      });
+                      if (otherProgram.trim() || otherProgramSubjects.trim()) {
+                        formData.append('otherPrograms', otherProgram.trim());
+                        formData.append('otherProgramSubjects', otherProgramSubjects.trim());
+                      }
                       selectedGrades.forEach(g => formData.append('grades', g));
-                      selectedDays.forEach(d => formData.append('availableDays', d));
+                      selectedDays.forEach(d => {
+                        formData.append('availableDays', d);
+                        formData.append('dayTimeSlots', `${d}: ${dayTimes[d]?.from || ''} - ${dayTimes[d]?.to || ''}`);
+                      });
                       
                       const result = await saveTeacherApplication(formData);
                       if (result && result.success) {
                         setStatus("idle");
                         setShowSuccessModal(true);
                         e.currentTarget.reset();
-                        setSelectedSubjects([]);
+                        setSelectedProgramIds([]);
+                        setProgramSubjects({});
+                        setOtherProgram("");
+                        setOtherProgramSubjects("");
                         setSelectedGrades([]);
                         setSelectedDays([]);
+                        setDayTimes({});
                       } else {
                         setStatus("error");
                       }
@@ -231,27 +280,17 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiMapPin />} label="Nearest Branch *" htmlFor="branch">
-                          <select id="branch" name="branch" required defaultValue="" className={`${inputClasses} appearance-none`}>
-                            <option value="" disabled>Choose the closest branch</option>
-                            {BRANCHES.map((b) => (
-                              <option key={b} value={b}>{b}</option>
-                            ))}
-                          </select>
-                        </Field>
                         <Field icon={<FiMapPin />} label="Country *" htmlFor="country">
                           <input id="country" name="country" required placeholder="e.g. Rwanda" className={inputClasses} />
                         </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiMapPin />} label="Province *" htmlFor="province">
                           <input id="province" name="province" required placeholder="e.g. Kigali / East" className={inputClasses} />
                         </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiMapPin />} label="District *" htmlFor="district">
                           <input id="district" name="district" required placeholder="e.g. Nyarugenge" className={inputClasses} />
                         </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiMapPin />} label="Sector *" htmlFor="sector">
                           <input id="sector" name="sector" required placeholder="e.g. Kanyinya" className={inputClasses} />
                         </Field>
@@ -297,8 +336,8 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         <Field icon={<FiAward />} label="Highest Level of Education *" htmlFor="educationLevel">
                           <select id="educationLevel" name="educationLevel" required className={`${inputClasses} appearance-none`}>
                             <option value="">Select Level</option>
-                            <option value="Bachelor's Degree">Bachelor's Degree</option>
-                            <option value="Master's Degree">Master's Degree</option>
+                            <option value="Bachelor&apos;s Degree">Bachelor&apos;s Degree</option>
+                            <option value="Master&apos;s Degree">Master&apos;s Degree</option>
                             <option value="PhD / Doctorate">PhD / Doctorate</option>
                             <option value="Diploma">Diploma</option>
                             <option value="Other">Other</option>
@@ -326,7 +365,7 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </div>
                         <div>
                           <h3 className="text-lg md:text-xl font-bold text-[#0f172a]">Teaching Experience</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Where and what you've taught</p>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Where and what you&apos;ve taught</p>
                         </div>
                       </div>
                       <Field icon={<FiClock />} label="Years of Teaching Experience *" htmlFor="experienceYears">
@@ -339,31 +378,6 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </select>
                       </Field>
 
-                      <div className="space-y-4" data-error={selectionErrors.subjects}>
-                        <div className="flex items-center justify-between">
-                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.subjects ? 'text-red-500' : 'text-slate-700'}`}>
-                            Subjects You Can Teach *
-                          </label>
-                          {selectionErrors.subjects && <span className="text-[10px] font-bold text-red-500 uppercase">Select at least one</span>}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {subjectsList.map(s => (
-                            <button
-                              key={s}
-                              type="button"
-                              onClick={() => toggleItem(s, selectedSubjects, setSelectedSubjects)}
-                              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
-                                selectedSubjects.includes(s)
-                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
-                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
                       <div className="space-y-4" data-error={selectionErrors.grades}>
                         <div className="flex items-center justify-between">
                           <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.grades ? 'text-red-500' : 'text-slate-700'}`}>
@@ -372,20 +386,119 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                           {selectionErrors.grades && <span className="text-[10px] font-bold text-red-500 uppercase">Select at least one</span>}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {gradesList.map(g => (
+                          {levels.map(g => (
                             <button
                               key={g}
                               type="button"
                               onClick={() => toggleItem(g, selectedGrades, setSelectedGrades)}
                               className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
                                 selectedGrades.includes(g)
-                                ? "bg-[#0f172a] border-[#0f172a] text-white shadow-lg shadow-slate-200"
-                                : "bg-white border-slate-100 text-slate-600 hover:border-[#0f172a]/30"
+                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
+                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
                               }`}
                             >
                               {g}
                             </button>
                           ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-4" data-error={selectionErrors.subjects}>
+                        <div className="flex items-center justify-between">
+                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.subjects ? 'text-red-500' : 'text-slate-700'}`}>
+                            Programs &amp; Subjects You Can Teach *
+                          </label>
+                          {selectionErrors.subjects && <span className="text-[10px] font-bold text-red-500 uppercase">Select at least one</span>}
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          Choose a program, then pick up to {MAX_SUBJECTS_PER_PROGRAM} subjects within it. You can select more than one program.
+                        </p>
+                        <div className="space-y-4">
+                          {programs.map(p => {
+                            const isProgramSelected = selectedProgramIds.includes(p.id);
+                            const count = programSubjects[p.id]?.length || 0;
+                            return (
+                              <div
+                                key={p.id}
+                                className={`rounded-2xl border-2 transition-all overflow-hidden ${
+                                  isProgramSelected
+                                    ? "border-[#E91E63] bg-[#E91E63]/5"
+                                    : "border-slate-100 bg-white"
+                                }`}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => toggleProgram(p.id)}
+                                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                                >
+                                  <span className={`text-sm font-bold ${isProgramSelected ? "text-[#E91E63]" : "text-slate-800"}`}>
+                                    {p.title}
+                                  </span>
+                                  <span className={`size-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                    isProgramSelected
+                                      ? "bg-[#E91E63] border-[#E91E63]"
+                                      : "bg-slate-100 border-slate-200"
+                                  }`}>
+                                    {isProgramSelected && <FiCheckCircle className="size-3 text-white" />}
+                                  </span>
+                                </button>
+                                {isProgramSelected && (
+                                  <div className="px-5 pb-5">
+                                    <div className="mb-3 flex items-center justify-between">
+                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                        Subjects (max {MAX_SUBJECTS_PER_PROGRAM})
+                                      </span>
+                                      <span className={`text-xs font-bold ${count >= MAX_SUBJECTS_PER_PROGRAM ? "text-[#E91E63]" : "text-slate-400"}`}>
+                                        {count}/{MAX_SUBJECTS_PER_PROGRAM}
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {p.subjects.map(s => {
+                                        const isSelected = programSubjects[p.id]?.includes(s.name);
+                                        return (
+                                          <button
+                                            key={s.id}
+                                            type="button"
+                                            onClick={() => toggleProgramSubject(p.id, s.name)}
+                                            className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
+                                              isSelected
+                                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
+                                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                                            }`}
+                                          >
+                                            {s.name}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <Field icon={<FiBriefcase />} label="Other Program(s) You Can Teach" htmlFor="otherProgram">
+                            <input
+                              id="otherProgram"
+                              name="otherProgram"
+                              value={otherProgram}
+                              onChange={(e) => setOtherProgram(e.target.value)}
+                              placeholder="e.g. Professional Training, Adult Literacy"
+                              className={inputClasses}
+                            />
+                          </Field>
+                          <Field icon={<FiBookOpen />} label="Subjects in Other Program(s)" htmlFor="otherProgramSubjects">
+                            <input
+                              id="otherProgramSubjects"
+                              name="otherProgramSubjects"
+                              value={otherProgramSubjects}
+                              onChange={(e) => setOtherProgramSubjects(e.target.value)}
+                              placeholder="e.g. Algebra, Statistics, Public Speaking"
+                              className={inputClasses}
+                            />
+                          </Field>
                         </div>
                       </div>
 
@@ -459,19 +572,22 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </select>
                       </Field>
                       
-                      <div className="space-y-4" data-error={selectionErrors.days}>
+                      <div className="space-y-4" data-error={selectionErrors.days || selectionErrors.dayTimes}>
                         <div className="flex items-center justify-between">
-                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.days ? 'text-red-500' : 'text-slate-700'}`}>
-                            Available Days *
+                          <label className={`text-sm font-bold flex items-center gap-2 ${selectionErrors.days || selectionErrors.dayTimes ? 'text-red-500' : 'text-slate-700'}`}>
+                            Available Days &amp; Time *
                           </label>
-                          {selectionErrors.days && <span className="text-[10px] font-bold text-red-500 uppercase">Select at least one</span>}
+                          {(selectionErrors.days || selectionErrors.dayTimes) && <span className="text-[10px] font-bold text-red-500 uppercase">Select days and set times</span>}
                         </div>
+                        <p className="text-xs text-slate-500">
+                          Pick the days you are available, then choose your working hours (from - to) for each selected day.
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {daysList.map(d => (
                             <button
                               key={d}
                               type="button"
-                              onClick={() => toggleItem(d, selectedDays, setSelectedDays)}
+                              onClick={() => toggleDay(d)}
                               className={`rounded-xl px-4 py-2 text-xs font-bold transition-all border-2 ${
                                 selectedDays.includes(d)
                                 ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
@@ -482,16 +598,49 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                             </button>
                           ))}
                         </div>
+
+                        {selectedDays.length > 0 && (
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            {selectedDays.map(d => (
+                              <div key={d} className="rounded-2xl border-2 border-slate-100 bg-slate-50 p-4">
+                                <p className="mb-3 flex items-center gap-2 text-xs font-bold text-slate-700">
+                                  <FiCalendar className="text-[#E91E63]" />
+                                  {d}
+                                </p>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</label>
+                                    <input
+                                      type="time"
+                                      value={dayTimes[d]?.from || ""}
+                                      onChange={(e) => updateDayTime(d, "from", e.target.value)}
+                                      aria-label={`${d} from time`}
+                                      className={`${inputClasses} py-2`}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To</label>
+                                    <input
+                                      type="time"
+                                      value={dayTimes[d]?.to || ""}
+                                      onChange={(e) => updateDayTime(d, "to", e.target.value)}
+                                      aria-label={`${d} to time`}
+                                      className={`${inputClasses} py-2`}
+                                    />
+                                  </div>
+                                </div>
+                                {selectionErrors.dayTimes && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
+                                  <p className="mt-2 text-[10px] font-bold text-red-500">Set a from and to time for {d}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiClock />} label="Available Hours *" htmlFor="availableHours">
-                          <input id="availableHours" name="availableHours" required placeholder="e.g. 4 PM - 8 PM" className={inputClasses} />
-                        </Field>
-                        <Field icon={<FiCalendar />} label="Earliest Start Date *" htmlFor="startDate">
-                          <input id="startDate" name="startDate" type="date" required className={inputClasses} />
-                        </Field>
-                      </div>
+                      <Field icon={<FiCalendar />} label="Earliest Start Date *" htmlFor="startDate">
+                        <input id="startDate" name="startDate" type="date" required className={inputClasses} />
+                      </Field>
                     </div>
 
                     {/* 6. Final Questions */}
@@ -528,32 +677,14 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiFileText />} label="Upload CV/Resume *" htmlFor="resume">
-                          <input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
-                        </Field>
-                        <Field icon={<FiFileText />} label="Academic Certificates (Upload) *" htmlFor="academicCert">
-                          <input id="academicCert" name="academicCert" type="file" required accept=".pdf,image/*" className={`${inputClasses} py-3`} />
-                        </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter">
-                          <input id="coverLetter" name="coverLetter" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
-                        </Field>
-                        <Field icon={<FiAward />} label="Upload Certificates" htmlFor="otherCerts">
-                          <input id="otherCerts" name="otherCerts" type="file" accept=".pdf,image/*" multiple className={`${inputClasses} py-3`} />
-                        </Field>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiStar />} label="Teaching License/Certification" htmlFor="license">
-                          <input id="license" name="license" type="file" accept=".pdf,image/*" className={`${inputClasses} py-3`} />
-                        </Field>
-                        <Field icon={<FiImage />} label="Profile Photo (Upload)" htmlFor="photo">
+                        <Field icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo">
                           <div className="flex items-center gap-4">
                             <input 
                               id="photo" 
                               name="photo" 
                               type="file" 
                               accept="image/*" 
+                              required
                               className={`${inputClasses} py-3`} 
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
@@ -576,10 +707,34 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                             </div>
                           </div>
                         </Field>
+                        <Field icon={<FiFileText />} label="Upload Passport / National ID *" htmlFor="idPassport">
+                          <input id="idPassport" name="idPassport" type="file" required accept=".pdf,image/*" className={`${inputClasses} py-3`} />
+                        </Field>
                       </div>
-                      <Field icon={<FiLink />} label="Portfolio / Sample Work (optional)" htmlFor="portfolio">
-                        <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
-                      </Field>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiFileText />} label="Upload CV/Resume *" htmlFor="resume">
+                          <input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
+                        </Field>
+                        <Field icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter">
+                          <input id="coverLetter" name="coverLetter" type="file" required accept=".pdf,.doc,.docx" className={`${inputClasses} py-3`} />
+                        </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiAward />} label="Academic Certificates (Upload Multiple) *" htmlFor="academicCert">
+                          <input id="academicCert" name="academicCert" type="file" required multiple accept=".pdf,image/*" className={`${inputClasses} py-3`} />
+                        </Field>
+                        <Field icon={<FiAward />} label="Other Certificates (Optional)" htmlFor="otherCerts">
+                          <input id="otherCerts" name="otherCerts" type="file" accept=".pdf,image/*" multiple className={`${inputClasses} py-3`} />
+                        </Field>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <Field icon={<FiStar />} label="Teaching License/Certification" htmlFor="license">
+                          <input id="license" name="license" type="file" accept=".pdf,image/*" className={`${inputClasses} py-3`} />
+                        </Field>
+                        <Field icon={<FiLink />} label="Portfolio / Sample Work (Optional)" htmlFor="portfolio">
+                          <input id="portfolio" name="portfolio" type="url" placeholder="Link to portfolio or shared folder" className={inputClasses} />
+                        </Field>
+                      </div>
                     </div>
 
                     {/* Terms and Agreement Title */}
@@ -601,28 +756,32 @@ export default function BecomeTeacherForm({ isOpen }: { isOpen: boolean }) {
                         <div className="flex h-6 items-center">
                           <input
                             id="terms"
-                            name="terms"
+                            name="agreedToTerms"
                             type="checkbox"
                             required
                             checked={agreedToTerms}
-                            onChange={(e) => setAgreedToTerms(e.target.checked)}
+                            onChange={() => {
+                              if (!agreedToTerms) {
+                                setShowTermsModal(true);
+                              }
+                            }}
                             className="size-5 rounded border-2 border-slate-200 text-[#E91E63] focus:ring-[#E91E63]"
                           />
                         </div>
                         <div className="text-sm">
                           <label htmlFor="terms" className="font-medium text-slate-700">
-                            I accept the {" "}
+                            I have read and accept the {" "}
                             <button
                               type="button"
                               onClick={() => setShowTermsModal(true)}
                               className="text-[#E91E63] hover:underline font-bold"
                             >
-                              Teacher Partner Terms & Conditions
+                              Teacher Partner Terms &amp; Conditions
                             </button>
                             {" "} and privacy policy.
                           </label>
                           <p className="text-xs text-slate-500 mt-1">
-                            Ticking in the Box means you accept our terms and conditions.
+                            Click the box to open and read the terms. You can only tick it after reading the full agreement.
                           </p>
                         </div>
                       </div>

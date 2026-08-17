@@ -41,9 +41,10 @@ export default function ProgramsPage({
 
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-12 text-white">
-        <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#7B1FA2] via-[#5B1380] to-[#21121f] pt-24 pb-12 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.08),transparent_45%)]" />
+        <div className="absolute -left-32 top-24 size-96 rounded-full bg-[#E91E63]/20 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-black/25 blur-3xl" />
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-14">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

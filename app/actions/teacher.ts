@@ -5,7 +5,7 @@ import { uploadBufferToCloudinary } from "@/app/lib/cloudinary";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB per file
 
-type DocKind = "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license";
+type DocKind = "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license" | "idPassport";
 
 async function fileToDocumentInput(file: File | null | undefined, kind: DocKind) {
   if (!file || file.size === 0) return null;
@@ -57,7 +57,13 @@ export async function saveTeacherApplication(formData: FormData) {
 
   // 3. Teaching Experience
   const experienceYears = String(formData.get("experienceYears") || "").trim();
-  const subjects = formData.getAll("subjects").map(s => String(s)).join(", ");
+  let subjects = formData.getAll("subjects").map(s => String(s)).join(", ");
+  const otherPrograms = String(formData.get("otherPrograms") || "").trim();
+  const otherProgramSubjects = String(formData.get("otherProgramSubjects") || "").trim();
+  if (otherPrograms || otherProgramSubjects) {
+    const otherPart = `Other Program: ${otherPrograms}${otherProgramSubjects ? ` (Subjects: ${otherProgramSubjects})` : ""}`;
+    subjects = subjects ? `${subjects}; ${otherPart}` : otherPart;
+  }
   const grades = formData.getAll("grades").map(g => String(g)).join(", ");
   const previousOrg = String(formData.get("previousOrg") || "").trim();
   const previousPos = String(formData.get("previousPos") || "").trim();
@@ -73,7 +79,7 @@ export async function saveTeacherApplication(formData: FormData) {
   // 5. Availability
   const employmentType = String(formData.get("employmentType") || "").trim();
   const availableDays = formData.getAll("availableDays").map(d => String(d)).join(", ");
-  const availableHours = String(formData.get("availableHours") || "").trim();
+  const availableHours = formData.getAll("dayTimeSlots").map(s => String(s)).join(", ");
   const startDate = String(formData.get("startDate") || "").trim();
 
   // 7. Final Questions
@@ -90,7 +96,8 @@ export async function saveTeacherApplication(formData: FormData) {
   const photoFile = formData.get("photo") as File | null;
   const resumeFile = formData.get("resume") as File | null;
   const coverLetterFile = formData.get("coverLetter") as File | null;
-  const academicCertFile = formData.get("academicCert") as File | null;
+  const idPassportFile = formData.get("idPassport") as File | null;
+  const academicCertFiles = formData.getAll("academicCert") as File[];
   const licenseFile = formData.get("license") as File | null;
   const otherCertFiles = formData.getAll("otherCerts") as File[];
 
@@ -101,8 +108,9 @@ export async function saveTeacherApplication(formData: FormData) {
         fileToDocumentInput(photoFile, "photo"),
         fileToDocumentInput(resumeFile, "resume"),
         fileToDocumentInput(coverLetterFile, "coverLetter"),
-        fileToDocumentInput(academicCertFile, "academicCertificates"),
+        fileToDocumentInput(idPassportFile, "idPassport"),
         fileToDocumentInput(licenseFile, "license"),
+        ...academicCertFiles.map((f) => fileToDocumentInput(f, "academicCertificates")),
         ...otherCertFiles.map((f) => fileToDocumentInput(f, "otherCertificates")),
       ])
     ).filter((doc): doc is NonNullable<typeof doc> => doc !== null);

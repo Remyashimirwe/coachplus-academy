@@ -22,28 +22,33 @@ export async function saveRequest(formData: FormData) {
   const programId = formData.get("programId") ? String(formData.get("programId")) : "N/A";
   const mode = String(formData.get("mode") || "").trim();
   const startDate = String(formData.get("startDate") || "").trim();
+  const preferredTimeFrom = String(formData.get("preferredTimeFrom") || "").trim();
+  const preferredTimeTo = String(formData.get("preferredTimeTo") || "").trim();
+  const preferredTime = preferredTimeFrom && preferredTimeTo ? `${preferredTimeFrom} - ${preferredTimeTo}` : "";
+  const availableDays = formData.getAll("availableDays").map(d => String(d)).join(", ");
+  const dayTimeSlots = formData.getAll("dayTimeSlots").map(s => String(s)).join(", ");
 
   try {
-    await db.request.create({
-      data: {
-        parentName,
-        email,
-        phone,
-        phone2,
-        country,
-        location,
-        branch,
-        province: "",
-        district: "",
-        sector: "",
-        cell: "",
-        village: "",
-        idPassport: "",
-        grade: programId,
-        subjects: coursesOfInterest + (topics ? ` (Topics: ${topics})` : ""),
-        details: `[Mode: ${mode}] [Start: ${startDate}] ${details}`,
-      },
-    });
+      await db.request.create({
+          data: {
+              parentName,
+              email,
+              phone,
+              phone2,
+              country,
+              location,
+              branch,
+              province: "",
+              district: "",
+              sector: "",
+              cell: "",
+              village: "",
+              idPassport: "",
+              grade: programId,
+              subjects: coursesOfInterest + (topics ? ` (Topics: ${topics})` : ""),
+              details: `[Mode: ${mode}]${preferredTime ? ` [Preferred Time: ${preferredTime}]` : ""}${availableDays ? ` [Available: ${dayTimeSlots}]` : ""} [Start: ${startDate}] ${details}`,
+          },
+      });
     return { success: true };
   } catch (error) {
     console.error("Failed to save request:", error);
