@@ -811,15 +811,19 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
 
                     {/* Terms and Agreement Title */}
                     <div className="space-y-6 md:space-y-8">
-                      <div className="flex items-center gap-4 mb-4 md:mb-8">
+                      <button
+                        type="button"
+                        onClick={() => setShowTermsModal(true)}
+                        className="flex w-full items-center gap-4 mb-4 md:mb-8 text-left transition-all"
+                      >
                         <div className="flex size-10 md:size-12 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-lg shadow-slate-200">
                           <FiShield className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Read about the Terms and Agreement carefully</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Please review our partnership policies</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a] hover:text-[#E91E63] transition-colors">Read about the Terms and Agreement carefully</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium hover:text-[#E91E63]/70 transition-colors">Please review our partnership policies</p>
                         </div>
-                      </div>
+                      </button>
                     </div>
 
                     {/* 8. Agreement */}
