@@ -49,6 +49,11 @@ model Student {
   phone          String       @default("")
   branch         String       @default("") // Location branch, e.g. Kigali-Remera
   subjects       String       @default("") // Courses/topics the student wants to learn
+  program        String       @default("") // Program/category the student enrolled in
+  learningMode   String       @default("") // Home Coaching | Online Coaching | Coaching Center
+  preferredDays  String       @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
+  preferredTime  String       @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
+  startDate      String       @default("") // Preferred start date
   attendances    Attendance[]
   reports        Report[]
   parentRequest  Request?     @relation("RequestStudent")
@@ -132,6 +137,11 @@ model Request {
   village           String   @default("")
   idPassport        String   @default("")
   country           String   @default("")
+  programTitle      String   @default("") // Program/category the student is requesting
+  learningMode      String   @default("") // Home Coaching | Online Coaching | Coaching Center
+  preferredDays     String   @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
+  preferredTime     String   @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
+  startDate         String   @default("") // Preferred start date
   studentId         Int?     @unique
   student           Student? @relation("RequestStudent", fields: [studentId], references: [id])
 }
@@ -167,6 +177,7 @@ model TeacherApplication {
   engagement              String   @default("")
   techTools               String?
   teachOnline             String   @default("")
+  onlinePlatforms         String   @default("")
   employmentType          String   @default("")
   availableDays           String   @default("")
   availableHours          String   @default("")

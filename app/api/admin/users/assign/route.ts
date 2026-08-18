@@ -35,11 +35,15 @@ export async function POST(request: Request) {
         sendRequestAssignedToTeacherEmail({
           to: student.teacher.user.email,
           teacherName: student.teacher.user.name,
-          parentName: student.user.name,
+          studentName: student.user.name,
           parentEmail: student.user.email,
           parentPhone: student.phone,
           parentBranch: student.branch,
+          program: student.program,
           subjects: student.subjects,
+          preferredTime: student.preferredTime,
+          learningMode: student.learningMode,
+          startDate: student.startDate,
         }),
       ]);
       emailSent = parentEmailResult.success && teacherEmailResult.success;

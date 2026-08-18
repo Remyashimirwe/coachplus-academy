@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { toggleTeacherApplications } from "@/app/actions/admin";
-import { FiCheckCircle, FiXCircle, FiAlertCircle } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle, FiAlertCircle, FiUsers, FiArrowRight } from "react-icons/fi";
 
 export default function SettingsView({ initialSettings }: { initialSettings: { teacherApplicationsOpen: boolean } }) {
   const [isApplicationsOpen, setIsApplicationsOpen] = useState(initialSettings.teacherApplicationsOpen);
@@ -71,20 +72,24 @@ export default function SettingsView({ initialSettings }: { initialSettings: { t
         </section>
 
         <section className="rounded-3xl bg-white p-8 shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">Account Settings</h2>
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">Admin Email</label>
-              <input disabled value="admin@coachplusacademy.com" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none opacity-60" />
+          <h2 className="text-xl font-bold text-slate-900 mb-6">Teacher Management</h2>
+          <Link
+            href="/admin/teachers"
+            className="flex items-center justify-between gap-4 p-6 rounded-[32px] bg-slate-50 border border-slate-100 hover:border-[#E91E63]/30 hover:bg-[#E91E63]/5 transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="size-12 rounded-2xl bg-[#E91E63] text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-200">
+                <FiUsers className="size-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">View All Teacher Applications</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  See every teacher who applied and filter by accepted or rejected.
+                </p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">Change Password</label>
-              <input type="password" placeholder="••••••••" className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63]" />
-            </div>
-            <button className="inline-flex h-[56px] items-center justify-center rounded-2xl bg-[#0F172A] px-8 text-base font-bold text-white transition-all hover:-translate-y-1 active:scale-95">
-              Update Profile
-            </button>
-          </div>
+            <FiArrowRight className="size-5 text-slate-400 shrink-0" />
+          </Link>
         </section>
       </div>
     </div>

@@ -1,20 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, type FC } from "react";
 import {
   FiCheckCircle,
   FiXCircle,
   FiClock,
   FiCalendar,
   FiUsers,
-  FiMessageSquare,
   FiLoader,
   FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
+  FiBookOpen,
+  FiAlertCircle,
 } from "react-icons/fi";
+import { DAYS_OF_WEEK, dayNameFromDate, isPreferredDay, parseLocalISODate, timeSlotForDay, toISODate, weekRange } from "@/app/lib/schedule";
 
 interface StudentRow {
   id: number;
   user: { name: string; email: string };
+  program?: string;
+  subjects?: string;
+  preferredDays?: string;
+  preferredTime?: string;
 }
 
 interface AttendanceRow {
@@ -25,27 +33,31 @@ interface AttendanceRow {
   date: string;
 }
 
-const STATUS_OPTIONS: { value: string; label: string; icon: any; activeClass: string }[] = [
-  { value: "PRESENT", label: "Present", icon: FiCheckCircle, activeClass: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-500/25" },
-  { value: "LATE", label: "Late", icon: FiClock, activeClass: "bg-amber-500 text-white border-amber-500 shadow-amber-500/25" },
-  { value: "ABSENT", label: "Absent", icon: FiXCircle, activeClass: "bg-rose-500 text-white border-rose-500 shadow-rose-500/25" },
+type StatusIcon = FC<{ className?: string }>;
+
+const STATUS_OPTIONS: { value: string; label: string; short: string; icon: StatusIcon; activeClass: string }[] = [
+  { value: "PRESENT", label: "Present", short: "P", icon: FiCheckCircle, activeClass: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-500/25" },
+  { value: "LATE", label: "Late", short: "L", icon: FiClock, activeClass: "bg-amber-500 text-white border-amber-500 shadow-amber-500/25" },
+  { value: "ABSENT", label: "Absent", short: "A", icon: FiXCircle, activeClass: "bg-rose-500 text-white border-rose-500 shadow-rose-500/25" },
 ];
 
 function todayISO() {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 10);
+  return toISODate(new Date());
 }
 
 export default function AttendancePage() {
   const [students, setStudents] = useState<StudentRow[]>([]);
-  const [marks, setMarks] = useState<Record<number, AttendanceRow | undefined>>({});
-  const [remarksDraft, setRemarksDraft] = useState<Record<number, string>>({});
+  const [marks, setMarks] = useState<Record<string, AttendanceRow>>({});
+  const [reasonDrafts, setReasonDrafts] = useState<Record<string, string>>({});
+  const [cellErrors, setCellErrors] = useState<Record<string, string | undefined>>({});
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
-  const [savingId, setSavingId] = useState<number | null>(null);
-  const [savedId, setSavedId] = useState<number | null>(null);
-  const [date, setDate] = useState(todayISO());
+  const [weekStart, setWeekStart] = useState<string>(toISODate(weekRange(new Date()).start));
   const [error, setError] = useState("");
+
+  const { start, end, days } = useMemo(() => weekRange(parseLocalISODate(weekStart)), [weekStart]);
+  const today = todayISO();
 
   const loadStudents = useCallback(async () => {
     const res = await fetch("/api/teacher/students");
@@ -53,13 +65,13 @@ export default function AttendancePage() {
     if (Array.isArray(data)) setStudents(data);
   }, []);
 
-  const loadMarks = useCallback(async (forDate: string) => {
-    const res = await fetch(`/api/teacher/attendance?date=${forDate}`);
+  const loadMarks = useCallback(async (from: string, to: string) => {
+    const res = await fetch(`/api/teacher/attendance?from=${from}&to=${to}`);
     const data = await res.json();
     if (Array.isArray(data)) {
-      const map: Record<number, AttendanceRow> = {};
+      const map: Record<string, AttendanceRow> = {};
       data.forEach((a: AttendanceRow) => {
-        map[a.studentId] = a;
+        map[`${a.studentId}:${toISODate(new Date(a.date))}`] = a;
       });
       setMarks(map);
     }
@@ -69,60 +81,59 @@ export default function AttendancePage() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      await Promise.all([loadStudents(), loadMarks(date)]);
+      await Promise.all([loadStudents(), loadMarks(toISODate(start), toISODate(end))]);
       if (!cancelled) setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
+  }, [weekStart]);
 
-  // Keep today's marks fresh without requiring a manual page refresh.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      loadMarks(date);
-    }, 20000);
-    return () => clearInterval(interval);
-  }, [date, loadMarks]);
+  const handleMark = async (student: StudentRow, dayDate: Date, status: string) => {
+    const key = `${student.id}:${toISODate(dayDate)}`;
+    const preferred = isPreferredDay(student.preferredDays, dayDate);
+    const reason = (reasonDrafts[key] ?? "").trim();
+    const existing = marks[key];
 
-  const handleMark = async (studentId: number, status: string) => {
-    setSavingId(studentId);
+    if (!preferred && !reason && !existing?.remarks) {
+      setCellErrors((prev) => ({
+        ...prev,
+        [key]: "A reason is required because this is not a preferred day.",
+      }));
+      return;
+    }
+
+    setSaving((prev) => ({ ...prev, [key]: true }));
+    setCellErrors((prev) => ({ ...prev, [key]: undefined }));
     setError("");
-    const remarks = remarksDraft[studentId] ?? marks[studentId]?.remarks ?? "";
-    const previous = marks[studentId];
 
-    // Optimistic update so the UI feels instant.
-    setMarks((prev) => ({
-      ...prev,
-      [studentId]: { ...(prev[studentId] || { id: -1, studentId, date }), status, remarks } as AttendanceRow,
-    }));
+    const remarks = reason || existing?.remarks || "";
 
     try {
       const res = await fetch("/api/teacher/attendance", {
         method: "POST",
-        body: JSON.stringify({ studentId, status, remarks, date }),
+        body: JSON.stringify({ studentId: student.id, status, remarks, date: toISODate(dayDate) }),
         headers: { "Content-Type": "application/json" },
       });
       const data = await res.json();
       if (res.ok) {
-        setMarks((prev) => ({ ...prev, [studentId]: data.attendance }));
-        setSavedId(studentId);
-        setTimeout(() => setSavedId((id) => (id === studentId ? null : id)), 1500);
+        setMarks((prev) => ({ ...prev, [key]: data.attendance }));
+        setReasonDrafts((prev) => ({ ...prev, [key]: "" }));
+        setSaved((prev) => ({ ...prev, [key]: true }));
+        setTimeout(() => setSaved((prev) => ({ ...prev, [key]: false })), 1500);
       } else {
-        setMarks((prev) => ({ ...prev, [studentId]: previous }));
-        setError(data.message || "Failed to save attendance");
+        setCellErrors((prev) => ({ ...prev, [key]: data.message || "Failed to save attendance" }));
       }
     } catch {
-      setMarks((prev) => ({ ...prev, [studentId]: previous }));
-      setError("Failed to save attendance");
+      setCellErrors((prev) => ({ ...prev, [key]: "Failed to save attendance" }));
     } finally {
-      setSavingId(null);
+      setSaving((prev) => ({ ...prev, [key]: false }));
     }
   };
 
   const stats = useMemo(() => {
-    const values = Object.values(marks).filter(Boolean) as AttendanceRow[];
+    const values = Object.values(marks);
     return {
       total: students.length,
       marked: values.length,
@@ -132,23 +143,51 @@ export default function AttendancePage() {
     };
   }, [marks, students.length]);
 
+  const weekLabel = days[0] && days[6]
+    ? `${days[0].toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${days[6].toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
+    : "";
+
+  function shiftWeek(delta: number) {
+    const next = new Date(start);
+    next.setDate(start.getDate() + delta * 7);
+    setWeekStart(toISODate(next));
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Mark Attendance</h1>
-          <p className="text-slate-500 mt-1 text-sm">Select a status for each student — it saves instantly.</p>
+          <p className="text-slate-500 mt-1 text-sm">
+            Attendance runs Monday – Sunday. Preferred days are highlighted — a reason is required on days that are not preferred.
+          </p>
         </div>
-        <label className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
-          <FiCalendar className="size-4 text-slate-400" />
-          <input
-            type="date"
-            value={date}
-            max={todayISO()}
-            onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent text-sm font-semibold text-slate-700 outline-none"
-          />
-        </label>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => shiftWeek(-1)}
+            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all"
+            title="Previous week"
+          >
+            <FiChevronLeft className="size-4" />
+          </button>
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+            <FiCalendar className="size-4 text-slate-400" />
+            <span className="text-sm font-semibold text-slate-700 whitespace-nowrap">{weekLabel}</span>
+          </div>
+          <button
+            onClick={() => shiftWeek(1)}
+            className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all"
+            title="Next week"
+          >
+            <FiChevronRight className="size-4" />
+          </button>
+          <button
+            onClick={() => setWeekStart(toISODate(weekRange(new Date()).start))}
+            className="px-3 py-2.5 rounded-xl bg-[#0f172a] text-white text-xs font-bold hover:bg-[#E91E63] transition-all"
+          >
+            This week
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -187,66 +226,160 @@ export default function AttendancePage() {
             <p className="text-slate-500 font-semibold">No students assigned to you yet.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {students.map((student) => {
-              const mark = marks[student.id];
-              return (
-                <div key={student.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="flex items-center gap-3 min-w-0 sm:w-56 shrink-0">
-                    <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold shrink-0">
-                      {student.user.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 truncate">{student.user.name}</p>
-                      <p className="text-xs text-slate-500 truncate">{student.user.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {STATUS_OPTIONS.map((opt) => {
-                      const active = mark?.status === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          onClick={() => handleMark(student.id, opt.value)}
-                          disabled={savingId === student.id}
-                          className={`inline-flex items-center gap-1.5 rounded-xl border-2 px-3.5 py-2 text-xs font-bold transition-all disabled:opacity-60 ${
-                            active
-                              ? `${opt.activeClass} shadow-lg`
-                              : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
-                          }`}
-                        >
-                          {savingId === student.id && active ? (
-                            <FiLoader className="size-3.5 animate-spin" />
-                          ) : savedId === student.id && active ? (
-                            <FiCheck className="size-3.5" />
-                          ) : (
-                            <opt.icon className="size-3.5" />
-                          )}
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex-1 min-w-[160px] flex items-center gap-2">
-                    <FiMessageSquare className="size-4 text-slate-300 shrink-0" />
-                    <input
-                      type="text"
-                      placeholder="Remarks (optional)"
-                      defaultValue={mark?.remarks ?? ""}
-                      onChange={(e) => setRemarksDraft((prev) => ({ ...prev, [student.id]: e.target.value }))}
-                      onBlur={() => {
-                        if (mark && remarksDraft[student.id] !== undefined && remarksDraft[student.id] !== (mark.remarks ?? "")) {
-                          handleMark(student.id, mark.status);
-                        }
-                      }}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63]/40 transition-all"
-                    />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[980px]">
+              <thead>
+                <tr className="bg-slate-50">
+                  <th className="px-5 py-4 text-xs font-bold uppercase text-slate-500 w-64 min-w-64 align-top">Student</th>
+                  {days.map((day, i) => {
+                    const iso = toISODate(day);
+                    const isToday = iso === today;
+                    return (
+                      <th key={iso} className="px-3 py-4 text-center min-w-[92px]">
+                        <div className={`text-[10px] font-black uppercase tracking-widest ${isToday ? "text-[#E91E63]" : "text-slate-400"}`}>
+                          {DAYS_OF_WEEK[i].slice(0, 3)}
+                        </div>
+                        <div className={`text-sm font-bold mt-0.5 ${isToday ? "text-slate-900" : "text-slate-600"}`}>
+                          {day.getDate()}
+                        </div>
+                        {isToday && (
+                          <span className="inline-block mt-1 rounded-full bg-[#E91E63]/10 text-[#E91E63] text-[9px] font-black px-1.5 py-0.5 uppercase tracking-tighter">
+                            Today
+                          </span>
+                        )}
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {students.map((student) => {
+                  const preferredSet = new Set((student.preferredDays || "").split(",").map((d) => d.trim()).filter(Boolean));
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50/40 transition-colors">
+                      <td className="px-5 py-4 align-top">
+                        <div className="flex items-start gap-3">
+                          <div className="size-9 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                            {student.user.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900 truncate">{student.user.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{student.user.email}</p>
+                            {(student.program || student.subjects) && (
+                              <p className="mt-1 text-[11px] font-semibold text-indigo-600 flex items-center gap-1">
+                                <FiBookOpen className="size-3 shrink-0" />
+                                <span className="truncate">{[student.program, student.subjects].filter(Boolean).join(" · ")}</span>
+                              </p>
+                            )}
+                            {student.preferredDays && (
+                              <div className="mt-1.5 flex flex-wrap gap-1">
+                                {DAYS_OF_WEEK.map((day) => {
+                                  const preferred = preferredSet.has(day);
+                                  const slot = preferred ? timeSlotForDay(student.preferredTime, day) : null;
+                                  return (
+                                    <span
+                                      key={day}
+                                      title={slot ? `${day}: ${slot}` : `${day} (not preferred)`}
+                                      className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${
+                                        preferred
+                                          ? "bg-emerald-100 text-emerald-700"
+                                          : "bg-slate-100 text-slate-400 line-through"
+                                      }`}
+                                    >
+                                      {day.slice(0, 3)}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      {days.map((day) => {
+                        const iso = toISODate(day);
+                        const key = `${student.id}:${iso}`;
+                        const mark = marks[key];
+                        const preferred = isPreferredDay(student.preferredDays, day);
+                        const slot = preferred ? timeSlotForDay(student.preferredTime, dayNameFromDate(day)) : null;
+                        const cellError = cellErrors[key];
+                        const isSaving = saving[key];
+                        const isSaved = saved[key];
+                        return (
+                          <td key={iso} className="px-3 py-4 align-top">
+                            <div className={`rounded-xl p-2 border-2 ${preferred ? "border-emerald-100 bg-emerald-50/40" : "border-slate-100 bg-slate-50/60"}`}>
+                              {slot && (
+                                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter mb-1.5 text-center">
+                                  {slot}
+                                </p>
+                              )}
+                              <div className="flex flex-col gap-1">
+                                {STATUS_OPTIONS.map((opt) => {
+                                  const active = mark?.status === opt.value;
+                                  return (
+                                    <button
+                                      key={opt.value}
+                                      onClick={() => handleMark(student, day, opt.value)}
+                                      disabled={isSaving}
+                                      title={active ? `${opt.label} (click again to keep)` : `${opt.label} — ${preferred ? "" : "reason required (not a preferred day)"}`}
+                                      className={`inline-flex items-center justify-center gap-1 rounded-lg border-2 px-2 py-1 text-[10px] font-bold transition-all disabled:opacity-60 ${
+                                        active
+                                          ? `${opt.activeClass} shadow-sm`
+                                          : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
+                                      }`}
+                                    >
+                                      {isSaving && active ? (
+                                        <FiLoader className="size-3 animate-spin" />
+                                      ) : isSaved && active ? (
+                                        <FiCheck className="size-3" />
+                                      ) : (
+                                        <opt.icon className="size-3" />
+                                      )}
+                                      {opt.short}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {!preferred && (
+                                <input
+                                  type="text"
+                                  value={reasonDrafts[key] ?? mark?.remarks ?? ""}
+                                  onChange={(e) => {
+                                    setReasonDrafts((prev) => ({ ...prev, [key]: e.target.value }));
+                                    if (cellError) setCellErrors((prev) => ({ ...prev, [key]: undefined }));
+                                  }}
+                                  onBlur={() => {
+                                    const reason = (reasonDrafts[key] ?? "").trim();
+                                    if (mark && reason && reason !== (mark.remarks ?? "")) {
+                                      handleMark(student, day, mark.status);
+                                    }
+                                  }}
+                                  placeholder={mark ? "Reason (editable)" : "Reason (required)"}
+                                  className={`w-full mt-1.5 rounded-lg border px-2 py-1.5 text-[10px] outline-none transition-all ${
+                                    cellError
+                                      ? "border-rose-300 bg-rose-50 text-rose-700"
+                                      : "border-slate-200 bg-white text-slate-700 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                                  }`}
+                                />
+                              )}
+                              {cellError && (
+                                <p className="mt-1 text-[9px] font-bold text-rose-600 flex items-center gap-1">
+                                  <FiAlertCircle className="size-3 shrink-0" /> {cellError}
+                                </p>
+                              )}
+                              {mark?.remarks && preferred && (
+                                <p className="mt-1 text-[9px] text-slate-400 italic truncate" title={mark.remarks}>
+                                  {mark.remarks}
+                                </p>
+                              )}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

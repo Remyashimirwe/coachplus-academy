@@ -137,8 +137,8 @@ export default function ProgramsPage({
               <FiClipboard className="size-4" />
               Not sure where to start?
             </p>
-            <h2 className="mt-5 text-3xl font-bold text-white">Need help choosing?</h2>
-            <p className="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed">
+            <h2 className="mt-5 text-2xl font-semibold text-white">Need help choosing?</h2>
+            <p className="mt-6 max-w-2xl text-base text-white/90 leading-relaxed">
               Tell CoachPlus Academy your goals and we&apos;ll recommend the
               best category and tutor match.
             </p>

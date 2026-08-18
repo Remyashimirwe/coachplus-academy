@@ -397,20 +397,28 @@ export async function sendTeacherAssignedToParentEmail({
 export async function sendRequestAssignedToTeacherEmail({
   to,
   teacherName,
-  parentName,
+  studentName,
   parentEmail,
   parentPhone,
   parentBranch,
+  program,
   subjects,
+  preferredTime,
+  learningMode,
+  startDate,
   details,
 }: {
   to: string;
   teacherName: string;
-  parentName: string;
+  studentName: string;
   parentEmail: string;
   parentPhone?: string;
   parentBranch?: string | null;
+  program?: string;
   subjects?: string;
+  preferredTime?: string;
+  learningMode?: string;
+  startDate?: string;
   details?: string;
 }) {
   const client = getResendClient();
@@ -424,25 +432,30 @@ export async function sendRequestAssignedToTeacherEmail({
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `You've been assigned a new student request on ${BRAND_NAME}`,
+      subject: `You've been assigned a new student on ${BRAND_NAME}`,
       html: renderEmail({
-        preheader: `You've been assigned a new student request on ${BRAND_NAME}.`,
+        preheader: `${studentName} has been assigned to you on ${BRAND_NAME}.`,
         bodyHtml: `
           <h2 style="margin-top:0;">Hi ${teacherName},</h2>
           <p>
-            You've been assigned to a new teacher request on <strong>${BRAND_NAME}</strong>,
+            A student has been assigned to you on <strong>${BRAND_NAME}</strong>,
             matched to your location and the subjects you teach.
           </p>
           <p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
-            <strong>Parent:</strong> ${parentName}<br/>
+            <strong>Student:</strong> ${studentName}<br/>
             <strong>Email:</strong> <a href="mailto:${parentEmail}">${parentEmail}</a>
             ${parentPhone ? `<br/><strong>Phone:</strong> <a href="tel:${parentPhone}">${parentPhone}</a>` : ""}
             ${branchLine(parentBranch)}
           </p>
-          ${subjects ? `<p><strong>Courses & Topics:</strong> ${subjects}</p>` : ""}
-          ${details ? `<p><strong>Details:</strong> ${details}</p>` : ""}
+          ${program ? `<p><strong>Program:</strong> ${program}</p>` : ""}
+          ${subjects ? `<p><strong>Courses &amp; Topics:</strong> ${subjects}</p>` : ""}
+          ${preferredTime ? `<p><strong>Preferred Days &amp; Time:</strong> ${preferredTime}</p>` : ""}
+          ${learningMode ? `<p><strong>Learning Mode:</strong> ${learningMode}</p>` : ""}
+          ${startDate ? `<p><strong>Preferred Start Date:</strong> ${startDate}</p>` : ""}
+          ${details ? `<p><strong>Additional Details:</strong> ${details}</p>` : ""}
           <p>
-            Please reach out to the parent to introduce yourself and coordinate the next steps.
+            Please reach out to the student or their guardian to introduce yourself and
+            coordinate the lessons according to their preferred schedule.
           </p>
           ${signature()}
         `,

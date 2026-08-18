@@ -21,10 +21,10 @@ export default function CTA() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl font-bold text-white sm:text-4xl leading-tight">
+              <h2 className="text-2xl font-semibold text-white sm:text-3xl leading-tight">
                 Ready to start <br /><span className="text-[#E91E63]">learning?</span>
               </h2>
-              <p className="mt-6 max-w-2xl text-base font-normal leading-relaxed text-slate-400">
+              <p className="mt-6 max-w-2xl text-sm font-normal leading-relaxed text-slate-400">
                 Get matched today with a certified teacher tailored precisely to your learning goals.
               </p>
             </motion.div>
@@ -37,10 +37,10 @@ export default function CTA() {
             >
               <Link
                 href="/request"
-                className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl bg-white px-8 text-lg font-bold text-[#0f172a] shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] hover:text-white active:scale-95"
+                className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl bg-white px-8 text-base font-semibold text-[#0f172a] shadow-2xl transition-all hover:-translate-y-1 hover:bg-[#E91E63] hover:text-white active:scale-95"
               >
                 Request a Teacher
-                <FiArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </motion.div>
           </div>

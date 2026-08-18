@@ -58,7 +58,6 @@ export async function saveTeacherApplication(formData: FormData) {
   // 3. Teaching Experience
   const experienceYears = String(formData.get("experienceYears") || "").trim();
   const subjects = formData.getAll("subjects").map(s => String(s)).join(", ");
-  const grades = formData.getAll("grades").map(g => String(g)).join(", ");
   const previousOrg = String(formData.get("previousOrg") || "").trim();
   const previousPos = String(formData.get("previousPos") || "").trim();
   const expDescription = String(formData.get("expDescription") || "").trim();
@@ -67,8 +66,8 @@ export async function saveTeacherApplication(formData: FormData) {
   const methods = String(formData.get("methods") || "").trim();
   const difficultStudents = String(formData.get("difficultStudents") || "").trim();
   const engagement = String(formData.get("engagement") || "").trim();
-  const techTools = String(formData.get("techTools") || "").trim();
   const teachOnline = String(formData.get("teachOnline") || "").trim();
+  const onlinePlatforms = String(formData.get("onlinePlatforms") || "").trim();
 
   // 5. Availability
   const employmentType = String(formData.get("employmentType") || "").trim();
@@ -133,15 +132,14 @@ export async function saveTeacherApplication(formData: FormData) {
         graduationYear,
         experienceYears,
         subjects,
-        grades,
         previousOrg,
         previousPos,
         expDescription,
         methods,
         difficultStudents,
         engagement,
-        techTools,
         teachOnline,
+        onlinePlatforms,
         employmentType,
         availableDays,
         availableHours,

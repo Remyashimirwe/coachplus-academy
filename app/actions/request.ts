@@ -22,11 +22,16 @@ export async function saveRequest(formData: FormData) {
   const programId = formData.get("programId") ? String(formData.get("programId")) : "N/A";
   const mode = String(formData.get("mode") || "").trim();
   const startDate = String(formData.get("startDate") || "").trim();
-  const preferredTimeFrom = String(formData.get("preferredTimeFrom") || "").trim();
-  const preferredTimeTo = String(formData.get("preferredTimeTo") || "").trim();
-  const preferredTime = preferredTimeFrom && preferredTimeTo ? `${preferredTimeFrom} - ${preferredTimeTo}` : "";
   const availableDays = formData.getAll("availableDays").map(d => String(d)).join(", ");
   const dayTimeSlots = formData.getAll("dayTimeSlots").map(s => String(s)).join(", ");
+
+  // Resolve the human-readable program title so the admin, teacher and student
+  // all see a clear program name instead of just a numeric id.
+  let programTitle = programId;
+  if (programId !== "N/A") {
+    const program = await db.program.findUnique({ where: { id: Number(programId) } });
+    if (program) programTitle = program.title;
+  }
 
   try {
       await db.request.create({
@@ -44,9 +49,14 @@ export async function saveRequest(formData: FormData) {
               cell: "",
               village: "",
               idPassport: "",
-              grade: programId,
+              grade: programTitle,
+              programTitle,
+              learningMode: mode,
+              preferredDays: availableDays,
+              preferredTime: dayTimeSlots,
+              startDate,
               subjects: coursesOfInterest + (topics ? ` (Topics: ${topics})` : ""),
-              details: `[Mode: ${mode}]${preferredTime ? ` [Preferred Time: ${preferredTime}]` : ""}${availableDays ? ` [Available: ${dayTimeSlots}]` : ""} [Start: ${startDate}] ${details}`,
+              details,
           },
       });
     return { success: true };

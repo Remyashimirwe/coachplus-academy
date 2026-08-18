@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FiUsers, FiCheckCircle, FiXCircle, FiClock, FiArrowRight, FiCheckSquare } from "react-icons/fi";
+import { FiUsers, FiCheckCircle, FiXCircle, FiClock, FiArrowRight, FiCheckSquare, FiBookOpen, FiCalendar } from "react-icons/fi";
 
 interface StudentRow {
   id: number;
   user: { name: string; email: string };
+  program?: string;
+  subjects?: string;
+  preferredTime?: string;
+  preferredDays?: string;
 }
 
 interface AttendanceRow {
@@ -91,13 +95,29 @@ export default function TeacherPage() {
             <p className="p-6 text-center text-slate-400 text-sm">No students assigned to you yet.</p>
           ) : (
             students.slice(0, 6).map((s) => (
-              <div key={s.id} className="p-4 flex items-center gap-3">
-                <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold shrink-0">
-                  {s.user.name.charAt(0)}
+              <div key={s.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold shrink-0">
+                    {s.user.name.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">{s.user.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{s.user.email}</p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-slate-900 truncate">{s.user.name}</p>
-                  <p className="text-xs text-slate-500 truncate">{s.user.email}</p>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                  {(s.program || s.subjects) && (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 text-indigo-700 px-2.5 py-1 truncate max-w-[220px]">
+                      <FiBookOpen className="size-3.5 shrink-0" />
+                      <span className="truncate">{[s.program, s.subjects].filter(Boolean).join(" · ")}</span>
+                    </span>
+                  )}
+                  {s.preferredTime && (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 text-rose-600 px-2.5 py-1 truncate max-w-[260px]">
+                      <FiCalendar className="size-3.5 shrink-0" />
+                      <span className="truncate">{s.preferredTime}</span>
+                    </span>
+                  )}
                 </div>
               </div>
             ))

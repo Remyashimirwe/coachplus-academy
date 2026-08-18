@@ -11,6 +11,7 @@ import {
   FiCheckCircle,
   FiUserCheck,
   FiAward,
+  FiBookOpen,
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import RequestDetailModal from "./RequestDetailModal";
@@ -193,6 +194,12 @@ export default function RequestsView({ requests, teachers }: any) {
                   <span className="truncate">{request.grade}</span>
                 </span>
               )}
+              {request.learningMode && (
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <FiBookOpen className="text-emerald-500 shrink-0" />
+                  <span className="truncate">{request.learningMode}</span>
+                </span>
+              )}
               {(request.branch || request.country || request.location) && (
                 <span className="flex items-center gap-1.5 min-w-0">
                   <FiMapPin className="text-rose-500 shrink-0" />
@@ -202,6 +209,17 @@ export default function RequestsView({ requests, teachers }: any) {
                 </span>
               )}
             </div>
+
+            {(request.preferredTime || request.preferredDays) && (
+              <div className="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100">
+                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <FiClock /> Preferred Schedule
+                </p>
+                <p className="text-xs font-bold text-slate-700 leading-relaxed line-clamp-2">
+                  {request.preferredTime || request.preferredDays}
+                </p>
+              </div>
+            )}
 
             <div className="p-4 rounded-2xl bg-rose-50/30 border border-rose-100">
               <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">Courses & Topics</p>

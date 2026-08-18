@@ -16,7 +16,6 @@ export default async function BecomeTeacherPage() {
       topics: s.topics.map((t) => ({ id: t.id, name: t.name })),
     })),
   }));
-  const levels = Array.from(new Set(rawPrograms.map((p) => p.level).filter(Boolean)));
 
   return (
     <main className="min-h-screen bg-white text-[#121826]">
@@ -58,7 +57,7 @@ export default async function BecomeTeacherPage() {
         </div>
       </div>
 
-      <BecomeTeacherForm isOpen={isOpen} programs={programs} levels={levels} />
+      <BecomeTeacherForm isOpen={isOpen} programs={programs} />
       <Footer />
     </main>
   );

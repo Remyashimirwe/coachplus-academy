@@ -131,7 +131,7 @@ export default function TeacherApplicationModal({
   }
 
   async function handleDeny() {
-    if (!confirm(`Deny ${app.fullName}'s application? This will permanently remove it from the database.`)) return;
+    if (!confirm(`Deny ${app.fullName}'s application? It will be marked as rejected and kept on record.`)) return;
 
     setDecision("deny");
     setDecisionError(null);
@@ -196,10 +196,14 @@ export default function TeacherApplicationModal({
                 </p>
                 <span
                   className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
-                    app.status === "pending" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
+                    app.status === "pending"
+                      ? "bg-amber-100 text-amber-700"
+                      : app.status === "rejected"
+                      ? "bg-rose-100 text-rose-700"
+                      : "bg-emerald-100 text-emerald-700"
                   }`}
                 >
-                  {app.status}
+                  {app.status === "approved" ? "Accepted" : app.status}
                 </span>
               </div>
             </div>
@@ -282,8 +286,8 @@ export default function TeacherApplicationModal({
                   <p className="text-sm font-bold text-slate-700">{app.teachOnline}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Tech Tools</p>
-                  <p className="text-xs text-slate-600 break-words">{app.techTools || "None specified"}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Online Platforms</p>
+                  <p className="text-xs text-slate-600 break-words">{app.onlinePlatforms || "None specified"}</p>
                 </div>
               </div>
             </div>
@@ -444,7 +448,7 @@ export default function TeacherApplicationModal({
             )}
             {!isPending && !decisionError && (
               <p className="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
-                <FiCheckCircle /> This applicant is already an approved teacher.
+                <FiCheckCircle /> {app.status === "rejected" ? "This application has been rejected." : "This applicant is already an accepted teacher."}
               </p>
             )}
           </div>

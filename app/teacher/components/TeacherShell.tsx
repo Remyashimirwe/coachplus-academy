@@ -1,11 +1,12 @@
 "use client";
 
 import { ReactNode } from "react";
-import { FiLayout, FiCheckSquare } from "react-icons/fi";
+import { FiLayout, FiCheckSquare, FiUsers } from "react-icons/fi";
 import DashboardLayout from "@/app/components/DashboardLayout";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: FiLayout, href: "/teacher" },
+  { id: "students", label: "My Students", icon: FiUsers, href: "/teacher/students" },
   { id: "attendance", label: "Mark Attendance", icon: FiCheckSquare, href: "/teacher/attendance" },
 ];
 

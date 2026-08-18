@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/app/lib/db';
 import { getSession } from '@/app/lib/auth';
+import { isPreferredDay, dayNameFromDate } from '@/app/lib/schedule';
 
 function startOfDay(input?: string | null) {
   const d = input ? new Date(input) : new Date();
@@ -17,6 +19,8 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
 
     const teacher = await prisma.teacher.findUnique({
       where: { userId: session.user.id },
@@ -24,8 +28,10 @@ export async function GET(request: Request) {
 
     if (!teacher) return NextResponse.json([]);
 
-    const where: any = { teacherId: teacher.id };
-    if (date) {
+    const where: Prisma.AttendanceWhereInput = { teacherId: teacher.id };
+    if (from && to) {
+      where.date = { gte: startOfDay(from), lte: startOfDay(to) };
+    } else if (date) {
       where.date = startOfDay(date);
     }
 
@@ -68,6 +74,20 @@ export async function POST(request: Request) {
     }
 
     const day = startOfDay(date);
+
+    // Attendance happens Monday-Sunday. On a day the student did not list as
+    // preferred, the teacher must provide a reason for marking it.
+    if (!isPreferredDay(student.preferredDays, day)) {
+      const reason = String(remarks || "").trim();
+      if (!reason) {
+        return NextResponse.json(
+          {
+            message: `${dayNameFromDate(day)} is not a preferred day for this student. Please enter a reason before marking attendance.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     const attendance = await prisma.attendance.upsert({
       where: { studentId_date: { studentId, date: day } },

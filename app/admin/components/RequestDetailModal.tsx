@@ -23,6 +23,7 @@ import {
   FiCopy,
   FiCheck,
   FiStar,
+  FiCalendar,
 } from "react-icons/fi";
 import { BRANCHES } from "@/app/lib/constants";
 import { scoreTeacherForStudent, matchLabel } from "@/app/lib/matching";
@@ -279,13 +280,40 @@ export default function RequestDetailModal({
               </h4>
               <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Program / Grade</p>
-                  <p className="text-sm font-bold text-slate-700 break-words">{request.grade || "Not specified"}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Program</p>
+                  <p className="text-sm font-bold text-slate-700 break-words">{request.programTitle || request.grade || "Not specified"}</p>
                 </div>
+                {request.learningMode && (
+                  <div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Learning Mode</p>
+                    <p className="text-sm font-bold text-slate-700 break-words">{request.learningMode}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Courses & Topics</p>
                   <p className="text-sm font-bold text-slate-700 break-words">{request.subjects || "Not specified"}</p>
                 </div>
+                {(request.preferredTime || request.preferredDays) && (
+                  <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3 space-y-2">
+                    <p className="text-[10px] text-indigo-400 font-bold uppercase flex items-center gap-1">
+                      <FiClock className="size-3" /> Preferred Schedule (Mon – Sun)
+                    </p>
+                    {request.preferredDays && (
+                      <p className="text-xs font-bold text-slate-700">{request.preferredDays}</p>
+                    )}
+                    {request.preferredTime && (
+                      <p className="text-xs font-bold text-indigo-700 whitespace-pre-line">{request.preferredTime}</p>
+                    )}
+                  </div>
+                )}
+                {request.startDate && (
+                  <div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                      <FiCalendar className="size-3" /> Preferred Start Date
+                    </p>
+                    <p className="text-sm font-bold text-slate-700">{request.startDate}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
                     <FiClock className="size-3" /> Submitted

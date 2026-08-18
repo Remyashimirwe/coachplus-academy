@@ -88,11 +88,15 @@ export async function POST(
     sendRequestAssignedToTeacherEmail({
       to: teacher.user.email,
       teacherName: teacher.user.name,
-      parentName: parentRequest.parentName,
+      studentName: parentRequest.parentName,
       parentEmail: parentRequest.email,
       parentPhone: parentRequest.phone,
       parentBranch: parentRequest.branch,
+      program: parentRequest.programTitle,
       subjects: parentRequest.subjects,
+      preferredTime: parentRequest.preferredTime,
+      learningMode: parentRequest.learningMode,
+      startDate: parentRequest.startDate,
       details: parentRequest.details,
     }),
   ]);

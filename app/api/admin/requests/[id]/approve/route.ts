@@ -59,6 +59,11 @@ export async function POST(
           phone: existingUser.studentProfile.phone || parentRequest.phone,
           branch: existingUser.studentProfile.branch || parentRequest.branch,
           subjects: existingUser.studentProfile.subjects || parentRequest.subjects,
+          program: existingUser.studentProfile.program || parentRequest.programTitle,
+          learningMode: existingUser.studentProfile.learningMode || parentRequest.learningMode,
+          preferredDays: existingUser.studentProfile.preferredDays || parentRequest.preferredDays,
+          preferredTime: existingUser.studentProfile.preferredTime || parentRequest.preferredTime,
+          startDate: existingUser.studentProfile.startDate || parentRequest.startDate,
         },
       });
     }
@@ -103,6 +108,11 @@ export async function POST(
             phone: parentRequest.phone,
             branch: parentRequest.branch,
             subjects: parentRequest.subjects,
+            program: parentRequest.programTitle,
+            learningMode: parentRequest.learningMode,
+            preferredDays: parentRequest.preferredDays,
+            preferredTime: parentRequest.preferredTime,
+            startDate: parentRequest.startDate,
           },
         },
       },

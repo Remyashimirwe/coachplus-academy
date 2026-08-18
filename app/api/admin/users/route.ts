@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, email, role } = await request.json();
+    const { name, email, role, branch, phone, programTitle, subjects, learningMode, preferredDays, preferredTime } = await request.json();
 
     if (!['TEACHER', 'STUDENT'].includes(role)) {
         return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
@@ -30,7 +30,21 @@ export async function POST(request: Request) {
         isFirstLogin: true,
         inviteToken,
         inviteTokenExpiresAt,
-        ...(role === 'TEACHER' ? { teacherProfile: { create: {} } } : { studentProfile: { create: {} } })
+        ...(role === 'TEACHER'
+          ? { teacherProfile: { create: {} } }
+          : {
+              studentProfile: {
+                create: {
+                  branch: branch || "",
+                  phone: phone || "",
+                  program: programTitle || "",
+                  subjects: subjects || "",
+                  learningMode: learningMode || "",
+                  preferredDays: preferredDays || "",
+                  preferredTime: preferredTime || "",
+                },
+              },
+            }),
       },
     });
 

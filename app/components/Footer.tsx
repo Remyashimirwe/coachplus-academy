@@ -47,13 +47,13 @@ export default function Footer() {
               <img
                 src="/logo.png"
                 alt="CoachPlus Academy"
-                className="size-12 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
+                className="size-10 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
               />
-              <span className="text-3xl font-bold tracking-tight text-white">
+              <span className="text-2xl font-semibold tracking-tight text-white">
                 CoachPlus <span className="text-[#E91E63]">Academy</span>
               </span>
             </Link>
-            <p className="mt-8 max-w-sm text-base leading-relaxed text-slate-400">
+            <p className="mt-8 max-w-sm text-sm leading-relaxed text-slate-400">
               Your Success Starts with the Right Coach.
             </p>
           </div>
@@ -65,13 +65,13 @@ export default function Footer() {
 
             return (
               <div key={group.title}>
-                <h3 className="text-base font-bold text-white mb-6">{group.title}</h3>
+                <h3 className="text-sm font-semibold text-white mb-6">{group.title}</h3>
                 <ul className="flex flex-col gap-4">
                   {filteredLinks.map((link) => (
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-base text-slate-400 transition hover:text-[#E91E63]"
+                        className="text-sm text-slate-400 transition hover:text-[#E91E63]"
                       >
                         {link.label}
                       </Link>

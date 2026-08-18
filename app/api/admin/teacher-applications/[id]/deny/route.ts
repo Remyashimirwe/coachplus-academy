@@ -26,11 +26,19 @@ export async function POST(
     return NextResponse.json({ message: "Application not found" }, { status: 404 });
   }
 
+  if (application.status === "rejected") {
+    return NextResponse.json({ message: "This application has already been rejected" }, { status: 400 });
+  }
+
   // Best-effort notification; denial should proceed even if the email fails.
   await sendApplicationDeniedEmail({ to: application.email, name: application.fullName }).catch(() => null);
 
-  // Documents are removed automatically via the cascading relation.
-  await db.teacherApplication.delete({ where: { id: applicationId } });
+  // Keep the application on record (status "rejected") so the admin can still
+  // review it and filter the table by accepted / rejected applicants.
+  const updated = await db.teacherApplication.update({
+    where: { id: applicationId },
+    data: { status: "rejected" },
+  });
 
-  return NextResponse.json({ message: "Application denied and removed" });
+  return NextResponse.json({ message: "Application denied", application: updated });
 }

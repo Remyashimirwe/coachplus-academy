@@ -177,7 +177,7 @@ function UploadField({
   );
 }
 
-export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen: boolean; programs: TeacherProgram[]; levels: string[] }) {
+export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolean; programs: TeacherProgram[] }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -185,20 +185,16 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
   const [selectedProgramIds, setSelectedProgramIds] = useState<number[]>([]);
   const [programSubjects, setProgramSubjects] = useState<Record<number, string[]>>({});
   const [programTopics, setProgramTopics] = useState<Record<string, string[]>>({});
-  const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [teachOnline, setTeachOnline] = useState<string>("");
   const [dayTimes, setDayTimes] = useState<Record<string, { from: string; to: string }>>({});
-  const [selectionErrors, setSelectionErrors] = useState<{ subjects?: boolean; grades?: boolean; days?: boolean; dayTimes?: boolean }>({});
+  const [selectionErrors, setSelectionErrors] = useState<{ subjects?: boolean; days?: boolean; dayTimes?: boolean }>({});
   const [diplomaFiles, setDiplomaFiles] = useState<{ file: File; url: string }[]>([]);
   const [photoFiles, setPhotoFiles] = useState<{ file: File; url: string }[]>([]);
   const [idPassportFiles, setIdPassportFiles] = useState<{ file: File; url: string }[]>([]);
   const [resumeFiles, setResumeFiles] = useState<{ file: File; url: string }[]>([]);
   const [coverLetterFiles, setCoverLetterFiles] = useState<{ file: File; url: string }[]>([]);
   const [otherCertFiles, setOtherCertFiles] = useState<{ file: File; url: string }[]>([]);
-
-  const toggleItem = (item: string, list: string[], setter: (val: string[]) => void) => {
-    setter(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
-  };
 
   const toggleProgram = (programId: number) => {
     setSelectedProgramIds(prev => {
@@ -322,7 +318,6 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         Object.values(programSubjects).reduce((sum, list) => sum + list.length, 0);
                       const errors: typeof selectionErrors = {};
                       if (totalSubjects === 0) errors.subjects = true;
-                      if (selectedGrades.length === 0) errors.grades = true;
                       if (selectedDays.length === 0) {
                         errors.days = true;
                       } else {
@@ -354,7 +349,6 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           topics.forEach(t => formData.append('subjects', program ? `${program.title}: ${s} - ${t}` : `${s} - ${t}`));
                         });
                       });
-                      selectedGrades.forEach(g => formData.append('grades', g));
                       selectedDays.forEach(d => {
                         formData.append('availableDays', d);
                         formData.append('dayTimeSlots', `${d}: ${dayTimes[d]?.from || ''} - ${dayTimes[d]?.to || ''}`);
@@ -368,7 +362,6 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                         setSelectedProgramIds([]);
                         setProgramSubjects({});
                         setProgramTopics({});
-                        setSelectedGrades([]);
                         setSelectedDays([]);
                         setDayTimes({});
                         setDiplomaFiles([]);
@@ -505,31 +498,6 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                           <option value="8+">8+ Years</option>
                         </select>
                       </Field>
-
-                      <div className="space-y-4" data-error={selectionErrors.grades}>
-                        <div className="flex items-center justify-between">
-                          <label className={`text-xs font-semibold flex items-center gap-2 ${selectionErrors.grades ? 'text-red-500' : 'text-slate-700'}`}>
-                            Grade/Level You Can Teach *
-                          </label>
-                          {selectionErrors.grades && <span className="text-[10px] font-medium text-red-500 uppercase">Select at least one</span>}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {levels.map(g => (
-                            <button
-                              key={g}
-                              type="button"
-                              onClick={() => toggleItem(g, selectedGrades, setSelectedGrades)}
-                              className={`rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
-                                selectedGrades.includes(g)
-                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
-                                : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
-                              }`}
-                            >
-                              {g}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
 
                       <div className="space-y-4" data-error={selectionErrors.subjects}>
                         <div className="flex items-center justify-between">
@@ -681,20 +649,22 @@ export default function BecomeTeacherForm({ isOpen, programs, levels }: { isOpen
                       <Field icon={<FiTarget />} label="How do you keep students engaged? *" htmlFor="engagement">
                         <textarea id="engagement" name="engagement" required className={inputClasses} />
                       </Field>
-                      <Field icon={<FiCpu />} label="What educational technologies/tools can you use?" htmlFor="techTools">
-                        <input id="techTools" name="techTools" placeholder="e.g. Google Classroom, Kahoot, Zoom" className={inputClasses} />
-                      </Field>
                       <div className="space-y-3">
                         <label className="text-xs font-semibold text-slate-700">Are you able to teach online? *</label>
                         <div className="flex gap-6">
                           {["Yes", "No"].map(option => (
                             <label key={option} className="flex items-center gap-2 cursor-pointer group">
-                              <input type="radio" name="teachOnline" value={option} required className="size-5 accent-[#E91E63]" />
+                              <input type="radio" name="teachOnline" value={option} checked={teachOnline === option} onChange={() => setTeachOnline(option)} className="size-5 accent-[#E91E63]" />
                               <span className="text-slate-600 font-medium group-hover:text-[#E91E63] transition-colors">{option}</span>
                             </label>
                           ))}
                         </div>
                       </div>
+                      {teachOnline === "Yes" && (
+                        <Field icon={<FiCpu />} label="Which online platforms do you use? *" htmlFor="onlinePlatforms">
+                          <input id="onlinePlatforms" name="onlinePlatforms" required placeholder="e.g. Zoom, Google Meet, Microsoft Teams" className={inputClasses} />
+                        </Field>
+                      )}
                     </div>
 
                     {/* 5. Availability */}
