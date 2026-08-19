@@ -79,3 +79,30 @@ export function timeSlotForDay(preferredTime?: string | null, dayName?: string):
   if (!match) return null;
   return `${match[1]} - ${match[2]}`;
 }
+
+export interface DayTimeSlot {
+  day: string;
+  from: string;
+  to: string;
+}
+
+/** Parses a "Day: from - to, ..." string into an array of slots (ignores unparseable entries). */
+export function parseTimeSlots(preferredTime?: string | null): DayTimeSlot[] {
+  if (!preferredTime) return [];
+  const slots: DayTimeSlot[] = [];
+  for (const day of DAYS_OF_WEEK) {
+    const slot = timeSlotForDay(preferredTime, day);
+    if (!slot) continue;
+    const [from, to] = slot.split("-").map((t) => t.trim());
+    if (from && to) slots.push({ day, from, to });
+  }
+  return slots;
+}
+
+/** Builds a "Day: from - to, ..." string (matching the stored format) from an array of slots. */
+export function buildPreferredTime(slots: DayTimeSlot[]): string {
+  const clean = slots
+    .filter((s) => s.day && s.from && s.to)
+    .map((s) => `${s.day}: ${s.from} - ${s.to}`);
+  return clean.join(", ");
+}

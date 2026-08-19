@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/app/lib/db';
 import { getSession } from '@/app/lib/auth';
-import { isPreferredDay, dayNameFromDate } from '@/app/lib/schedule';
 
 function startOfDay(input?: string | null) {
   const d = input ? new Date(input) : new Date();
@@ -42,68 +41,23 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json(attendances);
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Something went wrong" }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const session = await getSession();
     if (!session || session.user.role !== 'TEACHER') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { studentId, status, remarks, date } = await request.json();
-
-    if (!studentId || !status) {
-      return NextResponse.json({ message: 'studentId and status are required' }, { status: 400 });
-    }
-
-    const teacher = await prisma.teacher.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!teacher) {
-      return NextResponse.json({ message: 'Teacher profile not found' }, { status: 404 });
-    }
-
-    const student = await prisma.student.findUnique({ where: { id: studentId } });
-    if (!student || student.teacherId !== teacher.id) {
-      return NextResponse.json({ message: 'This student is not assigned to you' }, { status: 403 });
-    }
-
-    const day = startOfDay(date);
-
-    // Attendance happens Monday-Sunday. On a day the student did not list as
-    // preferred, the teacher must provide a reason for marking it.
-    if (!isPreferredDay(student.preferredDays, day)) {
-      const reason = String(remarks || "").trim();
-      if (!reason) {
-        return NextResponse.json(
-          {
-            message: `${dayNameFromDate(day)} is not a preferred day for this student. Please enter a reason before marking attendance.`,
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    const attendance = await prisma.attendance.upsert({
-      where: { studentId_date: { studentId, date: day } },
-      update: { status, remarks: remarks ?? null },
-      create: {
-        studentId,
-        teacherId: teacher.id,
-        status,
-        remarks: remarks ?? null,
-        date: day,
-      },
-      include: { student: { include: { user: true } } },
-    });
-
-    return NextResponse.json({ message: 'Attendance saved successfully', attendance });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Teachers mark their own attendance now. Use /api/teacher/my-attendance instead.' },
+      { status: 403 }
+    );
+  } catch (error) {
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Something went wrong" }, { status: 500 });
   }
 }

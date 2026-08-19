@@ -1,13 +1,14 @@
 "use client";
 
 import { ReactNode } from "react";
-import { FiLayout, FiCheckSquare, FiUsers } from "react-icons/fi";
+import { FiLayout, FiCheckSquare, FiUsers, FiSettings } from "react-icons/fi";
 import DashboardLayout from "@/app/components/DashboardLayout";
 
 const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: FiLayout, href: "/teacher" },
-  { id: "students", label: "My Students", icon: FiUsers, href: "/teacher/students" },
-  { id: "attendance", label: "Mark Attendance", icon: FiCheckSquare, href: "/teacher/attendance" },
+  { id: "dashboard", label: "Dashboard", icon: FiLayout, href: "/teacher", section: "Main" },
+  { id: "students", label: "My Students", icon: FiUsers, href: "/teacher/students", section: "Main" },
+  { id: "attendance", label: "My Attendance", icon: FiCheckSquare, href: "/teacher/attendance", section: "Main" },
+  { id: "settings", label: "Settings", icon: FiSettings, href: "/teacher/settings", section: "Account" },
 ];
 
 export default function TeacherShell({

@@ -57,5 +57,4 @@ export async function login(
 
 export async function logout() {
   await clearSession();
-  redirect("/admin/login");
 }

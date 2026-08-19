@@ -13,56 +13,60 @@ enum Role {
 }
 
 model User {
-  id                   Int          @id @default(autoincrement())
-  email                String       @unique
-  passwordHash         String?      // Nullable for first-time users
+  id                   Int       @id @default(autoincrement())
+  email                String    @unique
+  passwordHash         String? // Nullable for first-time users
   name                 String
+  image                String? // Profile picture (URL or data URL)
   role                 Role
-  isFirstLogin         Boolean      @default(true)
-  inviteToken          String?      @unique
+  isFirstLogin         Boolean   @default(true)
+  inviteToken          String?   @unique
   inviteTokenExpiresAt DateTime?
-  createdAt            DateTime     @default(now())
-  
+  createdAt            DateTime  @default(now())
+
   // Relations
-  teacherProfile  Teacher?     @relation("UserToTeacher")
-  studentProfile  Student?     @relation("UserToStudent")
+  teacherProfile Teacher? @relation("UserToTeacher")
+  studentProfile Student? @relation("UserToStudent")
+  notifications  Notification[]
 }
 
 model Teacher {
-  id          Int          @id @default(autoincrement())
-  userId      Int          @unique
-  user        User         @relation("UserToTeacher", fields: [userId], references: [id])
-  phone       String       @default("")
-  branch      String       @default("") // Location branch, e.g. Kigali-Remera
-  subjects    String       @default("") // Courses/subjects the teacher can teach
-  students    Student[]    @relation("TeacherStudents")
-  attendances Attendance[]
-  reports     Report[]
+  id                 Int                 @id @default(autoincrement())
+  userId             Int                 @unique
+  user               User                @relation("UserToTeacher", fields: [userId], references: [id])
+  phone              String              @default("")
+  branch             String              @default("") // Location branch, e.g. Kigali-Remera
+  subjects           String              @default("") // Courses/subjects the teacher can teach
+  students           Student[]           @relation("TeacherStudents")
+  attendances        Attendance[]
+  teacherAttendances TeacherAttendance[]
+  reports            Report[]
 }
 
 model Student {
-  id             Int          @id @default(autoincrement())
-  userId         Int          @unique
-  user           User         @relation("UserToStudent", fields: [userId], references: [id])
-  teacherId      Int?
-  teacher        Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
-  phone          String       @default("")
-  branch         String       @default("") // Location branch, e.g. Kigali-Remera
-  subjects       String       @default("") // Courses/topics the student wants to learn
-  program        String       @default("") // Program/category the student enrolled in
-  learningMode   String       @default("") // Home Coaching | Online Coaching | Coaching Center
-  preferredDays  String       @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
-  preferredTime  String       @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
-  startDate      String       @default("") // Preferred start date
-  attendances    Attendance[]
-  reports        Report[]
-  parentRequest  Request?     @relation("RequestStudent")
+  id            Int          @id @default(autoincrement())
+  userId        Int          @unique
+  user          User         @relation("UserToStudent", fields: [userId], references: [id])
+  teacherId     Int?
+  teacher       Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
+  phone         String       @default("")
+  branch        String       @default("") // Location branch, e.g. Kigali-Remera
+  subjects      String       @default("") // Courses/topics the student wants to learn
+  program       String       @default("") // Program/category the student enrolled in
+  learningMode  String       @default("") // Home Coaching | Online Coaching | Coaching Center
+  preferredDays String       @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
+  preferredTime String       @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
+  startDate     String       @default("") // Preferred start date
+  attendances   Attendance[]
+  reports       Report[]
+  parentRequest Request?     @relation("RequestStudent")
+  selfAttendances StudentAttendance[]
 }
 
 model Attendance {
   id        Int      @id @default(autoincrement())
   date      DateTime @default(now())
-  status    String   // "PRESENT", "ABSENT", "LATE"
+  status    String // "PRESENT", "ABSENT"
   studentId Int
   student   Student  @relation(fields: [studentId], references: [id])
   teacherId Int
@@ -71,6 +75,43 @@ model Attendance {
   createdAt DateTime @default(now())
 
   @@unique([studentId, date])
+}
+
+model TeacherAttendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  status    String // "PRESENT", "ABSENT"
+  teacherId Int
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  remarks   String?
+  timeUsed  String?
+  createdAt DateTime @default(now())
+
+  @@unique([teacherId, date])
+}
+
+model StudentAttendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  status    String // "PRESENT", "ABSENT"
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id])
+  remarks   String?
+  timeUsed  String?
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, date])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String   @default("info") // "info" | "success" | "warning"
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Report {
@@ -118,77 +159,77 @@ model Topic {
 }
 
 model Request {
-  id                Int      @id @default(autoincrement())
-  parentName        String
-  email             String
-  phone             String   @default("")
-  grade             String   @default("")
-  subjects          String   @default("")
-  details           String   @default("")
-  status            String   @default("new")
-  createdAt         DateTime @default(now())
-  location          String   @default("")
-  branch            String   @default("") // Location branch, e.g. Kigali-Remera
-  phone2            String   @default("")
-  cell              String   @default("")
-  district          String   @default("")
-  province          String   @default("")
-  sector            String   @default("")
-  village           String   @default("")
-  idPassport        String   @default("")
-  country           String   @default("")
-  programTitle      String   @default("") // Program/category the student is requesting
-  learningMode      String   @default("") // Home Coaching | Online Coaching | Coaching Center
-  preferredDays     String   @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
-  preferredTime     String   @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
-  startDate         String   @default("") // Preferred start date
-  studentId         Int?     @unique
-  student           Student? @relation("RequestStudent", fields: [studentId], references: [id])
+  id            Int      @id @default(autoincrement())
+  parentName    String
+  email         String
+  phone         String   @default("")
+  grade         String   @default("")
+  subjects      String   @default("")
+  details       String   @default("")
+  status        String   @default("new")
+  createdAt     DateTime @default(now())
+  location      String   @default("")
+  branch        String   @default("") // Location branch, e.g. Kigali-Remera
+  phone2        String   @default("")
+  cell          String   @default("")
+  district      String   @default("")
+  province      String   @default("")
+  sector        String   @default("")
+  village       String   @default("")
+  idPassport    String   @default("")
+  country       String   @default("")
+  programTitle  String   @default("") // Program/category the student is requesting
+  learningMode  String   @default("") // Home Coaching | Online Coaching | Coaching Center
+  preferredDays String   @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
+  preferredTime String   @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
+  startDate     String   @default("") // Preferred start date
+  studentId     Int?     @unique
+  student       Student? @relation("RequestStudent", fields: [studentId], references: [id])
 }
 
 model TeacherApplication {
-  id                      Int      @id @default(autoincrement())
-  fullName                String
-  email                   String
-  phone                   String
-  branch                  String   @default("") // Location branch, e.g. Kigali-Remera
-  country                 String   @default("")
-  province                String   @default("")
-  district                String   @default("")
-  sector                  String   @default("")
-  cell                    String   @default("")
-  village                 String   @default("")
-  linkedin                String?
-  instagram               String?
-  youtube                 String?
-  otherSocial             String?
-  educationLevel          String   @default("")
-  fieldOfStudy            String   @default("")
-  institution             String   @default("")
-  graduationYear          String   @default("")
-  experienceYears         String   @default("")
-  subjects                String
-  grades                  String   @default("")
-  previousOrg             String?
-  previousPos             String?
-  expDescription          String   @default("")
-  methods                 String   @default("")
-  difficultStudents       String   @default("")
-  engagement              String   @default("")
-  techTools               String?
-  teachOnline             String   @default("")
-  onlinePlatforms         String   @default("")
-  employmentType          String   @default("")
-  availableDays           String   @default("")
-  availableHours          String   @default("")
-  startDate               String   @default("")
-  portfolioUrl            String?
-  whyTeach                String   @default("")
-  whySelect               String   @default("")
-  contribution            String   @default("")
-  agreedToTerms           Boolean  @default(false)
-  status                  String   @default("pending")
-  createdAt               DateTime @default(now())
+  id                Int      @id @default(autoincrement())
+  fullName          String
+  email             String
+  phone             String
+  branch            String   @default("") // Location branch, e.g. Kigali-Remera
+  country           String   @default("")
+  province          String   @default("")
+  district          String   @default("")
+  sector            String   @default("")
+  cell              String   @default("")
+  village           String   @default("")
+  linkedin          String?
+  instagram         String?
+  youtube           String?
+  otherSocial       String?
+  educationLevel    String   @default("")
+  fieldOfStudy      String   @default("")
+  institution       String   @default("")
+  graduationYear    String   @default("")
+  experienceYears   String   @default("")
+  subjects          String
+  grades            String   @default("")
+  previousOrg       String?
+  previousPos       String?
+  expDescription    String   @default("")
+  methods           String   @default("")
+  difficultStudents String   @default("")
+  engagement        String   @default("")
+  techTools         String?
+  teachOnline       String   @default("")
+  onlinePlatforms   String   @default("")
+  employmentType    String   @default("")
+  availableDays     String   @default("")
+  availableHours    String   @default("")
+  startDate         String   @default("")
+  portfolioUrl      String?
+  whyTeach          String   @default("")
+  whySelect         String   @default("")
+  contribution      String   @default("")
+  agreedToTerms     Boolean  @default(false)
+  status            String   @default("pending")
+  createdAt         DateTime @default(now())
 
   documents TeacherApplicationDocument[]
 }
@@ -197,12 +238,12 @@ model TeacherApplicationDocument {
   id            Int                @id @default(autoincrement())
   applicationId Int
   application   TeacherApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  kind          String   // "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license"
+  kind          String // "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license"
   fileName      String
   mimeType      String
-  url           String   // Cloudinary secure URL
-  publicId      String   @default("") // Cloudinary public id (for future deletion/management)
-  createdAt     DateTime @default(now())
+  url           String // Cloudinary secure URL
+  publicId      String             @default("") // Cloudinary public id (for future deletion/management)
+  createdAt     DateTime           @default(now())
 }
 
 model Setting {
