@@ -8,7 +8,6 @@ import {
   FiHome,
   FiMenu,
   FiX,
-  FiSearch,
   FiBell,
   FiCheckCircle,
   FiInfo,
@@ -291,14 +290,6 @@ export default function DashboardLayout({
               <div className="min-w-0">
                 <h1 className="text-base font-semibold text-slate-900 truncate leading-tight">{resolvedTitle}</h1>
                 <p className="text-[11px] font-medium text-slate-400 truncate">CoachPlus Academy · {user.role} portal</p>
-              </div>
-              <div className="hidden lg:flex items-center gap-2 ml-4 bg-slate-100 hover:bg-slate-200/60 focus-within:bg-white border border-transparent focus-within:border-slate-400/50 focus-within:ring-2 focus-within:ring-slate-400/10 px-3.5 py-2 rounded-xl text-slate-500 transition-all">
-                <FiSearch className="size-4 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="bg-transparent border-none outline-none text-[13px] w-64 placeholder:text-slate-400"
-                />
               </div>
             </div>
 
