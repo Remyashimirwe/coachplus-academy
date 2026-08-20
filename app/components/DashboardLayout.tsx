@@ -75,7 +75,7 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
     <Link
       href={item.href}
       onClick={onClick}
-      className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+      className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium transition-all ${
         isActive
           ? "bg-white text-slate-900 shadow-lg shadow-black/20"
           : "text-slate-400 hover:bg-slate-800 hover:text-white"
@@ -89,7 +89,7 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
       <item.icon className="size-5 shrink-0" />
       <span className="truncate">{item.label}</span>
       {!!item.badge && (
-        <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-white text-[#0F172A] text-[10px] font-black flex items-center justify-center">
+        <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-white text-[#0F172A] text-[9px] font-bold flex items-center justify-center">
           {item.badge}
         </span>
       )}
@@ -211,21 +211,21 @@ export default function DashboardLayout({
       >
         <div className="flex h-20 shrink-0 items-center gap-3 px-8 border-b border-slate-800">
           <img src="/logo.png" alt="CoachPlus Academy" className="size-9 rounded-lg" />
-          <span className="text-xl font-bold tracking-tight">
+          <span className="text-lg font-semibold tracking-tight">
             CoachPlus <span className="text-white">Academy</span>
           </span>
         </div>
 
         <div className="px-6 py-5 border-b border-slate-800 shrink-0">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2.5">Signed in as</p>
+            <p className="text-[9px] font-medium text-slate-500 uppercase tracking-widest mb-2.5">Signed in as</p>
             <div className="flex items-center gap-3">
-                <Avatar user={displayUser} className="size-10 rounded-full bg-white text-slate-900 border border-white/20 font-black text-sm shrink-0" />
+                <Avatar user={displayUser} className="size-10 rounded-full bg-white text-slate-900 border border-white/20 font-bold text-sm shrink-0" />
                 <div className="overflow-hidden min-w-0">
-                    <p className="text-sm font-bold truncate">{displayUser.name}</p>
+                    <p className="text-[13px] font-semibold truncate">{displayUser.name}</p>
                     <p className="text-[10px] text-slate-400 truncate">{displayUser.email}</p>
                 </div>
             </div>
-            <span className="mt-3 inline-block rounded-full bg-slate-800 text-slate-300 text-[9px] font-black uppercase tracking-widest px-2.5 py-1">
+            <span className="mt-3 inline-block rounded-full bg-slate-800 text-slate-300 text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1">
                 {displayUser.role}
             </span>
         </div>
@@ -254,7 +254,7 @@ export default function DashboardLayout({
             });
             return groups.map((group) => (
               <div key={group.section}>
-                <p className="px-4 mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500">{group.section}</p>
+                <p className="px-4 mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-500">{group.section}</p>
                 <div className="space-y-1">
                   {group.items.map((item) => (
                     <NavLink key={item.id} item={item} pathname={pathname} onClick={() => setSidebarOpen(false)} />
@@ -268,7 +268,7 @@ export default function DashboardLayout({
         <div className="shrink-0 border-t border-slate-800 w-full px-4 py-4 space-y-2">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[13px] font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
           >
             <FiLogOut className="size-5" />
             Sign Out
@@ -289,7 +289,7 @@ export default function DashboardLayout({
                 <FiMenu className="size-6" />
               </button>
               <div className="min-w-0">
-                <h1 className="text-lg font-bold text-slate-900 truncate leading-tight">{resolvedTitle}</h1>
+                <h1 className="text-base font-semibold text-slate-900 truncate leading-tight">{resolvedTitle}</h1>
                 <p className="text-[11px] font-medium text-slate-400 truncate">CoachPlus Academy · {user.role} portal</p>
               </div>
               <div className="hidden lg:flex items-center gap-2 ml-4 bg-slate-100 hover:bg-slate-200/60 focus-within:bg-white border border-transparent focus-within:border-slate-400/50 focus-within:ring-2 focus-within:ring-slate-400/10 px-3.5 py-2 rounded-xl text-slate-500 transition-all">
@@ -297,7 +297,7 @@ export default function DashboardLayout({
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="bg-transparent border-none outline-none text-sm w-64 placeholder:text-slate-400"
+                  className="bg-transparent border-none outline-none text-[13px] w-64 placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function DashboardLayout({
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <Link
                 href="/"
-                className="hidden sm:flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors"
+                className="hidden sm:flex items-center gap-2 text-[13px] font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors"
               >
                 <FiHome className="size-4" />
                 Live Site
@@ -327,11 +327,11 @@ export default function DashboardLayout({
                 {notificationsOpen && (
                   <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white shadow-xl border border-slate-100 overflow-hidden z-50">
                     <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                      <h3 className="font-bold text-slate-800 text-sm">Notifications</h3>
+                      <h3 className="text-[13px] font-semibold text-slate-800">Notifications</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllRead}
-                          className="text-[10px] font-bold text-slate-700 hover:underline"
+                          className="text-[9px] font-semibold text-slate-700 hover:underline"
                         >
                           Mark all as read
                         </button>
@@ -341,7 +341,7 @@ export default function DashboardLayout({
                       <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-3">
                         <FiBell className="size-4 text-slate-700 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-bold text-slate-900">
+                          <p className="text-[10px] font-semibold text-slate-900">
                             {notificationPermission === "denied"
                               ? "Notifications are blocked in your browser."
                               : "Stay updated with browser notifications."}
@@ -354,7 +354,7 @@ export default function DashboardLayout({
                         </div>
                         <button
                           onClick={requestBrowserPermission}
-                          className="shrink-0 rounded-lg bg-slate-900 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-black transition-colors"
+                          className="shrink-0 rounded-lg bg-slate-900 px-3 py-1.5 text-[9px] font-semibold text-white hover:bg-black transition-colors"
                         >
                           Allow
                         </button>
@@ -374,8 +374,8 @@ export default function DashboardLayout({
                                  <FiInfo className="size-4" />}
                               </div>
                               <div>
-                                <h4 className="text-xs font-bold text-slate-800">{notification.title}</h4>
-                                <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">{notification.message}</p>
+                                <h4 className="text-[11px] font-semibold text-slate-800">{notification.title}</h4>
+                                <p className="text-[10px] text-slate-600 mt-0.5 line-clamp-2">{notification.message}</p>
                                 <span className="text-[9px] text-slate-400 mt-1 block">{notificationTime(notification.createdAt)}</span>
                               </div>
                             </div>
@@ -390,10 +390,10 @@ export default function DashboardLayout({
               </div>
 
               <div className="flex items-center gap-2.5 pl-1.5 pr-2 py-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-default">
-                <Avatar user={displayUser} className="size-9 rounded-full bg-slate-900 text-white border-2 border-slate-100 shadow-sm text-sm font-black shrink-0" />
+                <Avatar user={displayUser} className="size-9 rounded-full bg-slate-900 text-white border-2 border-slate-100 shadow-sm text-sm font-bold shrink-0" />
                 <div className="hidden md:flex flex-col items-start leading-tight">
-                  <span className="text-sm font-bold text-slate-800">{displayUser.name}</span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{displayUser.role}</span>
+                  <span className="text-[13px] font-semibold text-slate-800">{displayUser.name}</span>
+                  <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">{displayUser.role}</span>
                 </div>
               </div>
             </div>
