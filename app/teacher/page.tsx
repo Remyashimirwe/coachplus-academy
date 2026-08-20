@@ -264,8 +264,13 @@ export default function TeacherPage() {
             const mark = weekMap.get(iso);
             const isToday = iso === toISODate(new Date());
             return (
-              <div key={iso} className={`p-4 text-center ${isToday ? "bg-rose-50/40" : ""}`}>
-                <p className={`text-[10px] font-black uppercase tracking-widest ${isToday ? "text-[#E91E63]" : "text-slate-400"}`}>
+              <Link
+                key={iso}
+                href={`/teacher/attendance?date=${iso}`}
+                title="Click to record attendance for this day"
+                className={`group p-4 text-center transition-colors hover:bg-slate-50 ${isToday ? "bg-rose-50/40" : ""}`}
+              >
+                <p className={`text-[10px] font-black uppercase tracking-widest ${isToday ? "text-[#E91E63]" : "text-slate-400 group-hover:text-slate-600"}`}>
                   {DAYS_OF_WEEK[i].slice(0, 3)}
                 </p>
                 <p className="text-sm font-bold text-slate-700 mt-0.5">{day.getDate()}</p>
@@ -287,11 +292,12 @@ export default function TeacherPage() {
                     {mark.status}
                   </span>
                 ) : (
-                  <span className="mt-1.5 inline-block rounded-full bg-slate-100 text-slate-400 px-2 py-0.5 text-[9px] font-bold">
-                    Not marked
+                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-400 px-2 py-0.5 text-[9px] font-bold group-hover:text-[#E91E63] transition-colors">
+                    <FiArrowRight className="size-2.5" />
+                    Mark
                   </span>
                 )}
-              </div>
+              </Link>
             );
           })}
         </div>

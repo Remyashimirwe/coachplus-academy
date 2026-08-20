@@ -101,6 +101,7 @@ function DayCard({
   setTimeErrors,
   handleMark,
   focusedStudent,
+  highlighted,
 }: {
   day: DaySchedule;
   mark?: AttendanceRow;
@@ -120,6 +121,7 @@ function DayCard({
   setTimeErrors: (updater: (prev: Record<string, string | undefined>) => Record<string, string | undefined>) => void;
   handleMark: (day: DaySchedule, status: string) => void;
   focusedStudent?: { name: string; preferredDays?: string; preferredTime?: string };
+  highlighted?: boolean;
 }) {
   const key = day.iso;
   const expectedList = focusedStudent
@@ -141,7 +143,7 @@ function DayCard({
           : expected
             ? "border-slate-200/70 bg-gradient-to-br from-slate-50/70 to-white shadow-sm shadow-slate-100/50"
             : "border-slate-100 bg-white shadow-sm shadow-slate-100/50"
-      } ${isToday ? "ring-2 ring-slate-900/20" : ""}`}
+      } ${highlighted ? "ring-2 ring-black" : isToday ? "ring-2 ring-slate-900/20" : ""}`}
     >
       <div className="flex items-center justify-between mb-2.5">
         <div>
@@ -151,6 +153,7 @@ function DayCard({
           <p className="text-[11px] text-slate-500">
             {day.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             {isToday && <span className="font-semibold text-black"> • Today</span>}
+            {highlighted && !isToday && <span className="font-semibold text-black"> • Selected</span>}
           </p>
         </div>
         {isPast ? (
@@ -360,6 +363,7 @@ export default function AttendancePage() {
   const [weekStart, setWeekStart] = useState<string>(toISODate(weekRange(new Date()).start));
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
   const [search, setSearch] = useState("");
+  const [targetDate, setTargetDate] = useState<string | null>(null);
 
   const { start, end, days } = useMemo(() => weekRange(parseLocalISODate(weekStart)), [weekStart]);
   const today = todayISO();
@@ -393,6 +397,24 @@ export default function AttendancePage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weekStart]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const date = params.get("date");
+    if (date) {
+      const parsed = parseLocalISODate(date);
+      if (!isNaN(parsed.getTime())) {
+        setTargetDate(date);
+        setWeekStart(toISODate(weekRange(parsed).start));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (targetDate && students.length > 0 && !selectedStudent) {
+      setSelectedStudent(students[0]);
+    }
+  }, [targetDate, students, selectedStudent]);
 
   const filteredStudents = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -759,6 +781,7 @@ export default function AttendancePage() {
                           preferredDays: selectedStudent.preferredDays,
                           preferredTime: selectedStudent.preferredTime,
                         }}
+                        highlighted={iso === targetDate}
                       />
                     );
                   })}
