@@ -26,7 +26,6 @@ import {
   FiCalendar,
   FiUser,
 } from "react-icons/fi";
-import { BRANCHES } from "@/app/lib/constants";
 import { scoreTeacherForStudent, matchLabel } from "@/app/lib/matching";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -72,7 +71,6 @@ export default function RequestDetailModal({
   const [approving, setApproving] = useState(false);
   const [approveStatus, setApproveStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [teacherSearch, setTeacherSearch] = useState("");
-  const [teacherBranchFilter, setTeacherBranchFilter] = useState("");
   const [teacherSubjectFilter, setTeacherSubjectFilter] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [assignStatus, setAssignStatus] = useState<{ success: boolean; text: string } | null>(null);
@@ -219,7 +217,6 @@ export default function RequestDetailModal({
     const q = teacherSearch.trim().toLowerCase();
     return list
       .filter((t) => (q ? t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q) : true))
-      .filter((t) => (teacherBranchFilter ? t.branch === teacherBranchFilter : true))
       .filter((t) =>
         teacherSubjectFilter
           ? String(t.subjects || "").toLowerCase().includes(teacherSubjectFilter.toLowerCase())
@@ -227,7 +224,7 @@ export default function RequestDetailModal({
       )
       .map((t) => ({ ...t, match: scoreTeacherForStudent(t, { branch: request.branch, subjects: request.subjects }) }))
       .sort((a, b) => b.match.score - a.match.score);
-  }, [teachers, teacherSearch, teacherBranchFilter, teacherSubjectFilter, request.branch, request.subjects]);
+  }, [teachers, teacherSearch, teacherSubjectFilter, request.branch, request.subjects]);
 
   const fullAddress = [request.country, request.province, request.district, request.sector, request.cell, request.village]
     .filter(Boolean)
@@ -475,8 +472,8 @@ export default function RequestDetailModal({
                   </p>
                 )}
 
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <div className="relative sm:col-span-1">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="relative">
                     <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
                     <input
                       type="text"
@@ -486,16 +483,6 @@ export default function RequestDetailModal({
                       className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
                     />
                   </div>
-                  <select
-                    value={teacherBranchFilter}
-                    onChange={(e) => setTeacherBranchFilter(e.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
-                  >
-                    <option value="">All branches</option>
-                    {BRANCHES.map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
                   <select
                     value={teacherSubjectFilter}
                     onChange={(e) => setTeacherSubjectFilter(e.target.value)}
