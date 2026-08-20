@@ -431,11 +431,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
               <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">4</span>
               <span>The link expires after 7 days &mdash; simply resend it here if needed.</span>
             </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">5</span>
-              <span>For students, the preferences you enter here (program, subjects, location, learning mode, preferred days &amp; time) appear on the assigned teacher's "My Students" profile.</span>
-            </li>
-          </ul>
+            </ul>
         </div>
       </div>
     </div>
