@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
   FiCheckCircle,
   FiXCircle,
@@ -253,14 +253,6 @@ function DayCard({
                       }));
                       if (timeError) setTimeErrors((prev) => ({ ...prev, [key]: undefined }));
                     }}
-                    onBlur={() => {
-                      const from = timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from;
-                      const to = timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to;
-                      const used = combineTime(from, to);
-                      if (mark && mark.status === "PRESENT" && used && used !== (mark.timeUsed ?? "")) {
-                        handleMark(day, mark.status);
-                      }
-                    }}
                     className={`w-full rounded-xl border px-2.5 py-2 text-[10px] outline-none transition-all ${
                       timeError
                         ? "border-slate-400 bg-slate-100 text-slate-800"
@@ -280,14 +272,6 @@ function DayCard({
                       }));
                       if (timeError) setTimeErrors((prev) => ({ ...prev, [key]: undefined }));
                     }}
-                    onBlur={() => {
-                      const from = timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from;
-                      const to = timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to;
-                      const used = combineTime(from, to);
-                      if (mark && mark.status === "PRESENT" && used && used !== (mark.timeUsed ?? "")) {
-                        handleMark(day, mark.status);
-                      }
-                    }}
                     className={`w-full rounded-xl border px-2.5 py-2 text-[10px] outline-none transition-all ${
                       timeError
                         ? "border-slate-400 bg-slate-100 text-slate-800"
@@ -296,6 +280,14 @@ function DayCard({
                   />
                 </div>
               </div>
+              <button
+                onClick={() => handleMark(day, "PRESENT")}
+                disabled={isSaving}
+                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-black text-white text-[10px] font-semibold px-3 py-2 transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-60"
+              >
+                {isSaving ? <FiLoader className="size-3 animate-spin" /> : <FiCheck className="size-3" />}
+                Done
+              </button>
             </div>
           )}
 
@@ -364,6 +356,7 @@ export default function AttendancePage() {
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
   const [search, setSearch] = useState("");
   const [targetDate, setTargetDate] = useState<string | null>(null);
+  const autoOpened = useRef(false);
 
   const { start, end, days } = useMemo(() => weekRange(parseLocalISODate(weekStart)), [weekStart]);
   const today = todayISO();
@@ -411,7 +404,8 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    if (targetDate && students.length > 0 && !selectedStudent) {
+    if (targetDate && students.length > 0 && !selectedStudent && !autoOpened.current) {
+      autoOpened.current = true;
       setSelectedStudent(students[0]);
     }
   }, [targetDate, students, selectedStudent]);
