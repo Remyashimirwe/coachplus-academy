@@ -85,11 +85,6 @@ export default function RequestsView({ requests, teachers }: any) {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Teacher Requests</h1>
-        <p className="text-slate-500">Review parent requests and reply straight from CoachPlus Academy by email.</p>
-      </div>
-
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat, i) => (
           <div key={i} className="rounded-3xl bg-white p-5 shadow-sm border border-slate-200">
