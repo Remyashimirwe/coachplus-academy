@@ -277,6 +277,7 @@ export default function TeacherPage() {
                 {loading ? (
                   <span className="text-[10px] text-slate-300">…</span>
                 ) : mark ? (
+                  <>
                   <span
                     className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
                       mark.status === "PRESENT"
@@ -291,6 +292,10 @@ export default function TeacherPage() {
                     )}
                     {mark.status}
                   </span>
+                  {mark.status === "PRESENT" && mark.timeUsed && (
+                    <span className="mt-1 block text-[9px] font-semibold text-emerald-600">{mark.timeUsed}</span>
+                  )}
+                  </>
                 ) : (
                   <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-400 px-2 py-0.5 text-[9px] font-bold group-hover:text-[#E91E63] transition-colors">
                     <FiArrowRight className="size-2.5" />

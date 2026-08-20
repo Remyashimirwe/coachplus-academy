@@ -143,12 +143,13 @@ export async function POST(request: Request) {
     for (const student of affected) {
       await prisma.attendance.upsert({
         where: { studentId_date: { studentId: student.id, date: day } },
-        update: { status, remarks: remarks ?? null },
+        update: { status, remarks: remarks ?? null, timeUsed: used },
         create: {
           studentId: student.id,
           teacherId: teacher.id,
           status,
           remarks: remarks ?? null,
+          timeUsed: used,
           date: day,
         },
       });

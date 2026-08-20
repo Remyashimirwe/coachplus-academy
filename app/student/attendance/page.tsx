@@ -35,6 +35,7 @@ interface TeacherRecord {
   status: string;
   date: string;
   remarks: string | null;
+  timeUsed?: string | null;
 }
 
 const STATUS_OPTIONS = [
@@ -454,6 +455,11 @@ export default function StudentAttendancePage() {
                     </p>
                   ) : (
                     <p className="text-[11px] text-slate-400 mt-0.5">No schedule changes reported.</p>
+                  )}
+                  {r.timeUsed && r.status === "PRESENT" && (
+                    <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
+                      <FiClock className="size-3 text-slate-300" /> Time: {r.timeUsed}
+                    </p>
                   )}
                 </div>
                 <span

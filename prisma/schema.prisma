@@ -72,6 +72,7 @@ model Attendance {
   teacherId Int
   teacher   Teacher  @relation(fields: [teacherId], references: [id])
   remarks   String?
+  timeUsed  String?
   createdAt DateTime @default(now())
 
   @@unique([studentId, date])

@@ -152,7 +152,8 @@ export default function AdminAttendancePage() {
                 <tr>
                   <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Date</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">{tab === "teacher" ? "Teacher" : "Student"}</th>
-                  {tab !== "student" && <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Time Used</th>}
+                  {tab === "student" && <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Assigned Teacher</th>}
+                  <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Time Used</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Remarks</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Status</th>
                 </tr>
@@ -167,12 +168,15 @@ export default function AdminAttendancePage() {
                     <td className="px-6 py-4 text-sm font-semibold text-slate-800">
                       {record.student?.user.name || record.teacher?.user.name || "—"}
                     </td>
-                    {tab !== "student" && (
-                      <td className="px-6 py-4 text-sm text-slate-600 flex items-center gap-1.5">
-                        <FiClock className="size-3.5 text-slate-300" />
-                        {record.timeUsed || "—"}
+                    {tab === "student" && (
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {record.teacher?.user.name || "—"}
                       </td>
                     )}
+                    <td className="px-6 py-4 text-sm text-slate-600 flex items-center gap-1.5">
+                      <FiClock className="size-3.5 text-slate-300" />
+                      {record.timeUsed || "—"}
+                    </td>
                     <td className="px-6 py-4 text-xs text-slate-500 max-w-[220px] truncate">{record.remarks || "—"}</td>
                     <td className="px-6 py-4">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-bold inline-flex items-center gap-1 ${STATUS_STYLES[record.status] || "bg-slate-100 text-slate-500"}`}>

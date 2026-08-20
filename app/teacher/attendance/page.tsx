@@ -51,8 +51,8 @@ interface AttendanceRow {
 }
 
 const STATUS_OPTIONS = [
-  { value: "PRESENT", label: "Present", icon: FiCheckCircle, activeClass: "bg-black text-white border-black shadow-black/30" },
-  { value: "ABSENT", label: "Absent", icon: FiXCircle, activeClass: "bg-white text-slate-900 border-slate-400 shadow-slate-900/20" },
+  { value: "PRESENT", label: "Present", icon: FiCheckCircle, activeClass: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-500/25" },
+  { value: "ABSENT", label: "Absent", icon: FiXCircle, activeClass: "bg-rose-500 text-white border-rose-500 shadow-rose-500/25" },
 ] as const;
 
 function todayISO() {
@@ -194,8 +194,8 @@ function DayCard({
           <span
             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-semibold ${
               mark.status === "PRESENT"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-200 text-slate-700"
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-rose-100 text-rose-700"
             }`}
           >
             {mark.status === "PRESENT" ? (
