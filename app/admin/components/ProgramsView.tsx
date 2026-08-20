@@ -58,7 +58,7 @@ function FeaturedInHeroField({ defaultChecked }: { defaultChecked?: boolean }) {
       <span className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-slate-300 transition-colors peer-checked:bg-[#E91E63]">
         <span className="inline-block size-4.5 translate-x-1 rounded-full bg-white shadow-md transition-transform peer-checked:translate-x-[22px]" />
       </span>
-      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+      <span className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
         <FiStar className="size-3.5 text-[#E91E63]" /> Show in Homepage Slideshow
       </span>
     </label>
@@ -98,7 +98,7 @@ function ImageUploadField({
 
   return (
     <div className="space-y-2">
-      {!compact && <label className="text-sm font-bold text-slate-700">{label}</label>}
+      {!compact && <label className="text-[13px] font-semibold text-slate-700">{label}</label>}
       <div className="flex items-center gap-4">
         <div
           className={`${size} shrink-0 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center`}
@@ -124,7 +124,7 @@ function ImageUploadField({
               reader.readAsDataURL(file);
             }}
           />
-          <span className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors">
+          <span className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-semibold text-slate-600 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors">
             <FiUpload className="size-3.5" /> {existingImage ? "Change Image" : "Upload Image"}
           </span>
         </label>
@@ -201,7 +201,7 @@ function AddSubCategoryModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
       <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between gap-2 mb-4">
-          <h3 className="text-lg font-bold text-slate-900">
+          <h3 className="text-base font-semibold text-slate-900">
             Add Sub-category{categoryTitle ? ` to ${categoryTitle}` : ""}
           </h3>
           <button
@@ -215,7 +215,7 @@ function AddSubCategoryModal({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700">Sub-category Name</label>
+            <label className="text-[13px] font-semibold text-slate-700">Sub-category Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -226,7 +226,7 @@ function AddSubCategoryModal({
           <ImageUploadField name="__draft-subject-image" label="Sub-category Image" onFileChange={setImageFile} />
 
           <div className="border-t border-slate-100 pt-4 space-y-3">
-            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <FiBookOpen /> Subjects in this Sub-category
             </h4>
             {topics.length > 0 && (
@@ -234,7 +234,7 @@ function AddSubCategoryModal({
                 {topics.map((topic) => (
                   <div key={topic.tempId} className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
                     <FilePreviewThumb file={topic.imageFile} size="size-8" />
-                    <span className="flex-1 min-w-0 text-xs font-bold text-slate-700 truncate">{topic.name}</span>
+                    <span className="flex-1 min-w-0 text-[11px] font-semibold text-slate-700 truncate">{topic.name}</span>
                     <button
                       type="button"
                       onClick={() => removeTopicDraft(topic.tempId)}
@@ -257,7 +257,7 @@ function AddSubCategoryModal({
               <button
                 type="button"
                 onClick={addTopicDraft}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-[#E91E63] transition-colors shrink-0 inline-flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-slate-800 text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-colors shrink-0 inline-flex items-center gap-1.5"
               >
                 <FiPlus className="size-3.5" /> Add
               </button>
@@ -269,14 +269,14 @@ function AddSubCategoryModal({
               type="button"
               onClick={handleConfirm}
               disabled={!name.trim()}
-              className="flex-1 py-3 rounded-2xl bg-[#E91E63] text-white text-sm font-bold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+              className="flex-1 py-3 rounded-2xl bg-[#E91E63] text-white text-[13px] font-semibold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
             >
               Add Sub-category
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="py-3 px-6 rounded-2xl bg-slate-100 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors"
+              className="py-3 px-6 rounded-2xl bg-slate-100 text-[13px] font-semibold text-slate-600 hover:bg-slate-200 transition-colors"
             >
               Cancel
             </button>
@@ -437,7 +437,7 @@ export default function ProgramsView({ programs }: any) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manage Learning Content</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Manage Learning Content</h1>
           <p className="text-slate-500">Organize Categories, Sub-categories, and Subjects for your students.</p>
         </div>
       </div>
@@ -445,7 +445,7 @@ export default function ProgramsView({ programs }: any) {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <div className="space-y-6 min-w-0">
           <section className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-200 lg:sticky lg:top-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <FiLayers className="text-[#E91E63]" /> Categories
             </h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 min-w-0 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:gap-3 lg:grid-cols-1 lg:gap-2">
@@ -543,22 +543,22 @@ export default function ProgramsView({ programs }: any) {
                 <div className="size-10 rounded-xl bg-rose-50 text-[#E91E63] flex items-center justify-center shrink-0">
                   <FiPlus className="size-6" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900">Create New Category</h2>
+                <h2 className="text-base sm:text-lg font-semibold text-slate-900">Create New Category</h2>
               </div>
               <form ref={addFormRef} onSubmit={handleCreateCategorySubmit} className="grid gap-6">
                 <input type="hidden" name="action" value="add" />
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Category Title</label>
+                    <label className="text-[13px] font-semibold text-slate-700">Category Title</label>
                     <input name="title" required placeholder="e.g. Academic Excellence" className={inputClasses} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Tagline/Level</label>
+                    <label className="text-[13px] font-semibold text-slate-700">Tagline/Level</label>
                     <input name="level" required placeholder="e.g. Primary & Secondary" className={inputClasses} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Description</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Description</label>
                   <textarea name="text" rows={3} required placeholder="What is this category about?" className={`${inputClasses} resize-none`} />
                 </div>
                 <ImageUploadField name="image" label="Category Image" />
@@ -566,13 +566,13 @@ export default function ProgramsView({ programs }: any) {
 
                 <div className="space-y-3 border-t border-slate-100 pt-6">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                       <FiBookOpen /> Sub-categories & Subjects
                     </h3>
                     <button
                       type="button"
                       onClick={() => setShowAddSubCategoryModal(true)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-500 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-500 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors"
                     >
                       <FiPlus className="size-3.5" /> Add Sub-category
                     </button>
@@ -587,7 +587,7 @@ export default function ProgramsView({ programs }: any) {
                         <div key={subject.tempId} className="flex items-start gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
                           <FilePreviewThumb file={subject.imageFile} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-800 truncate">{subject.name}</p>
+                            <p className="text-[13px] font-semibold text-slate-800 truncate">{subject.name}</p>
                             {subject.topics.length > 0 ? (
                               <p className="text-xs text-slate-400 truncate">
                                 {subject.topics.map((topic) => topic.name).join(", ")}
@@ -637,16 +637,16 @@ export default function ProgramsView({ programs }: any) {
                     <input type="hidden" name="id" value={selectedProgram?.id} />
                     <div className="grid gap-6 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700">Category Title</label>
+                        <label className="text-[13px] font-semibold text-slate-700">Category Title</label>
                         <input name="title" required defaultValue={selectedProgram?.title} className={inputClasses} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700">Tagline/Level</label>
+                        <label className="text-[13px] font-semibold text-slate-700">Tagline/Level</label>
                         <input name="level" required defaultValue={selectedProgram?.level} className={inputClasses} />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700">Description</label>
+                      <label className="text-[13px] font-semibold text-slate-700">Description</label>
                       <textarea name="text" rows={3} required defaultValue={selectedProgram?.text} className={`${inputClasses} resize-none`} />
                     </div>
                     <ImageUploadField name="image" existingImage={selectedProgram?.image} label="Category Image" />
@@ -655,14 +655,14 @@ export default function ProgramsView({ programs }: any) {
                       <button
                         type="submit"
                         disabled={editProgramPending}
-                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-6 text-sm font-bold text-white shadow-lg shadow-rose-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-6 text-[13px] font-semibold text-white shadow-lg shadow-rose-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50"
                       >
                         <FiCheck /> {editProgramPending ? "Saving..." : "Save Changes"}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingProgram(false)}
-                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-6 text-sm font-bold text-slate-600 transition-all hover:bg-slate-200"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-6 text-[13px] font-semibold text-slate-600 transition-all hover:bg-slate-200"
                       >
                         <FiX /> Cancel
                       </button>
@@ -680,7 +680,7 @@ export default function ProgramsView({ programs }: any) {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{selectedProgram?.title}</h2>
+                          <h2 className="text-lg sm:text-base sm:text-lg font-semibold text-slate-900 truncate">{selectedProgram?.title}</h2>
                           {selectedProgram?.featuredInHero && (
                             <span className="hidden sm:flex items-center gap-1 shrink-0 text-[10px] font-bold text-[#E91E63] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
                               <FiStar className="size-2.5" /> IN SLIDESHOW
@@ -756,14 +756,14 @@ export default function ProgramsView({ programs }: any) {
                               <button
                                 type="submit"
                                 disabled={editSubjectPending}
-                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#E91E63] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#c81854] disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#E91E63] px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#c81854] disabled:opacity-50"
                               >
                                 <FiCheck className="size-3.5" /> {editSubjectPending ? "Saving..." : "Save"}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setEditingSubjectId(null)}
-                                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-200"
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2 text-[11px] font-semibold text-slate-600 transition-colors hover:bg-slate-200"
                               >
                                 <FiX className="size-3.5" /> Cancel
                               </button>
@@ -871,7 +871,7 @@ export default function ProgramsView({ programs }: any) {
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-slate-700 truncate">{topic.name}</p>
+                                    <p className="text-[11px] font-semibold text-slate-700 truncate">{topic.name}</p>
                                   </div>
                                   <button
                                     onClick={() => setEditingTopicId(topic.id)}
@@ -907,7 +907,7 @@ export default function ProgramsView({ programs }: any) {
                             <button
                               type="submit"
                               disabled={addTopicPending}
-                              className="px-6 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-[#E91E63] transition-colors disabled:opacity-50"
+                              className="px-6 py-2 rounded-xl bg-slate-800 text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-colors disabled:opacity-50"
                             >
                               Add
                             </button>
@@ -928,14 +928,14 @@ export default function ProgramsView({ programs }: any) {
                 <button
                   type="button"
                   onClick={() => setShowAddSubjectForm(true)}
-                  className="w-full flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-slate-200 bg-white py-5 text-sm font-bold text-slate-400 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-all"
+                  className="w-full flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-slate-200 bg-white py-5 text-[13px] font-semibold text-slate-400 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-all"
                 >
                   <FiPlus /> Add Sub-category to {selectedProgram?.title}
                 </button>
               ) : (
                 <section className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-slate-200">
                   <div className="flex items-center justify-between gap-2 mb-4">
-                    <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 min-w-0">
+                    <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2 min-w-0">
                       <FiBookOpen className="shrink-0" /> <span className="truncate">Add Sub-category to {selectedProgram?.title}</span>
                     </h4>
                     <button
@@ -962,7 +962,7 @@ export default function ProgramsView({ programs }: any) {
                     <button
                       type="submit"
                       disabled={addSubjectPending}
-                      className="w-full py-3 rounded-2xl bg-[#E91E63] text-white text-sm font-bold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                      className="w-full py-3 rounded-2xl bg-[#E91E63] text-white text-[13px] font-semibold shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
                     >
                       {addSubjectPending ? "Creating..." : "Create Sub-category"}
                     </button>

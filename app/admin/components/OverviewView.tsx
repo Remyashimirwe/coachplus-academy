@@ -45,7 +45,7 @@ export default function OverviewView({ programs, requests, teacherApplications, 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Dashboard Overview</h1>
         <p className="text-slate-500">Welcome back, Admin! Here's what's happening today.</p>
       </div>
 
@@ -61,14 +61,14 @@ export default function OverviewView({ programs, requests, teacherApplications, 
               <div className={`size-12 rounded-2xl ${stat.color} text-white flex items-center justify-center shadow-lg shadow-inherit/20`}>
                 <stat.icon className="size-6" />
               </div>
-              <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
                 <FiTrendingUp className="size-3" />
                 +12%
               </span>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">{stat.label}</h3>
-              <p className="text-3xl font-black text-slate-900 mt-1">{stat.value}</p>
+              <h3 className="text-[13px] font-semibold text-slate-500 uppercase tracking-widest">{stat.label}</h3>
+              <p className="text-xl font-bold text-slate-900 mt-1">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -84,8 +84,8 @@ export default function OverviewView({ programs, requests, teacherApplications, 
             <FiUserPlus className="size-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-bold">Invite a Teacher or Student</p>
-            <p className="text-xs text-slate-400">They'll set their own password to sign in</p>
+            <p className="font-semibold">Invite a Teacher or Student</p>
+            <p className="text-[11px] text-slate-400">They'll set their own password to sign in</p>
           </div>
           <FiArrowRight className="shrink-0 opacity-60 group-hover:translate-x-1 transition-transform" />
         </Link>
@@ -97,8 +97,8 @@ export default function OverviewView({ programs, requests, teacherApplications, 
             <FiUserCheck className="size-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-slate-900">Assign Students to Teachers</p>
-            <p className="text-xs text-slate-500">Click-to-assign in seconds</p>
+            <p className="font-semibold text-slate-900">Assign Students to Teachers</p>
+            <p className="text-[11px] text-slate-500">Click-to-assign in seconds</p>
           </div>
           <FiArrowRight className="shrink-0 text-slate-300 group-hover:translate-x-1 transition-transform" />
         </Link>
@@ -108,11 +108,11 @@ export default function OverviewView({ programs, requests, teacherApplications, 
       {pending.length > 0 && (
         <section className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-amber-200">
           <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
               Pending Teacher Approvals
-              <span className="text-xs font-black px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">{pending.length}</span>
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">{pending.length}</span>
             </h2>
-            <Link href="/admin/teachers" className="text-sm font-bold text-[#E91E63] hover:underline flex items-center gap-1">
+            <Link href="/admin/teachers" className="text-[13px] font-semibold text-[#E91E63] hover:underline flex items-center gap-1">
               View All <FiArrowRight className="size-3.5" />
             </Link>
           </div>
@@ -124,16 +124,16 @@ export default function OverviewView({ programs, requests, teacherApplications, 
                   key={app.id}
                   className="flex flex-wrap items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100"
                 >
-                  <div className="size-11 rounded-xl bg-white flex items-center justify-center font-bold text-indigo-500 shadow-sm shrink-0">
+                  <div className="size-11 rounded-xl bg-white flex items-center justify-center font-semibold text-indigo-500 shadow-sm shrink-0">
                     {app.fullName.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900 truncate">{app.fullName}</p>
-                    <p className="text-xs text-slate-500 truncate">
+                    <p className="text-[13px] font-semibold text-slate-900 truncate">{app.fullName}</p>
+                    <p className="text-[11px] text-slate-500 truncate">
                       {app.subjects} • {isMounted ? new Date(app.created_at).toLocaleDateString() : "..."}
                     </p>
                     {rowError[app.id] && (
-                      <p className="mt-1 text-[11px] font-bold text-rose-600 flex items-center gap-1">
+                      <p className="mt-1 text-[11px] font-semibold text-rose-600 flex items-center gap-1">
                         <FiAlertCircle className="size-3" /> {rowError[app.id]}
                       </p>
                     )}
@@ -157,7 +157,7 @@ export default function OverviewView({ programs, requests, teacherApplications, 
                     </button>
                     <Link
                       href="/admin/teachers"
-                      className="px-4 py-2.5 rounded-xl bg-[#0f172a] text-white text-xs font-bold hover:bg-[#E91E63] transition-all flex items-center"
+                      className="px-4 py-2.5 rounded-xl bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-all flex items-center"
                     >
                       Details
                     </Link>
@@ -171,32 +171,32 @@ export default function OverviewView({ programs, requests, teacherApplications, 
 
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="rounded-3xl bg-white p-8 shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">Recent Teacher Requests</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-6">Recent Teacher Requests</h2>
           <div className="space-y-4">
             {requests.slice(0, 5).map((req: any) => (
               <div key={req.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-xl bg-white flex items-center justify-center font-bold text-rose-500 shadow-sm">
+                  <div className="size-10 rounded-xl bg-white flex items-center justify-center font-semibold text-rose-500 shadow-sm">
                     {req.parent_name.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900">{req.parent_name}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[13px] font-semibold text-slate-900">{req.parent_name}</p>
+                    <p className="text-[11px] text-slate-500">
                       {req.grade} • {isMounted ? new Date(req.created_at).toLocaleDateString() : '...'}
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-amber-100 text-amber-600 px-2 py-1 rounded-lg">
+                <span className="text-[10px] font-semibold uppercase tracking-widest bg-amber-100 text-amber-600 px-2 py-1 rounded-lg">
                   {req.status}
                 </span>
               </div>
             ))}
-            {requests.length === 0 && <p className="text-sm text-slate-400 italic">No recent requests.</p>}
+            {requests.length === 0 && <p className="text-[13px] text-slate-400 italic">No recent requests.</p>}
           </div>
         </section>
 
         <section className="rounded-3xl bg-white p-8 shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">System Activity</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-6">System Activity</h2>
           <div className="space-y-6">
             {[
               { label: "New Program Added", time: "2 hours ago", icon: FiActivity, color: "text-blue-500" },
@@ -212,8 +212,8 @@ export default function OverviewView({ programs, requests, teacherApplications, 
                   {i !== 3 && <div className="absolute top-10 left-1/2 -translate-x-1/2 w-px h-8 bg-slate-100" />}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">{activity.label}</p>
-                  <p className="text-xs text-slate-500">{activity.time}</p>
+                  <p className="text-[13px] font-semibold text-slate-900">{activity.label}</p>
+                  <p className="text-[11px] text-slate-500">{activity.time}</p>
                 </div>
               </div>
             ))}

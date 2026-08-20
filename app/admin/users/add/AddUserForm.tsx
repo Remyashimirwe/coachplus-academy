@@ -132,7 +132,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Invite New Teacher or Student</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Invite New Teacher or Student</h1>
         <p className="text-slate-500">
           Send a direct invitation so they can log in and set up their own password to access their dashboard.
         </p>
@@ -142,7 +142,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
         <div className="lg:col-span-2 rounded-[28px] bg-white p-6 sm:p-8 shadow-sm border border-slate-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Invite as</label>
+              <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Invite as</label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -161,7 +161,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     <FiBookOpen className="size-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900">Student</p>
+                    <p className="text-[13px] font-semibold text-slate-900">Student</p>
                     <p className="text-xs text-slate-500">Access their learning dashboard</p>
                   </div>
                 </button>
@@ -182,7 +182,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     <FiAward className="size-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900">Teacher</p>
+                    <p className="text-[13px] font-semibold text-slate-900">Teacher</p>
                     <p className="text-xs text-slate-500">Access their teaching dashboard</p>
                   </div>
                 </button>
@@ -191,7 +191,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Full Name</label>
+                <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Full Name</label>
                 <div className="relative">
                   <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
                   <input
@@ -205,7 +205,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Email Address</label>
+                <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Email Address</label>
                 <div className="relative">
                   <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
                   <input
@@ -224,7 +224,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
               <>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Location / Branch</label>
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Location / Branch</label>
                     <div className="relative">
                       <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
                       <input
@@ -237,7 +237,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Phone</label>
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Phone</label>
                     <div className="relative">
                       <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
                       <input
@@ -252,7 +252,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Program / Category</label>
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Program / Category</label>
                   <select
                     value={programTitle}
                     onChange={(e) => {
@@ -270,14 +270,14 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
 
                 {programTitle && (
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Subjects</label>
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Subjects</label>
                     <div className="flex flex-wrap gap-2">
                       {availableSubjects.map((s) => (
                         <button
                           key={s.id}
                           type="button"
                           onClick={() => toggleSubject(s.name)}
-                          className={`rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
+                          className={`rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
                             subjects.includes(s.name)
                               ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                               : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -291,14 +291,14 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Learning Mode</label>
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Learning Mode</label>
                   <div className="flex flex-wrap gap-2">
                     {learningModes.map((m) => (
                       <button
                         key={m}
                         type="button"
                         onClick={() => setLearningMode(m)}
-                        className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
+                        className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
                           learningMode === m
                             ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                             : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -312,14 +312,14 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Preferred Days &amp; Time</label>
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Preferred Days &amp; Time</label>
                   <div className="flex flex-wrap gap-2">
                     {daysList.map((d) => (
                       <button
                         key={d}
                         type="button"
                         onClick={() => toggleDay(d)}
-                        className={`rounded-xl px-4 py-2 text-xs font-medium transition-all border-2 ${
+                        className={`rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
                           selectedDays.includes(d)
                             ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
                             : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
@@ -334,7 +334,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     <div className="grid gap-4 sm:grid-cols-2">
                       {selectedDays.map((d) => (
                         <div key={d} className="rounded-2xl border-2 border-slate-100 bg-slate-50 p-4">
-                          <p className="mb-3 flex items-center gap-2 text-xs font-medium text-slate-700">
+                          <p className="mb-3 flex items-center gap-2 text-[11px] font-medium text-slate-700">
                             <FiCalendar className="text-[#E91E63]" />
                             {d}
                           </p>
@@ -374,7 +374,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     : "bg-rose-50 border-rose-100 text-rose-600"
                 }`}
               >
-                <p className="text-sm font-bold flex items-start gap-2">
+                <p className="text-[13px] font-semibold flex items-start gap-2">
                   {result.success ? (
                     <FiCheckCircle className="mt-0.5 shrink-0" />
                   ) : (
@@ -388,7 +388,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     <button
                       type="button"
                       onClick={copyLink}
-                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-all"
+                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-semibold hover:bg-emerald-600 transition-all"
                     >
                       {copied ? <FiCheck className="size-3.5" /> : <FiCopy className="size-3.5" />}
                       {copied ? "Copied" : "Copy Link"}
@@ -401,7 +401,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[#0f172a] text-white text-sm font-bold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[#0f172a] text-white text-sm font-semibold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? <FiLoader className="size-4 animate-spin" /> : <FiSend className="size-4" />}
               {loading ? "Sending Invitation..." : "Send Invitation"}
@@ -413,26 +413,26 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
           <div className="size-12 rounded-2xl bg-white/10 flex items-center justify-center">
             <FiUserPlus className="size-6 text-[#E91E63]" />
           </div>
-          <h3 className="text-lg font-bold">How invitations work</h3>
+          <h3 className="text-base font-semibold">How invitations work</h3>
           <ul className="space-y-3 text-sm text-slate-300">
             <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">1</span>
+              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">1</span>
               <span>The invitee receives an email with a secure activation link.</span>
             </li>
             <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">2</span>
+              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">2</span>
               <span>Since they're new, they'll choose their own new password the first time they sign in.</span>
             </li>
             <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">3</span>
+              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">3</span>
               <span>Once activated, they land straight on their own Teacher or Student dashboard.</span>
             </li>
             <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">4</span>
+              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">4</span>
               <span>The link expires after 7 days &mdash; simply resend it here if needed.</span>
             </li>
             <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">5</span>
+              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">5</span>
               <span>For students, the preferences you enter here (program, subjects, location, learning mode, preferred days &amp; time) appear on the assigned teacher's "My Students" profile.</span>
             </li>
           </ul>

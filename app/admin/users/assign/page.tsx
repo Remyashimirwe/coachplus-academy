@@ -151,13 +151,13 @@ export default function AssignPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Assign Students to Teachers</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Assign Students to Teachers</h1>
         <p className="text-slate-500">Pick a student, then choose the best-matching teacher suggested for their location and subjects.</p>
       </div>
 
       {feedback && (
         <div
-          className={`rounded-2xl p-4 border flex items-center gap-2 text-sm font-bold ${
+          className={`rounded-2xl p-4 border flex items-center gap-2 text-[13px] font-semibold ${
             feedback.success
               ? "bg-emerald-50 border-emerald-100 text-emerald-700"
               : "bg-rose-50 border-rose-100 text-rose-600"
@@ -176,7 +176,7 @@ export default function AssignPage() {
         <div className="grid gap-6 lg:grid-cols-5">
           {/* Students column */}
           <div className="lg:col-span-2 rounded-[28px] bg-white p-6 shadow-sm border border-slate-200 space-y-4">
-            <h2 className="text-sm font-black text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
+            <h2 className="text-[13px] font-semibold text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
               <FiUsers /> 1. Select a Student
             </h2>
             <div className="relative">
@@ -201,14 +201,14 @@ export default function AssignPage() {
                     }`}
                   >
                     <div
-                      className={`size-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                      className={`size-10 rounded-xl flex items-center justify-center font-semibold shrink-0 ${
                         isActive ? "bg-[#E91E63] text-white" : "bg-slate-100 text-slate-500"
                       }`}
                     >
                       {s.user.name.charAt(0)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-900 truncate">{s.user.name}</p>
+                      <p className="text-[13px] font-semibold text-slate-900 truncate">{s.user.name}</p>
                       <p className="text-xs text-slate-500 truncate flex items-center gap-1">
                         <FiMail className="size-3 shrink-0" /> {s.user.email}
                       </p>
@@ -219,19 +219,19 @@ export default function AssignPage() {
                       )}
                       <p className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-slate-400">
                         {s.branch && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-bold">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold">
                             <FiMapPin className="size-2.5" /> {s.branch}
                           </span>
                         )}
                         {s.subjects && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-bold truncate max-w-[140px]">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold truncate max-w-[140px]">
                             <FiBookOpen className="size-2.5" /> {s.subjects}
                           </span>
                         )}
                       </p>
                     </div>
                     {s.teacher && (
-                      <span className="shrink-0 text-[10px] font-black px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">
+                      <span className="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">
                         with {s.teacher.user.name.split(" ")[0]}
                       </span>
                     )}
@@ -247,11 +247,11 @@ export default function AssignPage() {
           {/* Teachers column */}
           <div className="lg:col-span-3 rounded-[28px] bg-white p-6 shadow-sm border border-slate-200 space-y-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <h2 className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+              <h2 className="text-[13px] font-semibold text-indigo-500 uppercase tracking-widest flex items-center gap-2">
                 <FiAward /> 2. Assign a Teacher
               </h2>
               {selectedStudent && (
-                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
                   <FiLink className="text-[#E91E63]" /> Assigning for {selectedStudent.user.name}
                   <button
                     onClick={() => setSelectedStudentId(null)}
@@ -317,15 +317,15 @@ export default function AssignPage() {
                           isAssignedHere ? "border-emerald-400 bg-emerald-50/50" : "border-slate-100"
                         }`}
                       >
-                        <div className="size-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
+                        <div className="size-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-semibold shrink-0">
                           {t.user.name.charAt(0)}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-slate-900 truncate flex items-center gap-2">
+                          <p className="text-[13px] font-semibold text-slate-900 truncate flex items-center gap-2">
                             {t.user.name}
                             {label && (
                               <span
-                                className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                   label === "Best match"
                                     ? "bg-amber-100 text-amber-700"
                                     : "bg-indigo-50 text-indigo-600"
@@ -345,12 +345,12 @@ export default function AssignPage() {
                           )}
                           <p className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-slate-400">
                             {t.branch && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-bold">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold">
                                 <FiMapPin className="size-2.5" /> {t.branch}
                               </span>
                             )}
                             {t.subjects && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-bold truncate max-w-[160px]">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold truncate max-w-[160px]">
                                 <FiBookOpen className="size-2.5" /> {t.subjects}
                               </span>
                             )}
@@ -359,7 +359,7 @@ export default function AssignPage() {
                         <button
                           onClick={() => handleToggleAssign(t)}
                           disabled={isBusy}
-                          className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                             isAssignedHere
                               ? "bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50"
                               : "bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-100"

@@ -38,14 +38,14 @@ export default function ApprovedTeachersView({ teachers }: any) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Approved Teachers</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Approved Teachers</h1>
           <p className="text-slate-500 mt-1">
             Teachers whose applications were accepted and accounts created. {stats.total} total.
           </p>
         </div>
         <Link
           href="/admin/teachers"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#0f172a] text-white text-sm font-bold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#0f172a] text-white text-[13px] font-semibold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200"
         >
           Teacher Applications <FiArrowRight className="size-4" />
         </Link>
@@ -58,8 +58,8 @@ export default function ApprovedTeachersView({ teachers }: any) {
               <FiUsers className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Teachers</p>
-              <p className="text-2xl font-black text-slate-900">{stats.total}</p>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Total Teachers</p>
+              <p className="text-lg font-bold text-slate-900">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -69,8 +69,8 @@ export default function ApprovedTeachersView({ teachers }: any) {
               <FiCheckCircle className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Activated</p>
-              <p className="text-2xl font-black text-emerald-700">{stats.active}</p>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Activated</p>
+              <p className="text-lg font-bold text-emerald-700">{stats.active}</p>
             </div>
           </div>
         </div>
@@ -80,8 +80,8 @@ export default function ApprovedTeachersView({ teachers }: any) {
               <FiClock className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pending Activation</p>
-              <p className="text-2xl font-black text-amber-700">{stats.pending}</p>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Pending Activation</p>
+              <p className="text-lg font-bold text-amber-700">{stats.pending}</p>
             </div>
           </div>
         </div>
@@ -91,8 +91,8 @@ export default function ApprovedTeachersView({ teachers }: any) {
               <FiUsers className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">With Students</p>
-              <p className="text-2xl font-black text-slate-900">{stats.withStudents}</p>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">With Students</p>
+              <p className="text-lg font-bold text-slate-900">{stats.withStudents}</p>
             </div>
           </div>
         </div>
@@ -120,12 +120,12 @@ export default function ApprovedTeachersView({ teachers }: any) {
             <table className="w-full text-left">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Teacher</th>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Contact</th>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Subjects</th>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Students</th>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Joined</th>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Status</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Teacher</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Contact</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Subjects</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Students</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Joined</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -135,7 +135,7 @@ export default function ApprovedTeachersView({ teachers }: any) {
                     <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="size-9 rounded-xl bg-[#E91E63]/10 text-[#E91E63] flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+                          <div className="size-9 rounded-xl bg-[#E91E63]/10 text-[#E91E63] flex items-center justify-center font-semibold text-sm shrink-0 overflow-hidden">
                             {t.user.image ? (
                               <img src={t.user.image} alt="" className="size-full object-cover" />
                             ) : (
@@ -143,32 +143,32 @@ export default function ApprovedTeachersView({ teachers }: any) {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate">{t.user.name}</p>
+                            <p className="text-[13px] font-semibold text-slate-900 truncate">{t.user.name}</p>
                             <p className="text-[11px] text-slate-400 truncate">{t.user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         {t.phone ? (
-                          <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                          <p className="text-[11px] text-slate-600 flex items-center gap-1.5">
                             <FiPhone className="size-3 text-slate-300 shrink-0" /> {t.phone}
                           </p>
                         ) : (
-                          <span className="text-xs text-slate-400">—</span>
+                          <span className="text-[11px] text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-xs text-slate-500 max-w-[220px] truncate">{t.subjects || "—"}</td>
+                      <td className="px-5 py-4 text-[11px] text-slate-500 max-w-[220px] truncate">{t.subjects || "—"}</td>
                       <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold px-2.5 py-1">
                           <FiUsers className="size-3" /> {t._count.students}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-xs text-slate-500 whitespace-nowrap">
+                      <td className="px-5 py-4 text-[11px] text-slate-500 whitespace-nowrap">
                         {new Date(t.user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-tighter ${
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-tighter ${
                             activated ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
                           }`}
                         >

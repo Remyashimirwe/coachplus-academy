@@ -226,17 +226,17 @@ export default function RequestDetailModal({
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 sm:gap-4 bg-white/90 backdrop-blur px-5 sm:px-8 pt-6 sm:pt-8 pb-6 border-b border-slate-100">
           <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-            <div className="size-14 sm:size-16 rounded-2xl bg-rose-50 text-[#E91E63] flex items-center justify-center font-bold text-xl sm:text-2xl shrink-0">
+            <div className="size-14 sm:size-16 rounded-2xl bg-rose-50 text-[#E91E63] flex items-center justify-center font-semibold text-base sm:text-lg shrink-0">
               {request.parent_name.charAt(0)}
             </div>
             <div className="min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 truncate">{request.parent_name}</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{request.parent_name}</h3>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                 <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5 truncate">
                   <FiMail className="text-indigo-500 shrink-0" /> <span className="truncate">{request.email}</span>
                 </p>
                 <span
-                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
+                  className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
                     STATUS_STYLES[request.status] || "bg-slate-100 text-slate-600"
                   }`}
                 >
@@ -275,50 +275,50 @@ export default function RequestDetailModal({
           <div className="grid sm:grid-cols-2 gap-5 sm:gap-8">
             {/* Request details */}
             <div className="space-y-4">
-              <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+              <h4 className="text-[11px] font-semibold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
                 <FiBookOpen /> Request Details
               </h4>
               <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Program</p>
-                  <p className="text-sm font-bold text-slate-700 break-words">{request.programTitle || request.grade || "Not specified"}</p>
+                  <p className="text-[9px] text-slate-400 font-semibold uppercase">Program</p>
+                  <p className="text-[13px] font-semibold text-slate-700 break-words">{request.programTitle || request.grade || "Not specified"}</p>
                 </div>
                 {request.learningMode && (
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">Learning Mode</p>
-                    <p className="text-sm font-bold text-slate-700 break-words">{request.learningMode}</p>
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase">Learning Mode</p>
+                    <p className="text-[13px] font-semibold text-slate-700 break-words">{request.learningMode}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Courses & Topics</p>
-                  <p className="text-sm font-bold text-slate-700 break-words">{request.subjects || "Not specified"}</p>
+                  <p className="text-[9px] text-slate-400 font-semibold uppercase">Courses & Topics</p>
+                  <p className="text-[13px] font-semibold text-slate-700 break-words">{request.subjects || "Not specified"}</p>
                 </div>
                 {(request.preferredTime || request.preferredDays) && (
                   <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3 space-y-2">
-                    <p className="text-[10px] text-indigo-400 font-bold uppercase flex items-center gap-1">
+                    <p className="text-[9px] text-indigo-400 font-semibold uppercase flex items-center gap-1">
                       <FiClock className="size-3" /> Preferred Schedule (Mon – Sun)
                     </p>
                     {request.preferredDays && (
-                      <p className="text-xs font-bold text-slate-700">{request.preferredDays}</p>
+                      <p className="text-[11px] font-semibold text-slate-700">{request.preferredDays}</p>
                     )}
                     {request.preferredTime && (
-                      <p className="text-xs font-bold text-indigo-700 whitespace-pre-line">{request.preferredTime}</p>
+                      <p className="text-[11px] font-semibold text-indigo-700 whitespace-pre-line">{request.preferredTime}</p>
                     )}
                   </div>
                 )}
                 {request.startDate && (
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase flex items-center gap-1">
                       <FiCalendar className="size-3" /> Preferred Start Date
                     </p>
-                    <p className="text-sm font-bold text-slate-700">{request.startDate}</p>
+                    <p className="text-[13px] font-semibold text-slate-700">{request.startDate}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                  <p className="text-[9px] text-slate-400 font-semibold uppercase flex items-center gap-1">
                     <FiClock className="size-3" /> Submitted
                   </p>
-                  <p className="text-sm font-bold text-slate-700">
+                  <p className="text-[13px] font-semibold text-slate-700">
                     {new Date(request.created_at).toLocaleString()}
                   </p>
                 </div>
@@ -327,34 +327,34 @@ export default function RequestDetailModal({
 
             {/* Location */}
             <div className="space-y-4">
-              <h4 className="text-xs font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
+              <h4 className="text-[11px] font-semibold text-rose-400 uppercase tracking-widest flex items-center gap-2">
                 <FiMapPin /> Location
               </h4>
               <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Address</p>
-                  <p className="text-sm font-bold text-slate-700 break-words">
+                  <p className="text-[9px] text-slate-400 font-semibold uppercase">Address</p>
+                  <p className="text-[13px] font-semibold text-slate-700 break-words">
                     {locationParts.length > 0 ? locationParts.join(", ") : "Not specified"}
                   </p>
                 </div>
                 {request.location && (
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">City</p>
-                    <p className="text-sm font-bold text-slate-700 break-words">{request.location}</p>
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase">City</p>
+                    <p className="text-[13px] font-semibold text-slate-700 break-words">{request.location}</p>
                   </div>
                 )}
                 {request.branch && (
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">Branch</p>
-                    <p className="text-sm font-bold text-slate-700 break-words">{request.branch}</p>
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase">Branch</p>
+                    <p className="text-[13px] font-semibold text-slate-700 break-words">{request.branch}</p>
                   </div>
                 )}
                 {request.idPassport && (
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase flex items-center gap-1">
                       <FiCreditCard className="size-3" /> ID / Passport
                     </p>
-                    <p className="text-sm font-bold text-slate-700 break-words">{request.idPassport}</p>
+                    <p className="text-[13px] font-semibold text-slate-700 break-words">{request.idPassport}</p>
                   </div>
                 )}
               </div>
@@ -363,19 +363,19 @@ export default function RequestDetailModal({
 
           {/* Approve & Assign Teacher */}
           <div className="space-y-4">
-            <h4 className="text-xs font-black text-sky-500 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-[11px] font-semibold text-sky-500 uppercase tracking-widest flex items-center gap-2">
               <FiThumbsUp /> Approve & Assign a Teacher
             </h4>
             <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold text-slate-700">
+                  <p className="text-[13px] font-semibold text-slate-700">
                     {request.studentId
                       ? "A student account has been created for this request."
                       : "This request hasn't been approved yet — approving creates a student account."}
                   </p>
                   {approveStatus && (
-                    <p className={`mt-1.5 text-xs font-bold flex items-center gap-1.5 ${approveStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+                    <p className={`mt-1.5 text-[11px] font-semibold flex items-center gap-1.5 ${approveStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
                       {approveStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
                       {approveStatus.text}
                     </p>
@@ -385,13 +385,13 @@ export default function RequestDetailModal({
                   <button
                     onClick={handleApprove}
                     disabled={approving}
-                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white text-sm font-bold hover:bg-sky-600 transition-all shadow-lg shadow-sky-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-sky-500 text-white text-[13px] font-semibold hover:bg-sky-600 transition-all shadow-lg shadow-sky-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                   >
                     {approving ? <FiLoader className="size-4 animate-spin" /> : <FiThumbsUp className="size-4" />}
                     {approving ? "Approving..." : "Approve Request"}
                   </button>
                 ) : (
-                  <span className="flex items-center gap-1.5 text-xs font-black px-3 py-2 rounded-xl bg-sky-100 text-sky-700 shrink-0">
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 rounded-xl bg-sky-100 text-sky-700 shrink-0">
                     <FiCheckCircle /> Approved
                   </span>
                 )}
@@ -399,7 +399,7 @@ export default function RequestDetailModal({
 
               {approveInviteUrl && (
                 <div className="rounded-2xl p-4 border bg-emerald-50 border-emerald-100 text-emerald-700 space-y-3">
-                  <p className="text-sm font-bold flex items-start gap-2">
+                  <p className="text-[13px] font-semibold flex items-start gap-2">
                     <FiAlertCircle className="shrink-0 mt-0.5" />
                     The activation email couldn't be sent. Share this link with them manually so they can set their password:
                   </p>
@@ -408,7 +408,7 @@ export default function RequestDetailModal({
                     <button
                       type="button"
                       onClick={copyInviteLink}
-                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-all"
+                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-semibold hover:bg-emerald-600 transition-all"
                     >
                       {copied ? <FiCheck className="size-3.5" /> : <FiCopy className="size-3.5" />}
                       {copied ? "Copied" : "Copy Link"}
@@ -420,11 +420,11 @@ export default function RequestDetailModal({
               <div className="border-t border-slate-200 pt-5 space-y-4">
                 {request.studentId && (
                   <div className="flex items-center gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 p-4">
-                    <div className="size-11 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold shrink-0">
+                    <div className="size-11 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-semibold shrink-0">
                       <FiUserPlus className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-900 truncate">
+                      <p className="text-[13px] font-semibold text-slate-900 truncate">
                         {request.student?.user?.name || request.parent_name} is now in the Student section
                       </p>
                       <p className="text-xs text-slate-500 truncate">{request.student?.user?.email || request.email}</p>
@@ -434,11 +434,11 @@ export default function RequestDetailModal({
 
                 {request.assignedTeacher ? (
                     <div className="flex items-center gap-3 rounded-2xl border-2 border-violet-200 bg-violet-50/60 p-4">
-                      <div className="size-11 rounded-xl bg-violet-500 text-white flex items-center justify-center font-bold shrink-0">
+                      <div className="size-11 rounded-xl bg-violet-500 text-white flex items-center justify-center font-semibold shrink-0">
                         {request.assignedTeacher.user.name.charAt(0)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-slate-900 truncate">{request.assignedTeacher.user.name}</p>
+                        <p className="text-[13px] font-semibold text-slate-900 truncate">{request.assignedTeacher.user.name}</p>
                         <p className="text-xs text-slate-500 truncate">{request.assignedTeacher.user.email}</p>
                       </div>
                       <button
@@ -451,7 +451,7 @@ export default function RequestDetailModal({
                       </button>
                     </div>
                   ) : (
-                    <p className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <p className="text-[13px] font-semibold text-slate-700 flex items-center gap-2">
                       <FiAward className="text-violet-400" /> No teacher assigned yet.
                     </p>
                 )}
@@ -502,15 +502,15 @@ export default function RequestDetailModal({
                             title={request.studentId ? "Assign teacher" : "Approve this request before assigning"}
                             className="w-full flex items-center gap-3 rounded-2xl border-2 border-slate-100 hover:border-violet-300 bg-white p-3 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
+                            <div className="size-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-semibold shrink-0">
                               {t.name.charAt(0)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-bold text-slate-900 truncate flex items-center gap-2">
+                              <p className="text-[13px] font-semibold text-slate-900 truncate flex items-center gap-2">
                                 {t.name}
                                 {label && (
                                   <span
-                                    className={`inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+                                    className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                                       label === "Best match" ? "bg-amber-100 text-amber-700" : "bg-indigo-50 text-indigo-600"
                                     }`}
                                   >
@@ -525,7 +525,7 @@ export default function RequestDetailModal({
                                 </p>
                               )}
                             </div>
-                            <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-violet-600">
+                            <span className="shrink-0 flex items-center gap-1.5 text-[11px] font-semibold text-violet-600">
                               <FiUserCheck className="size-4" />
                               {!request.studentId ? "Approve first" : request.assignedTeacher ? "Reassign" : "Assign"}
                             </span>
@@ -538,7 +538,7 @@ export default function RequestDetailModal({
                   </div>
 
                   {assignStatus && (
-                    <p className={`text-xs font-bold flex items-center gap-1.5 ${assignStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+                    <p className={`text-[11px] font-semibold flex items-center gap-1.5 ${assignStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
                       {assignStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
                       {assignStatus.text}
                     </p>
@@ -549,7 +549,7 @@ export default function RequestDetailModal({
 
           {/* Message/Details */}
           <div className="space-y-4">
-            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <FiFileText /> Additional Details
             </h4>
             <div className="bg-slate-50 p-5 sm:p-6 rounded-3xl border border-slate-100">
@@ -561,7 +561,7 @@ export default function RequestDetailModal({
 
           {/* Send Message */}
           <div className="space-y-4">
-            <h4 className="text-xs font-black text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-[11px] font-semibold text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
               <FiSend /> Send an Email to {request.parent_name.split(" ")[0]}
             </h4>
             <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
@@ -575,7 +575,7 @@ export default function RequestDetailModal({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   {sendStatus && (
-                    <p className={`text-xs font-bold flex items-center gap-1.5 ${sendStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+                    <p className={`text-[11px] font-semibold flex items-center gap-1.5 ${sendStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
                       {sendStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
                       {sendStatus.text}
                     </p>
@@ -584,7 +584,7 @@ export default function RequestDetailModal({
                 <button
                   onClick={handleSendMessage}
                   disabled={sending || !message.trim()}
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#0f172a] text-white text-sm font-bold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#0f172a] text-white text-[13px] font-semibold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {sending ? <FiLoader className="size-4 animate-spin" /> : <FiSend className="size-4" />}
                   {sending ? "Sending..." : "Send Email"}
@@ -596,14 +596,14 @@ export default function RequestDetailModal({
 
         {/* Status footer */}
         <div className="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-100 px-5 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Update Status</p>
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Update Status</p>
           <div className="flex flex-wrap gap-2">
             {["new", "contacted", "resolved"].map((status) => (
               <button
                 key={status}
                 onClick={() => handleStatusChange(status)}
                 disabled={statusUpdating || status === request.status}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-tight transition-all disabled:cursor-default ${
+                className={`px-4 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-tight transition-all disabled:cursor-default ${
                   status === request.status
                     ? STATUS_STYLES[status]
                     : "bg-white text-slate-500 border-2 border-slate-200 hover:border-slate-300"

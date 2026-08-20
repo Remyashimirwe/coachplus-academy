@@ -92,7 +92,7 @@ export default function RequestsView({ requests, teachers }: any) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Teacher Requests</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Teacher Requests</h1>
         <p className="text-slate-500">Review parent requests and reply straight from CoachPlus Academy by email.</p>
       </div>
 
@@ -104,8 +104,8 @@ export default function RequestsView({ requests, teachers }: any) {
                 <stat.icon className="size-6" />
               </div>
               <div className="min-w-0">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest truncate">{stat.label}</h3>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">{stat.value}</p>
+                <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest truncate">{stat.label}</h3>
+                <p className="text-lg font-bold text-slate-900 mt-0.5">{stat.value}</p>
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function RequestsView({ requests, teachers }: any) {
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-tight transition-all ${
+              className={`px-4 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-tight transition-all ${
                 filter === f.id
                   ? "bg-[#0f172a] text-white shadow-lg shadow-slate-200"
                   : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300"
@@ -169,14 +169,14 @@ export default function RequestsView({ requests, teachers }: any) {
             className="flex flex-col gap-5 rounded-[28px] bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all"
           >
             <div className="flex items-start gap-4">
-              <div className="size-14 rounded-2xl bg-rose-50 text-[#E91E63] flex items-center justify-center font-bold text-xl shrink-0">
+              <div className="size-14 rounded-2xl bg-rose-50 text-[#E91E63] flex items-center justify-center font-semibold text-base shrink-0">
                 {request.parent_name.charAt(0)}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-                  <h3 className="text-lg font-bold text-slate-900 truncate">{request.parent_name}</h3>
+                  <h3 className="text-base font-semibold text-slate-900 truncate">{request.parent_name}</h3>
                   <span
-                    className={`shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-tighter ${
+                    className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-tighter ${
                       STATUS_STYLES[request.status] || "bg-slate-100 text-slate-600"
                     }`}
                   >
@@ -187,7 +187,7 @@ export default function RequestsView({ requests, teachers }: any) {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-slate-500">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-medium text-slate-500">
               {request.grade && (
                 <span className="flex items-center gap-1.5 min-w-0">
                   <FiClock className="text-indigo-500 shrink-0" />
@@ -212,24 +212,24 @@ export default function RequestsView({ requests, teachers }: any) {
 
             {(request.preferredTime || request.preferredDays) && (
               <div className="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100">
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                   <FiClock /> Preferred Schedule
                 </p>
-                <p className="text-xs font-bold text-slate-700 leading-relaxed line-clamp-2">
+                <p className="text-[11px] font-semibold text-slate-700 leading-relaxed line-clamp-2">
                   {request.preferredTime || request.preferredDays}
                 </p>
               </div>
             )}
 
             <div className="p-4 rounded-2xl bg-rose-50/30 border border-rose-100">
-              <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">Courses & Topics</p>
-              <p className="text-xs font-bold text-slate-700 leading-relaxed line-clamp-2">{request.subjects || "Not specified"}</p>
+              <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">Courses & Topics</p>
+              <p className="text-[11px] font-semibold text-slate-700 leading-relaxed line-clamp-2">{request.subjects || "Not specified"}</p>
             </div>
 
             {request.assignedTeacher && (
               <div className="flex items-center gap-2 p-3 rounded-2xl bg-violet-50 border border-violet-100">
                 <FiUserCheck className="text-violet-500 shrink-0" />
-                <p className="text-xs font-bold text-violet-700 truncate">
+                <p className="text-[11px] font-semibold text-violet-700 truncate">
                   Assigned to {request.assignedTeacher.user.name}
                 </p>
               </div>
@@ -254,7 +254,7 @@ export default function RequestsView({ requests, teachers }: any) {
               )}
               <button
                 onClick={() => setSelectedId(request.id)}
-                className="ml-auto px-4 py-2.5 rounded-xl bg-[#0f172a] text-white text-sm font-bold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200"
+                className="ml-auto px-4 py-2.5 rounded-xl bg-[#0f172a] text-white text-[13px] font-semibold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200"
               >
                 View & Manage
               </button>

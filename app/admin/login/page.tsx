@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
                     className="relative size-16 rounded-2xl object-contain shadow-sm"
                   />
                 </div>
-                <h2 className="text-2xl font-bold text-[#21121f] tracking-tight">Admin Portal</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-[#21121f] tracking-tight">Admin Portal</h2>
                 <p className="text-slate-500 mt-1 text-sm">Secure access to the management dashboard</p>
               </div>
 
@@ -58,14 +58,14 @@ export default function AdminLoginPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="mb-6 flex items-start gap-3 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600 ring-1 ring-red-100"
                 >
-                  <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-black">!</span>
+                  <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold">!</span>
                   {state.error}
                 </motion.div>
               )}
 
               <form action={formAction} className="space-y-5">
                 <div className="space-y-1.5">
-                  <label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">
+                  <label htmlFor="email" className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 ml-1">
                     Email Address
                   </label>
                   <div className="relative group">
@@ -84,7 +84,7 @@ export default function AdminLoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="password" className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">
+                  <label htmlFor="password" className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 ml-1">
                     Password
                   </label>
                   <div className="relative group">
@@ -113,7 +113,7 @@ export default function AdminLoginPage() {
                 <button
                   type="submit"
                   disabled={pending}
-                  className="group w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF5733] via-[#E91E63] to-[#D81B60] py-4 font-bold text-white shadow-lg shadow-[#E91E63]/25 hover:shadow-[#E91E63]/40 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
+                  className="group w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF5733] via-[#E91E63] to-[#D81B60] py-4 font-semibold text-white shadow-lg shadow-[#E91E63]/25 hover:shadow-[#E91E63]/40 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
                 >
                   {pending ? (
                     <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

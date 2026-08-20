@@ -75,7 +75,7 @@ export default function AdminAttendancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Attendance Records</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Attendance Records</h1>
         <p className="text-slate-500 mt-1 text-sm">All attendance across the platform, including teacher and student self-reporting.</p>
       </div>
 
@@ -90,7 +90,7 @@ export default function AdminAttendancePage() {
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className={`text-sm font-bold ${tab === t.id ? "text-[#E91E63]" : "text-slate-700"}`}>{t.label}</p>
+            <p className={`text-[13px] font-semibold ${tab === t.id ? "text-[#E91E63]" : "text-slate-700"}`}>{t.label}</p>
             <p className="text-[11px] text-slate-500 mt-0.5">{t.description}</p>
           </button>
         ))}
@@ -98,15 +98,15 @@ export default function AdminAttendancePage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
-          <p className="text-xl font-black text-slate-900">{stats.total}</p>
+          <p className="text-base font-bold text-slate-900">{stats.total}</p>
           <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Total Records</p>
         </div>
         <div className="rounded-2xl bg-emerald-50 border border-emerald-100 shadow-sm p-4">
-          <p className="text-xl font-black text-emerald-700">{stats.present}</p>
+          <p className="text-base font-bold text-emerald-700">{stats.present}</p>
           <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">Present</p>
         </div>
         <div className="rounded-2xl bg-rose-50 border border-rose-100 shadow-sm p-4">
-          <p className="text-xl font-black text-rose-700">{stats.absent}</p>
+          <p className="text-base font-bold text-rose-700">{stats.absent}</p>
           <p className="text-[11px] font-semibold text-rose-600 mt-0.5">Absent</p>
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function AdminAttendancePage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+              className={`rounded-xl px-4 py-2 text-[11px] font-semibold transition-all ${
                 filter === f ? "bg-[#E91E63] text-white shadow-lg shadow-rose-500/20" : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"
               }`}
             >
@@ -143,43 +143,43 @@ export default function AdminAttendancePage() {
         ) : filtered.length === 0 ? (
           <div className="p-10 text-center">
             <FiUsers className="size-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-slate-500 font-semibold text-sm">No {activeTab?.label.toLowerCase()} found.</p>
+            <p className="text-slate-500 font-semibold text-[13px]">No {activeTab?.label.toLowerCase()} found.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Date</th>
-                  <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">{tab === "teacher" ? "Teacher" : "Student"}</th>
-                  {tab === "student" && <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Assigned Teacher</th>}
-                  <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Time Used</th>
-                  <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Remarks</th>
-                  <th className="px-6 py-3 text-xs font-bold uppercase text-slate-500">Status</th>
+                  <th className="px-6 py-3 text-[10px] font-semibold uppercase text-slate-500">Date</th>
+                  <th className="px-6 py-3 text-[10px] font-semibold uppercase text-slate-500">{tab === "teacher" ? "Teacher" : "Student"}</th>
+                  {tab === "student" && <th className="px-6 py-3 text-[10px] font-semibold uppercase text-slate-500">Assigned Teacher</th>}
+                  <th className="px-6 py-3 text-[10px] font-semibold uppercase text-slate-500">Time Used</th>
+                  <th className="px-6 py-3 text-[10px] font-semibold uppercase text-slate-500">Remarks</th>
+                  <th className="px-6 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((record) => (
                   <tr key={record.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap flex items-center gap-1.5">
+                    <td className="px-6 py-4 text-[13px] text-slate-700 whitespace-nowrap flex items-center gap-1.5">
                       <FiCalendar className="size-3.5 text-slate-300" />
                       {new Date(record.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">
+                    <td className="px-6 py-4 text-[13px] font-semibold text-slate-800">
                       {record.student?.user.name || record.teacher?.user.name || "—"}
                     </td>
                     {tab === "student" && (
-                      <td className="px-6 py-4 text-sm text-slate-600">
+                      <td className="px-6 py-4 text-[13px] text-slate-600">
                         {record.teacher?.user.name || "—"}
                       </td>
                     )}
-                    <td className="px-6 py-4 text-sm text-slate-600 flex items-center gap-1.5">
+                    <td className="px-6 py-4 text-[13px] text-slate-600 flex items-center gap-1.5">
                       <FiClock className="size-3.5 text-slate-300" />
                       {record.timeUsed || "—"}
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-500 max-w-[220px] truncate">{record.remarks || "—"}</td>
+                    <td className="px-6 py-4 text-[11px] text-slate-500 max-w-[220px] truncate">{record.remarks || "—"}</td>
                     <td className="px-6 py-4">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-bold inline-flex items-center gap-1 ${STATUS_STYLES[record.status] || "bg-slate-100 text-slate-500"}`}>
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold inline-flex items-center gap-1 ${STATUS_STYLES[record.status] || "bg-slate-100 text-slate-500"}`}>
                         {record.status === "PRESENT" ? <FiCheckCircle className="size-3.5" /> : <FiXCircle className="size-3.5" />}
                         {record.status}
                       </span>

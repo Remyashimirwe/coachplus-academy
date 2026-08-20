@@ -73,7 +73,7 @@ function ReportModal({
       <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white p-5 border-b border-slate-100 flex items-center justify-between z-10">
           <div>
-            <h3 className="font-bold text-slate-900">{report.category}</h3>
+            <h3 className="font-semibold text-slate-900">{report.category}</h3>
             <p className="text-xs text-slate-500 mt-0.5">by {report.student.user.name}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400">
@@ -83,28 +83,28 @@ function ReportModal({
 
         <div className="p-6 space-y-5">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold shrink-0">
+            <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-semibold shrink-0">
               {report.student.user.name.charAt(0)}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900 truncate">{report.student.user.name}</p>
+              <p className="text-[13px] font-semibold text-slate-900 truncate">{report.student.user.name}</p>
               <p className="text-xs text-slate-500 truncate">{report.student.user.email}</p>
             </div>
           </div>
 
           {report.teacher && (
-            <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+            <p className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5">
               <FiUser className="size-3.5" /> Reporting about: <span className="text-slate-800">{report.teacher.user.name}</span>
             </p>
           )}
 
           <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-            <p className="text-xs font-black text-slate-400 uppercase mb-1.5">Message</p>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase mb-1.5">Message</p>
             <p className="text-sm text-slate-700 whitespace-pre-wrap">{report.message}</p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1.5">Reply to student (optional)</label>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">Reply to student (optional)</label>
             <textarea
               value={reply}
               onChange={(e) => setReply(e.target.value)}
@@ -115,7 +115,7 @@ function ReportModal({
           </div>
 
           {status && (
-            <p className={`text-xs font-bold flex items-center gap-1.5 ${status.success ? "text-emerald-600" : "text-rose-600"}`}>
+            <p className={`text-[11px] font-semibold flex items-center gap-1.5 ${status.success ? "text-emerald-600" : "text-rose-600"}`}>
               {status.success ? <FiCheckCircle /> : <FiAlertCircle />}
               {status.text}
             </p>
@@ -125,7 +125,7 @@ function ReportModal({
             <button
               onClick={() => updateStatus("reviewed")}
               disabled={!!saving}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-50 text-blue-700 border-2 border-blue-200 px-4 py-2.5 text-sm font-bold hover:bg-blue-100 transition-all disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-50 text-blue-700 border-2 border-blue-200 px-4 py-2.5 text-[13px] font-semibold hover:bg-blue-100 transition-all disabled:opacity-50"
             >
               {saving === "reviewed" ? <FiLoader className="size-4 animate-spin" /> : <FiMessageSquare className="size-4" />}
               Mark Reviewed
@@ -133,7 +133,7 @@ function ReportModal({
             <button
               onClick={() => updateStatus("resolved")}
               disabled={!!saving}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-white px-4 py-2.5 text-sm font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-white px-4 py-2.5 text-[13px] font-semibold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all disabled:opacity-50"
             >
               {saving === "resolved" ? <FiLoader className="size-4 animate-spin" /> : <FiSend className="size-4" />}
               Resolve &amp; Notify
@@ -198,25 +198,25 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Student Reports</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Student Reports</h1>
         <p className="text-slate-500 mt-1 text-sm">Concerns and issues reported by students about their teachers.</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
-          <p className="text-xl font-black text-slate-900">{stats.total}</p>
+          <p className="text-base font-bold text-slate-900">{stats.total}</p>
           <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Total</p>
         </div>
         <div className="rounded-2xl bg-amber-50 border border-amber-100 shadow-sm p-4">
-          <p className="text-xl font-black text-amber-700">{stats.newCount}</p>
+          <p className="text-base font-bold text-amber-700">{stats.newCount}</p>
           <p className="text-[11px] font-semibold text-amber-600 mt-0.5">New</p>
         </div>
         <div className="rounded-2xl bg-blue-50 border border-blue-100 shadow-sm p-4">
-          <p className="text-xl font-black text-blue-700">{stats.reviewed}</p>
+          <p className="text-base font-bold text-blue-700">{stats.reviewed}</p>
           <p className="text-[11px] font-semibold text-blue-600 mt-0.5">Reviewed</p>
         </div>
         <div className="rounded-2xl bg-emerald-50 border border-emerald-100 shadow-sm p-4">
-          <p className="text-xl font-black text-emerald-700">{stats.resolved}</p>
+          <p className="text-base font-bold text-emerald-700">{stats.resolved}</p>
           <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">Resolved</p>
         </div>
       </div>
@@ -237,7 +237,7 @@ export default function AdminReportsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-xl px-4 py-2 text-xs font-bold capitalize transition-all ${
+              className={`rounded-xl px-4 py-2 text-[11px] font-semibold capitalize transition-all ${
                 filter === f ? "bg-[#E91E63] text-white shadow-lg shadow-rose-500/20" : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"
               }`}
             >
@@ -252,7 +252,7 @@ export default function AdminReportsPage() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-10 text-center">
           <FiFlag className="size-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-slate-500 font-semibold text-sm">No reports found.</p>
+          <p className="text-slate-500 font-medium text-[13px]">No reports found.</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 2xl:grid-cols-3 gap-4">
@@ -263,8 +263,8 @@ export default function AdminReportsPage() {
               className="text-left rounded-2xl bg-white border border-slate-100 shadow-sm p-5 hover:border-[#E91E63]/30 hover:shadow-md transition-all flex flex-col h-full"
             >
               <div className="flex items-start justify-between gap-2 mb-3">
-                <p className="font-bold text-slate-900 text-sm">{r.category}</p>
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase border ${STATUS_STYLES[r.status] || "bg-slate-100 text-slate-500 border-slate-200"}`}>
+                <p className="font-semibold text-slate-900 text-[13px]">{r.category}</p>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase border ${STATUS_STYLES[r.status] || "bg-slate-100 text-slate-500 border-slate-200"}`}>
                   {r.status}
                 </span>
               </div>
