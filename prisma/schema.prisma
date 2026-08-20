@@ -37,6 +37,9 @@ model Teacher {
   phone              String              @default("")
   branch             String              @default("") // Location branch, e.g. Kigali-Remera
   subjects           String              @default("") // Courses/subjects the teacher can teach
+  isFired            Boolean             @default(false)
+  firedAt            DateTime?
+  fireMessage        String?
   students           Student[]           @relation("TeacherStudents")
   attendances        Attendance[]
   teacherAttendances TeacherAttendance[]

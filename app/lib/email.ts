@@ -474,6 +474,59 @@ export async function sendRequestAssignedToTeacherEmail({
   }
 }
 
+export async function sendTeacherFiredEmail({
+  to,
+  name,
+  message,
+}: {
+  to: string;
+  name: string;
+  message: string;
+}) {
+  const client = getResendClient();
+
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Dismissal notice not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `An update about your teaching role at ${BRAND_NAME}`,
+      html: renderEmail({
+        preheader: `Your teaching role at ${BRAND_NAME} has ended.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${name},</h2>
+          <p>
+            We are writing to let you know that your teaching role with
+            <strong>${BRAND_NAME}</strong> has come to an end.
+          </p>
+          <p><strong>Message from the admin team:</strong></p>
+          <p style="white-space: pre-wrap; background:#f8fafc; padding:12px 16px; border-radius:12px;">${message}</p>
+          <p>
+            Thank you for your time with us. If you have any questions or believe this
+            decision should be reviewed, please reach out to
+            <a href="mailto:${CONTACT_EMAIL}" style="color:#E91E63;text-decoration:none;font-weight:700;">${CONTACT_EMAIL}</a>.
+          </p>
+          ${signature()}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send dismissal email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send dismissal email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
 export async function sendReportSubmittedEmail({
   to,
   studentName,

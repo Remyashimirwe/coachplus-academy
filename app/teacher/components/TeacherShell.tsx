@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { FiLayout, FiCheckSquare, FiUsers, FiSettings } from "react-icons/fi";
 import DashboardLayout from "@/app/components/DashboardLayout";
+import TeacherFiredBanner from "./TeacherFiredBanner";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: FiLayout, href: "/teacher", section: "Main" },
@@ -20,6 +21,7 @@ export default function TeacherShell({
 }) {
   return (
     <DashboardLayout navItems={navItems} user={user} fallbackTitle="Teacher Dashboard">
+      <TeacherFiredBanner />
       {children}
     </DashboardLayout>
   );
