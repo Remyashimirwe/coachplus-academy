@@ -10,6 +10,7 @@ import {
   FiChevronRight,
   FiAlertCircle,
   FiClock,
+  FiEdit,
 } from "react-icons/fi";
 import {
   DAYS_OF_WEEK,
@@ -74,6 +75,7 @@ export default function StudentAttendancePage() {
   const [timeErrors, setTimeErrors] = useState<Record<string, string | undefined>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState<string>(toISODate(weekRange(new Date()).start));
 
@@ -207,6 +209,7 @@ export default function StudentAttendancePage() {
       if (res.ok) {
         setMarks((prev) => ({ ...prev, [day.iso]: data.attendance }));
         setSaved((prev) => ({ ...prev, [day.iso]: true }));
+        setEditing((prev) => ({ ...prev, [day.iso]: false }));
       } else {
         setCellErrors((prev) => ({ ...prev, [day.iso]: data.message || "Failed to save." }));
       }
@@ -317,6 +320,33 @@ export default function StudentAttendancePage() {
                   <p className="text-[11px] text-slate-400 italic mb-1">No preferred session</p>
                 )}
 
+                {!isPast && mark && !editing[day.iso] ? (
+                  <div className="mt-2 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
+                          mark.status === "PRESENT" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                        }`}
+                      >
+                        {mark.status === "PRESENT" ? <FiCheckCircle className="size-3.5" /> : <FiXCircle className="size-3.5" />}
+                        {mark.status}
+                        {mark.timeUsed && <span className="ml-1 font-bold">• {mark.timeUsed}</span>}
+                      </span>
+                      <button
+                        onClick={() => setEditing((prev) => ({ ...prev, [day.iso]: true }))}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-[#E91E63] hover:text-[#E91E63] transition-all"
+                      >
+                        <FiEdit className="size-3" /> Edit
+                      </button>
+                    </div>
+                    {mark.remarks && (
+                      <p className="text-[10px] text-amber-600 font-medium truncate" title={mark.remarks}>
+                        {mark.remarks}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <>
                 {!isPast && (
                   <div className="flex gap-2 mt-2">
                     {STATUS_OPTIONS.map((opt) => {
@@ -416,6 +446,8 @@ export default function StudentAttendancePage() {
                       </p>
                     )}
                   </div>
+                )}
+                  </>
                 )}
 
                 {isSaved && (

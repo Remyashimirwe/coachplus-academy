@@ -20,6 +20,7 @@ import {
   FiClock,
   FiMapPin,
   FiMonitor,
+  FiEdit,
 } from "react-icons/fi";
 import {
   dayNameFromDate,
@@ -103,6 +104,8 @@ function DayCard({
   handleMark,
   focusedStudent,
   highlighted,
+  editing,
+  setEditing,
 }: {
   day: DaySchedule;
   mark?: AttendanceRow;
@@ -123,6 +126,8 @@ function DayCard({
   handleMark: (day: DaySchedule, status: string) => void;
   focusedStudent?: { name: string; preferredDays?: string; preferredTime?: string };
   highlighted?: boolean;
+  editing: boolean;
+  setEditing: (val: boolean) => void;
 }) {
   const key = day.iso;
   const expectedList = focusedStudent
@@ -209,6 +214,37 @@ function DayCard({
         ) : (
           <p className="text-[10px] text-slate-400 italic">Not marked</p>
         )
+      ) : mark && !editing ? (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-semibold ${
+                mark.status === "PRESENT"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-rose-100 text-rose-700"
+              }`}
+            >
+              {mark.status === "PRESENT" ? (
+                <FiCheckCircle className="size-3" />
+              ) : (
+                <FiXCircle className="size-3" />
+              )}
+              {mark.status}
+              {mark.timeUsed && <span className="ml-1 font-bold">• {mark.timeUsed}</span>}
+            </span>
+            <button
+              onClick={() => setEditing(true)}
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-slate-900 hover:text-slate-900 transition-all"
+            >
+              <FiEdit className="size-3" /> Edit
+            </button>
+          </div>
+          {mark.remarks && (
+            <p className="text-[9px] text-slate-400 italic truncate" title={mark.remarks}>
+              {mark.remarks}
+            </p>
+          )}
+        </div>
       ) : (
         <>
           <div className="flex gap-2 mb-2">
@@ -353,6 +389,7 @@ export default function AttendancePage() {
   const [timeErrors, setTimeErrors] = useState<Record<string, string | undefined>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [weekStart, setWeekStart] = useState<string>(toISODate(weekRange(new Date()).start));
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
   const [search, setSearch] = useState("");
@@ -493,6 +530,7 @@ export default function AttendancePage() {
         setReasonDrafts((prev) => ({ ...prev, [key]: "" }));
         setTimeUsedDrafts((prev) => ({ ...prev, [key]: { from: "", to: "" } }));
         setSaved((prev) => ({ ...prev, [key]: true }));
+        setEditing((prev) => ({ ...prev, [key]: false }));
         setTimeout(() => setSaved((prev) => ({ ...prev, [key]: false })), 1500);
       } else {
         setCellErrors((prev) => ({ ...prev, [key]: data.message || "Failed to save attendance" }));
@@ -777,6 +815,8 @@ export default function AttendancePage() {
                           preferredTime: selectedStudent.preferredTime,
                         }}
                         highlighted={iso === targetDate}
+                        editing={!!editing[iso]}
+                        setEditing={(val) => setEditing((prev) => ({ ...prev, [iso]: val }))}
                       />
                     );
                   })}

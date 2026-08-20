@@ -12,8 +12,10 @@ import {
   FiMapPin,
   FiUser,
   FiChevronLeft,
+  FiChevronRight,
   FiPhone,
 } from "react-icons/fi";
+import { toISODate } from "@/app/lib/schedule";
 
 const STATUS_STYLES: Record<string, string> = {
   PRESENT: "bg-emerald-100 text-emerald-700",
@@ -49,10 +51,6 @@ interface Person {
   absent: number;
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" });
-}
-
 function StatusBadge({ status }: { status: string }) {
   const present = status === "PRESENT";
   return (
@@ -64,6 +62,109 @@ function StatusBadge({ status }: { status: string }) {
       {present ? <FiCheckCircle className="size-3.5" /> : <FiXCircle className="size-3.5" />}
       {status}
     </span>
+  );
+}
+
+// Month calendar that colour-codes each day: green = studied/present, red = absent.
+function AttendanceCalendar({ records }: { records: BaseRow[] }) {
+  const [cursor, setCursor] = useState(() => {
+    const ref = records.length ? new Date(records[0].date) : new Date();
+    return { year: ref.getFullYear(), month: ref.getMonth() };
+  });
+
+  const marks = useMemo(() => {
+    const map = new Map<string, string>();
+    records.forEach((r) => map.set(toISODate(new Date(r.date)), r.status));
+    return map;
+  }, [records]);
+
+  const first = new Date(cursor.year, cursor.month, 1);
+  const startWeekday = first.getDay();
+  const daysInMonth = new Date(cursor.year, cursor.month + 1, 0).getDate();
+  const cells: (Date | null)[] = [
+    ...Array.from({ length: startWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => new Date(cursor.year, cursor.month, i + 1)),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const monthLabel = first.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const todayIso = toISODate(new Date());
+
+  function shift(delta: number) {
+    const next = new Date(cursor.year, cursor.month + delta, 1);
+    setCursor({ year: next.getFullYear(), month: next.getMonth() });
+  }
+
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+        <h3 className="text-[13px] font-semibold text-slate-800 flex items-center gap-2">
+          <FiCalendar className="size-4 text-[#E91E63]" /> {monthLabel}
+        </h3>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => shift(-1)}
+            className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+            aria-label="Previous month"
+          >
+            <FiChevronLeft className="size-3.5" />
+          </button>
+          <button
+            onClick={() => shift(1)}
+            className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+            aria-label="Next month"
+          >
+            <FiChevronRight className="size-3.5" />
+          </button>
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="grid grid-cols-7 gap-1 mb-1.5">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+            <span key={d} className="text-center text-[9px] font-semibold uppercase text-slate-400">
+              {d}
+            </span>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {cells.map((cell, i) => {
+            if (!cell) return <div key={`empty-${i}`} />;
+            const iso = toISODate(cell);
+            const status = marks.get(iso);
+            const isToday = iso === todayIso;
+            return (
+              <div
+                key={iso}
+                title={status ? `${cell.toDateString()} — ${status}` : cell.toDateString()}
+                className={`aspect-square rounded-xl flex flex-col items-center justify-center text-[11px] transition-colors ${
+                  status === "PRESENT"
+                    ? "bg-emerald-500 text-white font-bold"
+                    : status === "ABSENT"
+                      ? "bg-rose-500 text-white font-bold"
+                      : isToday
+                        ? "bg-slate-200/70 text-slate-700 font-semibold"
+                        : "bg-slate-50 text-slate-500"
+                }`}
+              >
+                <span>{cell.getDate()}</span>
+                {isToday && <span className="text-[7px] font-semibold uppercase">today</span>}
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] font-semibold text-slate-500">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-emerald-500" /> Studied / Present
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-rose-500" /> Absent
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-slate-100" /> No record
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -295,35 +396,73 @@ export default function AdminAttendancePage() {
                 </div>
               </div>
 
-              <div className="p-5 sm:p-6">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">
-                  {tab === "student" ? "Recorded by teachers" : tab === "self" ? "Self-reported by student" : "Self-marked by teacher"}
-                </p>
-                {selected.records.length === 0 ? (
-                  <div className="p-10 text-center">
-                    <FiUser className="size-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-slate-400 italic text-sm">No attendance records yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {selected.records.map((r) => (
-                      <div key={r.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-3">
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-semibold text-slate-900">{formatDate(r.date)}</p>
-                          <p className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                            {r.timeUsed && (
-                              <span className="inline-flex items-center gap-1">
-                                <FiClock className="size-3 text-slate-300" /> {r.timeUsed}
-                              </span>
-                            )}
-                            {r.remarks && <span className="truncate">{r.remarks}</span>}
-                          </p>
-                        </div>
-                        <StatusBadge status={r.status} />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="p-5 sm:p-6 space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
+                    <FiCheckCircle className="size-3.5" /> {selected.present} days studied
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-100 px-3 py-1.5 text-[11px] font-semibold text-rose-700">
+                    <FiXCircle className="size-3.5" /> {selected.absent} absent
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
+                    <FiCalendar className="size-3.5" /> {selected.records.length} total
+                  </span>
+                </div>
+
+                <AttendanceCalendar records={selected.records} />
+
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">
+                    {tab === "student" ? "Recorded by teachers" : tab === "self" ? "Self-reported by student" : "Self-marked by teacher"}
+                  </p>
+                  {selected.records.length === 0 ? (
+                    <div className="p-10 text-center rounded-2xl border border-slate-100 bg-slate-50/40">
+                      <FiUser className="size-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-slate-400 italic text-sm">No attendance records yet.</p>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                      <table className="w-full text-left">
+                        <thead className="bg-slate-50">
+                          <tr>
+                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Date</th>
+                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Day</th>
+                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Status</th>
+                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Time Used</th>
+                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                          {selected.records.map((r) => (
+                            <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
+                              <td className="px-4 py-3 text-[13px] text-slate-700 whitespace-nowrap">
+                                {new Date(r.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </td>
+                              <td className="px-4 py-3 text-[11px] text-slate-500">
+                                {new Date(r.date).toLocaleDateString("en-US", { weekday: "long" })}
+                              </td>
+                              <td className="px-4 py-3">
+                                <StatusBadge status={r.status} />
+                              </td>
+                              <td className="px-4 py-3 text-[11px] text-slate-600 whitespace-nowrap">
+                                {r.timeUsed ? (
+                                  <span className="inline-flex items-center gap-1">
+                                    <FiClock className="size-3 text-slate-300" /> {r.timeUsed}
+                                  </span>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-[11px] text-slate-500 max-w-[220px] truncate">
+                                {r.remarks || "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
