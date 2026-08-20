@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   FiUsers,
   FiMail,
@@ -10,11 +10,16 @@ import {
   FiCheckCircle,
   FiClock,
   FiArrowRight,
+  FiUserPlus,
+  FiMapPin,
 } from "react-icons/fi";
 import Link from "next/link";
+import AssignStudentsModal from "./AssignStudentsModal";
 
-export default function ApprovedTeachersView({ teachers }: any) {
+export default function ApprovedTeachersView({ teachers: initialTeachers }: any) {
+  const [teachers, setTeachers] = useState(initialTeachers);
   const [search, setSearch] = useState("");
+  const [assignTeacher, setAssignTeacher] = useState<any | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -26,6 +31,17 @@ export default function ApprovedTeachersView({ teachers }: any) {
         String(t.subjects || "").toLowerCase().includes(q)
     );
   }, [teachers, search]);
+
+  const handleAssigned = useCallback(
+    (count: number) => {
+      setTeachers((prev: any[]) =>
+        prev.map((t: any) =>
+          t.id === assignTeacher?.id ? { ...t, _count: { ...t._count, students: count } } : t
+        )
+      );
+    },
+    [assignTeacher]
+  );
 
   const stats = useMemo(() => {
     const active = teachers.filter((t: any) => !t.user.isFirstLogin).length;
@@ -126,6 +142,7 @@ export default function ApprovedTeachersView({ teachers }: any) {
                   <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Students</th>
                   <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Joined</th>
                   <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -145,6 +162,11 @@ export default function ApprovedTeachersView({ teachers }: any) {
                           <div className="min-w-0">
                             <p className="text-[13px] font-semibold text-slate-900 truncate">{t.user.name}</p>
                             <p className="text-[11px] text-slate-400 truncate">{t.user.email}</p>
+                            {t.branch && (
+                              <p className="text-[11px] text-slate-400 truncate flex items-center gap-1">
+                                <FiMapPin className="size-3 shrink-0" /> {t.branch}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -176,6 +198,14 @@ export default function ApprovedTeachersView({ teachers }: any) {
                           {activated ? "Activated" : "Pending"}
                         </span>
                       </td>
+                      <td className="px-5 py-4">
+                        <button
+                          onClick={() => setAssignTeacher(t)}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-[#E91E63] text-white px-3 py-1.5 text-[11px] font-semibold hover:bg-[#c81854] transition-all shadow-md shadow-rose-100"
+                        >
+                          <FiUserPlus className="size-3.5" /> Assign
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -184,6 +214,14 @@ export default function ApprovedTeachersView({ teachers }: any) {
           </div>
         )}
       </div>
+
+      {assignTeacher && (
+        <AssignStudentsModal
+          teacher={assignTeacher}
+          onClose={() => setAssignTeacher(null)}
+          onAssigned={handleAssigned}
+        />
+      )}
     </div>
   );
 }
