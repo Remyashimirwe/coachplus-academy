@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  FiUserPlus,
   FiMail,
   FiUser,
   FiSend,
@@ -138,9 +137,8 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 rounded-[28px] bg-white p-6 sm:p-8 shadow-sm border border-slate-200">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="rounded-[28px] bg-white p-6 sm:p-8 shadow-sm border border-slate-200">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Invite as</label>
               <div className="grid grid-cols-2 gap-3">
@@ -407,32 +405,6 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
               {loading ? "Sending Invitation..." : "Send Invitation"}
             </button>
           </form>
-        </div>
-
-        <div className="rounded-[28px] bg-[#0f172a] text-white p-6 sm:p-8 shadow-sm space-y-5">
-          <div className="size-12 rounded-2xl bg-white/10 flex items-center justify-center">
-            <FiUserPlus className="size-6 text-[#E91E63]" />
-          </div>
-          <h3 className="text-base font-semibold">How invitations work</h3>
-          <ul className="space-y-3 text-sm text-slate-300">
-            <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">1</span>
-              <span>The invitee receives an email with a secure activation link.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">2</span>
-              <span>Since they're new, they'll choose their own new password the first time they sign in.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">3</span>
-              <span>Once activated, they land straight on their own Teacher or Student dashboard.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 size-6 rounded-full bg-white/10 flex items-center justify-center text-[11px] font-semibold">4</span>
-              <span>The link expires after 7 days &mdash; simply resend it here if needed.</span>
-            </li>
-            </ul>
-        </div>
       </div>
     </div>
   );
