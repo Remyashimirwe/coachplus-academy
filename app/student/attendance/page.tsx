@@ -14,6 +14,7 @@ import {
 import {
   DAYS_OF_WEEK,
   dayNameFromDate,
+  isDayLocked,
   parseLocalISODate,
   parsePreferredDays,
   timeSlotForDay,
@@ -165,9 +166,9 @@ export default function StudentAttendancePage() {
     if (saving[day.iso]) return;
     const current = getMark(day.iso);
 
-    const isPast = day.iso < todayISO;
+    const isPast = isDayLocked(day.iso);
     if (isPast && current?.status !== status) {
-      setCellErrors((prev) => ({ ...prev, [day.iso]: "This day has already finished." }));
+      setCellErrors((prev) => ({ ...prev, [day.iso]: "You can no longer edit attendance for this day." }));
       return;
     }
     if (isPast) return;
@@ -273,7 +274,7 @@ export default function StudentAttendancePage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {weekSchedule.map((day) => {
-            const isPast = day.iso < todayISO;
+            const isPast = isDayLocked(day.iso);
             const isToday = day.iso === todayISO;
             const mark = getMark(day.iso);
             const deviates = !!mark?.remarks;

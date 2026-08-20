@@ -70,10 +70,13 @@ export async function POST(request: Request) {
 
     const day = startOfDay(date);
 
-    const today = startOfDay(null);
-    if (day.getTime() < today.getTime()) {
+    // Attendance can be edited for 24 hours after the day ends; after that the
+    // day is locked and can no longer be marked or changed.
+    const dayEnd = new Date(day);
+    dayEnd.setHours(23, 59, 59, 999);
+    if (Date.now() > dayEnd.getTime() + 24 * 60 * 60 * 1000) {
       return NextResponse.json(
-        { message: "You cannot mark attendance for a day that has already finished." },
+        { message: "You can no longer edit attendance for this day." },
         { status: 400 }
       );
     }

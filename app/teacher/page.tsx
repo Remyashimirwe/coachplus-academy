@@ -306,8 +306,8 @@ export default function TeacherPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="font-bold text-slate-800">My Students</h2>
-            <Link href="/teacher/students" className="text-xs font-bold text-[#E91E63] hover:text-[#7B1FA2]">
+            <h2 className="font-semibold text-slate-700">My Students</h2>
+            <Link href="/teacher/students" className="text-xs font-semibold text-[#E91E63] hover:text-[#7B1FA2]">
               Manage
             </Link>
           </div>
@@ -330,12 +330,12 @@ export default function TeacherPage() {
                     selected?.id === s.id ? "bg-rose-50/40" : ""
                   }`}
                 >
-                  <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold shrink-0">
+                  <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-semibold shrink-0">
                     {s.user.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900 truncate">{s.user.name}</p>
-                    <p className="text-xs text-slate-500 truncate">
+                    <p className="text-[13px] font-semibold text-slate-900 truncate">{s.user.name}</p>
+                    <p className="text-[11px] text-slate-500 truncate">
                       {(s.program || s.subjects) && [s.program, s.subjects].filter(Boolean).join(" · ")}
                       {s.preferredTime && ` • ${s.preferredTime}`}
                     </p>

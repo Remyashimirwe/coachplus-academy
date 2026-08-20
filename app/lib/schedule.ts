@@ -106,3 +106,18 @@ export function buildPreferredTime(slots: DayTimeSlot[]): string {
     .map((s) => `${s.day}: ${s.from} - ${s.to}`);
   return clean.join(", ");
 }
+
+/** The end of a calendar day (23:59:59.999) in local time. */
+function endOfDay(iso: string): Date {
+  const end = parseLocalISODate(iso);
+  end.setHours(23, 59, 59, 999);
+  return end;
+}
+
+/**
+ * A day's attendance can be edited for 24 hours after that day ends. Once that
+ * window passes, the day is locked and can no longer be marked or changed.
+ */
+export function isDayLocked(iso: string): boolean {
+  return Date.now() > endOfDay(iso).getTime() + 24 * 60 * 60 * 1000;
+}

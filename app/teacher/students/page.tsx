@@ -57,8 +57,8 @@ export default function TeacherStudentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">My Students</h1>
-        <p className="text-slate-500 mt-1 text-sm">Click a student to view their profile.</p>
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">My Students</h1>
+        <p className="text-slate-500 mt-1 text-xs">Click a student to view their profile.</p>
       </div>
 
       {loading ? (
@@ -68,13 +68,13 @@ export default function TeacherStudentsPage() {
       ) : students.length === 0 ? (
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-10 text-center">
           <FiUsers className="size-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-slate-500 font-semibold">No students assigned to you yet.</p>
+          <p className="text-slate-500 font-medium">No students assigned to you yet.</p>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
           <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-slate-100">
-              <h2 className="font-bold text-slate-800">Assigned Students</h2>
+              <h2 className="font-semibold text-slate-700">Assigned Students</h2>
             </div>
             <div className="divide-y divide-slate-100">
               {students.map((s) => (
@@ -85,12 +85,12 @@ export default function TeacherStudentsPage() {
                     selected?.id === s.id ? "bg-rose-50/40" : ""
                   }`}
                 >
-                  <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-bold shrink-0">
+                  <div className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center font-semibold shrink-0">
                     {s.user.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900 truncate">{s.user.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{s.user.email}</p>
+                    <p className="text-[13px] font-semibold text-slate-900 truncate">{s.user.name}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{s.user.email}</p>
                   </div>
                   <FiChevronLeft className="size-4 rotate-180 text-slate-300 shrink-0" />
                 </button>
@@ -102,12 +102,12 @@ export default function TeacherStudentsPage() {
             <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-100 bg-gradient-to-tr from-slate-50 to-white">
                 <div className="flex items-center gap-4">
-                  <div className="size-14 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center text-lg font-black shrink-0">
+                  <div className="size-14 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center text-base font-semibold shrink-0">
                     {selected.user.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-lg font-black text-slate-900 truncate">{selected.user.name}</h2>
-                    <p className="text-sm text-slate-500 truncate">{selected.user.email}</p>
+                    <h2 className="text-base font-semibold text-slate-900 truncate">{selected.user.name}</h2>
+                    <p className="text-xs text-slate-500 truncate">{selected.user.email}</p>
                   </div>
                 </div>
               </div>
@@ -118,8 +118,8 @@ export default function TeacherStudentsPage() {
                       <row.icon className="size-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{row.label}</p>
-                      <p className="text-sm font-semibold text-slate-800 break-words">{row.value}</p>
+                      <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">{row.label}</p>
+                      <p className="text-[13px] font-normal text-slate-700 break-words">{row.value}</p>
                     </div>
                   </div>
                 ))}
@@ -130,7 +130,7 @@ export default function TeacherStudentsPage() {
               <div className="size-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
                 <FiUser className="size-8 text-slate-300" />
               </div>
-              <p className="text-slate-500 font-semibold">Select a student to view their profile</p>
+              <p className="text-slate-500 font-medium">Select a student to view their profile</p>
               <p className="text-xs text-slate-400 mt-1">Name, preferred time, location, program & subjects, and learning mode.</p>
             </div>
           )}

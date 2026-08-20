@@ -23,6 +23,7 @@ import {
 } from "react-icons/fi";
 import {
   dayNameFromDate,
+  isDayLocked,
   isPreferredDay,
   parseLocalISODate,
   timeSlotForDay,
@@ -532,7 +533,7 @@ export default function AttendancePage() {
               View each student&apos;s profile and mark their weekly attendance. Pick a student below to open their schedule for the selected week.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <button
               onClick={() => shiftWeek(-1)}
               className="p-2.5 rounded-xl bg-white/10 text-white ring-1 ring-white/15 backdrop-blur transition-all hover:bg-white/20"
@@ -540,9 +541,9 @@ export default function AttendancePage() {
             >
               <FiChevronLeft className="size-4" />
             </button>
-            <div className="flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 ring-1 ring-white/15 backdrop-blur">
-              <FiCalendar className="size-4 text-white/80" />
-              <span className="text-xs font-medium text-white whitespace-nowrap">{weekLabel}</span>
+            <div className="flex items-center gap-2 rounded-2xl bg-white/10 px-3 sm:px-4 py-2.5 ring-1 ring-white/15 backdrop-blur">
+              <FiCalendar className="size-4 text-white/80 shrink-0" />
+              <span className="text-[11px] sm:text-xs font-medium text-white whitespace-nowrap">{weekLabel}</span>
             </div>
             <button
               onClick={() => shiftWeek(1)}
@@ -553,7 +554,7 @@ export default function AttendancePage() {
             </button>
             <button
               onClick={() => setWeekStart(toISODate(weekRange(new Date()).start))}
-              className="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-[11px] font-semibold shadow-lg shadow-black/30 transition-all hover:bg-slate-200"
+              className="px-3 sm:px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-[11px] font-semibold shadow-lg shadow-black/30 transition-all hover:bg-slate-200"
             >
               This week
             </button>
@@ -682,12 +683,12 @@ export default function AttendancePage() {
       </div>
 
       {selectedStudent && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
           <div
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setSelectedStudent(null)}
           />
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-black/30 flex flex-col ring-1 ring-slate-900/10">
+          <div className="relative w-full sm:max-w-4xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden rounded-t-[28px] sm:rounded-[28px] bg-white shadow-2xl shadow-black/30 flex flex-col ring-1 ring-slate-900/10">
             <button
               onClick={() => setSelectedStudent(null)}
               className="absolute right-4 top-4 z-20 rounded-2xl bg-white/80 backdrop-blur p-2.5 text-slate-500 shadow-lg ring-1 ring-slate-200/60 transition-all hover:bg-slate-100 hover:text-slate-900 hover:rotate-90 duration-200"
@@ -697,7 +698,7 @@ export default function AttendancePage() {
             </button>
 
             <div className="flex-1 min-w-0 overflow-y-auto">
-              <div className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#262626] p-6 sm:p-7 text-white">
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#262626] p-4 sm:p-7 text-white">
                 <div className="absolute -top-20 -right-16 size-56 rounded-full bg-white/10 blur-3xl" />
                 <div className="absolute -bottom-24 -left-10 size-48 rounded-full bg-white/5 blur-3xl" />
                 <div className="relative flex items-center gap-3">
@@ -718,7 +719,7 @@ export default function AttendancePage() {
                 </div>
               </div>
 
-              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-slate-100 bg-slate-50/40">
+              <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-slate-100 bg-slate-50/40">
                 {detailRows(selectedStudent).map((row) => (
                   <div key={row.label} className="flex items-start gap-3 rounded-2xl bg-white border border-slate-100 p-3.5 shadow-sm">
                     <div className={`size-8 rounded-xl ${row.color} flex items-center justify-center shrink-0 mt-0.5`}>
@@ -732,7 +733,7 @@ export default function AttendancePage() {
                 ))}
               </div>
 
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-slate-900 flex items-center gap-2">
                     <FiCalendar className="size-4 text-slate-900" /> Weekly Attendance
@@ -743,7 +744,7 @@ export default function AttendancePage() {
                     const iso = toISODate(day);
                     const mark = marks[iso];
                     const isToday = iso === today;
-                    const isPast = iso < today;
+                    const isPast = isDayLocked(iso);
                     const cellError = cellErrors[iso];
                     const timeError = timeErrors[iso];
                     const isSaving = saving[iso];
