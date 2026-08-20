@@ -707,7 +707,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                         className="group relative w-full overflow-hidden rounded-2xl bg-[#E91E63] p-4 text-base font-semibold text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
                                         <div
-                                            className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-500 group-hover:translate-x-full"/>
+                                            className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 -translate-x-full transition-transform duration-500 group-hover:translate-x-full"/>
                                         <span className="relative flex items-center justify-center gap-3">
                       {status === "submitting" ? "Sending..." : "Send My Request"}
                                             <FiSend
