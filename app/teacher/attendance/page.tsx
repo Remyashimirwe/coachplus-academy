@@ -50,8 +50,8 @@ interface AttendanceRow {
 }
 
 const STATUS_OPTIONS = [
-  { value: "PRESENT", label: "Present", icon: FiCheckCircle, activeClass: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-500/25" },
-  { value: "ABSENT", label: "Absent", icon: FiXCircle, activeClass: "bg-rose-500 text-white border-rose-500 shadow-rose-500/25" },
+  { value: "PRESENT", label: "Present", icon: FiCheckCircle, activeClass: "bg-black text-white border-black shadow-black/30" },
+  { value: "ABSENT", label: "Absent", icon: FiXCircle, activeClass: "bg-white text-slate-900 border-slate-400 shadow-slate-900/20" },
 ] as const;
 
 function todayISO() {
@@ -139,18 +139,18 @@ function DayCard({
         isPast
           ? "border-slate-100 bg-slate-50/60 opacity-80"
           : expected
-            ? "border-emerald-200/70 bg-gradient-to-br from-emerald-50/70 to-white shadow-sm shadow-emerald-100/50"
+            ? "border-slate-200/70 bg-gradient-to-br from-slate-50/70 to-white shadow-sm shadow-slate-100/50"
             : "border-slate-100 bg-white shadow-sm shadow-slate-100/50"
-      } ${isToday ? "ring-2 ring-[#E91E63]/30" : ""}`}
+      } ${isToday ? "ring-2 ring-slate-900/20" : ""}`}
     >
       <div className="flex items-center justify-between mb-2.5">
         <div>
-          <p className={`text-[13px] font-bold ${isToday ? "text-[#E91E63]" : "text-slate-800"}`}>
+          <p className={`text-[13px] font-bold ${isToday ? "text-black" : "text-slate-800"}`}>
             {day.date.toLocaleDateString("en-US", { weekday: "long" })}
           </p>
           <p className="text-[11px] text-slate-500">
             {day.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            {isToday && <span className="font-semibold text-[#E91E63]"> • Today</span>}
+            {isToday && <span className="font-semibold text-black"> • Today</span>}
           </p>
         </div>
         {isPast ? (
@@ -158,7 +158,7 @@ function DayCard({
             <FiLock className="size-2.5" /> Finished
           </span>
         ) : expected ? (
-          <span className="rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-semibold uppercase px-2 py-0.5 tracking-tighter">
+          <span className="rounded-full bg-slate-200 text-slate-700 text-[9px] font-semibold uppercase px-2 py-0.5 tracking-tighter">
             Scheduled
           </span>
         ) : null}
@@ -170,9 +170,9 @@ function DayCard({
             {expectedList.map((slot) => (
               <li
                 key={slot.time}
-                className="rounded-xl bg-white border border-emerald-100 px-2.5 py-1.5 text-[10px] shadow-sm"
+                className="rounded-xl bg-white border border-slate-200 px-2.5 py-1.5 text-[10px] shadow-sm"
               >
-                <span className="font-bold text-emerald-700">{slot.time}</span>
+                <span className="font-bold text-slate-900">{slot.time}</span>
                 <span className="text-slate-300 mx-1">•</span>
                 <span className="text-slate-600 font-medium">{slot.names.join(", ")}</span>
               </li>
@@ -190,8 +190,8 @@ function DayCard({
           <span
             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-semibold ${
               mark.status === "PRESENT"
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-rose-100 text-rose-700"
+                ? "bg-slate-900 text-white"
+                : "bg-slate-200 text-slate-700"
             }`}
           >
             {mark.status === "PRESENT" ? (
@@ -260,8 +260,8 @@ function DayCard({
                     }}
                     className={`w-full rounded-xl border px-2.5 py-2 text-[10px] outline-none transition-all ${
                       timeError
-                        ? "border-rose-300 bg-rose-50 text-rose-700"
-                        : "border-slate-200 bg-white text-slate-700 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                        ? "border-slate-400 bg-slate-100 text-slate-800"
+                        : "border-slate-200 bg-white text-slate-700 focus:border-slate-400 focus:ring-2 focus:ring-slate-400/10"
                     }`}
                   />
                 </div>
@@ -287,8 +287,8 @@ function DayCard({
                     }}
                     className={`w-full rounded-xl border px-2.5 py-2 text-[10px] outline-none transition-all ${
                       timeError
-                        ? "border-rose-300 bg-rose-50 text-rose-700"
-                        : "border-slate-200 bg-white text-slate-700 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                        ? "border-slate-400 bg-slate-100 text-slate-800"
+                        : "border-slate-200 bg-white text-slate-700 focus:border-slate-400 focus:ring-2 focus:ring-slate-400/10"
                     }`}
                   />
                 </div>
@@ -313,8 +313,8 @@ function DayCard({
               placeholder="Reason (required)"
               className={`w-full rounded-xl border px-3 py-2 text-[10px] outline-none transition-all ${
                 cellError
-                  ? "border-rose-300 bg-rose-50 text-rose-700"
-                  : "border-slate-200 bg-white text-slate-700 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                  ? "border-slate-400 bg-slate-100 text-slate-800"
+                  : "border-slate-200 bg-white text-slate-700 focus:border-slate-400 focus:ring-2 focus:ring-slate-400/10"
               }`}
             />
           )}
@@ -332,13 +332,13 @@ function DayCard({
           )}
 
           {timeError && (
-            <p className="mt-1.5 text-[9px] font-semibold text-rose-600 flex items-center gap-1">
+            <p className="mt-1.5 text-[9px] font-semibold text-slate-700 flex items-center gap-1">
               <FiAlertCircle className="size-3 shrink-0" /> {timeError}
             </p>
           )}
 
           {cellError && (
-            <p className="mt-1.5 text-[9px] font-semibold text-rose-600 flex items-center gap-1">
+            <p className="mt-1.5 text-[9px] font-semibold text-slate-700 flex items-center gap-1">
               <FiAlertCircle className="size-3 shrink-0" /> {cellError}
             </p>
           )}
@@ -406,11 +406,11 @@ export default function AttendancePage() {
   }, [students, search]);
 
   const detailRows = (s: StudentRow) => [
-    { icon: FiBookOpen, label: "Program & Subjects", value: [s.program, s.subjects].filter(Boolean).join(" · ") || "Not specified", color: "text-indigo-600 bg-indigo-50" },
-    { icon: FiClock, label: "Preferred Time", value: s.preferredTime || "Not specified", color: "text-rose-600 bg-rose-50" },
-    { icon: FiCalendar, label: "Preferred Days", value: s.preferredDays || "Not specified", color: "text-emerald-600 bg-emerald-50" },
-    { icon: FiMapPin, label: "Location", value: s.branch || "Not specified", color: "text-amber-600 bg-amber-50" },
-    { icon: FiMonitor, label: "Learning Mode", value: s.learningMode || "Not specified", color: "text-violet-600 bg-violet-50" },
+    { icon: FiBookOpen, label: "Program & Subjects", value: [s.program, s.subjects].filter(Boolean).join(" · ") || "Not specified", color: "text-slate-700 bg-slate-100" },
+    { icon: FiClock, label: "Preferred Time", value: s.preferredTime || "Not specified", color: "text-slate-700 bg-slate-100" },
+    { icon: FiCalendar, label: "Preferred Days", value: s.preferredDays || "Not specified", color: "text-slate-700 bg-slate-100" },
+    { icon: FiMapPin, label: "Location", value: s.branch || "Not specified", color: "text-slate-700 bg-slate-100" },
+    { icon: FiMonitor, label: "Learning Mode", value: s.learningMode || "Not specified", color: "text-slate-700 bg-slate-100" },
   ];
 
   const weekSchedule: DaySchedule[] = useMemo(() => {
@@ -499,9 +499,9 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#4a044e] p-6 sm:p-8 text-white shadow-xl shadow-indigo-950/20">
-        <div className="absolute -top-24 -right-24 size-64 rounded-full bg-[#E91E63]/30 blur-3xl" />
-        <div className="absolute -bottom-32 -left-16 size-72 rounded-full bg-[#FF5733]/20 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#262626] p-6 sm:p-8 text-white shadow-xl shadow-black/20">
+        <div className="absolute -top-24 -right-24 size-64 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-16 size-72 rounded-full bg-white/5 blur-3xl" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -525,7 +525,7 @@ export default function AttendancePage() {
               <FiChevronLeft className="size-4" />
             </button>
             <div className="flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 ring-1 ring-white/15 backdrop-blur">
-              <FiCalendar className="size-4 text-[#FF8FB3]" />
+              <FiCalendar className="size-4 text-white/80" />
               <span className="text-xs font-medium text-white whitespace-nowrap">{weekLabel}</span>
             </div>
             <button
@@ -537,7 +537,7 @@ export default function AttendancePage() {
             </button>
             <button
               onClick={() => setWeekStart(toISODate(weekRange(new Date()).start))}
-              className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] text-white text-[11px] font-semibold shadow-lg shadow-rose-500/30 transition-all hover:shadow-rose-500/50 hover:brightness-110"
+              className="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-[11px] font-semibold shadow-lg shadow-black/30 transition-all hover:bg-slate-200"
             >
               This week
             </button>
@@ -549,7 +549,7 @@ export default function AttendancePage() {
         <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h2 className="font-bold text-slate-900 flex items-center gap-2.5">
-              <span className="size-8 rounded-xl bg-gradient-to-br from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center shadow-md shadow-rose-500/20">
+              <span className="size-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md shadow-slate-900/20">
                 <FiUser className="size-4" />
               </span>
               My Students
@@ -558,7 +558,7 @@ export default function AttendancePage() {
               Click a student to view their profile and attendance for the week.
             </p>
           </div>
-          <span className="rounded-full bg-gradient-to-r from-[#FF5733]/10 to-[#E91E63]/10 text-[#E91E63] text-[10px] font-semibold px-3.5 py-1.5 w-fit ring-1 ring-[#E91E63]/20">
+          <span className="rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold px-3.5 py-1.5 w-fit ring-1 ring-slate-200">
             {students.length} {students.length === 1 ? "student" : "students"} assigned
           </span>
         </div>
@@ -570,7 +570,7 @@ export default function AttendancePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search students by name, email or program..."
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-4 focus:ring-[#E91E63]/10"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-400/10"
             />
           </div>
           {filteredStudents.length === 0 ? (
@@ -600,19 +600,19 @@ export default function AttendancePage() {
                         key={s.id}
                         onClick={() => setSelectedStudent(s)}
                         className={`group cursor-pointer transition-all duration-200 ${
-                          isActive ? "bg-gradient-to-r from-rose-50/80 to-transparent" : "hover:bg-slate-50/70"
+                          isActive ? "bg-slate-50" : "hover:bg-slate-50/70"
                         }`}
                       >
                         <td className="py-3 pr-3">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative shrink-0">
-                              <div className="size-9 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center text-xs font-bold shadow-md shadow-rose-500/20">
+                              <div className="size-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-md shadow-slate-900/20">
                                 {s.user.name.charAt(0)}
                               </div>
-                              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-400 ring-2 ring-white" />
+                              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-white ring-2 ring-slate-900" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[13px] font-semibold text-slate-900 truncate group-hover:text-[#E91E63] transition-colors">
+                              <p className="text-[13px] font-semibold text-slate-900 truncate group-hover:text-black transition-colors">
                                 {s.user.name}
                               </p>
                               <p className="text-[11px] text-slate-400 truncate">{s.user.email}</p>
@@ -626,7 +626,7 @@ export default function AttendancePage() {
                         </td>
                         <td className="py-3 pr-3">
                           {s.preferredTime ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-semibold px-2.5 py-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold px-2.5 py-1">
                               <FiClock className="size-3" />
                               {s.preferredTime}
                             </span>
@@ -647,8 +647,8 @@ export default function AttendancePage() {
                             }}
                             className={`inline-flex items-center gap-1.5 rounded-xl border-2 px-3.5 py-2 text-[11px] font-semibold transition-all active:scale-95 ${
                               isActive
-                                ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-500/25"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-[#E91E63] hover:text-[#E91E63] hover:shadow-md hover:shadow-rose-500/10"
+                                ? "bg-black border-black text-white shadow-lg shadow-black/25"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-black hover:text-black hover:shadow-md hover:shadow-black/10"
                             }`}
                           >
                             <FiCalendar className="size-3.5" />
@@ -671,21 +671,21 @@ export default function AttendancePage() {
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setSelectedStudent(null)}
           />
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-900/30 flex flex-col ring-1 ring-white/10">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-black/30 flex flex-col ring-1 ring-slate-900/10">
             <button
               onClick={() => setSelectedStudent(null)}
-              className="absolute right-4 top-4 z-20 rounded-2xl bg-white/80 backdrop-blur p-2.5 text-slate-500 shadow-lg ring-1 ring-slate-200/60 transition-all hover:bg-rose-50 hover:text-[#E91E63] hover:rotate-90 duration-200"
+              className="absolute right-4 top-4 z-20 rounded-2xl bg-white/80 backdrop-blur p-2.5 text-slate-500 shadow-lg ring-1 ring-slate-200/60 transition-all hover:bg-slate-100 hover:text-slate-900 hover:rotate-90 duration-200"
               title="Close"
             >
               <FiX className="size-4" />
             </button>
 
             <div className="flex-1 min-w-0 overflow-y-auto">
-              <div className="relative overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#4a044e] p-6 sm:p-7 text-white">
-                <div className="absolute -top-20 -right-16 size-56 rounded-full bg-[#E91E63]/25 blur-3xl" />
-                <div className="absolute -bottom-24 -left-10 size-48 rounded-full bg-[#FF5733]/20 blur-3xl" />
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#171717] to-[#262626] p-6 sm:p-7 text-white">
+                <div className="absolute -top-20 -right-16 size-56 rounded-full bg-white/10 blur-3xl" />
+                <div className="absolute -bottom-24 -left-10 size-48 rounded-full bg-white/5 blur-3xl" />
                 <div className="relative flex items-center gap-3">
-                  <div className="size-12 rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center text-sm font-semibold shrink-0 shadow-lg shadow-rose-500/30 ring-2 ring-white/15">
+                  <div className="size-12 rounded-2xl bg-white text-slate-900 flex items-center justify-center text-sm font-semibold shrink-0 shadow-lg shadow-black/30 ring-2 ring-white/15">
                     {selectedStudent.user.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
@@ -719,7 +719,7 @@ export default function AttendancePage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                    <FiCalendar className="size-4 text-[#E91E63]" /> Weekly Attendance
+                    <FiCalendar className="size-4 text-slate-900" /> Weekly Attendance
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

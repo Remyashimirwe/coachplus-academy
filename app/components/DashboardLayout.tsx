@@ -77,19 +77,19 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
       onClick={onClick}
       className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
         isActive
-          ? "bg-gradient-to-r from-[#E91E63] to-[#7B1FA2] text-white shadow-lg shadow-rose-500/20"
+          ? "bg-white text-slate-900 shadow-lg shadow-black/20"
           : "text-slate-400 hover:bg-slate-800 hover:text-white"
       }`}
     >
       <span
-        className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-white transition-all ${
+        className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-slate-900 transition-all ${
           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40"
         }`}
       />
       <item.icon className="size-5 shrink-0" />
       <span className="truncate">{item.label}</span>
       {!!item.badge && (
-        <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-amber-400 text-[#0F172A] text-[10px] font-black flex items-center justify-center">
+        <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-white text-[#0F172A] text-[10px] font-black flex items-center justify-center">
           {item.badge}
         </span>
       )}
@@ -212,14 +212,14 @@ export default function DashboardLayout({
         <div className="flex h-20 shrink-0 items-center gap-3 px-8 border-b border-slate-800">
           <img src="/logo.png" alt="CoachPlus Academy" className="size-9 rounded-lg" />
           <span className="text-xl font-bold tracking-tight">
-            CoachPlus <span className="text-[#E91E63]">Academy</span>
+            CoachPlus <span className="text-white">Academy</span>
           </span>
         </div>
 
         <div className="px-6 py-5 border-b border-slate-800 shrink-0">
             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2.5">Signed in as</p>
             <div className="flex items-center gap-3">
-                <Avatar user={displayUser} className="size-10 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] border border-white/20 text-white font-black text-sm shrink-0" />
+                <Avatar user={displayUser} className="size-10 rounded-full bg-white text-slate-900 border border-white/20 font-black text-sm shrink-0" />
                 <div className="overflow-hidden min-w-0">
                     <p className="text-sm font-bold truncate">{displayUser.name}</p>
                     <p className="text-[10px] text-slate-400 truncate">{displayUser.email}</p>
@@ -268,7 +268,7 @@ export default function DashboardLayout({
         <div className="shrink-0 border-t border-slate-800 w-full px-4 py-4 space-y-2">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-500"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-400 transition hover:bg-slate-800 hover:text-white"
           >
             <FiLogOut className="size-5" />
             Sign Out
@@ -292,7 +292,7 @@ export default function DashboardLayout({
                 <h1 className="text-lg font-bold text-slate-900 truncate leading-tight">{resolvedTitle}</h1>
                 <p className="text-[11px] font-medium text-slate-400 truncate">CoachPlus Academy · {user.role} portal</p>
               </div>
-              <div className="hidden lg:flex items-center gap-2 ml-4 bg-slate-100 hover:bg-slate-200/60 focus-within:bg-white border border-transparent focus-within:border-[#E91E63]/30 focus-within:ring-2 focus-within:ring-[#E91E63]/10 px-3.5 py-2 rounded-xl text-slate-500 transition-all">
+              <div className="hidden lg:flex items-center gap-2 ml-4 bg-slate-100 hover:bg-slate-200/60 focus-within:bg-white border border-transparent focus-within:border-slate-400/50 focus-within:ring-2 focus-within:ring-slate-400/10 px-3.5 py-2 rounded-xl text-slate-500 transition-all">
                 <FiSearch className="size-4 shrink-0" />
                 <input
                   type="text"
@@ -305,7 +305,7 @@ export default function DashboardLayout({
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <Link
                 href="/"
-                className="hidden sm:flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#E91E63] px-3 py-2 rounded-xl hover:bg-rose-50 transition-colors"
+                className="hidden sm:flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors"
               >
                 <FiHome className="size-4" />
                 Live Site
@@ -320,7 +320,7 @@ export default function DashboardLayout({
                 >
                   <FiBell className="size-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 size-2 bg-rose-500 rounded-full border-2 border-white" />
+                    <span className="absolute top-1.5 right-1.5 size-2 bg-slate-900 rounded-full border-2 border-white" />
                   )}
                 </button>
 
@@ -331,22 +331,22 @@ export default function DashboardLayout({
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllRead}
-                          className="text-[10px] font-bold text-[#E91E63] hover:underline"
+                          className="text-[10px] font-bold text-slate-700 hover:underline"
                         >
                           Mark all as read
                         </button>
                       )}
                     </div>
                     {canPromptNotifications && (
-                      <div className="px-4 py-3 border-b border-slate-100 bg-[#fff8e1] flex items-center gap-3">
-                        <FiBell className="size-4 text-amber-600 shrink-0" />
+                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-3">
+                        <FiBell className="size-4 text-slate-700 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-bold text-amber-800">
+                          <p className="text-[11px] font-bold text-slate-900">
                             {notificationPermission === "denied"
                               ? "Notifications are blocked in your browser."
                               : "Stay updated with browser notifications."}
                           </p>
-                          <p className="text-[10px] text-amber-700/80 mt-0.5">
+                          <p className="text-[10px] text-slate-600 mt-0.5">
                             {notificationPermission === "denied"
                               ? "Enable them in your browser site settings, or manage in Settings."
                               : "Allow them to get notified when something changes."}
@@ -354,7 +354,7 @@ export default function DashboardLayout({
                         </div>
                         <button
                           onClick={requestBrowserPermission}
-                          className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-amber-600 transition-colors"
+                          className="shrink-0 rounded-lg bg-slate-900 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-black transition-colors"
                         >
                           Allow
                         </button>
@@ -365,14 +365,10 @@ export default function DashboardLayout({
                         notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!notification.read ? "bg-rose-50/30" : ""}`}
+                            className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!notification.read ? "bg-slate-50/60" : ""}`}
                           >
                             <div className="flex gap-3">
-                              <div className={`mt-0.5 size-8 rounded-full flex items-center justify-center shrink-0 ${
-                                notification.type === "success" ? "bg-green-100 text-green-600" :
-                                notification.type === "warning" ? "bg-amber-100 text-amber-600" :
-                                "bg-blue-100 text-blue-600"
-                              }`}>
+                              <div className={`mt-0.5 size-8 rounded-full flex items-center justify-center shrink-0 bg-slate-100 text-slate-700`}>
                                 {notification.type === "success" ? <FiCheckCircle className="size-4" /> :
                                  notification.type === "warning" ? <FiAlertCircle className="size-4" /> :
                                  <FiInfo className="size-4" />}
@@ -394,7 +390,7 @@ export default function DashboardLayout({
               </div>
 
               <div className="flex items-center gap-2.5 pl-1.5 pr-2 py-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-default">
-                <Avatar user={displayUser} className="size-9 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] border-2 border-white shadow-sm text-white text-sm font-black shrink-0" />
+                <Avatar user={displayUser} className="size-9 rounded-full bg-slate-900 text-white border-2 border-slate-100 shadow-sm text-sm font-black shrink-0" />
                 <div className="hidden md:flex flex-col items-start leading-tight">
                   <span className="text-sm font-bold text-slate-800">{displayUser.name}</span>
                   <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{displayUser.role}</span>
@@ -402,7 +398,7 @@ export default function DashboardLayout({
               </div>
             </div>
           </div>
-          <div className="h-0.5 bg-gradient-to-r from-[#E91E63] via-[#FF5733] to-[#7B1FA2]" />
+          <div className="h-0.5 bg-slate-900" />
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
