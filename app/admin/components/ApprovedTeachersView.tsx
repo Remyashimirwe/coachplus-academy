@@ -5,7 +5,6 @@ import {
   FiUsers,
   FiMail,
   FiPhone,
-  FiMapPin,
   FiBookOpen,
   FiSearch,
   FiCheckCircle,
@@ -24,8 +23,7 @@ export default function ApprovedTeachersView({ teachers }: any) {
       (t: any) =>
         t.user.name.toLowerCase().includes(q) ||
         t.user.email.toLowerCase().includes(q) ||
-        String(t.subjects || "").toLowerCase().includes(q) ||
-        String(t.branch || "").toLowerCase().includes(q)
+        String(t.subjects || "").toLowerCase().includes(q)
     );
   }, [teachers, search]);
 
@@ -106,7 +104,7 @@ export default function ApprovedTeachersView({ teachers }: any) {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email, subject or branch..."
+          placeholder="Search by name, email or subject..."
           className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
         />
       </div>
@@ -124,7 +122,6 @@ export default function ApprovedTeachersView({ teachers }: any) {
                 <tr>
                   <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Teacher</th>
                   <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Contact</th>
-                  <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Branch</th>
                   <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Subjects</th>
                   <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Students</th>
                   <th className="px-5 py-3 text-xs font-bold uppercase text-slate-500">Joined</th>
@@ -159,11 +156,6 @@ export default function ApprovedTeachersView({ teachers }: any) {
                         ) : (
                           <span className="text-xs text-slate-400">—</span>
                         )}
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="text-xs text-slate-600 flex items-center gap-1.5">
-                          <FiMapPin className="size-3 text-slate-300 shrink-0" /> {t.branch || "—"}
-                        </p>
                       </td>
                       <td className="px-5 py-4 text-xs text-slate-500 max-w-[220px] truncate">{t.subjects || "—"}</td>
                       <td className="px-5 py-4">
