@@ -226,7 +226,7 @@ export default function StudentSettingsPage() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">Select at least one day above.</p>
+                  <p className="text-xs text-slate-400 italic">No days selected yet. Save with no days to clear your schedule.</p>
                 )}
 
                 {status && (
@@ -240,7 +240,7 @@ export default function StudentSettingsPage() {
 
                 <button
                   onClick={handleSave}
-                  disabled={saving || days.length === 0}
+                  disabled={saving}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#E91E63] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/20 hover:bg-[#7B1FA2] transition-all disabled:opacity-50"
                 >
                   {saving ? <FiLoader className="size-4 animate-spin" /> : <FiSave className="size-4" />}

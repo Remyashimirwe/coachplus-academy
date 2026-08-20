@@ -41,6 +41,19 @@ const STATUS_OPTIONS = [
   { value: "ABSENT", label: "Absent", icon: FiXCircle, activeClass: "bg-rose-500 text-white border-rose-500 shadow-rose-500/25" },
 ] as const;
 
+function parseTimeUsed(value?: string | null): { from: string; to: string } {
+  if (!value) return { from: "", to: "" };
+  const match = value.match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/);
+  if (match) return { from: match[1], to: match[2] };
+  return { from: value, to: "" };
+}
+
+function combineTime(from: string, to: string): string {
+  const f = from.trim();
+  const t = to.trim();
+  return f && t ? `${f} - ${t}` : "";
+}
+
 interface DaySchedule {
   iso: string;
   date: Date;
@@ -54,7 +67,7 @@ export default function StudentAttendancePage() {
   const [marks, setMarks] = useState<Record<string, SelfMark>>({});
   const [teacherRecords, setTeacherRecords] = useState<TeacherRecord[]>([]);
   const [reasonDrafts, setReasonDrafts] = useState<Record<string, string>>({});
-  const [timeUsedDrafts, setTimeUsedDrafts] = useState<Record<string, string>>({});
+  const [timeUsedDrafts, setTimeUsedDrafts] = useState<Record<string, { from: string; to: string }>>({});
   const [cellErrors, setCellErrors] = useState<Record<string, string | undefined>>({});
   const [timeErrors, setTimeErrors] = useState<Record<string, string | undefined>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
@@ -161,7 +174,8 @@ export default function StudentAttendancePage() {
 
     const deviates = (day.preferred && status === "ABSENT") || (!day.preferred && status === "PRESENT");
     const reason = (reasonDrafts[day.iso] ?? "").trim();
-    const timeUsed = (timeUsedDrafts[day.iso] ?? "").trim();
+    const draft = timeUsedDrafts[day.iso];
+    const timeUsed = combineTime(draft?.from ?? "", draft?.to ?? "");
 
     if (status === "PRESENT" && !timeUsed) {
       setTimeErrors((prev) => ({ ...prev, [day.iso]: "Please enter the time you used." }));
@@ -338,18 +352,42 @@ export default function StudentAttendancePage() {
 
                 {!isPast && (timeError || mark?.status === "PRESENT") && (
                   <div className="mt-2.5">
-                    <input
-                      type="text"
-                      value={timeUsedDrafts[day.iso] ?? mark?.timeUsed ?? ""}
-                      onChange={(e) => {
-                        setTimeUsedDrafts((prev) => ({ ...prev, [day.iso]: e.target.value }));
-                        if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
-                      }}
-                      placeholder="Time used (e.g. 08:00 - 10:00)"
-                      className={`w-full rounded-xl border px-3 py-2 text-xs outline-none transition-all ${
-                        timeError ? "border-rose-400 ring-2 ring-rose-500/10" : "border-slate-200 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
-                      } bg-white text-slate-700`}
-                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">From</label>
+                        <input
+                          type="time"
+                          value={timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from}
+                          onChange={(e) => {
+                            setTimeUsedDrafts((prev) => ({
+                              ...prev,
+                              [day.iso]: { from: e.target.value, to: timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to },
+                            }));
+                            if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
+                          }}
+                          className={`w-full rounded-xl border px-3 py-2 text-xs outline-none transition-all ${
+                            timeError ? "border-rose-400 ring-2 ring-rose-500/10" : "border-slate-200 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                          } bg-white text-slate-700`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">To</label>
+                        <input
+                          type="time"
+                          value={timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to}
+                          onChange={(e) => {
+                            setTimeUsedDrafts((prev) => ({
+                              ...prev,
+                              [day.iso]: { from: timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from, to: e.target.value },
+                            }));
+                            if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
+                          }}
+                          className={`w-full rounded-xl border px-3 py-2 text-xs outline-none transition-all ${
+                            timeError ? "border-rose-400 ring-2 ring-rose-500/10" : "border-slate-200 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                          } bg-white text-slate-700`}
+                        />
+                      </div>
+                    </div>
                     {timeError && (
                       <p className="text-[10px] text-rose-600 font-semibold mt-1">{timeError}</p>
                     )}
