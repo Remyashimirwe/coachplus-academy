@@ -14,6 +14,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiPhone,
+  FiX,
 } from "react-icons/fi";
 import { toISODate } from "@/app/lib/schedule";
 
@@ -291,15 +292,14 @@ export default function AdminAttendancePage() {
           <FiUsers className="size-8 animate-pulse" />
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* People list */}
-          <div className="lg:col-span-2 rounded-[28px] bg-white p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-[11px] font-semibold text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
-                <FiUsers /> {tab === "teacher" ? "Teachers" : "Students"}
-              </h2>
-              <span className="text-[10px] font-semibold text-slate-400">{filteredPeople.length}</span>
-            </div>
+        <>
+        <div className="rounded-[28px] bg-white p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-[11px] font-semibold text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
+              <FiUsers /> {tab === "teacher" ? "Teachers" : "Students"}
+            </h2>
+            <span className="text-[10px] font-semibold text-slate-400">{filteredPeople.length}</span>
+          </div>
             <div className="relative">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
               <input
@@ -361,122 +361,128 @@ export default function AdminAttendancePage() {
             </div>
           </div>
 
-          {/* Detail */}
-          {selected ? (
-            <div className="lg:col-span-3 rounded-[28px] bg-white border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-5 sm:p-6 border-b border-slate-100 bg-gradient-to-tr from-slate-50 to-white">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <div className="size-14 rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center text-lg font-black shrink-0">
-                    {selected.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{selected.name}</h2>
-                    <p className="text-xs text-slate-500 truncate">{selected.email}</p>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px] font-semibold">
-                      {selected.branch && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-slate-600">
-                          <FiMapPin className="size-2.5" /> {selected.branch}
-                        </span>
-                      )}
-                      {selected.phone && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-slate-600">
-                          <FiPhone className="size-2.5" /> {selected.phone}
-                        </span>
-                      )}
+        {/* Detail popup */}
+        {selected && (
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
+            <div
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+              onClick={() => setSelectedId(null)}
+            />
+            <div className="relative w-full sm:max-w-4xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden rounded-t-[28px] sm:rounded-[28px] bg-white shadow-2xl shadow-black/30 flex flex-col ring-1 ring-slate-900/10">
+              <button
+                onClick={() => setSelectedId(null)}
+                className="absolute right-4 top-4 z-20 rounded-2xl bg-white/80 backdrop-blur p-2.5 text-slate-500 shadow-lg ring-1 ring-slate-200/60 transition-all hover:bg-slate-100 hover:text-slate-900 hover:rotate-90 duration-200"
+                title="Close"
+              >
+                <FiX className="size-4" />
+              </button>
+
+              <div className="flex-1 min-w-0 overflow-y-auto">
+                <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-white p-5 sm:p-7 border-b border-slate-100">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="size-14 rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center text-lg font-black shrink-0">
+                      {selected.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{selected.name}</h2>
+                      <p className="text-xs text-slate-500 truncate">{selected.email}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px] font-semibold">
+                        {selected.branch && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-slate-600">
+                            <FiMapPin className="size-2.5" /> {selected.branch}
+                          </span>
+                        )}
+                        {selected.phone && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-slate-600">
+                            <FiPhone className="size-2.5" /> {selected.phone}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
+                        <FiCheckCircle className="size-3.5" /> {selected.present} Present
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-100 px-3 py-1.5 text-[11px] font-semibold text-rose-700">
+                        <FiXCircle className="size-3.5" /> {selected.absent} Absent
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
-                      <FiCheckCircle className="size-3.5" /> {selected.present} Present
+                </div>
+
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
+                      <FiCheckCircle className="size-3.5" /> {selected.present} days studied
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-100 px-3 py-1.5 text-[11px] font-semibold text-rose-700">
-                      <FiXCircle className="size-3.5" /> {selected.absent} Absent
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-100 px-3 py-1.5 text-[11px] font-semibold text-rose-700">
+                      <FiXCircle className="size-3.5" /> {selected.absent} absent
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
+                      <FiCalendar className="size-3.5" /> {selected.records.length} total
                     </span>
                   </div>
-                </div>
-              </div>
 
-              <div className="p-5 sm:p-6 space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
-                    <FiCheckCircle className="size-3.5" /> {selected.present} days studied
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-100 px-3 py-1.5 text-[11px] font-semibold text-rose-700">
-                    <FiXCircle className="size-3.5" /> {selected.absent} absent
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
-                    <FiCalendar className="size-3.5" /> {selected.records.length} total
-                  </span>
-                </div>
+                  <AttendanceCalendar records={selected.records} />
 
-                <AttendanceCalendar records={selected.records} />
-
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">
-                    {tab === "student" ? "Recorded by teachers" : tab === "self" ? "Self-reported by student" : "Self-marked by teacher"}
-                  </p>
-                  {selected.records.length === 0 ? (
-                    <div className="p-10 text-center rounded-2xl border border-slate-100 bg-slate-50/40">
-                      <FiUser className="size-8 text-slate-300 mx-auto mb-2" />
-                      <p className="text-slate-400 italic text-sm">No attendance records yet.</p>
-                    </div>
-                  ) : (
-                    <div className="rounded-2xl border border-slate-100 overflow-hidden">
-                      <table className="w-full text-left">
-                        <thead className="bg-slate-50">
-                          <tr>
-                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Date</th>
-                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Day</th>
-                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Status</th>
-                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Time Used</th>
-                            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Remarks</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                          {selected.records.map((r) => (
-                            <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
-                              <td className="px-4 py-3 text-[13px] text-slate-700 whitespace-nowrap">
-                                {new Date(r.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                              </td>
-                              <td className="px-4 py-3 text-[11px] text-slate-500">
-                                {new Date(r.date).toLocaleDateString("en-US", { weekday: "long" })}
-                              </td>
-                              <td className="px-4 py-3">
-                                <StatusBadge status={r.status} />
-                              </td>
-                              <td className="px-4 py-3 text-[11px] text-slate-600 whitespace-nowrap">
-                                {r.timeUsed ? (
-                                  <span className="inline-flex items-center gap-1">
-                                    <FiClock className="size-3 text-slate-300" /> {r.timeUsed}
-                                  </span>
-                                ) : (
-                                  "—"
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-[11px] text-slate-500 max-w-[220px] truncate">
-                                {r.remarks || "—"}
-                              </td>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">
+                      {tab === "student" ? "Recorded by teachers" : tab === "self" ? "Self-reported by student" : "Self-marked by teacher"}
+                    </p>
+                    {selected.records.length === 0 ? (
+                      <div className="p-10 text-center rounded-2xl border border-slate-100 bg-slate-50/40">
+                        <FiUser className="size-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-slate-400 italic text-sm">No attendance records yet.</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                        <table className="w-full text-left">
+                          <thead className="bg-slate-50">
+                            <tr>
+                              <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Date</th>
+                              <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Day</th>
+                              <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Status</th>
+                              <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Time Used</th>
+                              <th className="px-4 py-2.5 text-[10px] font-semibold uppercase text-slate-500">Remarks</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                          </thead>
+                          <tbody className="divide-y divide-slate-50">
+                            {selected.records.map((r) => (
+                              <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
+                                <td className="px-4 py-3 text-[13px] text-slate-700 whitespace-nowrap">
+                                  {new Date(r.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                </td>
+                                <td className="px-4 py-3 text-[11px] text-slate-500">
+                                  {new Date(r.date).toLocaleDateString("en-US", { weekday: "long" })}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <StatusBadge status={r.status} />
+                                </td>
+                                <td className="px-4 py-3 text-[11px] text-slate-600 whitespace-nowrap">
+                                  {r.timeUsed ? (
+                                    <span className="inline-flex items-center gap-1">
+                                      <FiClock className="size-3 text-slate-300" /> {r.timeUsed}
+                                    </span>
+                                  ) : (
+                                    "—"
+                                  )}
+                                </td>
+                                <td className="px-4 py-3 text-[11px] text-slate-500 max-w-[220px] truncate">
+                                  {r.remarks || "—"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="lg:col-span-3 rounded-[28px] bg-white border border-slate-100 shadow-sm p-12 flex flex-col items-center justify-center text-center">
-              <div className="size-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
-                <FiUsers className="size-8 text-slate-300" />
-              </div>
-              <p className="text-[13px] font-semibold text-slate-600">Select a {tab === "teacher" ? "teacher" : "student"} to view their attendance</p>
-              <p className="text-xs text-slate-400 mt-1">
-                Click a name on the left to see their records, time used and remarks.
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+        </>
       )}
     </div>
   );
