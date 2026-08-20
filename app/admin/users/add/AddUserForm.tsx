@@ -27,6 +27,20 @@ interface Program {
   subjects: { id: number; name: string }[];
 }
 
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] hover:border-slate-300";
+
+function SectionHeader({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="size-7 rounded-lg bg-gradient-to-tr from-[#E91E63]/10 to-[#FF5733]/10 text-[#E91E63] flex items-center justify-center">
+        {icon}
+      </div>
+      <h3 className="text-[11px] font-semibold text-slate-700 uppercase tracking-widest">{children}</h3>
+    </div>
+  );
+}
+
 export default function AddUserForm({ programs }: { programs: Program[] }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -129,64 +143,61 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Invite New Teacher or Student</h1>
-        <p className="text-slate-500">
-          Send a direct invitation so they can log in and set up their own password to access their dashboard.
-        </p>
-      </div>
-
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="rounded-[28px] bg-white p-6 sm:p-8 shadow-sm border border-slate-200">
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Invite as</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole("STUDENT")}
-                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-3">
+            <SectionHeader icon={<FiBookOpen className="size-3.5" />}>Invite as</SectionHeader>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole("STUDENT")}
+                className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
+                  role === "STUDENT"
+                    ? "border-[#E91E63] bg-gradient-to-br from-[#E91E63]/10 via-transparent to-transparent shadow-sm"
+                    : "border-slate-200 hover:border-slate-300"
+                }`}
+              >
+                <div
+                  className={`size-11 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                     role === "STUDENT"
-                      ? "border-[#E91E63] bg-rose-50/60 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300"
+                      ? "bg-gradient-to-tr from-[#E91E63] to-[#FF5733] text-white shadow-lg shadow-rose-200"
+                      : "bg-slate-100 text-slate-500"
                   }`}
                 >
-                  <div
-                    className={`size-11 rounded-xl flex items-center justify-center shrink-0 ${
-                      role === "STUDENT" ? "bg-[#E91E63] text-white" : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    <FiBookOpen className="size-5" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-slate-900">Student</p>
-                    <p className="text-xs text-slate-500">Access their learning dashboard</p>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("TEACHER")}
-                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
-                    role === "TEACHER"
-                      ? "border-indigo-500 bg-indigo-50/60 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300"
+                  <FiBookOpen className="size-5" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-slate-900">Student</p>
+                  <p className="text-xs text-slate-500">Access their learning dashboard</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("TEACHER")}
+                className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
+                  role === "TEACHER"
+                    ? "border-indigo-500 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent shadow-sm"
+                    : "border-slate-200 hover:border-slate-300"
+                }`}
+              >
+                <div
+                  className={`size-11 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                    role === "TEACHER" ? "bg-indigo-500 text-white shadow-lg shadow-indigo-200" : "bg-slate-100 text-slate-500"
                   }`}
                 >
-                  <div
-                    className={`size-11 rounded-xl flex items-center justify-center shrink-0 ${
-                      role === "TEACHER" ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    <FiAward className="size-5" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-slate-900">Teacher</p>
-                    <p className="text-xs text-slate-500">Access their teaching dashboard</p>
-                  </div>
-                </button>
-              </div>
+                  <FiAward className="size-5" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-slate-900">Teacher</p>
+                  <p className="text-xs text-slate-500">Access their teaching dashboard</p>
+                </div>
+              </button>
             </div>
+          </div>
 
+          <div className="space-y-3">
+            <SectionHeader icon={<FiUser className="size-3.5" />}>Account details</SectionHeader>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Full Name</label>
@@ -198,7 +209,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Jane Doe"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -212,14 +223,17 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+                    className={inputClass}
                   />
                 </div>
               </div>
             </div>
+          </div>
 
-            {role === "STUDENT" && (
-              <>
+          {role === "STUDENT" && (
+            <>
+              <div className="space-y-3">
+                <SectionHeader icon={<FiMapPin className="size-3.5" />}>Student details</SectionHeader>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Location / Branch</label>
@@ -230,7 +244,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}
                         placeholder="e.g. Kigali-Remera"
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+                        className={inputClass}
                       />
                     </div>
                   </div>
@@ -243,28 +257,28 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="e.g. +250 788 000 000"
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+                        className={inputClass}
                       />
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Program / Category</label>
-                  <select
-                    value={programTitle}
-                    onChange={(e) => {
-                      setProgramTitle(e.target.value);
-                      setSubjects([]);
-                    }}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
-                  >
-                    <option value="">Select a program...</option>
-                    {programs.map((p) => (
-                      <option key={p.id} value={p.title}>{p.title}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className="space-y-3">
+                <SectionHeader icon={<FiBookOpen className="size-3.5" />}>Program &amp; subjects</SectionHeader>
+                <select
+                  value={programTitle}
+                  onChange={(e) => {
+                    setProgramTitle(e.target.value);
+                    setSubjects([]);
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] hover:border-slate-300"
+                >
+                  <option value="">Select a program...</option>
+                  {programs.map((p) => (
+                    <option key={p.id} value={p.title}>{p.title}</option>
+                  ))}
+                </select>
 
                 {programTitle && (
                   <div className="space-y-2">
@@ -277,7 +291,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                           onClick={() => toggleSubject(s.name)}
                           className={`rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
                             subjects.includes(s.name)
-                              ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
+                              ? "bg-gradient-to-tr from-[#E91E63] to-[#FF5733] border-transparent text-white shadow-lg shadow-rose-200"
                               : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
                           }`}
                         >
@@ -287,124 +301,125 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                     </div>
                   </div>
                 )}
+              </div>
 
-                <div className="space-y-2">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Learning Mode</label>
-                  <div className="flex flex-wrap gap-2">
-                    {learningModes.map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setLearningMode(m)}
-                        className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
-                          learningMode === m
-                            ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
-                            : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
-                        }`}
-                      >
-                        <FiMonitor className="size-3.5" />
-                        {m}
-                      </button>
-                    ))}
-                  </div>
+              <div className="space-y-3">
+                <SectionHeader icon={<FiMonitor className="size-3.5" />}>Learning mode</SectionHeader>
+                <div className="flex flex-wrap gap-2">
+                  {learningModes.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setLearningMode(m)}
+                      className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
+                        learningMode === m
+                          ? "bg-gradient-to-tr from-[#E91E63] to-[#FF5733] border-transparent text-white shadow-lg shadow-rose-200"
+                          : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                      }`}
+                    >
+                      <FiMonitor className="size-3.5" />
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeader icon={<FiCalendar className="size-3.5" />}>Preferred days &amp; time</SectionHeader>
+                <div className="flex flex-wrap gap-2">
+                  {daysList.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => toggleDay(d)}
+                      className={`rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
+                        selectedDays.includes(d)
+                          ? "bg-gradient-to-tr from-[#E91E63] to-[#FF5733] border-transparent text-white shadow-lg shadow-rose-200"
+                          : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ))}
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Preferred Days &amp; Time</label>
-                  <div className="flex flex-wrap gap-2">
-                    {daysList.map((d) => (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => toggleDay(d)}
-                        className={`rounded-xl px-4 py-2 text-[11px] font-medium transition-all border-2 ${
-                          selectedDays.includes(d)
-                            ? "bg-[#E91E63] border-[#E91E63] text-white shadow-lg shadow-rose-200"
-                            : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
-                        }`}
-                      >
-                        {d}
-                      </button>
-                    ))}
-                  </div>
-
-                  {selectedDays.length > 0 && (
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {selectedDays.map((d) => (
-                        <div key={d} className="rounded-2xl border-2 border-slate-100 bg-slate-50 p-4">
-                          <p className="mb-3 flex items-center gap-2 text-[11px] font-medium text-slate-700">
-                            <FiCalendar className="text-[#E91E63]" />
-                            {d}
-                          </p>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
-                              <input
-                                type="time"
-                                value={dayTimes[d]?.from || ""}
-                                onChange={(e) => updateDayTime(d, "from", e.target.value)}
-                                className="w-full mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
-                              <input
-                                type="time"
-                                value={dayTimes[d]?.to || ""}
-                                onChange={(e) => updateDayTime(d, "to", e.target.value)}
-                                className="w-full mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
-                              />
-                            </div>
+                {selectedDays.length > 0 && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {selectedDays.map((d) => (
+                      <div key={d} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="mb-3 flex items-center gap-2 text-[11px] font-medium text-slate-700">
+                          <FiCalendar className="text-[#E91E63]" />
+                          {d}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
+                            <input
+                              type="time"
+                              value={dayTimes[d]?.from || ""}
+                              onChange={(e) => updateDayTime(d, "from", e.target.value)}
+                              className="w-full mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition-all focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
+                            <input
+                              type="time"
+                              value={dayTimes[d]?.to || ""}
+                              onChange={(e) => updateDayTime(d, "to", e.target.value)}
+                              className="w-full mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition-all focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63]"
+                            />
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {result && (
-              <div
-                className={`rounded-2xl p-4 border space-y-3 ${
-                  result.success
-                    ? "bg-emerald-50 border-emerald-100 text-emerald-700"
-                    : "bg-rose-50 border-rose-100 text-rose-600"
-                }`}
-              >
-                <p className="text-[13px] font-semibold flex items-start gap-2">
-                  {result.success ? (
-                    <FiCheckCircle className="mt-0.5 shrink-0" />
-                  ) : (
-                    <FiAlertCircle className="mt-0.5 shrink-0" />
-                  )}
-                  {result.text}
-                </p>
-                {result.inviteUrl && (
-                  <div className="flex items-center gap-2 bg-white rounded-xl border border-emerald-200 p-2 pl-3">
-                    <span className="text-xs text-slate-500 truncate flex-1">{result.inviteUrl}</span>
-                    <button
-                      type="button"
-                      onClick={copyLink}
-                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-semibold hover:bg-emerald-600 transition-all"
-                    >
-                      {copied ? <FiCheck className="size-3.5" /> : <FiCopy className="size-3.5" />}
-                      {copied ? "Copied" : "Copy Link"}
-                    </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-            )}
+            </>
+          )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[#0f172a] text-white text-sm font-semibold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          {result && (
+            <div
+              className={`rounded-2xl p-4 border space-y-3 ${
+                result.success
+                  ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                  : "bg-rose-50 border-rose-100 text-rose-600"
+              }`}
             >
-              {loading ? <FiLoader className="size-4 animate-spin" /> : <FiSend className="size-4" />}
-              {loading ? "Sending Invitation..." : "Send Invitation"}
-            </button>
-          </form>
+              <p className="text-[13px] font-semibold flex items-start gap-2">
+                {result.success ? (
+                  <FiCheckCircle className="mt-0.5 shrink-0" />
+                ) : (
+                  <FiAlertCircle className="mt-0.5 shrink-0" />
+                )}
+                {result.text}
+              </p>
+              {result.inviteUrl && (
+                <div className="flex items-center gap-2 bg-white rounded-xl border border-emerald-200 p-2 pl-3">
+                  <span className="text-xs text-slate-500 truncate flex-1">{result.inviteUrl}</span>
+                  <button
+                    type="button"
+                    onClick={copyLink}
+                    className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-semibold hover:bg-emerald-600 transition-all"
+                  >
+                    {copied ? <FiCheck className="size-3.5" /> : <FiCopy className="size-3.5" />}
+                    {copied ? "Copied" : "Copy Link"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-tr from-[#E91E63] to-[#FF5733] px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-rose-200 transition-all hover:brightness-110 hover:shadow-xl hover:shadow-rose-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? <FiLoader className="size-4 animate-spin" /> : <FiSend className="size-4" />}
+            {loading ? "Sending Invitation..." : "Send Invitation"}
+          </button>
+        </form>
       </div>
     </div>
   );
