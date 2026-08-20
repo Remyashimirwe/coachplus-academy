@@ -8,6 +8,7 @@ import {
   FiXCircle,
   FiAlertCircle,
   FiUsers,
+  FiUserCheck,
   FiArrowRight,
   FiMail,
   FiPhone,
@@ -136,12 +137,20 @@ export default function SettingsView({
               Separate teacher applications by status and review who applied.
             </p>
           </div>
-          <Link
-            href="/admin/teachers"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#E91E63] hover:text-[#7B1FA2] transition-colors"
-          >
-            Manage all applications <FiArrowRight className="size-4" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/admin/approved-teachers"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#E91E63] text-white text-sm font-bold hover:bg-[#c2185b] transition-all shadow-lg shadow-rose-200"
+            >
+              <FiUserCheck className="size-4" /> View Approved Teachers
+            </Link>
+            <Link
+              href="/admin/teachers"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#E91E63] hover:text-[#7B1FA2] transition-colors"
+            >
+              Manage all applications <FiArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-5">

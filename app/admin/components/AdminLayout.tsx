@@ -24,6 +24,7 @@ const baseNavItems = [
   { id: "programs", label: "Manage Learning", icon: FiBook, href: "/admin/programs" },
   { id: "requests", label: "Teacher Requests", icon: FiMessageSquare, href: "/admin/requests" },
   { id: "teachers", label: "Teacher Applications", icon: FiUsers, href: "/admin/teachers" },
+  { id: "approved-teachers", label: "Approved Teachers", icon: FiUserCheck, href: "/admin/approved-teachers" },
   { id: "reports", label: "Student Reports", icon: FiFlag, href: "/admin/reports" },
   { id: "settings", label: "Settings", icon: FiSettings, href: "/admin/settings" },
 ];
