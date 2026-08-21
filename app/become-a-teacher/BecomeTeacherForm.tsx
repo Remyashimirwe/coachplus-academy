@@ -314,6 +314,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                   <form 
                     onSubmit={async (e) => {
                       e.preventDefault();
+                      const formEl = e.currentTarget;
                       const totalSubjects =
                         Object.values(programSubjects).reduce((sum, list) => sum + list.length, 0);
                       const errors: typeof selectionErrors = {};
@@ -340,7 +341,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                       setSelectionErrors({});
                       setStatus("submitting");
 
-                      const formData = new FormData(e.currentTarget);
+                      const formData = new FormData(formEl);
                       Object.entries(programSubjects).forEach(([programId, subs]) => {
                         const program = programs.find(p => p.id === Number(programId));
                         subs.forEach(s => {
@@ -354,23 +355,27 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                         formData.append('dayTimeSlots', `${d}: ${dayTimes[d]?.from || ''} - ${dayTimes[d]?.to || ''}`);
                       });
                       
-                      const result = await saveTeacherApplication(formData);
-                      if (result && result.success) {
-                        setStatus("idle");
-                        setShowSuccessModal(true);
-                        e.currentTarget.reset();
-                        setSelectedProgramIds([]);
-                        setProgramSubjects({});
-                        setProgramTopics({});
-                        setSelectedDays([]);
-                        setDayTimes({});
-                        setDiplomaFiles([]);
-                        setPhotoFiles([]);
-                        setIdPassportFiles([]);
-                        setResumeFiles([]);
-                        setCoverLetterFiles([]);
-                        setOtherCertFiles([]);
-                      } else {
+                      try {
+                        const result = await saveTeacherApplication(formData);
+                        if (result && result.success) {
+                          setStatus("idle");
+                          setShowSuccessModal(true);
+                          formEl.reset();
+                          setSelectedProgramIds([]);
+                          setProgramSubjects({});
+                          setProgramTopics({});
+                          setSelectedDays([]);
+                          setDayTimes({});
+                          setDiplomaFiles([]);
+                          setPhotoFiles([]);
+                          setIdPassportFiles([]);
+                          setResumeFiles([]);
+                          setCoverLetterFiles([]);
+                          setOtherCertFiles([]);
+                        } else {
+                          setStatus("error");
+                        }
+                      } catch {
                         setStatus("error");
                       }
                     }}
@@ -889,6 +894,12 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                       {!agreedToTerms && (
                         <p className="mt-2 text-center text-xs text-rose-500 font-medium">
                           Please accept the terms and conditions to enable submission.
+                        </p>
+                      )}
+                      {status === "error" && (
+                        <p className="mt-2 text-center text-xs text-rose-500 font-medium flex items-center justify-center gap-1.5">
+                          <FiAlertCircle />
+                          Something went wrong while submitting your application. Please check your connection and try again.
                         </p>
                       )}
                     </div>
