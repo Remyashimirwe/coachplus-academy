@@ -31,6 +31,7 @@ import {
   FiShield,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
+import TimePicker from "@/app/components/TimePicker";
 
 const MAX_SUBJECTS_PER_PROGRAM = 4;
 const MAX_TOPICS_PER_SUBJECT = 4;
@@ -728,28 +729,18 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                                   {d}
                                 </p>
                                 <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
-                                    <input
-                                      type="time"
-                                      step={60}
-                                      value={dayTimes[d]?.from || ""}
-                                      onChange={(e) => updateDayTime(d, "from", e.target.value)}
-                                      aria-label={`${d} from time`}
-                                      className={`${inputClasses} py-2`}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
-                                    <input
-                                      type="time"
-                                      step={60}
-                                      value={dayTimes[d]?.to || ""}
-                                      onChange={(e) => updateDayTime(d, "to", e.target.value)}
-                                      aria-label={`${d} to time`}
-                                      className={`${inputClasses} py-2`}
-                                    />
-                                  </div>
+                                  <TimePicker
+                                    label="From"
+                                    ariaLabel={`${d} from time`}
+                                    value={dayTimes[d]?.from || ""}
+                                    onChange={(v) => updateDayTime(d, "from", v)}
+                                  />
+                                  <TimePicker
+                                    label="To"
+                                    ariaLabel={`${d} to time`}
+                                    value={dayTimes[d]?.to || ""}
+                                    onChange={(v) => updateDayTime(d, "to", v)}
+                                  />
                                 </div>
                                 {selectionErrors.dayTimes && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
                                   <p className="mt-2 text-[10px] font-medium text-red-500">Set a from and to time for {d}</p>

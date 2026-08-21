@@ -5,6 +5,7 @@ import { FiLoader, FiCheckCircle, FiAlertCircle, FiSave, FiCalendar, FiClock, Fi
 import { DAYS_OF_WEEK, buildPreferredTime, parseTimeSlots } from "@/app/lib/schedule";
 import AccountSettings from "@/app/components/AccountSettings";
 import NotificationSettings from "@/app/components/NotificationSettings";
+import TimePicker from "@/app/components/TimePicker";
 
 interface SlotState {
   from: string;
@@ -207,18 +208,16 @@ export default function StudentSettingsPage() {
                         >
                           <span className="text-sm font-bold text-slate-700 w-28">{day}</span>
                           <div className="flex items-center gap-2">
-                            <input
-                              type="time"
+                            <TimePicker
+                              ariaLabel={`${day} from time`}
                               value={slots[day]?.from ?? DEFAULT_FROM}
-                              onChange={(e) => setSlot(day, "from", e.target.value)}
-                              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                              onChange={(v) => setSlot(day, "from", v)}
                             />
                             <span className="text-slate-400">to</span>
-                            <input
-                              type="time"
+                            <TimePicker
+                              ariaLabel={`${day} to time`}
                               value={slots[day]?.to ?? DEFAULT_TO}
-                              onChange={(e) => setSlot(day, "to", e.target.value)}
-                              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                              onChange={(v) => setSlot(day, "to", v)}
                             />
                           </div>
                         </div>

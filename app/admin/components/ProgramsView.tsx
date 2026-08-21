@@ -15,6 +15,8 @@ import {
   FiChevronUp,
   FiMove,
   FiStar,
+  FiEye,
+  FiEyeOff,
 } from "react-icons/fi";
 import {
   addProgram,
@@ -30,6 +32,7 @@ import {
   reorderSubjects,
   reorderTopics,
   toggleProgramFeatured,
+  toggleShowOnTeacherForm,
 } from "@/app/actions/admin";
 
 /** Moves the item with `draggedId` to sit right before/after the item with `targetId`, keeping every other item's relative order untouched. */
@@ -341,6 +344,51 @@ export default function ProgramsView({ programs }: any) {
     setLocalPrograms((prev) => prev.map((p: any) => (p.id === id ? { ...p, featuredInHero: nextFeatured } : p)));
     startTransition(() => {
       toggleProgramFeatured(id, nextFeatured);
+    });
+  };
+
+  const handleToggleTopicVisibility = (subjectId: number, topicId: number, show: boolean) => {
+    setLocalPrograms((prev) =>
+      prev.map((p: any) =>
+        p.id === selectedProgram?.id
+          ? {
+              ...p,
+              subjects: p.subjects.map((s: any) =>
+                s.id === subjectId
+                  ? { ...s, topics: s.topics.map((t: any) => (t.id === topicId ? { ...t, showOnTeacherForm: show } : t)) }
+                  : s
+              ),
+            }
+          : p
+      )
+    );
+    startTransition(() => {
+      toggleShowOnTeacherForm("topic", topicId, show);
+    });
+  };
+
+  const handleToggleSubjectVisibility = (subjectId: number, show: boolean) => {
+    setLocalPrograms((prev) =>
+      prev.map((p: any) =>
+        p.id === selectedProgram?.id
+          ? {
+              ...p,
+              subjects: p.subjects.map((s: any) => (s.id === subjectId ? { ...s, showOnTeacherForm: show } : s)),
+            }
+          : p
+      )
+    );
+    startTransition(() => {
+      toggleShowOnTeacherForm("subject", subjectId, show);
+    });
+  };
+
+  const handleToggleProgramVisibility = (programId: number, show: boolean) => {
+    setLocalPrograms((prev) =>
+      prev.map((p: any) => (p.id === programId ? { ...p, showOnTeacherForm: show } : p))
+    );
+    startTransition(() => {
+      toggleShowOnTeacherForm("program", programId, show);
     });
   };
 
@@ -680,7 +728,12 @@ export default function ProgramsView({ programs }: any) {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <h2 className="text-lg sm:text-base sm:text-lg font-semibold text-slate-900 truncate">{selectedProgram?.title}</h2>
+                          <h2 className={`text-lg sm:text-base sm:text-lg font-semibold truncate ${selectedProgram?.showOnTeacherForm === false ? "text-slate-400 italic" : "text-slate-900"}`}>{selectedProgram?.title}</h2>
+                          {selectedProgram?.showOnTeacherForm === false && (
+                            <span className="shrink-0 text-[9px] font-bold uppercase tracking-wide text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                              Hidden from teacher form
+                            </span>
+                          )}
                           {selectedProgram?.featuredInHero && (
                             <span className="hidden sm:flex items-center gap-1 shrink-0 text-[10px] font-bold text-[#E91E63] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
                               <FiStar className="size-2.5" /> IN SLIDESHOW
@@ -691,6 +744,18 @@ export default function ProgramsView({ programs }: any) {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleProgramVisibility(selectedProgram!.id, selectedProgram?.showOnTeacherForm === false)}
+                        title={selectedProgram?.showOnTeacherForm === false ? "Show on Become a Teacher form" : "Hide from Become a Teacher form"}
+                        className={`p-2.5 sm:p-3 rounded-xl transition-colors ${
+                          selectedProgram?.showOnTeacherForm === false
+                            ? "text-slate-400 hover:bg-slate-100 hover:text-[#E91E63]"
+                            : "text-emerald-500 hover:bg-emerald-50"
+                        }`}
+                      >
+                        {selectedProgram?.showOnTeacherForm === false ? <FiEyeOff className="size-5" /> : <FiEye className="size-5" />}
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleToggleFeatured(selectedProgram!.id, !selectedProgram?.featuredInHero)}
@@ -785,7 +850,16 @@ export default function ProgramsView({ programs }: any) {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-slate-800 truncate">{subject.name}</h3>
+                                <div className="flex items-center gap-2">
+                                  <h3 className={`font-bold truncate ${subject.showOnTeacherForm === false ? "text-slate-400 italic" : "text-slate-800"}`}>
+                                    {subject.name}
+                                  </h3>
+                                  {subject.showOnTeacherForm === false && (
+                                    <span className="shrink-0 text-[9px] font-bold uppercase tracking-wide text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                                      Hidden
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-xs text-slate-400">
                                   {subject.topics.length} subject{subject.topics.length === 1 ? "" : "s"}
                                 </p>
@@ -797,6 +871,18 @@ export default function ProgramsView({ programs }: any) {
                               )}
                             </button>
                             <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleSubjectVisibility(subject.id, subject.showOnTeacherForm === false)}
+                                title={subject.showOnTeacherForm === false ? "Show on Become a Teacher form" : "Hide from Become a Teacher form"}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  subject.showOnTeacherForm === false
+                                    ? "text-slate-400 hover:bg-white hover:text-[#E91E63]"
+                                    : "text-emerald-500 hover:bg-emerald-50"
+                                }`}
+                              >
+                                {subject.showOnTeacherForm === false ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
+                              </button>
                               <button
                                 onClick={() => {
                                   setEditingSubjectId(subject.id);
@@ -871,8 +957,25 @@ export default function ProgramsView({ programs }: any) {
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-[11px] font-semibold text-slate-700 truncate">{topic.name}</p>
+                                    <p className={`text-[11px] font-semibold truncate ${topic.showOnTeacherForm === false ? "text-slate-400 line-clamp-1 italic" : "text-slate-700"}`}>
+                                      {topic.name}
+                                    </p>
+                                    {topic.showOnTeacherForm === false && (
+                                      <p className="text-[9px] text-slate-400 uppercase tracking-wide">Hidden from teacher form</p>
+                                    )}
                                   </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleTopicVisibility(subject.id, topic.id, topic.showOnTeacherForm === false)}
+                                    title={topic.showOnTeacherForm === false ? "Show on Become a Teacher form" : "Hide from Become a Teacher form"}
+                                    className={`size-8 flex items-center justify-center rounded-lg transition-all shrink-0 ${
+                                      topic.showOnTeacherForm === false
+                                        ? "text-slate-300 hover:text-[#E91E63] hover:bg-rose-50"
+                                        : "text-emerald-500 hover:bg-emerald-50"
+                                    }`}
+                                  >
+                                    {topic.showOnTeacherForm === false ? <FiEyeOff className="size-3.5" /> : <FiEye className="size-3.5" />}
+                                  </button>
                                   <button
                                     onClick={() => setEditingTopicId(topic.id)}
                                     className="size-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-[#E91E63] hover:bg-rose-50 transition-all"

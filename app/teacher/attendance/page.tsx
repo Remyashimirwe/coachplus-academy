@@ -30,6 +30,7 @@ import {
   toISODate,
   weekRange,
 } from "@/app/lib/schedule";
+import TimePicker from "@/app/components/TimePicker";
 
 interface StudentRow {
   id: number;
@@ -276,44 +277,30 @@ function DayCard({
           {(timeError || mark?.status === "PRESENT") && (
             <div className="mb-1.5">
               <div className="grid grid-cols-2 gap-1.5">
-                <div>
-                  <label className="block text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">From</label>
-                  <input
-                    type="time"
-                    value={timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from}
-                    onChange={(e) => {
-                      setTimeUsedDrafts((prev) => ({
-                        ...prev,
-                        [key]: { from: e.target.value, to: timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to },
-                      }));
-                      if (timeError) setTimeErrors((prev) => ({ ...prev, [key]: undefined }));
-                    }}
-                    className={`w-full rounded-xl border px-2.5 py-2 text-[10px] outline-none transition-all ${
-                      timeError
-                        ? "border-slate-400 bg-slate-100 text-slate-800"
-                        : "border-slate-200 bg-white text-slate-700 focus:border-slate-400 focus:ring-2 focus:ring-slate-400/10"
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">To</label>
-                  <input
-                    type="time"
-                    value={timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to}
-                    onChange={(e) => {
-                      setTimeUsedDrafts((prev) => ({
-                        ...prev,
-                        [key]: { from: timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from, to: e.target.value },
-                      }));
-                      if (timeError) setTimeErrors((prev) => ({ ...prev, [key]: undefined }));
-                    }}
-                    className={`w-full rounded-xl border px-2.5 py-2 text-[10px] outline-none transition-all ${
-                      timeError
-                        ? "border-slate-400 bg-slate-100 text-slate-800"
-                        : "border-slate-200 bg-white text-slate-700 focus:border-slate-400 focus:ring-2 focus:ring-slate-400/10"
-                    }`}
-                  />
-                </div>
+                <TimePicker
+                  label="From"
+                  ariaLabel={`${key} from time`}
+                  value={timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from}
+                  onChange={(v) => {
+                    setTimeUsedDrafts((prev) => ({
+                      ...prev,
+                      [key]: { from: v, to: timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to },
+                    }));
+                    if (timeError) setTimeErrors((prev) => ({ ...prev, [key]: undefined }));
+                  }}
+                />
+                <TimePicker
+                  label="To"
+                  ariaLabel={`${key} to time`}
+                  value={timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to}
+                  onChange={(v) => {
+                    setTimeUsedDrafts((prev) => ({
+                      ...prev,
+                      [key]: { from: timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from, to: v },
+                    }));
+                    if (timeError) setTimeErrors((prev) => ({ ...prev, [key]: undefined }));
+                  }}
+                />
               </div>
               <button
                 onClick={() => handleMark(day, "PRESENT")}

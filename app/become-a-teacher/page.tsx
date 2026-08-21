@@ -7,15 +7,21 @@ export const dynamic = "force-dynamic";
 export default async function BecomeTeacherPage() {
   const isOpen = await getSetting("teacher_applications_open", "true") === "true";
   const rawPrograms = await getPrograms();
-  const programs = rawPrograms.map((p) => ({
-    id: p.id,
-    title: p.title,
-    subjects: p.subjects.map((s) => ({
-      id: s.id,
-      name: s.name,
-      topics: s.topics.map((t) => ({ id: t.id, name: t.name })),
-    })),
-  }));
+  const programs = rawPrograms
+    .filter((p) => p.showOnTeacherForm !== false)
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      subjects: p.subjects
+        .filter((s) => s.showOnTeacherForm !== false)
+        .map((s) => ({
+          id: s.id,
+          name: s.name,
+          topics: s.topics
+            .filter((t) => t.showOnTeacherForm !== false)
+            .map((t) => ({ id: t.id, name: t.name })),
+        })),
+    }));
 
   return (
     <main className="min-h-screen bg-white text-[#121826]">

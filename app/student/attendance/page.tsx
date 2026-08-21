@@ -12,6 +12,7 @@ import {
   FiClock,
   FiEdit,
 } from "react-icons/fi";
+import TimePicker from "@/app/components/TimePicker";
 import {
   DAYS_OF_WEEK,
   dayNameFromDate,
@@ -385,40 +386,30 @@ export default function StudentAttendancePage() {
                 {!isPast && (timeError || mark?.status === "PRESENT") && (
                   <div className="mt-2.5">
                     <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">From</label>
-                        <input
-                          type="time"
-                          value={timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from}
-                          onChange={(e) => {
-                            setTimeUsedDrafts((prev) => ({
-                              ...prev,
-                              [day.iso]: { from: e.target.value, to: timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to },
-                            }));
-                            if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
-                          }}
-                          className={`w-full rounded-xl border px-3 py-2 text-xs outline-none transition-all ${
-                            timeError ? "border-rose-400 ring-2 ring-rose-500/10" : "border-slate-200 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
-                          } bg-white text-slate-700`}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">To</label>
-                        <input
-                          type="time"
-                          value={timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to}
-                          onChange={(e) => {
-                            setTimeUsedDrafts((prev) => ({
-                              ...prev,
-                              [day.iso]: { from: timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from, to: e.target.value },
-                            }));
-                            if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
-                          }}
-                          className={`w-full rounded-xl border px-3 py-2 text-xs outline-none transition-all ${
-                            timeError ? "border-rose-400 ring-2 ring-rose-500/10" : "border-slate-200 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
-                          } bg-white text-slate-700`}
-                        />
-                      </div>
+                      <TimePicker
+                        label="From"
+                        ariaLabel={`${day.iso} from time`}
+                        value={timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from}
+                        onChange={(v) => {
+                          setTimeUsedDrafts((prev) => ({
+                            ...prev,
+                            [day.iso]: { from: v, to: timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to },
+                          }));
+                          if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
+                        }}
+                      />
+                      <TimePicker
+                        label="To"
+                        ariaLabel={`${day.iso} to time`}
+                        value={timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to}
+                        onChange={(v) => {
+                          setTimeUsedDrafts((prev) => ({
+                            ...prev,
+                            [day.iso]: { from: timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from, to: v },
+                          }));
+                          if (timeError) setTimeErrors((prev) => ({ ...prev, [day.iso]: undefined }));
+                        }}
+                      />
                     </div>
                     {timeError && (
                       <p className="text-[10px] text-rose-600 font-semibold mt-1">{timeError}</p>

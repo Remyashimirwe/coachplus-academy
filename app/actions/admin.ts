@@ -441,6 +441,28 @@ export async function reorderTopics(ids: number[]) {
   revalidatePath("/admin");
 }
 
+/** Quick on/off toggle for whether a Category, Sub-category, or Subject is selectable on the Become a Teacher application form. */
+export async function toggleShowOnTeacherForm(
+  kind: "program" | "subject" | "topic",
+  id: number,
+  show: boolean
+) {
+  await requireAdmin();
+
+  if (kind === "program") {
+    await db.program.update({ where: { id }, data: { showOnTeacherForm: show } });
+  } else if (kind === "subject") {
+    await db.subject.update({ where: { id }, data: { showOnTeacherForm: show } });
+  } else {
+    await db.topic.update({ where: { id }, data: { showOnTeacherForm: show } });
+  }
+
+  revalidatePath("/become-a-teacher");
+  revalidatePath("/admin");
+
+  return { success: true };
+}
+
 export async function updateRequestStatus(formData: FormData) {
   await requireAdmin();
 

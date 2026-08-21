@@ -20,6 +20,7 @@ import {
     FiGlobe,
 } from "react-icons/fi";
 import {saveRequest} from "@/app/actions/request";
+import TimePicker from "../components/TimePicker";
 import Footer from "../components/Footer";
 
 interface Topic {
@@ -654,26 +655,18 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                             {d}
                                                         </p>
                                                         <div className="grid grid-cols-2 gap-3">
-                                                            <div>
-                                                                <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
-                                                                <input
-                                                                    type="time"
-                                                                    value={dayTimes[d]?.from || ""}
-                                                                    onChange={(e) => updateDayTime(d, "from", e.target.value)}
-                                                                    aria-label={`${d} from time`}
-                                                                    className={`${inputClasses} py-2`}
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
-                                                                <input
-                                                                    type="time"
-                                                                    value={dayTimes[d]?.to || ""}
-                                                                    onChange={(e) => updateDayTime(d, "to", e.target.value)}
-                                                                    aria-label={`${d} to time`}
-                                                                    className={`${inputClasses} py-2`}
-                                                                />
-                                                            </div>
+                                                            <TimePicker
+                                                                label="From"
+                                                                ariaLabel={`${d} from time`}
+                                                                value={dayTimes[d]?.from || ""}
+                                                                onChange={(v) => updateDayTime(d, "from", v)}
+                                                            />
+                                                            <TimePicker
+                                                                label="To"
+                                                                ariaLabel={`${d} to time`}
+                                                                value={dayTimes[d]?.to || ""}
+                                                                onChange={(v) => updateDayTime(d, "to", v)}
+                                                            />
                                                         </div>
                                                         {daysError && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
                                                             <p className="mt-2 text-[10px] font-medium text-red-500">Set a from and to time for {d}</p>

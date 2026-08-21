@@ -17,6 +17,7 @@ import {
   FiCalendar,
   FiMonitor,
 } from "react-icons/fi";
+import TimePicker from "@/app/components/TimePicker";
 
 const learningModes = ["Home Coaching", "Online Coaching", "Coaching Center"];
 const daysList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -337,24 +338,18 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
                           {d}
                         </p>
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
-                            <input
-                              type="time"
-                              value={dayTimes[d]?.from || ""}
-                              onChange={(e) => updateDayTime(d, "from", e.target.value)}
-                              className="w-full mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition-all focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
-                            <input
-                              type="time"
-                              value={dayTimes[d]?.to || ""}
-                              onChange={(e) => updateDayTime(d, "to", e.target.value)}
-                              className="w-full mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition-all focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900"
-                            />
-                          </div>
+                          <TimePicker
+                            label="From"
+                            ariaLabel={`${d} from time`}
+                            value={dayTimes[d]?.from || ""}
+                            onChange={(v) => updateDayTime(d, "from", v)}
+                          />
+                          <TimePicker
+                            label="To"
+                            ariaLabel={`${d} to time`}
+                            value={dayTimes[d]?.to || ""}
+                            onChange={(v) => updateDayTime(d, "to", v)}
+                          />
                         </div>
                       </div>
                     ))}
