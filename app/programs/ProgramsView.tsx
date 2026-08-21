@@ -8,6 +8,7 @@ import {
   FiClipboard,
 } from "react-icons/fi";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import ProgramModal from "../components/ProgramModal";
 import PageHero from "../components/PageHero";
 
@@ -40,10 +41,17 @@ export default function ProgramsPage({
 }) {
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const openDetails = (program: Program) => {
     setSelectedProgram(program);
     setIsModalOpen(true);
+  };
+
+  const handleRequestTeacher = (e: React.MouseEvent, programId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/request?programId=${programId}`);
   };
 
   const MAX_LENGTH = 200;
@@ -83,60 +91,73 @@ export default function ProgramsPage({
                   : program.text;
 
                 return (
-                <motion.article
+                <Link
                   key={program.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
-                  className="group flex h-full flex-col overflow-hidden rounded-4xl bg-white shadow-xl shadow-slate-200 ring-1 ring-slate-100 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-300"
+                  href={`/programs/${program.id}`}
+                  className="block"
                 >
-                  <div className="aspect-video w-full overflow-hidden relative shrink-0">
-                    <img 
-                      src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"} 
-                      alt={program.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
-                    <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg backdrop-blur-sm">
-                      {program.level}
+                  <motion.article
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
+                    className="group flex h-full flex-col overflow-hidden rounded-4xl bg-white shadow-xl shadow-slate-200 ring-1 ring-slate-100 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-300"
+                  >
+                    <div className="aspect-video w-full overflow-hidden relative shrink-0">
+                      <img 
+                        src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"} 
+                        alt={program.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+                      <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg backdrop-blur-sm">
+                        {program.level}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <h2 className="text-base font-medium text-[#0f172a] transition-colors group-hover:text-[#E91E63]">
-                      {program.title}
-                    </h2>
-                    <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
-                      {description}
-                    </p>
-                    {isLong && (
-                      <button
-                        onClick={() => openDetails(program)}
-                        className="mt-2 self-start text-sm font-bold text-[#E91E63] transition-colors hover:text-[#7B1FA2]"
-                      >
-                        Show more
-                      </button>
-                    )}
-                    
-                    <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col gap-3">
-                      <button
-                        onClick={() => openDetails(program)}
-                        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#E91E63] py-3 text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95 shadow-sm"
-                      >
-                        Read more
-                        <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                      </button>
-                      <Link
-                        href={`/request?programId=${program.id}`}
-                        className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-3 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
-                      >
-                        Request a Teacher
-                        <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                      </Link>
+                    <div className="flex flex-1 flex-col p-6">
+                      <h2 className="text-base font-medium text-[#0f172a] transition-colors group-hover:text-[#E91E63]">
+                        {program.title}
+                      </h2>
+                      <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
+                        {description}
+                      </p>
+                      {isLong && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openDetails(program);
+                          }}
+                          className="mt-2 self-start text-sm font-bold text-[#E91E63] transition-colors hover:text-[#7B1FA2]"
+                        >
+                          Show more
+                        </button>
+                      )}
+                      
+                      <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col gap-3">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openDetails(program);
+                          }}
+                          className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#E91E63] py-3 text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95 shadow-sm"
+                        >
+                          Read more
+                          <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                        </button>
+                        <button
+                          onClick={(e) => handleRequestTeacher(e, program.id)}
+                          className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-3 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
+                        >
+                          Request a Teacher
+                          <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </motion.article>
+                  </motion.article>
+                </Link>
                 );
               })}
             </div>
