@@ -727,6 +727,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                                     <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">From</label>
                                     <input
                                       type="time"
+                                      step={60}
                                       value={dayTimes[d]?.from || ""}
                                       onChange={(e) => updateDayTime(d, "from", e.target.value)}
                                       aria-label={`${d} from time`}
@@ -737,6 +738,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                                     <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">To</label>
                                     <input
                                       type="time"
+                                      step={60}
                                       value={dayTimes[d]?.to || ""}
                                       onChange={(e) => updateDayTime(d, "to", e.target.value)}
                                       aria-label={`${d} to time`}

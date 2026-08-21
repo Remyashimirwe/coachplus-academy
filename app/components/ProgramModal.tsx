@@ -94,9 +94,9 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                   {program.title}{" "}
                   <span className="text-[#E91E63]">({program.level})</span>
                 </h2>
-                <p className="text-slate-600 leading-relaxed text-xs">
+                <div className="text-slate-600 leading-relaxed text-xs max-h-40 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-200/60 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#E91E63]/40 hover:[&::-webkit-scrollbar-thumb]:bg-[#E91E63]/70">
                   {program.text}
-                </p>
+                </div>
               </div>
 
               {/* Right Content - Sub-categories List */}
@@ -107,6 +107,9 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                      {program.title}{" "}
                      <span className="text-[#E91E63]">({program.level})</span>
                    </h2>
+                   <div className="mt-3 text-slate-600 leading-relaxed text-xs max-h-40 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-200/60 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#E91E63]/40 hover:[&::-webkit-scrollbar-thumb]:bg-[#E91E63]/70">
+                     {program.text}
+                   </div>
                 </div>
 
                 <div className="mb-6 flex items-center justify-between">
