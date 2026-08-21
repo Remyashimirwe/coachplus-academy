@@ -52,12 +52,11 @@ export async function POST(
       );
     }
 
-    if (!existingUser.studentProfile.branch || !existingUser.studentProfile.subjects || !existingUser.studentProfile.phone) {
+    if (!existingUser.studentProfile.subjects || !existingUser.studentProfile.phone) {
       await db.student.update({
         where: { id: existingUser.studentProfile.id },
         data: {
           phone: existingUser.studentProfile.phone || parentRequest.phone,
-          branch: existingUser.studentProfile.branch || parentRequest.branch,
           subjects: existingUser.studentProfile.subjects || parentRequest.subjects,
           program: existingUser.studentProfile.program || parentRequest.programTitle,
           learningMode: existingUser.studentProfile.learningMode || parentRequest.learningMode,
@@ -76,7 +75,6 @@ export async function POST(
     const emailResult = await sendRequestApprovedEmail({
       to: parentRequest.email,
       name: parentRequest.parentName,
-      branch: parentRequest.branch,
     });
 
     return NextResponse.json({
@@ -106,7 +104,6 @@ export async function POST(
         studentProfile: {
           create: {
             phone: parentRequest.phone,
-            branch: parentRequest.branch,
             subjects: parentRequest.subjects,
             program: parentRequest.programTitle,
             learningMode: parentRequest.learningMode,
@@ -130,7 +127,6 @@ export async function POST(
       name: user.name,
       role: "STUDENT",
       token: inviteToken,
-      branch: parentRequest.branch,
     });
 
     return NextResponse.json({

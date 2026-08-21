@@ -43,6 +43,42 @@ function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
 }
 
+type GroupedSubject = { name: string; topics: string[] };
+type GroupedCategory = { category: string; subjects: GroupedSubject[] };
+
+function groupSubjects(raw: string): GroupedCategory[] {
+  const categoryMap = new Map<string, Map<string, string[]>>();
+
+  (raw || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((entry) => {
+      const idx = entry.indexOf(":");
+      if (idx === -1) return;
+      const category = entry.slice(0, idx).trim();
+      const rest = entry.slice(idx + 1).trim();
+      const dashIdx = rest.indexOf(" - ");
+      let subject: string;
+      let topic: string | null = null;
+      if (dashIdx !== -1) {
+        subject = rest.slice(0, dashIdx).trim();
+        topic = rest.slice(dashIdx + 3).trim();
+      } else {
+        subject = rest;
+      }
+      if (!categoryMap.has(category)) categoryMap.set(category, new Map());
+      const subjMap = categoryMap.get(category)!;
+      if (!subjMap.has(subject)) subjMap.set(subject, []);
+      if (topic) subjMap.get(subject)!.push(topic);
+    });
+
+  return Array.from(categoryMap.entries()).map(([category, subjMap]) => ({
+    category,
+    subjects: Array.from(subjMap.entries()).map(([name, topics]) => ({ name, topics })),
+  }));
+}
+
 export default function TeacherApplicationModal({
   app,
   onClose,
@@ -192,7 +228,7 @@ export default function TeacherApplicationModal({
                   <FiClock className="text-indigo-500" /> {app.experienceYears} Years
                 </p>
                 <p className="text-[13px] font-semibold text-slate-500 flex items-center gap-1.5">
-                  <FiMapPin className="text-rose-500" /> {[app.branch, app.district || app.country].filter(Boolean).join(" · ")}
+                  <FiMapPin className="text-rose-500" /> {[app.district || app.country].filter(Boolean).join(" · ")}
                 </p>
                 <span
                   className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
@@ -262,7 +298,34 @@ export default function TeacherApplicationModal({
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Teaching Subjects</p>
-                  <p className="text-[13px] font-semibold text-slate-700 break-words">{app.subjects}</p>
+                  {groupSubjects(app.subjects).length > 0 ? (
+                    <div className="mt-1.5 space-y-3">
+                      {groupSubjects(app.subjects).map((cat) => (
+                        <div
+                          key={cat.category}
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+                        >
+                          <p className="text-[13px] font-bold text-slate-800">{cat.category}</p>
+                          <ul className="mt-1.5 space-y-1.5">
+                            {cat.subjects.map((sub) => (
+                              <li key={sub.name} className="text-[12px] text-slate-600">
+                                <span className="font-semibold text-slate-700">{sub.name}</span>
+                                {sub.topics.length > 0 && (
+                                  <ul className="ml-4 mt-0.5 list-disc space-y-0.5 text-[11px] text-slate-500">
+                                    {sub.topics.map((t) => (
+                                      <li key={t}>{t}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[13px] font-semibold text-slate-700 break-words">{app.subjects}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Target Grades</p>

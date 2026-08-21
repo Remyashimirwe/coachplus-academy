@@ -29,7 +29,6 @@ export async function POST(request: Request) {
           teacherName: student.teacher.user.name,
           teacherEmail: student.teacher.user.email,
           teacherPhone: student.teacher.phone,
-          teacherBranch: student.teacher.branch,
           subjects: student.subjects,
         }),
         sendRequestAssignedToTeacherEmail({
@@ -38,7 +37,6 @@ export async function POST(request: Request) {
           studentName: student.user.name,
           parentEmail: student.user.email,
           parentPhone: student.phone,
-          parentBranch: student.branch,
           program: student.program,
           subjects: student.subjects,
           preferredTime: student.preferredTime,

@@ -5,7 +5,6 @@ import {
   FiUsers,
   FiBookOpen,
   FiClock,
-  FiMapPin,
   FiMonitor,
   FiChevronLeft,
   FiLoader,
@@ -21,7 +20,6 @@ interface Student {
   preferredTime?: string;
   preferredDays?: string;
   learningMode?: string;
-  branch?: string;
   phone?: string;
 }
 
@@ -50,7 +48,6 @@ export default function TeacherStudentsPage() {
     { icon: FiBookOpen, label: "Program & Subjects", value: [s.program, s.subjects].filter(Boolean).join(" · ") || "Not specified", color: "text-indigo-600 bg-indigo-50" },
     { icon: FiClock, label: "Preferred Time", value: s.preferredTime || "Not specified", color: "text-rose-600 bg-rose-50" },
     { icon: FiCalendar, label: "Preferred Days", value: s.preferredDays || "Not specified", color: "text-emerald-600 bg-emerald-50" },
-    { icon: FiMapPin, label: "Location", value: s.branch || "Not specified", color: "text-amber-600 bg-amber-50" },
     { icon: FiMonitor, label: "Learning Mode", value: s.learningMode || "Not specified", color: "text-violet-600 bg-violet-50" },
   ];
 

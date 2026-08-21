@@ -57,7 +57,6 @@ export async function POST(
         teacherProfile: {
           create: {
             phone: application.phone,
-            branch: application.branch,
             subjects: application.subjects,
           },
         },
@@ -74,7 +73,6 @@ export async function POST(
       to: application.email,
       name: application.fullName,
       inviteUrl,
-      branch: application.branch,
     });
 
     const { passwordHash, inviteToken: _token, ...safeUser } = user;

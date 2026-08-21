@@ -10,7 +10,6 @@ import {
   FiCheckSquare,
   FiAlertCircle,
   FiClock,
-  FiMapPin,
   FiMonitor,
   FiBookOpen,
   FiCalendar,
@@ -27,7 +26,6 @@ interface TeacherProfile {
   email: string;
   image?: string | null;
   phone?: string;
-  branch?: string;
   subjects?: string;
   studentCount?: number;
 }
@@ -40,7 +38,6 @@ interface StudentRow {
   preferredTime?: string;
   preferredDays?: string;
   learningMode?: string;
-  branch?: string;
   phone?: string;
 }
 
@@ -178,7 +175,6 @@ export default function TeacherPage() {
     { icon: FiBookOpen, label: "Program & Subjects", value: [s.program, s.subjects].filter(Boolean).join(" · ") || "Not specified", color: "text-indigo-600 bg-indigo-50" },
     { icon: FiClock, label: "Preferred Time", value: s.preferredTime || "Not specified", color: "text-rose-600 bg-rose-50" },
     { icon: FiCalendar, label: "Preferred Days", value: s.preferredDays || "Not specified", color: "text-emerald-600 bg-emerald-50" },
-    { icon: FiMapPin, label: "Location", value: s.branch || "Not specified", color: "text-amber-600 bg-amber-50" },
     { icon: FiMonitor, label: "Learning Mode", value: s.learningMode || "Not specified", color: "text-violet-600 bg-violet-50" },
   ];
 
@@ -202,11 +198,6 @@ export default function TeacherPage() {
               {profile?.phone && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
                   <FiPhone className="size-3" /> {profile.phone}
-                </span>
-              )}
-              {profile?.branch && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
-                  <FiMapPin className="size-3" /> {profile.branch}
                 </span>
               )}
               <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">

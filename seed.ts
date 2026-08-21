@@ -28,79 +28,53 @@ async function main() {
   });
   console.log(`Admin created: ${adminEmail}`);
 
-  // 2. Create Programs and Subjects with Topics
-  const programsData = [
-    {
-      title: "Early Years (Nursery–Pre-K / Maternelle)",
-      level: "Nursery - Pre-K",
-      text: "Phonics, basic counting, creative arts, and beginner piano/music.",
-      sortOrder: 1,
-      subCategories: [
-        { name: "Phonics & Literacy", topics: ["Alphabet Basics", "Storytelling", "Pronunciation"] },
-        { name: "Basic Counting", topics: ["Numbers 1-20", "Shapes", "Simple Addition"] },
-        { name: "Creative Arts", topics: ["Drawing", "Coloring", "Crafts"] },
-        { name: "Beginner Piano/Music", topics: ["Notes", "Rhythm", "Songs"] },
-      ],
-    },
-    {
-      title: "Primary School (Grade 1–6 / P1–P6)",
-      level: "Primary",
-      text: "Math, introductory science, beginner coding, music, and languages.",
-      sortOrder: 2,
-      subCategories: [
-        { name: "Mathematics", topics: ["Arithmetic", "Fractions", "Word Problems"] },
-        { name: "Introductory Science", topics: ["Living Things", "Matter", "Environment"] },
-        { name: "Beginner Coding", topics: ["Scratch", "Logic Puzzles"] },
-        { name: "Music & Languages", topics: ["French Basics", "English Grammar", "Keyboard"] },
-      ],
-    },
-    {
-      title: "Secondary & High School (Grade 7–12 / S1–S6)",
-      level: "Secondary",
-      text: "Advanced STEM (Physics, Chemistry, Biology, Math), coding, national exam prep, advanced languages, and music.",
-      sortOrder: 3,
-      subCategories: [
-        { name: "Advanced STEM", topics: ["Physics", "Chemistry", "Biology", "Calculus"] },
-        { name: "National Exam Prep", topics: ["Past Papers", "Exam Strategies", "Review Sessions"] },
-        { name: "Advanced Languages", topics: ["Literature", "Essay Writing", "Public Speaking"] },
-        { name: "Coding & Music", topics: ["Python", "Web Design", "Music Theory"] },
-      ],
-    },
-    {
-      title: "Adult & Personal (Post-Secondary & Beyond)",
-      level: "Adult",
-      text: "Software development, practical language fluency, Music mastery, and professional skills.",
-      sortOrder: 4,
-      subCategories: [
-        { name: "Software Development", topics: ["React", "Node.js", "Databases"] },
-        { name: "Language Fluency", topics: ["Conversational English", "Business French", "Kinyarwanda"] },
-        { name: "Music Mastery", topics: ["Piano", "Guitar", "Vocal Training"] },
-        { name: "Professional Skills", topics: ["Project Management", "Digital Marketing", "Soft Skills"] },
-      ],
-    },
-  ];
+  // 2. Fix Music & Performing Arts program (remove duplicates)
+  const musicProgram = {
+    title: "Music & Performing Arts",
+    level: "All Ages",
+    text: "Comprehensive music education from theory to performance across multiple instruments.",
+    sortOrder: 5,
+    subCategories: [
+      { name: "Music Theory", topics: ["Musical Notation", "Rhythm & Meter", "Scales & Key Signatures", "Intervals"] },
+      { name: "Piano", topics: ["Piano Fundamentals", "Keyboard Orientation", "Finger Techniques", "Scales & Arpeggios"] },
+      { name: "Drums", topics: ["Drum Kit Fundamentals", "Basic Rhythms", "Rudiments", "Coordination"] },
+    ],
+  };
 
-  // Clear existing programs
-  await prisma.program.deleteMany({});
+  // Delete existing Music & Performing Arts program if exists (with its subjects/topics)
+  const existingMusic = await prisma.program.findFirst({
+    where: { title: "Music & Performing Arts" },
+    include: { subjects: { include: { topics: true } } },
+  });
 
-  for (const p of programsData) {
-    await prisma.program.create({
-      data: {
-        title: p.title,
-        level: p.level,
-        text: p.text,
-        sortOrder: p.sortOrder,
-        subjects: {
-          create: p.subCategories.map((sc) => ({
-            name: sc.name,
-            topics: {
-              create: sc.topics.map(t => ({ name: t }))
-            }
-          })),
-        },
-      },
-    });
+  if (existingMusic) {
+    // Delete topics first, then subjects, then program
+    for (const subject of existingMusic.subjects) {
+      await prisma.topic.deleteMany({ where: { subjectId: subject.id } });
+    }
+    await prisma.subject.deleteMany({ where: { programId: existingMusic.id } });
+    await prisma.program.delete({ where: { id: existingMusic.id } });
+    console.log("Removed existing Music & Performing Arts program");
   }
+
+  // Create clean Music & Performing Arts program
+  await prisma.program.create({
+    data: {
+      title: musicProgram.title,
+      level: musicProgram.level,
+      text: musicProgram.text,
+      sortOrder: musicProgram.sortOrder,
+      subjects: {
+        create: musicProgram.subCategories.map((sc) => ({
+          name: sc.name,
+          topics: {
+            create: sc.topics.map(t => ({ name: t }))
+          }
+        })),
+      },
+    },
+  });
+  console.log("Created clean Music & Performing Arts program");
 
   console.log("Seeding finished.");
 }

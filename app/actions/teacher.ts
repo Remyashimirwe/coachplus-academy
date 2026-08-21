@@ -37,7 +37,6 @@ export async function saveTeacherApplication(formData: FormData) {
   const fullName = String(formData.get("fullName") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
-  const branch = String(formData.get("branch") || "").trim();
   const country = String(formData.get("country") || "").trim();
   const province = String(formData.get("province") || "").trim();
   const district = String(formData.get("district") || "").trim();
@@ -115,7 +114,6 @@ export async function saveTeacherApplication(formData: FormData) {
         fullName,
         email,
         phone,
-        branch,
         country,
         province,
         district,

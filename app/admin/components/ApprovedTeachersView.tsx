@@ -11,7 +11,6 @@ import {
   FiClock,
   FiArrowRight,
   FiUserPlus,
-  FiMapPin,
   FiUserX,
   FiAlertTriangle,
 } from "react-icons/fi";
@@ -187,11 +186,6 @@ export default function ApprovedTeachersView({ teachers: initialTeachers }: any)
                           <div className="min-w-0">
                             <p className="text-[13px] font-semibold text-slate-900 truncate">{t.user.name}</p>
                             <p className="text-[11px] text-slate-400 truncate">{t.user.email}</p>
-                            {t.branch && (
-                              <p className="text-[11px] text-slate-400 truncate flex items-center gap-1">
-                                <FiMapPin className="size-3 shrink-0" /> {t.branch}
-                              </p>
-                            )}
                           </div>
                         </div>
                       </td>

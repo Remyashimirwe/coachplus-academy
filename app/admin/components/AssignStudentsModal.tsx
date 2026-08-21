@@ -7,7 +7,6 @@ import {
   FiLoader,
   FiUserPlus,
   FiUserCheck,
-  FiMapPin,
   FiBookOpen,
   FiMail,
   FiCheckCircle,
@@ -46,7 +45,7 @@ export default function AssignStudentsModal({ teacher, onClose, onAssigned }: an
     [students, teacher.id]
   );
 
-  // Students ranked by how well this teacher matches their location (branch) and the subjects they need help with.
+  // Students ranked by how well this teacher matches the subjects they need help with.
   const rankedStudents = useMemo(() => {
     const q = search.trim().toLowerCase();
     return students
@@ -125,11 +124,6 @@ export default function AssignStudentsModal({ teacher, onClose, onAssigned }: an
                   <FiMail className="size-3 shrink-0" /> {teacher.user.email}
                 </p>
                 <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-slate-400">
-                  {teacher.branch && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold">
-                      <FiMapPin className="size-2.5" /> {teacher.branch}
-                    </span>
-                  )}
                   {teacher.subjects && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold truncate max-w-[220px]">
                       <FiBookOpen className="size-2.5" /> {teacher.subjects}
@@ -223,11 +217,6 @@ export default function AssignStudentsModal({ teacher, onClose, onAssigned }: an
                         <FiMail className="size-3 shrink-0" /> {s.user.email}
                       </p>
                       <p className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-slate-400">
-                        {s.branch && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold">
-                            <FiMapPin className="size-2.5" /> {s.branch}
-                          </span>
-                        )}
                         {s.subjects && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold truncate max-w-[160px]">
                             <FiBookOpen className="size-2.5" /> {s.subjects}

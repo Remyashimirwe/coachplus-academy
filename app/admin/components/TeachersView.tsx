@@ -19,10 +19,45 @@ import {
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import TeacherApplicationModal from "./TeacherApplicationModal";
-import { BRANCHES } from "@/app/lib/constants";
 
 function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
+}
+
+type GroupedSubject = { name: string; topics: string[] };
+type GroupedCategory = { category: string; subjects: GroupedSubject[] };
+
+function groupSubjects(raw: string): GroupedCategory[] {
+  const categoryMap = new Map<string, Map<string, string[]>>();
+
+  (raw || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((entry) => {
+      const idx = entry.indexOf(":");
+      if (idx === -1) return;
+      const category = entry.slice(0, idx).trim();
+      const rest = entry.slice(idx + 1).trim();
+      const dashIdx = rest.indexOf(" - ");
+      let subject: string;
+      let topic: string | null = null;
+      if (dashIdx !== -1) {
+        subject = rest.slice(0, dashIdx).trim();
+        topic = rest.slice(dashIdx + 3).trim();
+      } else {
+        subject = rest;
+      }
+      if (!categoryMap.has(category)) categoryMap.set(category, new Map());
+      const subjMap = categoryMap.get(category)!;
+      if (!subjMap.has(subject)) subjMap.set(subject, []);
+      if (topic) subjMap.get(subject)!.push(topic);
+    });
+
+  return Array.from(categoryMap.entries()).map(([category, subjMap]) => ({
+    category,
+    subjects: Array.from(subjMap.entries()).map(([name, topics]) => ({ name, topics })),
+  }));
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -51,11 +86,10 @@ export default function TeachersView({ teacherApplications }: any) {
   const [rowDecision, setRowDecision] = useState<Record<number, "approve" | "deny" | null>>({});
   const [rowError, setRowError] = useState<Record<number, string | undefined>>({});
   const [search, setSearch] = useState("");
-  const [branchFilter, setBranchFilter] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-  const [view, setView] = useState<"cards" | "table">("cards");
+  const [view, setView] = useState<"cards" | "table">("table");
 
   const selectedApp = applications.find((a) => a.id === selectedId) || null;
 
@@ -77,10 +111,9 @@ export default function TeachersView({ teacherApplications }: any) {
       const matchesStatus = statusFilter === "all" || a.status === statusFilter;
       const matchesSearch =
         !q || a.fullName.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
-      const matchesBranch = !branchFilter || a.branch === branchFilter;
       const matchesSubject =
         !subjectFilter || String(a.subjects || "").toLowerCase().includes(subjectFilter.toLowerCase());
-      return matchesStatus && matchesSearch && matchesBranch && matchesSubject;
+      return matchesStatus && matchesSearch && matchesSubject;
     });
 
     const statusOrder: Record<string, number> = { pending: 0, approved: 1, rejected: 2 };
@@ -97,7 +130,7 @@ export default function TeachersView({ teacherApplications }: any) {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [applications, search, branchFilter, subjectFilter, statusFilter, sortBy]);
+  }, [applications, search, subjectFilter, statusFilter, sortBy]);
 
   const stats = useMemo(() => {
     const pending = applications.filter((a) => a.status === "pending").length;
@@ -225,16 +258,6 @@ export default function TeachersView({ teacherApplications }: any) {
           ))}
         </select>
         <select
-          value={branchFilter}
-          onChange={(e) => setBranchFilter(e.target.value)}
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
-        >
-          <option value="">All branches</option>
-          {BRANCHES.map((b) => (
-            <option key={b} value={b}>{b}</option>
-          ))}
-        </select>
-        <select
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
@@ -275,7 +298,6 @@ export default function TeachersView({ teacherApplications }: any) {
                   <tr>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Applicant</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Contact</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Branch</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Subjects</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Experience</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
@@ -313,8 +335,29 @@ export default function TeachersView({ teacherApplications }: any) {
                           <p className="text-[11px] font-semibold text-slate-600 truncate max-w-[200px]">{app.email}</p>
                           {app.phone && <p className="text-[11px] text-slate-400 truncate max-w-[200px]">{app.phone}</p>}
                         </td>
-                        <td className="px-5 py-4 text-[13px] text-slate-600">{app.branch || "—"}</td>
-                        <td className="px-5 py-4 text-[11px] text-slate-500 max-w-[220px] truncate">{app.subjects}</td>
+                        <td className="px-5 py-4 text-slate-500 max-w-[260px]">
+                          {groupSubjects(app.subjects).length > 0 ? (
+                            <div className="space-y-2">
+                              {groupSubjects(app.subjects).map((cat) => (
+                                <div key={cat.category}>
+                                  <p className="text-[11px] font-bold text-slate-700">{cat.category}</p>
+                                  <ul className="ml-3 list-disc space-y-0.5 text-[10px] text-slate-500 marker:text-slate-300">
+                                    {cat.subjects.map((sub) => (
+                                      <li key={sub.name}>
+                                        {sub.name}
+                                        {sub.topics.length > 0 && (
+                                          <span className="text-slate-400"> ({sub.topics.join(", ")})</span>
+                                        )}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-slate-400">—</span>
+                          )}
+                        </td>
                         <td className="px-5 py-4 text-[13px] text-slate-600">{app.experienceYears} yrs</td>
                         <td className="px-5 py-4">
                           <span
@@ -418,7 +461,7 @@ export default function TeachersView({ teacherApplications }: any) {
                   <span className="flex items-center gap-1.5 min-w-0">
                     <FiMapPin className="text-rose-500 shrink-0" />
                     <span className="truncate">
-                      {[app.branch, app.district, app.province, app.country].filter(Boolean).join(", ")}
+                      {[app.district, app.province, app.country].filter(Boolean).join(", ")}
                     </span>
                   </span>
                 </div>

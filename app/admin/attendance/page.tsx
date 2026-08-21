@@ -9,7 +9,6 @@ import {
   FiUsers,
   FiClock,
   FiMail,
-  FiMapPin,
   FiUser,
   FiChevronLeft,
   FiChevronRight,
@@ -37,15 +36,14 @@ interface BaseRow {
   date: string;
   remarks: string | null;
   timeUsed?: string | null;
-  student?: { id: number; user: { name: string; email: string }; branch?: string; phone?: string };
-  teacher?: { id: number; user: { name: string; email: string }; branch?: string; phone?: string };
+  student?: { id: number; user: { name: string; email: string }; phone?: string };
+  teacher?: { id: number; user: { name: string; email: string }; phone?: string };
 }
 
 interface Person {
   id: number;
   name: string;
   email: string;
-  branch?: string;
   phone?: string;
   records: BaseRow[];
   present: number;
@@ -217,7 +215,6 @@ export default function AdminAttendancePage() {
           id: p.id,
           name: p.user.name,
           email: p.user.email,
-          branch: p.branch,
           phone: p.phone,
           records: [],
           present: 0,
@@ -387,11 +384,6 @@ export default function AdminAttendancePage() {
                       <h2 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{selected.name}</h2>
                       <p className="text-xs text-slate-500 truncate">{selected.email}</p>
                       <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px] font-semibold">
-                        {selected.branch && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-slate-600">
-                            <FiMapPin className="size-2.5" /> {selected.branch}
-                          </span>
-                        )}
                         {selected.phone && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-slate-600">
                             <FiPhone className="size-2.5" /> {selected.phone}

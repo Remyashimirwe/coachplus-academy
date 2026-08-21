@@ -182,7 +182,6 @@ export default function SettingsView({
                   <tr>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Applicant</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Contact</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Branch</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Subjects</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Applied</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
@@ -210,7 +209,6 @@ export default function SettingsView({
                           </p>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-[13px] text-slate-600">{app.branch || "—"}</td>
                       <td className="px-5 py-4 text-[11px] text-slate-500 max-w-[220px] truncate">{app.subjects}</td>
                       <td className="px-5 py-4 text-[11px] text-slate-500 whitespace-nowrap flex items-center gap-1.5">
                         <FiClock className="size-3 text-slate-300 shrink-0" />

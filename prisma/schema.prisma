@@ -35,7 +35,6 @@ model Teacher {
   userId             Int                 @unique
   user               User                @relation("UserToTeacher", fields: [userId], references: [id])
   phone              String              @default("")
-  branch             String              @default("") // Location branch, e.g. Kigali-Remera
   subjects           String              @default("") // Courses/subjects the teacher can teach
   isFired            Boolean             @default(false)
   firedAt            DateTime?
@@ -53,7 +52,6 @@ model Student {
   teacherId     Int?
   teacher       Teacher?     @relation("TeacherStudents", fields: [teacherId], references: [id])
   phone         String       @default("")
-  branch        String       @default("") // Location branch, e.g. Kigali-Remera
   subjects      String       @default("") // Courses/topics the student wants to learn
   program       String       @default("") // Program/category the student enrolled in
   learningMode  String       @default("") // Home Coaching | Online Coaching | Coaching Center
@@ -173,7 +171,6 @@ model Request {
   status        String   @default("new")
   createdAt     DateTime @default(now())
   location      String   @default("")
-  branch        String   @default("") // Location branch, e.g. Kigali-Remera
   phone2        String   @default("")
   cell          String   @default("")
   district      String   @default("")
@@ -196,7 +193,6 @@ model TeacherApplication {
   fullName          String
   email             String
   phone             String
-  branch            String   @default("") // Location branch, e.g. Kigali-Remera
   country           String   @default("")
   province          String   @default("")
   district          String   @default("")

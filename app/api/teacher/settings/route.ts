@@ -26,7 +26,6 @@ export async function GET() {
       email: teacher.user.email,
       image: teacher.user.image,
       phone: teacher.phone,
-      branch: teacher.branch,
       subjects: teacher.subjects,
       studentCount: teacher._count.students,
     });

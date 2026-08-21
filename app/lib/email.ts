@@ -43,12 +43,6 @@ function renderEmail({ preheader, bodyHtml }: { preheader?: string; bodyHtml: st
   `;
 }
 
-/** Renders a small inline row for the branch (location) tied to a specific email, when known. */
-function branchLine(branch?: string | null) {
-  if (!branch) return "";
-  return `<br/><strong>Branch:</strong> ${branch}`;
-}
-
 function signature(label = "The") {
   return `
     <p style="margin-top:32px;color:#64748b;font-size:13px;">
@@ -62,13 +56,11 @@ export async function sendInviteEmail({
   name,
   role,
   token,
-  branch,
 }: {
   to: string;
   name: string;
   role: string;
   token: string;
-  branch?: string | null;
 }) {
   const inviteUrl = `${APP_URL}/accept-invite?token=${token}`;
   const roleLabel = role === "TEACHER" ? "Teacher" : "Student";
@@ -95,13 +87,6 @@ export async function sendInviteEmail({
             An administrator has invited you to join <strong>${BRAND_NAME}</strong> as a
             <strong>${roleLabel}</strong>.
           </p>
-          ${
-            branch
-              ? `<p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
-                   Your branch is <strong>${branch}</strong>.
-                 </p>`
-              : ""
-          }
           <p>
             Click the button below to create your password and activate your
             account.
@@ -138,12 +123,10 @@ export async function sendApplicationApprovedEmail({
   to,
   name,
   inviteUrl,
-  branch,
 }: {
   to: string;
   name: string;
   inviteUrl: string;
-  branch?: string | null;
 }) {
   const client = getResendClient();
 
@@ -167,13 +150,6 @@ export async function sendApplicationApprovedEmail({
             We're excited to let you know that your application to become a
             <strong>Teacher</strong> at ${BRAND_NAME} has been <strong>approved</strong>.
           </p>
-          ${
-            branch
-              ? `<p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
-                   You'll be teaching out of our <strong>${branch}</strong> branch.
-                 </p>`
-              : ""
-          }
           <p>
             Click the button below to set up your password and activate your official teacher account.
           </p>
@@ -256,12 +232,10 @@ export async function sendRequestApprovedEmail({
   to,
   name,
   inviteUrl,
-  branch,
 }: {
   to: string;
   name: string;
   inviteUrl?: string;
-  branch?: string | null;
 }) {
   const client = getResendClient();
 
@@ -283,13 +257,6 @@ export async function sendRequestApprovedEmail({
             Good news! Your request for a teacher on <strong>${BRAND_NAME}</strong> has been
             <strong>approved</strong>.
           </p>
-          ${
-            branch
-              ? `<p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
-                   Your nearest branch is <strong>${branch}</strong>.
-                 </p>`
-              : ""
-          }
           ${
             inviteUrl
               ? `
@@ -340,7 +307,6 @@ export async function sendTeacherAssignedToParentEmail({
   teacherName,
   teacherEmail,
   teacherPhone,
-  teacherBranch,
   subjects,
 }: {
   to: string;
@@ -348,7 +314,6 @@ export async function sendTeacherAssignedToParentEmail({
   teacherName: string;
   teacherEmail: string;
   teacherPhone?: string;
-  teacherBranch?: string | null;
   subjects?: string;
 }) {
   const client = getResendClient();
@@ -375,7 +340,6 @@ export async function sendTeacherAssignedToParentEmail({
           <p style="background:#f8fafc;padding:14px 18px;border-radius:12px;margin:0 0 16px 0;">
             <strong>Email:</strong> <a href="mailto:${teacherEmail}">${teacherEmail}</a>
             ${teacherPhone ? `<br/><strong>Phone:</strong> <a href="tel:${teacherPhone}">${teacherPhone}</a>` : ""}
-            ${branchLine(teacherBranch)}
           </p>
           ${signature()}
         `,
@@ -400,7 +364,6 @@ export async function sendRequestAssignedToTeacherEmail({
   studentName,
   parentEmail,
   parentPhone,
-  parentBranch,
   program,
   subjects,
   preferredTime,
@@ -413,7 +376,6 @@ export async function sendRequestAssignedToTeacherEmail({
   studentName: string;
   parentEmail: string;
   parentPhone?: string;
-  parentBranch?: string | null;
   program?: string;
   subjects?: string;
   preferredTime?: string;
@@ -445,7 +407,6 @@ export async function sendRequestAssignedToTeacherEmail({
             <strong>Student:</strong> ${studentName}<br/>
             <strong>Email:</strong> <a href="mailto:${parentEmail}">${parentEmail}</a>
             ${parentPhone ? `<br/><strong>Phone:</strong> <a href="tel:${parentPhone}">${parentPhone}</a>` : ""}
-            ${branchLine(parentBranch)}
           </p>
           ${program ? `<p><strong>Program:</strong> ${program}</p>` : ""}
           ${subjects ? `<p><strong>Courses &amp; Topics:</strong> ${subjects}</p>` : ""}

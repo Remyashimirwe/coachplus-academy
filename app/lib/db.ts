@@ -7,16 +7,20 @@ const connectionString = process.env.DATABASE_URL;
 const pool = new pg.Pool({
   connectionString,
   // Neon's pooled endpoint (PgBouncer) silently drops idle connections on its
-  // own schedule. If a client sits idle in our pool longer than that, the next
-  // query on it fails with "Connection terminated unexpectedly" after a long
-  // OS-level hang. Recycling idle clients quickly on our side (and enabling
-  // TCP keepalive) avoids handing out stale connections.
-  idleTimeoutMillis: 10_000,
+  // own schedule (typically ~5s). If a client sits idle in our pool longer than
+  // that, the next query on it fails with "Connection terminated unexpectedly"
+  // after a long OS-level hang. Recycling idle clients quickly on our side
+  // (and enabling TCP keepalive) avoids handing out stale connections.
+  idleTimeoutMillis: 4_000,
+  // Limit pool size to avoid overwhelming the serverless endpoint
+  max: 10,
   // Neon's serverless compute can take several seconds to resume from
   // suspend on the first request after being idle, so give new connection
   // attempts more room than the default before giving up.
   connectionTimeoutMillis: 20_000,
   keepAlive: true,
+  // Allow the pool to drain when the process exits
+  allowExitOnIdle: true,
 });
 
 // Without a listener, errors emitted by idle clients in the pool (e.g. the

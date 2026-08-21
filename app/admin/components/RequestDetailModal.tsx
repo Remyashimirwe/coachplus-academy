@@ -5,7 +5,6 @@ import {
   FiX,
   FiMail,
   FiPhone,
-  FiMapPin,
   FiBookOpen,
   FiFileText,
   FiSend,
@@ -60,7 +59,7 @@ export default function RequestDetailModal({
   onUpdated,
 }: {
   request: any;
-  teachers?: { id: number; name: string; email: string; phone?: string; branch?: string; subjects?: string }[];
+  teachers?: { id: number; name: string; email: string; phone?: string; subjects?: string }[];
   onClose: () => void;
   onUpdated: (id: number, changes: any) => void;
 }) {
@@ -222,9 +221,9 @@ export default function RequestDetailModal({
           ? String(t.subjects || "").toLowerCase().includes(teacherSubjectFilter.toLowerCase())
           : true
       )
-      .map((t) => ({ ...t, match: scoreTeacherForStudent(t, { branch: request.branch, subjects: request.subjects }) }))
+      .map((t) => ({ ...t, match: scoreTeacherForStudent(t, { subjects: request.subjects }) }))
       .sort((a, b) => b.match.score - a.match.score);
-  }, [teachers, teacherSearch, teacherSubjectFilter, request.branch, request.subjects]);
+  }, [teachers, teacherSearch, teacherSubjectFilter, request.subjects]);
 
   const fullAddress = [request.country, request.province, request.district, request.sector, request.cell, request.village]
     .filter(Boolean)
@@ -321,10 +320,9 @@ export default function RequestDetailModal({
                 <Field label="Alt Phone" value={request.phone2} />
                 <Field
                   label="Address"
-                  value={fullAddress ? fullAddress : request.location ? request.location : request.branch ? request.branch : undefined}
+                  value={fullAddress ? fullAddress : request.location ? request.location : undefined}
                 />
                 {request.location && <Field label="City / Area" value={request.location} />}
-                {request.branch && <Field label="Branch" value={request.branch} />}
                 <Field label="ID / Passport" value={request.idPassport} />
               </div>
             </div>
@@ -349,7 +347,6 @@ export default function RequestDetailModal({
                 </div>
                 <div className="grid sm:grid-cols-2 gap-x-8">
                   <Field label="Phone" value={student.phone} />
-                  <Field label="Branch" value={student.branch} />
                   <Field label="Program" value={student.program} />
                   <Field label="Subjects" value={student.subjects} />
                   <Field label="Learning Mode" value={student.learningMode} />
@@ -525,9 +522,9 @@ export default function RequestDetailModal({
                               )}
                             </p>
                             <p className="text-xs text-slate-500 truncate">{t.email}{t.phone ? ` · ${t.phone}` : ""}</p>
-                            {(t.branch || t.subjects) && (
+                            {t.subjects && (
                               <p className="text-[10px] text-slate-400 truncate">
-                                {[t.branch, t.subjects].filter(Boolean).join(" · ")}
+                                {t.subjects}
                               </p>
                             )}
                           </div>

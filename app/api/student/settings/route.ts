@@ -25,7 +25,6 @@ export async function GET() {
       name: student.user.name,
       email: student.user.email,
       phone: student.phone,
-      branch: student.branch,
       program: student.program,
       subjects: student.subjects,
       learningMode: student.learningMode,

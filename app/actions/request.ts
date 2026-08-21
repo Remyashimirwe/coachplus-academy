@@ -9,7 +9,6 @@ export async function saveRequest(formData: FormData) {
   const phone2 = String(formData.get("phone2") || "").trim();
   const country = String(formData.get("country") || "").trim();
   const location = String(formData.get("city") || "").trim();
-  const branch = String(formData.get("branch") || "").trim();
   const details = String(formData.get("details") || "").trim();
   const coursesOfInterest = formData
     .getAll("subjects")
@@ -42,7 +41,6 @@ export async function saveRequest(formData: FormData) {
               phone2,
               country,
               location,
-              branch,
               province: "",
               district: "",
               sector: "",

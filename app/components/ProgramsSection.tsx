@@ -6,6 +6,8 @@ import { FiArrowRight } from "react-icons/fi";
 import { useState } from "react";
 import ProgramModal from "./ProgramModal";
 
+const MAX_LENGTH = 200;
+
 type Subject = {
   id: number;
   name: string;
@@ -23,6 +25,11 @@ type Program = {
 export default function ProgramsSection({ programs }: { programs: Program[] }) {
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openDetails = (program: Program) => {
+    setSelectedProgram(program);
+    setIsModalOpen(true);
+  };
 
   const displayPrograms = programs.slice(0, 6);
 
@@ -59,6 +66,11 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
         
         <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {displayPrograms.map((program, index) => {
+            const isLong = program.text.length > MAX_LENGTH;
+            const description = isLong
+              ? `${program.text.slice(0, MAX_LENGTH).trimEnd()}…`
+              : program.text;
+
             return (
               <motion.article
                 key={program.id}
@@ -85,15 +97,20 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                     {program.title}
                   </h3>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-700">
-                    {program.text}
+                    {description}
                   </p>
+                  {isLong && (
+                    <button
+                      onClick={() => openDetails(program)}
+                      className="mt-2 self-start text-sm font-bold text-[#E91E63] transition-colors hover:text-[#7B1FA2]"
+                    >
+                      Show more
+                    </button>
+                  )}
                   
                   <div className="mt-6 flex flex-col gap-3">
                     <button 
-                      onClick={() => {
-                        setSelectedProgram(program);
-                        setIsModalOpen(true);
-                      }}
+                      onClick={() => openDetails(program)}
                       className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border-2 border-[#E91E63] text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95"
                     >
                       Show Details

@@ -18,7 +18,6 @@ import {
   FiMail,
   FiBookOpen,
   FiClock,
-  FiMapPin,
   FiMonitor,
   FiEdit,
 } from "react-icons/fi";
@@ -40,7 +39,6 @@ interface StudentRow {
   preferredDays?: string;
   preferredTime?: string;
   learningMode?: string;
-  branch?: string;
 }
 
 interface AttendanceRow {
@@ -463,7 +461,6 @@ export default function AttendancePage() {
     { icon: FiBookOpen, label: "Program & Subjects", value: [s.program, s.subjects].filter(Boolean).join(" · ") || "Not specified", color: "text-slate-700 bg-slate-100" },
     { icon: FiClock, label: "Preferred Time", value: s.preferredTime || "Not specified", color: "text-slate-700 bg-slate-100" },
     { icon: FiCalendar, label: "Preferred Days", value: s.preferredDays || "Not specified", color: "text-slate-700 bg-slate-100" },
-    { icon: FiMapPin, label: "Location", value: s.branch || "Not specified", color: "text-slate-700 bg-slate-100" },
     { icon: FiMonitor, label: "Learning Mode", value: s.learningMode || "Not specified", color: "text-slate-700 bg-slate-100" },
   ];
 

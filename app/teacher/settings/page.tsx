@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FiLoader, FiUser, FiMail, FiPhone, FiMapPin, FiBookOpen, FiUsers } from "react-icons/fi";
+import { FiLoader, FiUser, FiMail, FiPhone, FiBookOpen, FiUsers } from "react-icons/fi";
 import AccountSettings from "@/app/components/AccountSettings";
 import NotificationSettings from "@/app/components/NotificationSettings";
 
@@ -10,7 +10,6 @@ interface TeacherProfile {
   email: string;
   image: string | null;
   phone: string;
-  branch: string;
   subjects: string;
   studentCount: number;
 }
@@ -68,12 +67,6 @@ export default function TeacherSettingsPage() {
                   <div className="flex items-center gap-3 text-slate-600">
                     <FiPhone className="size-4 text-slate-400" />
                     {profile.phone}
-                  </div>
-                )}
-                {profile?.branch && (
-                  <div className="flex items-center gap-3 text-slate-600">
-                    <FiMapPin className="size-4 text-slate-400" />
-                    {profile.branch}
                   </div>
                 )}
                 {profile?.subjects && (

@@ -41,6 +41,13 @@ export default function ProgramsPage({
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const openDetails = (program: Program) => {
+    setSelectedProgram(program);
+    setIsModalOpen(true);
+  };
+
+  const MAX_LENGTH = 200;
+
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
       <PageHero
@@ -69,7 +76,13 @@ export default function ProgramsPage({
             </div>
           ) : (
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {programs.map((program, index) => (
+              {programs.map((program, index) => {
+                const isLong = program.text.length > MAX_LENGTH;
+                const description = isLong
+                  ? `${program.text.slice(0, MAX_LENGTH).trimEnd()}…`
+                  : program.text;
+
+                return (
                 <motion.article
                   key={program.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -95,18 +108,24 @@ export default function ProgramsPage({
                       {program.title}
                     </h2>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
-                      {program.text}
+                      {description}
                     </p>
+                    {isLong && (
+                      <button
+                        onClick={() => openDetails(program)}
+                        className="mt-2 self-start text-sm font-bold text-[#E91E63] transition-colors hover:text-[#7B1FA2]"
+                      >
+                        Show more
+                      </button>
+                    )}
                     
                     <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col gap-3">
                       <button
-                        onClick={() => {
-                          setSelectedProgram(program);
-                          setIsModalOpen(true);
-                        }}
-                        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#0f172a] py-3 text-sm font-bold text-[#0f172a] transition-all hover:bg-[#0f172a] hover:text-white active:scale-95 shadow-sm"
+                        onClick={() => openDetails(program)}
+                        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#E91E63] py-3 text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95 shadow-sm"
                       >
-                        Show Details
+                        Read more
+                        <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                       </button>
                       <Link
                         href={`/request?programId=${program.id}`}
@@ -118,7 +137,8 @@ export default function ProgramsPage({
                     </div>
                   </div>
                 </motion.article>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

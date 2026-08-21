@@ -11,13 +11,11 @@ import {
   FiAlertCircle,
   FiX,
   FiLink,
-  FiMapPin,
   FiBookOpen,
   FiMail,
   FiPhone,
   FiStar,
 } from "react-icons/fi";
-import { BRANCHES } from "@/app/lib/constants";
 import { scoreTeacherForStudent, matchLabel } from "@/app/lib/matching";
 
 export default function AssignPage() {
@@ -26,7 +24,6 @@ export default function AssignPage() {
   const [loading, setLoading] = useState(true);
   const [teacherSearch, setTeacherSearch] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
-  const [branchFilter, setBranchFilter] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [busyTeacherId, setBusyTeacherId] = useState<number | null>(null);
@@ -75,12 +72,11 @@ export default function AssignPage() {
     );
   }, [students, studentSearch]);
 
-  // Teachers ranked by how well they match the selected student's branch and desired subjects.
+  // Teachers ranked by how well they match the selected student's desired subjects.
   const rankedTeachers = useMemo(() => {
     const q = teacherSearch.trim().toLowerCase();
     return teachers
       .filter((t) => (q ? t.user.name.toLowerCase().includes(q) || t.user.email.toLowerCase().includes(q) : true))
-      .filter((t) => (branchFilter ? t.branch === branchFilter : true))
       .filter((t) =>
         subjectFilter
           ? String(t.subjects || "")
@@ -93,7 +89,7 @@ export default function AssignPage() {
         match: selectedStudent ? scoreTeacherForStudent(t, selectedStudent) : null,
       }))
       .sort((a, b) => (b.match?.score || 0) - (a.match?.score || 0));
-  }, [teachers, teacherSearch, branchFilter, subjectFilter, selectedStudent]);
+  }, [teachers, teacherSearch, subjectFilter, selectedStudent]);
 
   async function handleToggleAssign(teacher: any) {
     if (!selectedStudent) return;
@@ -152,7 +148,7 @@ export default function AssignPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Assign Students to Teachers</h1>
-        <p className="text-slate-500">Pick a student, then choose the best-matching teacher suggested for their location and subjects.</p>
+        <p className="text-slate-500">Pick a student, then choose the best-matching teacher suggested for their subjects.</p>
       </div>
 
       {feedback && (
@@ -218,11 +214,6 @@ export default function AssignPage() {
                         </p>
                       )}
                       <p className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-slate-400">
-                        {s.branch && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold">
-                            <FiMapPin className="size-2.5" /> {s.branch}
-                          </span>
-                        )}
                         {s.subjects && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold truncate max-w-[140px]">
                             <FiBookOpen className="size-2.5" /> {s.subjects}
@@ -284,16 +275,6 @@ export default function AssignPage() {
                     />
                   </div>
                   <select
-                    value={branchFilter}
-                    onChange={(e) => setBranchFilter(e.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
-                  >
-                    <option value="">All branches</option>
-                    {BRANCHES.map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
-                  <select
                     value={subjectFilter}
                     onChange={(e) => setSubjectFilter(e.target.value)}
                     className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
@@ -344,11 +325,6 @@ export default function AssignPage() {
                             </p>
                           )}
                           <p className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-slate-400">
-                            {t.branch && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold">
-                                <FiMapPin className="size-2.5" /> {t.branch}
-                              </span>
-                            )}
                             {t.subjects && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-semibold truncate max-w-[160px]">
                                 <FiBookOpen className="size-2.5" /> {t.subjects}

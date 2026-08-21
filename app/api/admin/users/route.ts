@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, email, role, branch, phone, programTitle, subjects, learningMode, preferredDays, preferredTime } = await request.json();
+    const { name, email, role, phone, programTitle, subjects, learningMode, preferredDays, preferredTime } = await request.json();
 
     if (!['TEACHER', 'STUDENT'].includes(role)) {
         return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
@@ -35,7 +35,6 @@ export async function POST(request: Request) {
           : {
               studentProfile: {
                 create: {
-                  branch: branch || "",
                   phone: phone || "",
                   program: programTitle || "",
                   subjects: subjects || "",

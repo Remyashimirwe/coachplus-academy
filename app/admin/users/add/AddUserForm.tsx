@@ -45,7 +45,6 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"TEACHER" | "STUDENT">("STUDENT");
-  const [branch, setBranch] = useState("");
   const [phone, setPhone] = useState("");
   const [programTitle, setProgramTitle] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -100,7 +99,7 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
           email,
           role,
           ...(role === "STUDENT"
-            ? { branch, phone, programTitle, subjects: subjects.join(", "), learningMode, preferredDays, preferredTime }
+            ? { phone, programTitle, subjects: subjects.join(", "), learningMode, preferredDays, preferredTime }
             : {}),
         }),
         headers: { "Content-Type": "application/json" },
@@ -118,7 +117,6 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
         });
         setName("");
         setEmail("");
-        setBranch("");
         setPhone("");
         setProgramTitle("");
         setSubjects([]);
@@ -235,19 +233,6 @@ export default function AddUserForm({ programs }: { programs: Program[] }) {
               <div className="space-y-3">
                 <SectionHeader icon={<FiMapPin className="size-3.5" />}>Student details</SectionHeader>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Location / Branch</label>
-                    <div className="relative">
-                      <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
-                      <input
-                        type="text"
-                        value={branch}
-                        onChange={(e) => setBranch(e.target.value)}
-                        placeholder="e.g. Kigali-Remera"
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Phone</label>
                     <div className="relative">

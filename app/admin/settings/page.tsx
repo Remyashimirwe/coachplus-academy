@@ -17,7 +17,6 @@ export default async function SettingsPage() {
       fullName: true,
       email: true,
       phone: true,
-      branch: true,
       subjects: true,
       status: true,
       createdAt: true,
