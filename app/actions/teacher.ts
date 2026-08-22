@@ -153,6 +153,20 @@ export async function saveTeacherApplication(formData: FormData) {
         },
       },
     });
+
+    // Notify every admin so they see the new application without refreshing.
+    const admins = await db.user.findMany({ where: { role: "ADMIN" }, select: { id: true } });
+    if (admins.length > 0) {
+      await db.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          title: "New Teacher Application",
+          message: `${fullName} applied to become a teacher.`,
+          type: "info",
+        })),
+      });
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Failed to save teacher application:", error);

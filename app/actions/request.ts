@@ -57,6 +57,20 @@ export async function saveRequest(formData: FormData) {
               details,
           },
       });
+
+    // Notify every admin so they see the new request without refreshing.
+    const admins = await db.user.findMany({ where: { role: "ADMIN" }, select: { id: true } });
+    if (admins.length > 0) {
+      await db.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          title: "New Teacher Request",
+          message: `${parentName} requested a teacher for ${programTitle}.`,
+          type: "info",
+        })),
+      });
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Failed to save request:", error);

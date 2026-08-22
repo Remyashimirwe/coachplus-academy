@@ -276,8 +276,9 @@ function DayCard({
 
           {(timeError || mark?.status === "PRESENT") && (
             <div className="mb-1.5">
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 <TimePicker
+                  compact
                   label="From"
                   ariaLabel={`${key} from time`}
                   value={timeUsedDrafts[key]?.from ?? parseTimeUsed(mark?.timeUsed).from}
@@ -290,6 +291,7 @@ function DayCard({
                   }}
                 />
                 <TimePicker
+                  compact
                   label="To"
                   ariaLabel={`${key} to time`}
                   value={timeUsedDrafts[key]?.to ?? parseTimeUsed(mark?.timeUsed).to}

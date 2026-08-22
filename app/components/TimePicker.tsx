@@ -10,11 +10,13 @@ export default function TimePicker({
   onChange,
   label,
   ariaLabel,
+  compact = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   label?: string;
   ariaLabel?: string;
+  compact?: boolean;
 }) {
   const [hour, setHour] = useState("");
   const [minute, setMinute] = useState("");
@@ -26,17 +28,18 @@ export default function TimePicker({
     setMinute(m || "");
   }, [value]);
 
-  const selectCls =
-    "w-full rounded-xl border-2 border-slate-100 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[#E91E63] focus:ring-4 focus:ring-[#E91E63]/10";
+  const selectCls = compact
+    ? "w-full min-w-0 rounded-lg border border-slate-200 bg-white px-1.5 py-1.5 text-[11px] outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+    : "w-full rounded-xl border-2 border-slate-100 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[#E91E63] focus:ring-4 focus:ring-[#E91E63]/10";
+  const rowCls = compact ? "flex items-center gap-1" : "flex items-center gap-1.5";
+  const labelCls = compact
+    ? "text-[9px] font-semibold text-slate-400 uppercase tracking-wider"
+    : "text-[10px] font-medium text-slate-400 uppercase tracking-widest";
 
   return (
     <div>
-      {label && (
-        <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
-          {label}
-        </label>
-      )}
-      <div className="flex items-center gap-1.5">
+      {label && <label className={labelCls}>{label}</label>}
+      <div className={rowCls}>
         <select
           aria-label={ariaLabel ? `${ariaLabel} hour` : "Hour"}
           value={hour}
@@ -52,7 +55,7 @@ export default function TimePicker({
             <option key={h} value={h}>{h}</option>
           ))}
         </select>
-        <span className="font-bold text-slate-400">:</span>
+        <span className={`font-bold text-slate-400 ${compact ? "text-[10px]" : ""}`}>:</span>
         <select
           aria-label={ariaLabel ? `${ariaLabel} minute` : "Minute"}
           value={minute}

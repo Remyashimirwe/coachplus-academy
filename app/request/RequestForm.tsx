@@ -679,19 +679,11 @@ function RequestFormContent({programs}: { programs: Program[] }) {
 
                                     <Field icon={<FiCalendar/>} label="Preferred Start Date" htmlFor="start-date">
                                         <input id="start-date" name="startDate" type="date" required
+                                               onClick={(e) => {
+                                                   const input = e.target as HTMLInputElement;
+                                                   if (input.showPicker) input.showPicker();
+                                               }}
                                                className={inputClasses}/>
-                                    </Field>
-
-                                    <Field icon={<FiMessageSquare/>} label="Anything else we should know?"
-                                           htmlFor="details">
-                    <textarea
-                        id="details"
-                        name="details"
-                        rows={4}
-                        required
-                        placeholder="Share specific goals, challenges, or schedule preferences..."
-                        className={`${inputClasses} resize-none`}
-                    />
                                     </Field>
 
                                     <button

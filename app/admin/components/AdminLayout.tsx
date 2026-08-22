@@ -34,15 +34,17 @@ export default function AdminLayout({ children, user }: { children: React.ReactN
   const isLoginPage = pathname === "/admin/login";
   const [pendingCount, setPendingCount] = useState(0);
   const [pendingReports, setPendingReports] = useState(0);
+  const [newRequestsCount, setNewRequestsCount] = useState(0);
 
   useEffect(() => {
     if (isLoginPage) return;
     let cancelled = false;
     async function loadPendingCounts() {
       try {
-        const [appsRes, reportsRes] = await Promise.all([
+        const [appsRes, reportsRes, requestsRes] = await Promise.all([
           fetch("/api/admin/teacher-applications/pending-count"),
           fetch("/api/admin/reports/pending-count"),
+          fetch("/api/admin/requests/new-count"),
         ]);
         if (appsRes.ok) {
           const data = await appsRes.json();
@@ -52,12 +54,16 @@ export default function AdminLayout({ children, user }: { children: React.ReactN
           const data = await reportsRes.json();
           if (!cancelled) setPendingReports(data.count || 0);
         }
+        if (requestsRes.ok) {
+          const data = await requestsRes.json();
+          if (!cancelled) setNewRequestsCount(data.count || 0);
+        }
       } catch {
         // ignore, badge is a non-critical enhancement
       }
     }
     loadPendingCounts();
-    const interval = setInterval(loadPendingCounts, 60000);
+    const interval = setInterval(loadPendingCounts, 30000);
     return () => {
       cancelled = true;
       clearInterval(interval);
@@ -77,6 +83,7 @@ export default function AdminLayout({ children, user }: { children: React.ReactN
   const navItems = baseNavItems.map((item) => {
     if (item.id === "teachers" && pendingCount > 0) return { ...item, badge: pendingCount };
     if (item.id === "reports" && pendingReports > 0) return { ...item, badge: pendingReports };
+    if (item.id === "requests" && newRequestsCount > 0) return { ...item, badge: newRequestsCount };
     return item;
   });
 

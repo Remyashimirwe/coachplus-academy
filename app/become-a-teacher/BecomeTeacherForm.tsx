@@ -752,7 +752,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                       </div>
 
                       <Field icon={<FiCalendar />} label="Earliest Start Date *" htmlFor="startDate">
-                        <input id="startDate" name="startDate" type="date" required className={inputClasses} />
+                        <input id="startDate" name="startDate" type="date" required onClick={(e) => { const input = e.target as HTMLInputElement; if (input.showPicker) input.showPicker(); }} className={inputClasses} />
                       </Field>
                     </div>
 

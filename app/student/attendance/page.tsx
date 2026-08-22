@@ -385,8 +385,9 @@ export default function StudentAttendancePage() {
 
                 {!isPast && (timeError || mark?.status === "PRESENT") && (
                   <div className="mt-2.5">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <TimePicker
+                        compact
                         label="From"
                         ariaLabel={`${day.iso} from time`}
                         value={timeUsedDrafts[day.iso]?.from ?? parseTimeUsed(mark?.timeUsed).from}
@@ -399,6 +400,7 @@ export default function StudentAttendancePage() {
                         }}
                       />
                       <TimePicker
+                        compact
                         label="To"
                         ariaLabel={`${day.iso} to time`}
                         value={timeUsedDrafts[day.iso]?.to ?? parseTimeUsed(mark?.timeUsed).to}
