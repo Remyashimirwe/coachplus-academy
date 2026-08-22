@@ -57,6 +57,10 @@ export async function POST(
         teacherProfile: {
           create: {
             phone: application.phone,
+            country: application.country,
+            city: application.district,
+            village: application.village,
+            cell: application.cell,
             subjects: application.subjects,
           },
         },

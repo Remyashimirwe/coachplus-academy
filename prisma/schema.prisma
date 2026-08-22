@@ -35,6 +35,10 @@ model Teacher {
   userId             Int                 @unique
   user               User                @relation("UserToTeacher", fields: [userId], references: [id])
   phone              String              @default("")
+  country            String              @default("") // Location shown on the teacher dashboard
+  city               String              @default("")
+  village            String              @default("")
+  cell               String              @default("")
   subjects           String              @default("") // Courses/subjects the teacher can teach
   isFired            Boolean             @default(false)
   firedAt            DateTime?

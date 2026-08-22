@@ -32,6 +32,10 @@ function renderEmail({ preheader, bodyHtml }: { preheader?: string; bodyHtml: st
           ${bodyHtml}
         </div>
         <div style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <img src="${LOGO_URL}" alt="${BRAND_NAME}" width="32" height="32" style="border-radius:8px;display:inline-block;object-fit:contain;background:#ffffff;padding:3px;border:1px solid #e2e8f0;" />
+            <span style="font-size:13px;font-weight:700;color:#0f172a;">${BRAND_NAME}</span>
+          </div>
           <p style="margin:0 0 8px 0;font-size:12px;color:#64748b;">
             Questions? Reach out to us at
             <a href="mailto:${CONTACT_EMAIL}" style="color:#E91E63;text-decoration:none;font-weight:700;">${CONTACT_EMAIL}</a>

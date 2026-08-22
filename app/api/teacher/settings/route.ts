@@ -26,8 +26,49 @@ export async function GET() {
       email: teacher.user.email,
       image: teacher.user.image,
       phone: teacher.phone,
+      country: teacher.country,
+      city: teacher.city,
+      village: teacher.village,
+      cell: teacher.cell,
       subjects: teacher.subjects,
       studentCount: teacher._count.students,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const session = await getSession();
+    if (!session || session.user.role !== "TEACHER") {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const clean = (v: unknown) => String(v ?? "").trim();
+
+    const teacher = await prisma.teacher.update({
+      where: { userId: session.user.id },
+      data: {
+        country: clean(body.country),
+        city: clean(body.city),
+        village: clean(body.village),
+        cell: clean(body.cell),
+        ...(body.phone !== undefined ? { phone: clean(body.phone) } : {}),
+      },
+    });
+
+    return NextResponse.json({
+      message: "Location updated successfully",
+      country: teacher.country,
+      city: teacher.city,
+      village: teacher.village,
+      cell: teacher.cell,
+      phone: teacher.phone,
     });
   } catch (error) {
     return NextResponse.json(

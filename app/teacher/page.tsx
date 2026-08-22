@@ -10,8 +10,11 @@ import {
   FiCheckSquare,
   FiAlertCircle,
   FiClock,
+  FiMapPin,
   FiMonitor,
   FiBookOpen,
+  FiEdit2,
+  FiX,
   FiCalendar,
   FiLoader,
   FiChevronLeft,
@@ -26,6 +29,10 @@ interface TeacherProfile {
   email: string;
   image?: string | null;
   phone?: string;
+  country?: string;
+  city?: string;
+  village?: string;
+  cell?: string;
   subjects?: string;
   studentCount?: number;
 }
@@ -82,6 +89,50 @@ export default function TeacherPage() {
   const [studentLoading, setStudentLoading] = useState(false);
   const [studentError, setStudentError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [locationDraft, setLocationDraft] = useState({ country: "", city: "", village: "", cell: "" });
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<{ success: boolean; text: string } | null>(null);
+
+  const locationLine = [profile?.country, profile?.city, profile?.village, profile?.cell]
+    .filter(Boolean)
+    .join(" · ");
+
+  function startEditLocation() {
+    setLocationDraft({
+      country: profile?.country || "",
+      city: profile?.city || "",
+      village: profile?.village || "",
+      cell: profile?.cell || "",
+    });
+    setLocationStatus(null);
+    setEditingLocation(true);
+  }
+
+  async function saveLocation(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingLocation(true);
+    setLocationStatus(null);
+    try {
+      const res = await fetch("/api/teacher/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(locationDraft),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProfile((prev) => (prev ? { ...prev, ...locationDraft } : prev));
+        setLocationStatus({ success: true, text: data.message || "Location updated." });
+        setTimeout(() => setEditingLocation(false), 800);
+      } else {
+        setLocationStatus({ success: false, text: data.message || "Failed to update location." });
+      }
+    } catch {
+      setLocationStatus({ success: false, text: "Something went wrong. Please try again." });
+    } finally {
+      setSavingLocation(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -180,31 +231,141 @@ export default function TeacherPage() {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-2xl bg-gradient-to-r from-[#E91E63]/10 via-[#FF5733]/10 to-[#7B1FA2]/10 border border-[#E91E63]/20 p-4 sm:p-5 flex items-start gap-3">
+        <div className="size-10 shrink-0 rounded-xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] text-white flex items-center justify-center shadow-lg shadow-rose-200">
+          <FiMapPin className="size-5" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-slate-900">We match you with nearby students</p>
+          <p className="text-xs text-slate-600 mt-0.5">
+            Keep your location updated so you never miss opportunities!
+          </p>
+        </div>
+      </div>
+
       <div className="rounded-2xl bg-gradient-to-tr from-[#0f172a] to-[#1e293b] text-white overflow-hidden">
-        <div className="p-6 flex items-center gap-4">
-          <div className="size-16 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] flex items-center justify-center text-2xl font-black">
-            {profile?.image ? (
-              <img src={profile.image} alt={profile.name} className="h-full w-full object-cover" />
-            ) : (
-              profile?.name?.charAt(0) || "T"
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-black truncate">{profile?.name || "Teacher Dashboard"}</h1>
-            <p className="text-sm text-slate-300 truncate flex items-center gap-1.5">
-              <FiMail className="size-3.5 shrink-0" /> {profile?.email || ""}
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2 text-[11px] font-semibold">
-              {profile?.phone && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
-                  <FiPhone className="size-3" /> {profile.phone}
-                </span>
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="size-16 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] flex items-center justify-center text-2xl font-black">
+              {profile?.image ? (
+                <img src={profile.image} alt={profile.name} className="h-full w-full object-cover" />
+              ) : (
+                profile?.name?.charAt(0) || "T"
               )}
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
-                <FiUsers className="size-3" /> {students.length} {students.length === 1 ? "Student" : "Students"}
-              </span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-black truncate">{profile?.name || "Teacher Dashboard"}</h1>
+              <p className="text-sm text-slate-300 truncate flex items-center gap-1.5">
+                <FiMail className="size-3.5 shrink-0" /> {profile?.email || ""}
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2 text-[11px] font-semibold">
+                {profile?.phone && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
+                    <FiPhone className="size-3" /> {profile.phone}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
+                  <FiUsers className="size-3" /> {students.length} {students.length === 1 ? "Student" : "Students"}
+                </span>
+              </div>
+              {/* Location line on small screens */}
+              {locationLine && (
+                <p className="mt-2 text-[11px] font-semibold text-slate-300 flex items-center gap-1.5 md:hidden">
+                  <FiMapPin className="size-3 shrink-0 text-[#E91E63]" /> {locationLine}
+                </p>
+              )}
+            </div>
+
+            {/* Location block on the right (desktop) */}
+            <div className="hidden md:flex flex-col items-end gap-1.5 shrink-0 text-right">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Location</p>
+              {locationLine ? (
+                <p className="text-sm font-semibold flex items-center gap-1.5 max-w-[240px]">
+                  <FiMapPin className="size-4 shrink-0 text-[#E91E63]" />
+                  <span className="truncate" title={locationLine}>{locationLine}</span>
+                </p>
+              ) : (
+                <p className="text-xs text-slate-400 italic">No location set yet</p>
+              )}
+              <button
+                type="button"
+                onClick={startEditLocation}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white transition-all hover:bg-[#E91E63]"
+              >
+                <FiEdit2 className="size-3" /> Edit
+              </button>
             </div>
           </div>
+
+          {/* Mobile edit entry */}
+          {!editingLocation && (
+            <button
+              type="button"
+              onClick={startEditLocation}
+              className="md:hidden mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white transition-all hover:bg-[#E91E63]"
+            >
+              <FiEdit2 className="size-3" /> Update location
+            </button>
+          )}
+
+          {editingLocation && (
+            <form onSubmit={saveLocation} className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 grid gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  value={locationDraft.country}
+                  onChange={(e) => setLocationDraft((d) => ({ ...d, country: e.target.value }))}
+                  placeholder="Country (e.g. Rwanda)"
+                  aria-label="Country"
+                  className="rounded-xl bg-white/10 border border-white/20 px-3 py-2 text-sm text-white placeholder:text-slate-400 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/30"
+                />
+                <input
+                  value={locationDraft.city}
+                  onChange={(e) => setLocationDraft((d) => ({ ...d, city: e.target.value }))}
+                  placeholder="City / District (e.g. Kigali)"
+                  aria-label="City"
+                  className="rounded-xl bg-white/10 border border-white/20 px-3 py-2 text-sm text-white placeholder:text-slate-400 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/30"
+                />
+                <input
+                  value={locationDraft.village}
+                  onChange={(e) => setLocationDraft((d) => ({ ...d, village: e.target.value }))}
+                  placeholder="Village (e.g. Kibenga)"
+                  aria-label="Village"
+                  className="rounded-xl bg-white/10 border border-white/20 px-3 py-2 text-sm text-white placeholder:text-slate-400 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/30"
+                />
+                <input
+                  value={locationDraft.cell}
+                  onChange={(e) => setLocationDraft((d) => ({ ...d, cell: e.target.value }))}
+                  placeholder="Cell (e.g. Nyamweru)"
+                  aria-label="Cell"
+                  className="rounded-xl bg-white/10 border border-white/20 px-3 py-2 text-sm text-white placeholder:text-slate-400 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/30"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={savingLocation}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#E91E63] px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-500/20 transition-all hover:bg-[#c81854] disabled:opacity-50"
+                >
+                  {savingLocation ? "Saving..." : "Save Location"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingLocation(false);
+                    setLocationStatus(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-white/20"
+                >
+                  Cancel
+                </button>
+                {locationStatus && (
+                  <span className={`text-[11px] font-semibold ${locationStatus.success ? "text-emerald-400" : "text-rose-400"}`}>
+                    {locationStatus.text}
+                  </span>
+                )}
+              </div>
+            </form>
+          )}
         </div>
       </div>
 
