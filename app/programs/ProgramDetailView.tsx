@@ -34,7 +34,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-32 pb-20 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-24 pb-14 text-white">
         <div className="absolute -left-32 top-24 size-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -right-20 bottom-0 size-80 rounded-full bg-[#7B1FA2]/45 blur-3xl" />
         
@@ -46,38 +46,38 @@ export default function ProgramDetailView({ program }: { program: Program }) {
           >
             <Link 
               href="/programs"
-              className="inline-flex items-center gap-2 mb-8 text-white/80 hover:text-white transition-colors font-medium"
+              className="inline-flex items-center gap-2 mb-5 text-white/80 hover:text-white transition-colors font-medium"
             >
               <FiChevronLeft className="size-5" />
               Back to Programs
             </Link>
           </motion.div>
 
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20">
-                <FiBookOpen className="size-4" />
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20">
+                <FiBookOpen className="size-3.5" />
                 {program.level}
               </p>
-              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+              <h1 className="mt-3 text-lg font-extrabold tracking-tight sm:text-xl md:text-2xl">
                 {program.title}{" "}
                 <span className="text-white/80">({program.level})</span>
               </h1>
-              <p className="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed">
+              <p className="mt-2.5 max-w-2xl text-xs text-white/90 leading-relaxed sm:text-sm">
                 {program.text}
               </p>
               
-              <div className="mt-10">
+              <div className="mt-5">
                 <Link
                   href={`/request?programId=${program.id}`}
-                  className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-2xl bg-white px-8 text-lg font-bold text-[#E91E63] shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
+                  className="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#E91E63] shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
                 >
                   Request a Teacher
-                  <FiArrowRight className="size-5" />
+                  <FiArrowRight className="size-3.5" />
                 </Link>
               </div>
             </motion.div>
@@ -88,7 +88,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
               transition={{ duration: 0.8 }}
               className="relative hidden lg:block"
             >
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[40px] border-8 border-white/10 shadow-2xl">
+              <div className="relative aspect-video overflow-hidden rounded-[28px] border-4 border-white/10 shadow-2xl">
                 <img 
                   src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80"} 
                   alt={program.title}
@@ -115,13 +115,13 @@ export default function ProgramDetailView({ program }: { program: Program }) {
       <section className="bg-white py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-[#E91E63] mb-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-[#E91E63] mb-3">
               Available programs
             </h2>
-            <h2 className="text-3xl font-bold tracking-tight text-[#21121f] sm:text-4xl">
+            <h2 className="text-lg font-extrabold tracking-tight text-[#21121f] sm:text-xl">
               Available <span className="text-[#E91E63]">Programs</span>
             </h2>
-            <p className="mt-6 text-lg font-medium text-slate-600">
+            <p className="mt-2.5 text-xs font-medium text-slate-600 sm:text-sm">
               Choose a specialized path within {program.title} to find the perfect tutor.
             </p>
           </div>
@@ -147,13 +147,13 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                     <FiCheck className="size-5" />
                   </div>
                 </div>
-              <h3 className="text-sm font-normal text-slate-800 mb-4">{subject.name}</h3>
+              <h3 className="text-xs font-bold text-slate-900 mb-4">{subject.name}</h3>
                 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Included Subjects:</p>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Included Subjects:</p>
                   <ul className="space-y-2 mb-8">
                     {subject.topics.map((topic) => (
-                      <li key={topic.id} className="flex items-center gap-2 text-slate-600">
+                      <li key={topic.id} className="flex items-center gap-2 text-xs font-medium text-slate-600">
                         <div className="size-1.5 rounded-full bg-[#E91E63]/40" />
                         {topic.name}
                       </li>
@@ -166,7 +166,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
 
                 <Link
                   href={`/request?programId=${program.id}&subjectId=${subject.id}`}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-3 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#E91E63] py-2.5 text-xs font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
                 >
                   Request a Teacher
                   <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -189,23 +189,23 @@ export default function ProgramDetailView({ program }: { program: Program }) {
           <div className="relative overflow-hidden rounded-[48px] bg-[#0f172a] p-12 lg:p-20">
             <div className="absolute -right-24 top-0 size-72 rounded-full bg-[#E91E63]/25 blur-3xl" />
             <div className="relative z-10 max-w-3xl">
-            <h2 className="text-3xl font-medium text-white sm:text-4xl">
-                Ready to find the perfect teacher for your child?
+              <h2 className="text-lg font-extrabold text-white sm:text-xl">
+                Ready to Find the Right Teacher for You?
               </h2>
-              <p className="mt-8 text-xl text-white/70">
-                Join hundreds of families in Rwanda who trust CoachPlus Academy for personalized education.
+              <p className="mt-3 text-xs leading-relaxed text-white/60">
+                Connect with qualified and trusted teachers who match your learning needs, goals, location, and preferred learning style. Whether you’re learning a new subject, developing a skill, preparing for an exam, or pursuing professional growth, CoachPlus Academy helps you find the right teacher for your journey.
               </p>
-              <div className="mt-12 flex flex-col gap-4 sm:flex-row">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/request"
-                  className="inline-flex min-h-[64px] items-center justify-center gap-3 rounded-2xl bg-[#E91E63] px-10 text-lg font-bold text-white shadow-xl shadow-rose-500/25 transition-all hover:-translate-y-1 hover:bg-[#7B1FA2]"
+                  className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-5 text-xs font-bold text-white shadow-xl shadow-rose-500/25 transition-all hover:-translate-y-1 hover:bg-[#7B1FA2]"
                 >
                   Get Started Now
-                  <FiArrowRight className="size-6" />
+                  <FiArrowRight className="size-4" />
                 </Link>
                 <Link
                   href="/become-a-teacher"
-                  className="inline-flex min-h-[64px] items-center justify-center rounded-2xl border border-white/20 px-10 text-lg font-bold text-white backdrop-blur-sm transition-all hover:bg-white/10"
+                  className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-white/20 px-5 text-xs font-bold text-white backdrop-blur-sm transition-all hover:bg-white/10"
                 >
                   Join as a Teacher
                 </Link>

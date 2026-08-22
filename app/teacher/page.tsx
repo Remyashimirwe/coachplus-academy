@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   FiUsers,
@@ -21,8 +21,10 @@ import {
   FiMail,
   FiPhone,
   FiUser,
+  FiCamera,
 } from "react-icons/fi";
 import { DAYS_OF_WEEK, parsePreferredDays, toISODate, weekRange } from "@/app/lib/schedule";
+import { resizeImage } from "@/app/lib/image";
 
 interface TeacherProfile {
   name: string;
@@ -93,10 +95,35 @@ export default function TeacherPage() {
   const [locationDraft, setLocationDraft] = useState({ country: "", city: "", village: "", cell: "" });
   const [savingLocation, setSavingLocation] = useState(false);
   const [locationStatus, setLocationStatus] = useState<{ success: boolean; text: string } | null>(null);
+  const [savingImage, setSavingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const locationLine = [profile?.country, profile?.city, profile?.village, profile?.cell]
     .filter(Boolean)
     .join(" · ");
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || savingImage) return;
+    setSavingImage(true);
+    try {
+      const dataUrl = await resizeImage(file);
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      if (res.ok) {
+        setProfile((prev) => (prev ? { ...prev, image: dataUrl } : prev));
+        window.dispatchEvent(new Event("account:updated"));
+      }
+    } catch {
+      // ignore, keep current picture
+    } finally {
+      setSavingImage(false);
+      e.target.value = "";
+    }
+  }
 
   function startEditLocation() {
     setLocationDraft({
@@ -236,7 +263,7 @@ export default function TeacherPage() {
           <FiMapPin className="size-5" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-900">We match you with nearby students</p>
+          <p className="bg-gradient-to-tr from-[#FF5733] to-[#E91E63] bg-clip-text text-sm font-bold text-transparent">We match you with nearby students</p>
           <p className="text-xs text-slate-600 mt-0.5">
             Keep your location updated so you never miss opportunities!
           </p>
@@ -246,12 +273,24 @@ export default function TeacherPage() {
       <div className="rounded-2xl bg-gradient-to-tr from-[#0f172a] to-[#1e293b] text-white overflow-hidden">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="size-16 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] flex items-center justify-center text-2xl font-black">
-              {profile?.image ? (
-                <img src={profile.image} alt={profile.name} className="h-full w-full object-cover" />
-              ) : (
-                profile?.name?.charAt(0) || "T"
-              )}
+            <div className="relative size-16 shrink-0">
+              <div className="size-16 overflow-hidden rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] flex items-center justify-center text-2xl font-black">
+                {profile?.image ? (
+                  <img src={profile.image} alt={profile.name} className="h-full w-full object-cover" />
+                ) : (
+                  profile?.name?.charAt(0) || "T"
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={savingImage}
+                title="Change profile picture"
+                className="absolute -bottom-1 -right-1 size-7 rounded-full bg-[#E91E63] text-white border-2 border-white shadow-md flex items-center justify-center transition-colors hover:bg-[#7B1FA2] disabled:opacity-60"
+              >
+                {savingImage ? <FiLoader className="size-3 animate-spin" /> : <FiCamera className="size-3.5" />}
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-xl font-black truncate">{profile?.name || "Teacher Dashboard"}</h1>
