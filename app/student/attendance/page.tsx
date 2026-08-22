@@ -11,6 +11,7 @@ import {
   FiAlertCircle,
   FiClock,
   FiEdit,
+  FiCheck,
 } from "react-icons/fi";
 import TimePicker from "@/app/components/TimePicker";
 import {
@@ -77,6 +78,7 @@ export default function StudentAttendancePage() {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<Record<string, boolean>>({});
+  const [timeOpen, setTimeOpen] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState<string>(toISODate(weekRange(new Date()).start));
 
@@ -211,6 +213,7 @@ export default function StudentAttendancePage() {
         setMarks((prev) => ({ ...prev, [day.iso]: data.attendance }));
         setSaved((prev) => ({ ...prev, [day.iso]: true }));
         setEditing((prev) => ({ ...prev, [day.iso]: false }));
+        setTimeOpen((prev) => ({ ...prev, [day.iso]: false }));
       } else {
         setCellErrors((prev) => ({ ...prev, [day.iso]: data.message || "Failed to save." }));
       }
@@ -355,7 +358,14 @@ export default function StudentAttendancePage() {
                       return (
                         <button
                           key={opt.value}
-                          onClick={() => submitMark(day, opt.value)}
+                          onClick={() => {
+                            if (opt.value === "PRESENT") {
+                              setTimeOpen((prev) => ({ ...prev, [day.iso]: true }));
+                              if (cellError) setCellErrors((prev) => ({ ...prev, [day.iso]: undefined }));
+                            } else {
+                              submitMark(day, opt.value);
+                            }
+                          }}
                           disabled={isSaving}
                           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-2 text-xs font-bold transition-all ${
                             active
@@ -383,7 +393,7 @@ export default function StudentAttendancePage() {
                   </div>
                 )}
 
-                {!isPast && (timeError || mark?.status === "PRESENT") && (
+                {!isPast && (timeOpen[day.iso] || timeError || mark?.status === "PRESENT") && (
                   <div className="mt-2.5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <TimePicker
@@ -413,6 +423,14 @@ export default function StudentAttendancePage() {
                         }}
                       />
                     </div>
+                    <button
+                      onClick={() => submitMark(day, "PRESENT")}
+                      disabled={isSaving}
+                      className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-black text-white text-[10px] font-semibold px-3 py-2 transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-60"
+                    >
+                      {isSaving ? <FiLoader className="size-3 animate-spin" /> : <FiCheck className="size-3" />}
+                      Done
+                    </button>
                     {timeError && (
                       <p className="text-[10px] text-rose-600 font-semibold mt-1">{timeError}</p>
                     )}

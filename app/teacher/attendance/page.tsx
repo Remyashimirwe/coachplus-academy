@@ -105,6 +105,8 @@ function DayCard({
   highlighted,
   editing,
   setEditing,
+  timeOpen,
+  setTimeOpen,
 }: {
   day: DaySchedule;
   mark?: AttendanceRow;
@@ -127,6 +129,8 @@ function DayCard({
   highlighted?: boolean;
   editing: boolean;
   setEditing: (val: boolean) => void;
+  timeOpen: boolean;
+  setTimeOpen: (val: boolean) => void;
 }) {
   const key = day.iso;
   const expectedList = focusedStudent
@@ -252,7 +256,14 @@ function DayCard({
               return (
                 <button
                   key={opt.value}
-                  onClick={() => handleMark(day, opt.value)}
+                  onClick={() => {
+                    if (opt.value === "PRESENT") {
+                      setTimeOpen(true);
+                      if (cellError) setCellErrors((prev) => ({ ...prev, [key]: undefined }));
+                    } else {
+                      handleMark(day, opt.value);
+                    }
+                  }}
                   disabled={isSaving}
                   title={opt.label}
                   className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-2 text-[10px] font-semibold transition-all duration-150 active:scale-95 disabled:opacity-60 ${
@@ -274,7 +285,7 @@ function DayCard({
             })}
           </div>
 
-          {(timeError || mark?.status === "PRESENT") && (
+          {(timeOpen || timeError || mark?.status === "PRESENT") && (
             <div className="mb-1.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 <TimePicker
@@ -377,6 +388,7 @@ export default function AttendancePage() {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<Record<string, boolean>>({});
+  const [timeOpen, setTimeOpen] = useState<Record<string, boolean>>({});
   const [weekStart, setWeekStart] = useState<string>(toISODate(weekRange(new Date()).start));
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
   const [search, setSearch] = useState("");
@@ -515,6 +527,7 @@ export default function AttendancePage() {
         setMarks((prev) => ({ ...prev, [key]: data.attendance }));
         setReasonDrafts((prev) => ({ ...prev, [key]: "" }));
         setTimeUsedDrafts((prev) => ({ ...prev, [key]: { from: "", to: "" } }));
+        setTimeOpen((prev) => ({ ...prev, [key]: false }));
         setSaved((prev) => ({ ...prev, [key]: true }));
         setEditing((prev) => ({ ...prev, [key]: false }));
         setTimeout(() => setSaved((prev) => ({ ...prev, [key]: false })), 1500);
@@ -803,6 +816,8 @@ export default function AttendancePage() {
                         highlighted={iso === targetDate}
                         editing={!!editing[iso]}
                         setEditing={(val) => setEditing((prev) => ({ ...prev, [iso]: val }))}
+                        timeOpen={!!timeOpen[iso]}
+                        setTimeOpen={(val) => setTimeOpen((prev) => ({ ...prev, [iso]: val }))}
                       />
                     );
                   })}
