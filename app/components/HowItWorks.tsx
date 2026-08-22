@@ -12,7 +12,7 @@ const steps = [
   {
     icon: FiUsers,
     title: "Meet matched teachers",
-    text: "We find the great educators by specialty, availability, reviews, and the teaching style that fits your child.",
+    text: "We find the great educators by specialty, availability, reviews, and the teaching style that fits you.",
   },
   {
     icon: FiAward,

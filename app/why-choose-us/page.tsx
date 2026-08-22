@@ -7,7 +7,7 @@ export default function WhyChooseUsPage() {
     <main className="min-h-screen">
       <PageHero
         title={<>Why Choose <span className="text-[#E91E63]">CoachPlus Academy</span></>}
-        subtitle="Premium features built around safety, comfort, and better learning outcomes for your children."
+        subtitle="Premium features built around safety, comfort, and better learning outcomes for you."
       />
       <Features />
       <Footer />
