@@ -264,7 +264,7 @@ export default function TeacherPage() {
         </div>
         <div className="min-w-0">
           <p className="bg-gradient-to-tr from-[#FF5733] to-[#E91E63] bg-clip-text text-sm font-bold text-transparent">We match you with nearby students</p>
-          <p className="text-xs text-slate-600 mt-0.5">
+          <p className="bg-gradient-to-tr from-[#FF5733] to-[#E91E63] bg-clip-text text-xs font-semibold text-transparent mt-0.5">
             Keep your location updated so you never miss opportunities!
           </p>
         </div>

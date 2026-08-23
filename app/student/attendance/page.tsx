@@ -423,6 +423,20 @@ export default function StudentAttendancePage() {
                         }}
                       />
                     </div>
+                    {!day.preferred && (
+                      <textarea
+                        value={reasonDrafts[day.iso] ?? ""}
+                        onChange={(e) => {
+                          setReasonDrafts((prev) => ({ ...prev, [day.iso]: e.target.value }));
+                          if (cellError) setCellErrors((prev) => ({ ...prev, [day.iso]: undefined }));
+                        }}
+                        placeholder="Reason (required)"
+                        rows={2}
+                        className={`mt-2 w-full rounded-xl border px-3 py-2 text-xs outline-none transition-all ${
+                          cellError ? "border-rose-400 ring-2 ring-rose-500/10" : "border-slate-200 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10"
+                        } bg-white text-slate-700`}
+                      />
+                    )}
                     <button
                       onClick={() => submitMark(day, "PRESENT")}
                       disabled={isSaving}

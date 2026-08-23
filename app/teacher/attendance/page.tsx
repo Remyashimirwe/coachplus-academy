@@ -315,6 +315,23 @@ function DayCard({
                   }}
                 />
               </div>
+              {!expected && (
+                <input
+                  type="text"
+                  value={reasonDrafts[key] ?? ""}
+                  onChange={(e) => {
+                    setReasonDrafts((prev) => ({ ...prev, [key]: e.target.value }));
+                    if (cellError) setCellErrors((prev) => ({ ...prev, [key]: undefined }));
+                  }}
+                  placeholder="Reason (required)"
+                  aria-label={`${key} reason`}
+                  className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-[10px] outline-none transition-all ${
+                    cellError
+                      ? "border-slate-400 bg-slate-100 text-slate-800"
+                      : "border-slate-200 bg-white text-slate-700 focus:border-slate-400 focus:ring-2 focus:ring-slate-400/10"
+                  }`}
+                />
+              )}
               <button
                 onClick={() => handleMark(day, "PRESENT")}
                 disabled={isSaving}
@@ -336,8 +353,9 @@ function DayCard({
               }}
               onBlur={() => {
                 const reason = (reasonDrafts[key] ?? "").trim();
-                if (mark && reason && reason !== (mark.remarks ?? "")) {
-                  handleMark(day, mark.status);
+                const status = mark?.status ?? (expected ? "ABSENT" : "PRESENT");
+                if (reason && reason !== (mark?.remarks ?? "")) {
+                  handleMark(day, status);
                 }
               }}
               placeholder="Reason (required)"
