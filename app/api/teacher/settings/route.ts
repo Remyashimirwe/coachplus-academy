@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "TEACHER") {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== "TEACHER") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const teacher = await prisma.teacher.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       include: {
         user: true,
         _count: { select: { students: true } },
@@ -31,6 +31,8 @@ export async function GET() {
       village: teacher.village,
       cell: teacher.cell,
       subjects: teacher.subjects,
+      availableDays: teacher.availableDays ?? '',
+      availableHours: teacher.availableHours ?? '',
       studentCount: teacher._count.students,
     });
   } catch (error) {
@@ -43,8 +45,8 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "TEACHER") {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== "TEACHER") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -52,7 +54,7 @@ export async function PUT(request: Request) {
     const clean = (v: unknown) => String(v ?? "").trim();
 
     const teacher = await prisma.teacher.update({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       data: {
         country: clean(body.country),
         city: clean(body.city),

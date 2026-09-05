@@ -1,22 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const user = await getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const [notifications, unreadCount] = await Promise.all([
       prisma.notification.findMany({
-        where: { userId: session.user.id },
+        where: { userId: user.id },
         orderBy: { createdAt: "desc" },
         take: 30,
       }),
       prisma.notification.count({
-        where: { userId: session.user.id, read: false },
+        where: { userId: user.id, read: false },
       }),
     ]);
 

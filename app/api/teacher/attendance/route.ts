@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/app/lib/db';
-import { getSession } from '@/app/lib/auth';
+import { getUserFromRequest } from '@/app/lib/auth';
 
 function startOfDay(input?: string | null) {
   const d = input ? new Date(input) : new Date();
@@ -11,8 +11,8 @@ function startOfDay(input?: string | null) {
 
 export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'TEACHER') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'TEACHER') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const to = searchParams.get('to');
 
     const teacher = await prisma.teacher.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
     });
 
     if (!teacher) return NextResponse.json([]);
@@ -47,17 +47,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST() {
-  try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'TEACHER') {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    return NextResponse.json(
-      { message: 'Teachers mark their own attendance now. Use /api/teacher/my-attendance instead.' },
-      { status: 403 }
-    );
-  } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Something went wrong" }, { status: 500 });
-  }
+  return NextResponse.json(
+    { message: 'Teachers mark their own attendance now. Use /api/teacher/my-attendance instead.' },
+    { status: 403 }
+  );
 }

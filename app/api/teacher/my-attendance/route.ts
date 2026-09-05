@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/app/lib/db';
-import { getSession } from '@/app/lib/auth';
+import { getUserFromRequest } from '@/app/lib/auth';
 import { dayNameFromDate, parsePreferredDays } from '@/app/lib/schedule';
 import { notifyEveryone } from '@/app/lib/notifications';
 
@@ -11,11 +11,6 @@ function startOfDay(input?: string | null) {
   return d;
 }
 
-/**
- * A day is "expected" when at least one of the teacher's students has listed
- * that weekday in their preferred days. The teacher is expected to show up on
- * those days and gets asked for a reason when they mark something different.
- */
 async function expectedDay(teacherId: number, day: Date): Promise<boolean> {
   const students = await prisma.student.findMany({
     where: { teacherId },
@@ -27,8 +22,8 @@ async function expectedDay(teacherId: number, day: Date): Promise<boolean> {
 
 export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'TEACHER') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'TEACHER') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -37,7 +32,7 @@ export async function GET(request: Request) {
     const to = searchParams.get('to');
 
     const teacher = await prisma.teacher.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
     });
 
     if (!teacher) return NextResponse.json([]);
@@ -60,8 +55,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'TEACHER') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'TEACHER') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -72,7 +67,7 @@ export async function POST(request: Request) {
     }
 
     const teacher = await prisma.teacher.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
     });
 
     if (!teacher) {
@@ -81,8 +76,6 @@ export async function POST(request: Request) {
 
     const day = startOfDay(date);
 
-    // Attendance can be edited for 24 hours after the day ends; after that the
-    // day is locked and can no longer be marked or changed.
     const dayEnd = new Date(day);
     dayEnd.setHours(23, 59, 59, 999);
     if (Date.now() > dayEnd.getTime() + 24 * 60 * 60 * 1000) {
@@ -92,7 +85,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Marking yourself present requires the actual time you used / taught.
     if (status === 'PRESENT' && !String(timeUsed || "").trim()) {
       return NextResponse.json(
         { message: 'Please enter the time you used before marking yourself present.' },
@@ -104,8 +96,6 @@ export async function POST(request: Request) {
     const reason = String(remarks || "").trim();
     const used = status === 'PRESENT' ? (String(timeUsed || "").trim() || null) : null;
 
-    // When the teacher's mark differs from the students' preferred schedule,
-    // a reason is required so the student knows what changed and why.
     const deviates =
       (isExpected && status === 'ABSENT') ||
       (!isExpected && status === 'PRESENT');
@@ -129,9 +119,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Derive each student's attendance from the teacher's record: if a student
-    // had a preferred session that day, the teacher's presence reflects whether
-    // the session happened and any reason given flows to the student.
     const students = await prisma.student.findMany({
       where: { teacherId: teacher.id },
       select: { id: true, preferredDays: true },
@@ -157,9 +144,9 @@ export async function POST(request: Request) {
 
     await notifyEveryone({
       title: "Attendance Updated",
-      message: `${session.user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
+      message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
       type: "info",
-      exceptUserId: session.user.id,
+      exceptUserId: user.id,
     });
 
     return NextResponse.json({

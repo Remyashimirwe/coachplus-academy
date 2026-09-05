@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 import { sendTeacherFiredEmail } from "@/app/lib/email";
 
 export async function POST(
@@ -8,8 +8,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "ADMIN") {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 

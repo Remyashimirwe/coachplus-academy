@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
-import { getSession } from '@/app/lib/auth';
+import { getUserFromRequest } from '@/app/lib/auth';
 import { sendReportSubmittedEmail } from '@/app/lib/email';
 
 const VALID_CATEGORIES = [
@@ -11,15 +11,15 @@ const VALID_CATEGORIES = [
   'Other',
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'STUDENT') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'STUDENT') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const student = await prisma.student.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       include: { teacher: { include: { user: true } } },
     });
 
@@ -44,8 +44,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'STUDENT') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'STUDENT') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     const finalCategory = VALID_CATEGORIES.includes(category) ? category : 'Other';
 
     const student = await prisma.student.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       include: { user: true, teacher: { include: { user: true } } },
     });
 

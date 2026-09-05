@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/app/lib/db';
-import { getSession } from '@/app/lib/auth';
+import { getUserFromRequest } from '@/app/lib/auth';
 import { sendInviteEmail } from '@/app/lib/email';
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'ADMIN') {
+    const authUser = await getUserFromRequest(request);
+    if (!authUser || authUser.role !== 'ADMIN') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
-import { getSession } from '@/app/lib/auth';
+import { getUserFromRequest } from '@/app/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'STUDENT') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'STUDENT') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const student = await prisma.student.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: user.id }
     });
 
     if (!student) return NextResponse.json([]);

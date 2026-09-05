@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 import { sendInviteEmail, sendRequestApprovedEmail } from "@/app/lib/email";
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -11,8 +11,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") {
+  const user = await getUserFromRequest(request);
+  if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 

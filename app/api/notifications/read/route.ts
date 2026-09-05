@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const user = await getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.notification.updateMany({
-      where: { userId: session.user.id, read: false },
+      where: { userId: user.id, read: false },
       data: { read: true },
     });
 

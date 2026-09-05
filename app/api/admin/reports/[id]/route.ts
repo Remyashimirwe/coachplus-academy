@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
-import { getSession } from '@/app/lib/auth';
+import { getUserFromRequest } from '@/app/lib/auth';
 import { sendReportUpdateEmail } from '@/app/lib/email';
 
 const VALID_STATUSES = ['new', 'reviewed', 'resolved'];
@@ -10,8 +10,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== 'ADMIN') {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 

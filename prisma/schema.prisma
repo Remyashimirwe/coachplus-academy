@@ -35,11 +35,13 @@ model Teacher {
   userId             Int                 @unique
   user               User                @relation("UserToTeacher", fields: [userId], references: [id])
   phone              String              @default("")
-  country            String              @default("") // Location shown on the teacher dashboard
+  country            String              @default("")
   city               String              @default("")
   village            String              @default("")
   cell               String              @default("")
-  subjects           String              @default("") // Courses/subjects the teacher can teach
+  subjects           String              @default("")
+  availableDays      String              @default("") // Comma-separated: "Monday, Wednesday, Friday"
+  availableHours     String              @default("") // e.g. "14:00 - 20:00"
   isFired            Boolean             @default(false)
   firedAt            DateTime?
   fireMessage        String?

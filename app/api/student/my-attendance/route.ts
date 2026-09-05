@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 import { dayNameFromDate, isPreferredDay } from "@/app/lib/schedule";
 import { notifyEveryone } from "@/app/lib/notifications";
 
@@ -13,8 +13,8 @@ function startOfDay(input?: string | null) {
 
 export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "STUDENT") {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== "STUDENT") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const to = searchParams.get("to");
 
     const student = await prisma.student.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
     });
 
     if (!student) return NextResponse.json([]);
@@ -49,8 +49,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session || session.user.role !== "STUDENT") {
+    const user = await getUserFromRequest(request);
+    if (!user || user.role !== "STUDENT") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     const student = await prisma.student.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
     });
 
     if (!student) {
@@ -70,8 +70,6 @@ export async function POST(request: Request) {
 
     const day = startOfDay(date);
 
-    // Attendance can be edited for 24 hours after the day ends; after that the
-    // day is locked and can no longer be marked or changed.
     const dayEnd = new Date(day);
     dayEnd.setHours(23, 59, 59, 999);
     if (Date.now() > dayEnd.getTime() + 24 * 60 * 60 * 1000) {
@@ -115,9 +113,9 @@ export async function POST(request: Request) {
 
     await notifyEveryone({
       title: "Attendance Updated",
-      message: `${session.user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
+      message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
       type: "info",
-      exceptUserId: session.user.id,
+      exceptUserId: user.id,
     });
 
     return NextResponse.json({ message: "Attendance saved successfully", attendance });
