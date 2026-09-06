@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     const applications = await prisma.teacherApplication.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      include: { documents: true },
     });
 
     return NextResponse.json(applications);

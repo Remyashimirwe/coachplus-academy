@@ -49,6 +49,8 @@ model Teacher {
   attendances        Attendance[]
   teacherAttendances TeacherAttendance[]
   reports            Report[]
+  developmentReports DevelopmentReport[]
+  ratings            TeacherRating[]
 }
 
 model Student {
@@ -64,10 +66,12 @@ model Student {
   preferredDays String       @default("") // Comma-separated preferred days, e.g. "Monday, Wednesday"
   preferredTime String       @default("") // Day-time slots, e.g. "Monday: 08:00 - 10:00, Wednesday: 09:00 - 11:00"
   startDate     String       @default("") // Preferred start date
-  attendances   Attendance[]
-  reports       Report[]
-  parentRequest Request?     @relation("RequestStudent")
-  selfAttendances StudentAttendance[]
+  attendances      Attendance[]
+  reports          Report[]
+  parentRequest    Request?              @relation("RequestStudent")
+  selfAttendances  StudentAttendance[]
+  developmentReports DevelopmentReport[]
+  teacherRatings   TeacherRating[]
 }
 
 model Attendance {
@@ -134,6 +138,33 @@ model Report {
   adminReply String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model DevelopmentReport {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  student    Student  @relation(fields: [studentId], references: [id])
+  teacherId  Int
+  teacher    Teacher  @relation(fields: [teacherId], references: [id])
+  category   String   @default("General") // "General", "Progress", "Behavior", "Attendance", "Other"
+  title      String
+  message    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TeacherRating {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id])
+  teacherId Int
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  rating    Int      // 1-5 stars
+  comment   String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, teacherId])
 }
 
 model Program {
