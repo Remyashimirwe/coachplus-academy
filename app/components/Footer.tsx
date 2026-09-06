@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { useState, useEffect } from "react";
-import { getSession } from "@/app/lib/auth";
+import { getSession } from "@/app/lib/auth-actions";
 
 const footerGroups = [
   {

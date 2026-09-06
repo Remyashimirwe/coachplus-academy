@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import AdminLayoutComponent from "./components/AdminLayout";
-import { getSession } from "@/app/lib/auth";
+import { getSession } from "@/app/lib/auth-actions";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

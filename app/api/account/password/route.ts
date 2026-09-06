@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/app/lib/db";
-import { getSession } from "@/app/lib/auth";
+import { getUserFromRequest } from "@/app/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const sessionUser = await getUserFromRequest(request);
+    if (!sessionUser) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    const user = await prisma.user.findUnique({ where: { id: sessionUser.id } });
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }

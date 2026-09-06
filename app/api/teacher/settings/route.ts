@@ -53,24 +53,41 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const clean = (v: unknown) => String(v ?? "").trim();
 
-    const teacher = await prisma.teacher.update({
+    const teacherUpdate: Record<string, unknown> = {};
+    if (body.country !== undefined) teacherUpdate.country = clean(body.country);
+    if (body.city !== undefined) teacherUpdate.city = clean(body.city);
+    if (body.village !== undefined) teacherUpdate.village = clean(body.village);
+    if (body.cell !== undefined) teacherUpdate.cell = clean(body.cell);
+    if (body.phone !== undefined) teacherUpdate.phone = clean(body.phone);
+
+    const userUpdate: Record<string, unknown> = {};
+    if (body.name !== undefined) {
+      const name = clean(body.name);
+      if (name.length > 0) userUpdate.name = name;
+    }
+
+    const updates: Promise<unknown>[] = [];
+    if (Object.keys(teacherUpdate).length > 0) {
+      updates.push(prisma.teacher.update({ where: { userId: user.id }, data: teacherUpdate }));
+    }
+    if (Object.keys(userUpdate).length > 0) {
+      updates.push(prisma.user.update({ where: { id: user.id }, data: userUpdate }));
+    }
+    await Promise.all(updates);
+
+    const teacher = await prisma.teacher.findUnique({
       where: { userId: user.id },
-      data: {
-        country: clean(body.country),
-        city: clean(body.city),
-        village: clean(body.village),
-        cell: clean(body.cell),
-        ...(body.phone !== undefined ? { phone: clean(body.phone) } : {}),
-      },
+      include: { user: true },
     });
 
     return NextResponse.json({
-      message: "Location updated successfully",
-      country: teacher.country,
-      city: teacher.city,
-      village: teacher.village,
-      cell: teacher.cell,
-      phone: teacher.phone,
+      message: "Profile updated successfully",
+      name: teacher?.user.name,
+      phone: teacher?.phone,
+      country: teacher?.country,
+      city: teacher?.city,
+      village: teacher?.village,
+      cell: teacher?.cell,
     });
   } catch (error) {
     return NextResponse.json(

@@ -18,6 +18,10 @@ export default function AccountSettings() {
   const [savingImage, setSavingImage] = useState(false);
   const [imageStatus, setImageStatus] = useState<{ success: boolean; text: string } | null>(null);
 
+  const [editName, setEditName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [nameStatus, setNameStatus] = useState<{ success: boolean; text: string } | null>(null);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -36,6 +40,7 @@ export default function AccountSettings() {
           if (!cancelled) {
             setUser(data);
             setImage(data.image || null);
+            setEditName(data.name || "");
           }
         }
       } catch {
@@ -113,6 +118,31 @@ export default function AccountSettings() {
       setImageStatus({ success: false, text: "Failed to remove profile picture." });
     } finally {
       setSavingImage(false);
+    }
+  };
+
+  const saveName = async () => {
+    if (savingName || !editName.trim()) return;
+    setSavingName(true);
+    setNameStatus(null);
+    try {
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNameStatus({ success: true, text: data.message || "Name updated!" });
+        setUser((u) => (u ? { ...u, name: editName.trim() } : u));
+        window.dispatchEvent(new Event("account:updated"));
+      } else {
+        setNameStatus({ success: false, text: data.message || "Failed to update name." });
+      }
+    } catch {
+      setNameStatus({ success: false, text: "Failed to update name." });
+    } finally {
+      setSavingName(false);
     }
   };
 
@@ -215,6 +245,36 @@ export default function AccountSettings() {
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100">
+          <h2 className="font-bold text-slate-800">Display Name</h2>
+          <p className="text-xs text-slate-500 mt-0.5">This name is shown across the platform.</p>
+        </div>
+        <div className="p-5 space-y-3 max-w-md">
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/10 transition-all"
+            placeholder="Your name"
+          />
+          {nameStatus && (
+            <p className={`text-xs font-bold flex items-center gap-1.5 ${nameStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
+              {nameStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
+              {nameStatus.text}
+            </p>
+          )}
+          <button
+            onClick={saveName}
+            disabled={savingName || !editName.trim() || editName.trim() === (user?.name || "")}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#E91E63] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/20 hover:bg-[#7B1FA2] transition-all disabled:opacity-50"
+          >
+            {savingName ? <FiLoader className="size-4 animate-spin" /> : <FiSave className="size-4" />}
+            Save Name
+          </button>
         </div>
       </div>
 

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { getUserByEmail } from "@/app/lib/db";
-import { login as setSession, logout as clearSession, encrypt } from "@/app/lib/auth";
+import { login as setSession, logout as clearSession } from "@/app/lib/auth-actions";
 
 export type LoginState = {
   error?: string;

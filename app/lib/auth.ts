@@ -1,5 +1,3 @@
-"use server";
-
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -50,7 +48,6 @@ export async function verifyToken(token: string) {
 /**
  * Resolves the authenticated user for an API request from either the httpOnly
  * session cookie (web) or an `Authorization: Bearer <token>` header (mobile).
- * Returns the user object, or `null` when not authenticated.
  */
 export async function getUserFromRequest(request: Request) {
   const session = await getSession();
@@ -64,19 +61,6 @@ export async function getUserFromRequest(request: Request) {
   return null;
 }
 
-export async function login(user: { id: number; email: string; role: string; name: string; isFirstLogin?: boolean }) {
-  const expires = new Date(Date.now() + 2 * 60 * 60 * 1000);
-  const session = await encrypt({ user, expires });
-
-  const cookieStore = await cookies();
-  cookieStore.set("session", session, { expires, httpOnly: true });
-}
-
-export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.set("session", "", { expires: new Date(0) });
-}
-
 export async function getSession() {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
@@ -88,7 +72,6 @@ export async function updateSession(request: NextRequest) {
   const session = request.cookies.get("session")?.value;
   if (!session) return;
 
-  // Refresh the session so it doesn't expire
   const parsed = await decrypt(session);
   parsed.expires = new Date(Date.now() + 2 * 60 * 60 * 1000);
   const res = NextResponse.next();
@@ -100,3 +83,5 @@ export async function updateSession(request: NextRequest) {
   });
   return res;
 }
+
+

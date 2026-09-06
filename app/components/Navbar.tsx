@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSend, FiMenu, FiX, FiUser, FiLogOut } from "react-icons/fi";
-import { getSession, logout } from "@/app/lib/auth";
+import { getSession, logout } from "@/app/lib/auth-actions";
 
 const navLinks = [
   { label: "Home", href: "/" },
