@@ -14,11 +14,15 @@ export async function GET(request: Request) {
     });
 
     if (!student) {
-      return NextResponse.json({ message: "Student profile not found" }, { status: 404 });
+      return NextResponse.json(null);
+    }
+
+    if (!student.teacherId) {
+      return NextResponse.json(null);
     }
 
     const rating = await prisma.teacherRating.findUnique({
-      where: { studentId_teacherId: { studentId: student.id, teacherId: student.teacherId! } },
+      where: { studentId_teacherId: { studentId: student.id, teacherId: student.teacherId } },
       include: {
         teacher: { include: { user: { select: { name: true } } } },
       },
