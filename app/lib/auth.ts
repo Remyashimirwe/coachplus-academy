@@ -48,16 +48,29 @@ export async function verifyToken(token: string) {
 /**
  * Resolves the authenticated user for an API request from either the httpOnly
  * session cookie (web) or an `Authorization: Bearer <token>` header (mobile).
+ *
+ * Bearer token is checked first so mobile clients (Flutter) never depend on
+ * the cookies() context, which can fail outside of server actions.
  */
 export async function getUserFromRequest(request: Request) {
-  const session = await getSession();
-  if (session?.user) return session.user;
-
   const authHeader = request.headers.get("authorization") || "";
   if (authHeader.toLowerCase().startsWith("bearer ")) {
-    const payload = await verifyToken(authHeader.slice(7).trim());
-    if (payload?.user) return payload.user;
+    const token = authHeader.slice(7).trim();
+    if (token) {
+      const payload = await verifyToken(token);
+      if (payload?.user) return payload.user;
+    }
   }
+
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const match = cookieHeader.match(/(?:^|;\s*)session=([^;]*)/);
+    if (match) {
+      const payload = await decrypt(match[1]);
+      if (payload?.user) return payload.user;
+    }
+  } catch (_) {}
+
   return null;
 }
 
