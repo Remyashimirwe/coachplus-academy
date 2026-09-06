@@ -1,0 +1,30 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/app/lib/db";
+import { getUserFromRequest } from "@/app/lib/auth";
+
+export async function POST(request: Request) {
+  try {
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { token } = await request.json();
+
+    if (!token || typeof token !== "string") {
+      return NextResponse.json({ message: "token is required" }, { status: 400 });
+    }
+
+    await prisma.deviceToken.updateMany({
+      where: { token, userId: user.id },
+      data: { active: false },
+    });
+
+    return NextResponse.json({ message: "Device token unregistered" });
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}

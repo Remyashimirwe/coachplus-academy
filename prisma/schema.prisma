@@ -28,6 +28,7 @@ model User {
   teacherProfile Teacher? @relation("UserToTeacher")
   studentProfile Student? @relation("UserToStudent")
   notifications  Notification[]
+  deviceTokens   DeviceToken[]
 }
 
 model Teacher {
@@ -123,6 +124,16 @@ model Notification {
   message   String
   type      String   @default("info") // "info" | "success" | "warning"
   read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model DeviceToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  platform  String   @default("android") // "android" | "ios" | "web"
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 

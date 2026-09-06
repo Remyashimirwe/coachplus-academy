@@ -1,7 +1,9 @@
 import { prisma } from "@/app/lib/db";
+import { notifyEveryonePush } from "./push";
 
 /**
- * Creates an in-app notification for every user on the platform.
+ * Creates an in-app notification for every user on the platform
+ * and sends a push notification to their devices.
  * The user who performed the action is excluded so they don't get
  * notified about their own change.
  */
@@ -32,6 +34,11 @@ export async function notifyEveryone({
         type,
       })),
     });
+
+    // Also send push notifications to devices
+    if (exceptUserId) {
+      await notifyEveryonePush(exceptUserId, title, message);
+    }
   } catch (error) {
     console.error("Failed to create notifications", error);
   }
