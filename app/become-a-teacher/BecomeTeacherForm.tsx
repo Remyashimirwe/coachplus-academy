@@ -191,6 +191,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
   const [dayTimes, setDayTimes] = useState<Record<string, { from: string; to: string }>>({});
   const [selectionErrors, setSelectionErrors] = useState<{ subjects?: boolean; days?: boolean; dayTimes?: boolean }>({});
   const [diplomaFiles, setDiplomaFiles] = useState<{ file: File; url: string }[]>([]);
+  const [criminalRecordFiles, setCriminalRecordFiles] = useState<{ file: File; url: string }[]>([]);
   const [photoFiles, setPhotoFiles] = useState<{ file: File; url: string }[]>([]);
   const [idPassportFiles, setIdPassportFiles] = useState<{ file: File; url: string }[]>([]);
   const [resumeFiles, setResumeFiles] = useState<{ file: File; url: string }[]>([]);
@@ -368,6 +369,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                           setSelectedDays([]);
                           setDayTimes({});
                           setDiplomaFiles([]);
+                          setCriminalRecordFiles([]);
                           setPhotoFiles([]);
                           setIdPassportFiles([]);
                           setResumeFiles([]);
@@ -799,6 +801,9 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
                         <UploadField icon={<FiAward />} label="Diploma Upload *" htmlFor="academicCert" name="academicCert" required multiple accept=".pdf,image/*" files={diplomaFiles} onChange={setDiplomaFiles} />
+                        <UploadField icon={<FiShield />} label="Criminal Record Certificate *" htmlFor="criminalRecord" name="criminalRecord" required multiple accept=".pdf,image/*" files={criminalRecordFiles} onChange={setCriminalRecordFiles} />
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2">
                         <UploadField icon={<FiAward />} label="Other Certificates (Optional)" htmlFor="otherCerts" name="otherCerts" multiple accept=".pdf,image/*" files={otherCertFiles} onChange={setOtherCertFiles} />
                       </div>
 

@@ -5,7 +5,7 @@ import { uploadBufferToCloudinary } from "@/app/lib/cloudinary";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB per file
 
-type DocKind = "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license" | "idPassport";
+type DocKind = "photo" | "resume" | "coverLetter" | "academicCertificates" | "otherCertificates" | "license" | "idPassport" | "criminalRecord";
 
 async function fileToDocumentInput(file: File | null | undefined, kind: DocKind) {
   if (!file || file.size === 0) return null;
@@ -90,6 +90,7 @@ export async function saveTeacherApplication(formData: FormData) {
   const coverLetterFile = formData.get("coverLetter") as File | null;
   const idPassportFile = formData.get("idPassport") as File | null;
   const academicCertFiles = formData.getAll("academicCert") as File[];
+  const criminalRecordFiles = formData.getAll("criminalRecord") as File[];
   const otherCertFiles = formData.getAll("otherCerts") as File[];
 
   let documentInputs;
@@ -101,6 +102,7 @@ export async function saveTeacherApplication(formData: FormData) {
         fileToDocumentInput(coverLetterFile, "coverLetter"),
         fileToDocumentInput(idPassportFile, "idPassport"),
         ...academicCertFiles.map((f) => fileToDocumentInput(f, "academicCertificates")),
+        ...criminalRecordFiles.map((f) => fileToDocumentInput(f, "criminalRecord")),
         ...otherCertFiles.map((f) => fileToDocumentInput(f, "otherCertificates")),
       ])
     ).filter((doc): doc is NonNullable<typeof doc> => doc !== null);

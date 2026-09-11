@@ -37,6 +37,7 @@ const DOCUMENT_LABELS: Record<string, string> = {
   otherCertificates: "Other Certificate",
   license: "Teaching License",
   idPassport: "Passport / National ID",
+  criminalRecord: "Criminal Record Certificate",
 };
 
 function documentUrl(docId: number) {
