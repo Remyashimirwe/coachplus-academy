@@ -1,6 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
+import net from "node:net";
+
+// Node's Happy-Eyeballs connect() gives each candidate address only 250ms by
+// default before abandoning it and moving on. Neon's pooled endpoint can sit
+// ~350ms+ away on slower links (home/VPN), so every query would fail with an
+// opaque `ETIMEDOUT` with no message. Allow each address attempt longer before
+// falling through so local dev and seed scripts can reach the database.
+net.setDefaultAutoSelectFamilyAttemptTimeout(5_000);
 
 const connectionString = process.env.DATABASE_URL;
 
