@@ -42,6 +42,7 @@ export async function PATCH(
         title,
         level,
         text,
+        ...(typeof body.image === "string" ? { image: body.image } : {}),
         ...(typeof body.featuredInHero === "boolean"
           ? { featuredInHero: body.featuredInHero }
           : {}),

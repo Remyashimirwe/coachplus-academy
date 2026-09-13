@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
     const title = String(body.title ?? "").trim();
     const level = String(body.level ?? "").trim();
     const text = String(body.text ?? "").trim();
+    const image = body.image ? String(body.image).trim() : null;
     const featuredInHero = body.featuredInHero === true;
     const showOnTeacherForm = body.showOnTeacherForm !== false;
 
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
         title,
         level,
         text,
-        image: null,
+        image,
         sortOrder,
         featuredInHero,
         showOnTeacherForm,

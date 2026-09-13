@@ -29,7 +29,10 @@ export async function PATCH(
 
     const subject = await db.subject.update({
       where: { id: subjectId },
-      data: { name },
+      data: {
+        name,
+        ...(typeof body.image === "string" ? { image: body.image } : {}),
+      },
     });
     return NextResponse.json({ subject });
   } catch (error: any) {

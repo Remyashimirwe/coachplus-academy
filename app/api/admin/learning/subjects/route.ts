@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => null);
     const programId = Number(body?.programId);
     const name = String(body?.name ?? "").trim();
+    const image = body?.image ? String(body?.image).trim() : null;
 
     if (!Number.isFinite(programId) || !name) {
       return NextResponse.json(
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     const subject = await db.subject.create({
       data: {
         name,
-        image: null,
+        image,
         programId,
         sortOrder,
       },
