@@ -20,6 +20,7 @@ import {
   FiLink,
   FiSend,
   FiDownload,
+  FiExternalLink,
   FiCheckCircle,
   FiAlertCircle,
   FiUserCheck,
@@ -429,17 +430,28 @@ export default function TeacherApplicationModal({
                 app.documents
                   .filter((doc: any) => doc.kind !== "photo")
                   .map((doc: any) => (
-                    <a
-                      key={doc.id}
-                      href={documentDownloadUrl(doc.id)}
-                      title={doc.fileName}
-                      className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"
-                    >
-                      <FiDownload />
-                      <span className="text-[11px] font-semibold uppercase tracking-tight">
-                        {DOCUMENT_LABELS[doc.kind] || doc.kind}
-                      </span>
-                    </a>
+                    <div key={doc.id} className="flex items-center gap-1.5">
+                      <a
+                        href={documentUrl(doc.id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Preview ${doc.fileName}`}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"
+                      >
+                        <FiExternalLink />
+                        <span className="text-[11px] font-semibold uppercase tracking-tight">
+                          Preview {DOCUMENT_LABELS[doc.kind] || doc.kind}
+                        </span>
+                      </a>
+                      <a
+                        href={documentDownloadUrl(doc.id)}
+                        title={`Download ${doc.fileName}`}
+                        aria-label={`Download ${doc.fileName}`}
+                        className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
+                      >
+                        <FiDownload />
+                      </a>
+                    </div>
                   ))
               ) : (
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl text-slate-500">
