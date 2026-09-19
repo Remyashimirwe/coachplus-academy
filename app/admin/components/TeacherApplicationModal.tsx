@@ -44,6 +44,10 @@ function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
 }
 
+function documentDownloadUrl(docId: number) {
+  return `${documentUrl(docId)}?download=1`;
+}
+
 type GroupedSubject = { name: string; topics: string[] };
 type GroupedCategory = { category: string; subjects: GroupedSubject[] };
 
@@ -427,9 +431,7 @@ export default function TeacherApplicationModal({
                   .map((doc: any) => (
                     <a
                       key={doc.id}
-                      href={documentUrl(doc.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={documentDownloadUrl(doc.id)}
                       title={doc.fileName}
                       className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"
                     >
