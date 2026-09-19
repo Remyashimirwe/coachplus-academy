@@ -340,6 +340,7 @@ export default function TeachersView({ teacherApplications }: any) {
                             <div className="space-y-2">
                               {groupSubjects(app.subjects).map((cat) => (
                                 <div key={cat.category}>
+                                  
                                   <p className="text-[11px] font-bold text-slate-700">{cat.category}</p>
                                   <ul className="ml-3 list-disc space-y-0.5 text-[10px] text-slate-500 marker:text-slate-300">
                                     {cat.subjects.map((sub) => (
