@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
+import { getCloudinaryDocumentUrl } from "@/app/lib/cloudinary";
 
 function cloudinaryUrl(url: string, download: boolean) {
   const parsedUrl = new URL(url);
@@ -38,6 +39,16 @@ export async function GET(
 
   if (!doc) {
     return NextResponse.json({ message: "Document not found" }, { status: 404 });
+  }
+
+  const download = request.nextUrl.searchParams.get("download") === "1";
+  const signedUrl = getCloudinaryDocumentUrl(doc.publicId, {
+    download,
+    filename: doc.fileName,
+  });
+
+  if (signedUrl) {
+    return NextResponse.redirect(signedUrl);
   }
 
   if (request.nextUrl.searchParams.get("download") === "1") {

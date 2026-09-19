@@ -74,3 +74,19 @@ export function isCloudinaryConfigured() {
       process.env.CLOUDINARY_API_SECRET
   );
 }
+
+export function getCloudinaryDocumentUrl(
+  publicId: string,
+  options: { download: boolean; filename: string }
+) {
+  const client = getCloudinaryClient();
+  if (!client || !publicId) return null;
+
+  return client.url(publicId, {
+    secure: true,
+    resource_type: "image",
+    type: "upload",
+    sign_url: true,
+    flags: options.download ? `attachment:${options.filename}` : undefined,
+  });
+}
