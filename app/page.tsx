@@ -6,6 +6,8 @@ import {getPrograms} from "./lib/db";
 
 export const dynamic = "force-dynamic";
 
+
+
 export default async function Home() {
     const programs = await getPrograms();
     const featuredPrograms = programs.filter((program) => program.featuredInHero);
