@@ -3,7 +3,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 adding the download 
 fixing the pdf
 ## Getting Started
-
+preview
 First, run the development server:
 
 ```bash
