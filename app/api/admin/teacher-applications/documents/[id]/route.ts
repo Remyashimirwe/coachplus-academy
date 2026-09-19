@@ -39,27 +39,7 @@ export async function GET(
   }
 
   if (request.nextUrl.searchParams.get("download") === "1") {
-    let cloudinaryResponse: Response;
-    try {
-      cloudinaryResponse = await fetch(cloudinaryAttachmentUrl(doc.url));
-      if (!cloudinaryResponse.ok) {
-        cloudinaryResponse = await fetch(doc.url);
-      }
-    } catch {
-      return NextResponse.json({ message: "Failed to download document" }, { status: 502 });
-    }
-
-    if (!cloudinaryResponse.ok || !cloudinaryResponse.body) {
-      return NextResponse.json({ message: "Failed to download document" }, { status: 502 });
-    }
-
-    const headers = new Headers();
-    headers.set("Content-Type", doc.mimeType || cloudinaryResponse.headers.get("content-type") || "application/octet-stream");
-    headers.set("Content-Disposition", `attachment; filename="${doc.fileName.replace(/["\\\r\n]/g, "_")}"`);
-    const contentLength = cloudinaryResponse.headers.get("content-length");
-    if (contentLength) headers.set("Content-Length", contentLength);
-
-    return new NextResponse(cloudinaryResponse.body, { headers });
+    return NextResponse.redirect(cloudinaryAttachmentUrl(doc.url));
   }
 
   // Files are hosted on Cloudinary; redirect the (already auth-checked) request there.
