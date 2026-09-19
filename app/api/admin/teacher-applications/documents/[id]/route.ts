@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
+function cloudinaryAttachmentUrl(url: string) {
+  const parsedUrl = new URL(url);
+  const uploadMarker = "/upload/";
+  const uploadIndex = parsedUrl.pathname.indexOf(uploadMarker);
+
+  if (uploadIndex === -1) return url;
+
+  const pathBeforeUpload = parsedUrl.pathname.slice(0, uploadIndex + uploadMarker.length);
+  const pathAfterUpload = parsedUrl.pathname.slice(uploadIndex + uploadMarker.length);
+  parsedUrl.pathname = `${pathBeforeUpload}fl_attachment/${pathAfterUpload}`;
+  return parsedUrl.toString();
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -28,7 +41,10 @@ export async function GET(
   if (request.nextUrl.searchParams.get("download") === "1") {
     let cloudinaryResponse: Response;
     try {
-      cloudinaryResponse = await fetch(doc.url);
+      cloudinaryResponse = await fetch(cloudinaryAttachmentUrl(doc.url));
+      if (!cloudinaryResponse.ok) {
+        cloudinaryResponse = await fetch(doc.url);
+      }
     } catch {
       return NextResponse.json({ message: "Failed to download document" }, { status: 502 });
     }
