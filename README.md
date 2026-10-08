@@ -4,6 +4,7 @@ adding the download
 fixing the pdf
 ## Getting Started
 preview
+public
 First, run the development server:
 
 ```bash
