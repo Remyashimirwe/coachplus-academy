@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FiChevronLeft, FiChevronRight, FiImage } from "react-icons/fi";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import PlayStoreButton from "./PlayStoreButton";
 
 type HeroProgram = {
   id: number;
@@ -138,6 +139,14 @@ export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
             <p className="mt-6 max-w-lg text-lg text-white/90 leading-relaxed sm:text-base">
               Trusted educators providing personalized home and online coaching
             </p>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
+              className="mt-8"
+            >
+              <PlayStoreButton />
+            </motion.div>
           </motion.div>
         </div>
 

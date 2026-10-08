@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
+import PlayStoreButton from "./PlayStoreButton";
 
 export default function CTA() {
   return (
@@ -34,6 +35,7 @@ export default function CTA() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col items-start gap-4 sm:items-center"
             >
               <Link
                 href="/request"
@@ -42,6 +44,7 @@ export default function CTA() {
                 Request a Teacher
                 <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </Link>
+              <PlayStoreButton variant="outline" />
             </motion.div>
           </div>
         </div>
