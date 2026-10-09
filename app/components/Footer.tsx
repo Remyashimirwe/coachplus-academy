@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useState, useEffect } from "react";
 import { getSession } from "@/app/lib/auth-actions";
+import PlayStoreButton from "./PlayStoreButton";
 
 const footerGroups = [
   {
@@ -56,6 +57,12 @@ export default function Footer() {
             <p className="mt-8 max-w-sm text-sm leading-relaxed text-slate-400">
               Your Success Starts with the Right Coach.
             </p>
+            <div className="mt-6">
+              <p className="mb-3 text-sm text-slate-400">
+                Learn on the go — get the CoachPlus app.
+              </p>
+              <PlayStoreButton variant="outline" className="min-h-[46px] px-5" />
+            </div>
           </div>
           
           {footerGroups.map((group) => {
