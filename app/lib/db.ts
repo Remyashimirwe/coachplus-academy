@@ -53,14 +53,23 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export const db = prisma;
 
-export async function getPrograms() {
+export async function getPrograms({
+  onlyForTeacherForm = false,
+}: { onlyForTeacherForm?: boolean } = {}) {
+  const where = onlyForTeacherForm
+    ? { showOnTeacherForm: true }
+    : undefined;
+
   return prisma.program.findMany({
+    where,
     orderBy: { sortOrder: "asc" },
     include: {
       subjects: {
+        where: onlyForTeacherForm ? { showOnTeacherForm: true } : undefined,
         orderBy: { sortOrder: "asc" },
         include: {
           topics: {
+            where: onlyForTeacherForm ? { showOnTeacherForm: true } : undefined,
             orderBy: { sortOrder: "asc" },
           },
         },
