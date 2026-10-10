@@ -178,7 +178,7 @@ Recommended production setup:
 - `APP_URL` set to your production domain
 - `RESEND_API_KEY` configured for outbound email delivery
 
-## Notes
+## Note
 
 - The app uses Prisma with PostgreSQL and is optimized for a hosted database such as Neon, Supabase, or a managed Postgres service.
 - The default app name in package metadata is `wecouch`, but the product branding is CoachPlus Academy.
