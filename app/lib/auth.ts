@@ -2,14 +2,52 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const secretKey = "secret"; // Use an environment variable in production
-const key = new TextEncoder().encode(secretKey);
+/**
+ * Signing secret for the session cookie **and** the mobile bearer token.
+ *
+ * This used to be the literal string `"secret"`, which meant anyone who read
+ * the source could mint a valid token for any user — including an admin, i.e.
+ * full account takeover of every account. The secret now comes from the
+ * environment, and production refuses to start without one instead of quietly
+ * signing tokens with a publicly known value.
+ */
+const secretFromEnv = process.env.JWT_SECRET?.trim();
 
-export async function encrypt(payload: any) {
+if (!secretFromEnv) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "JWT_SECRET is not set. Add it to the deployment environment (see .env.example) — " +
+        "without it every session in the app could be forged.",
+    );
+  }
+  console.warn(
+    "[auth] JWT_SECRET is not set — using an INSECURE development-only secret. " +
+      "Set JWT_SECRET before deploying.",
+  );
+}
+
+const DEV_ONLY_SECRET = "development-only-secret-set-JWT_SECRET";
+const key = new TextEncoder().encode(secretFromEnv || DEV_ONLY_SECRET);
+
+/** Lifetime of the httpOnly cookie used by the website (unchanged). */
+const SESSION_TTL = "2h";
+
+/**
+ * Lifetime of the bearer token handed to the Flutter app. The previous code
+ * wrote a 30-day value into the *payload* while `encrypt()` stamped the token
+ * itself with `2h`, so users were silently signed out a couple of hours after
+ * logging in. The real `exp` claim now comes from JWT_EXPIRES_IN (7d).
+ */
+const MOBILE_TOKEN_TTL = process.env.JWT_EXPIRES_IN?.trim() || "30d";
+
+export async function encrypt(
+  payload: any,
+  expiresIn: string | number = SESSION_TTL,
+) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("2h")
+    .setExpirationTime(expiresIn)
     .sign(key);
 }
 
@@ -26,9 +64,12 @@ export async function decrypt(input: string | undefined): Promise<any> {
 }
 
 /**
- * Issues a long-lived bearer token for external clients (e.g. the Flutter app).
+ * Issues a bearer token for external clients (e.g. the Flutter app).
+ *
  * The payload carries a `user` object so every authenticated call can resolve
- * the current user from the token alone, without an httpOnly cookie.
+ * the current user from the token alone, without an httpOnly cookie. The
+ * token's own `exp` claim is what actually governs the lifetime (see
+ * MOBILE_TOKEN_TTL) — no phantom "expires" field that nothing ever reads.
  */
 export async function signToken(user: {
   id: number;
@@ -37,7 +78,7 @@ export async function signToken(user: {
   name: string;
   isFirstLogin?: boolean;
 }) {
-  return await encrypt({ user, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
+  return await encrypt({ user }, MOBILE_TOKEN_TTL);
 }
 
 /** Verifies a bearer token issued by [signToken] and returns its payload. */
