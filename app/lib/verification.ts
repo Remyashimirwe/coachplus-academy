@@ -1,4 +1,4 @@
-import { randomInt, timingSafeEqual } from "crypto";
+import { createHash, randomInt, timingSafeEqual } from "crypto";
 import { db } from "./db";
 import { sendVerificationCodeEmail } from "./email";
 
@@ -28,10 +28,22 @@ function generateCode(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }
 
+/**
+ * Hashes a code for storage/comparison.
+ *
+ * Codes are never persisted in the clear: a database dump or a stray log line
+ * must not hand over live codes. SHA-256 is sufficient here because guessing
+ * is already bounded — 5 attempts per code, a new random code per resend, and
+ * a 10-minute window.
+ */
+export function hashVerificationCode(code: string): string {
+  return createHash("sha256").update(String(code).trim()).digest("hex");
+}
+
 /** Constant-time comparison so guessing the code is not faster byte-by-byte. */
-export function codesMatch(attempt: string, expected: string): boolean {
-  const a = Buffer.from(String(attempt), "utf8");
-  const b = Buffer.from(String(expected), "utf8");
+export function codesMatch(attempt: string, expectedHash: string): boolean {
+  const a = Buffer.from(hashVerificationCode(attempt), "utf8");
+  const b = Buffer.from(String(expectedHash), "utf8");
   if (a.length === 0 || a.length !== b.length) return false;
   return timingSafeEqual(a, b);
 }
@@ -82,7 +94,7 @@ export async function issueVerificationCode(
   await db.user.update({
     where: { id: user.id },
     data: {
-      verificationCode: code,
+      verificationCode: hashVerificationCode(code),
       verificationPurpose: purpose,
       verificationExpiresAt: new Date(Date.now() + VERIFICATION_TTL_MINUTES * 60_000),
       verificationSentAt: new Date(),

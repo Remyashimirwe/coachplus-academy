@@ -43,10 +43,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Already verified (retrying after a success, or a stale screen): let the
-    // user through instead of dead-ending them on a code that was consumed.
+    // An already-verified account must never receive a token from this
+    // endpoint. This route proves knowledge of an emailed code — it is not a
+    // login, and the caller has not presented a password here. (Handing out a
+    // token when `emailVerified` was true would have meant anyone who knows an
+    // email address could take over every verified account.) After a
+    // successful verify the token is returned in that same response; a stale
+    // retry is simply told there is nothing pending and can sign in properly.
     if (user.emailVerified && !user.verificationCode) {
-      return NextResponse.json(await issueToken(user));
+      return NextResponse.json(
+        { error: "This account is already verified. Please sign in with your password." },
+        { status: 400 },
+      );
     }
 
     if (
