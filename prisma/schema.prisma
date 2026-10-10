@@ -24,6 +24,17 @@ model User {
   inviteTokenExpiresAt DateTime?
   createdAt            DateTime  @default(now())
 
+  // ── Email verification ──────────────────────────────────────────────
+  // A 6-digit code is emailed (via Resend) the first time an account signs
+  // in from the app. Once accepted, `emailVerified` stays true and every
+  // later login goes straight through — the code is only required once.
+  emailVerified         Boolean   @default(false)
+  verificationCode      String?
+  verificationPurpose   String?   // "login" | "register" | "password_reset"
+  verificationExpiresAt DateTime?
+  verificationSentAt    DateTime?
+  verificationAttempts  Int       @default(0)
+
   // Relations
   teacherProfile Teacher? @relation("UserToTeacher")
   studentProfile Student? @relation("UserToStudent")

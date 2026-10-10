@@ -647,3 +647,92 @@ export async function sendMessageEmail({
     return { success: false, message: err.message };
   }
 }
+
+/** Escapes user-supplied text before it is interpolated into email HTML. */
+function escapeHtml(value: string) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Emails a 6-digit verification code (login / registration / password reset).
+ *
+ * The code is rendered large so it is easy to read on a phone, and the email
+ * states the expiry so a stale code is never a mystery.
+ */
+export async function sendVerificationCodeEmail({
+  to,
+  name,
+  code,
+  expiresInMinutes,
+  purpose = "login",
+}: {
+  to: string;
+  name: string;
+  code: string;
+  expiresInMinutes: number;
+  purpose?: "login" | "register" | "password_reset";
+}) {
+  const client = getResendClient();
+  const safeName = escapeHtml(name || "there");
+  const subjectPrefix =
+    purpose === "password_reset"
+      ? "Reset your"
+      : purpose === "register"
+        ? "Verify your email for"
+        : "Your";
+
+  if (!client) {
+    // Never echo the code into production logs — that would defeat the point
+    // of asking for it. The caller treats this as "not sent" and lets the
+    // user sign in normally rather than blocking them behind an email that
+    // could not go out.
+    console.warn(`RESEND_API_KEY is not set. Verification email not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `${subjectPrefix} ${BRAND_NAME} — code ${code}`,
+      html: renderEmail({
+        preheader: `Your ${BRAND_NAME} verification code is ${code}.`,
+        bodyHtml: `
+          <h2 style="margin-top:0;">Hi ${safeName},</h2>
+          <p>
+            Use the code below to finish signing in to <strong>${BRAND_NAME}</strong>:
+          </p>
+          <p style="text-align:center;margin:32px 0;">
+            <span style="display:inline-block;background:#f1f5f9;color:#0f172a;font-size:34px;font-weight:700;letter-spacing:12px;padding:18px 30px;border-radius:14px;font-family:'Courier New',monospace;">${code}</span>
+          </p>
+          <p>
+            This code expires in <strong>${expiresInMinutes} minutes</strong>.
+            For your security it can only be used once and only from your own
+            account.
+          </p>
+          <p>
+            If you didn't request this, you can safely ignore this email — your
+            account stays protected. Never share this code with anyone,
+            including our team.
+          </p>
+          ${signature()}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send verification code email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send verification code email:", err);
+    return { success: false, message: err.message };
+  }
+}
