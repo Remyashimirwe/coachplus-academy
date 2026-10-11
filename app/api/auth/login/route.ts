@@ -52,31 +52,30 @@ export async function POST(request: Request) {
       studentId: user.studentProfile?.id ?? null,
     };
 
-    // ── Email verification (required once per account) ───────────────
-    // The first time an account signs in, a 6-digit code is emailed via
-    // Resend and no token is issued until it is entered. Once accepted the
-    // account is marked verified and every later login is immediate.
-    if (!user.emailVerified) {
-      const outcome = await issueVerificationCode(user, "login");
+    // ── Email verification (required on EVERY sign-in) ───────────────
+    // A fresh 6-digit code is emailed via Resend each time the user signs in
+    // and no token is issued until it is entered. `emailVerified` is still
+    // recorded for reporting, but it no longer short-circuits this check — a
+    // code is demanded on every login, not just the first one.
+    const outcome = await issueVerificationCode(user, "login");
 
-      if (!outcome.sent && outcome.reason === "send_failed") {
-        // No code could be delivered (bad key, quota, provider outage). A
-        // user who proved their password must not be locked out by an email
-        // problem, so sign them in normally instead.
-        console.warn(`[auth/login] verification email failed for ${user.email}`);
-      } else {
-        // Either a fresh code went out, or one is already sitting in their
-        // inbox from seconds ago. Both mean a code is outstanding — so ask
-        // for it and never hand out a token. (Treating "cooldown" as a
-        // success here matters: otherwise logging in twice inside 60s would
-        // bypass verification entirely.)
-        return NextResponse.json({
-          requiresVerification: true,
-          message: `We sent a 6-digit code to ${user.email}. Enter it to finish signing in.`,
-          user: userPayload,
-        });
-      }
+    if (outcome.sent || outcome.reason === "cooldown") {
+      // Either a fresh code went out, or one is already sitting in their
+      // inbox from seconds ago (a second tap inside the 60s cooldown). Both
+      // mean a code is outstanding — so ask for it and never hand out a
+      // token. Treating "cooldown" as a success here matters: otherwise
+      // logging in twice inside 60s would bypass verification entirely.
+      return NextResponse.json({
+        requiresVerification: true,
+        message: `We sent a 6-digit code to ${user.email}. Enter it to finish signing in.`,
+        user: userPayload,
+      });
     }
+
+    // `send_failed`: Resend rejected the send (bad key, quota, provider
+    // outage). A user who proved their password must not be locked out by an
+    // email problem, so sign them in normally instead.
+    console.warn(`[auth/login] verification email failed for ${user.email}`);
 
     const token = await signToken({
       id: user.id,
