@@ -19,14 +19,25 @@ export async function GET(request: Request) {
 
     const profile = await prisma.user.findUnique({
       where: { id: user.id },
-      select: userSelect,
+      select: {
+        ...userSelect,
+        studentProfile: { select: { phone: true } },
+        teacherProfile: { select: { phone: true } },
+      },
     });
 
     if (!profile) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(profile);
+    const { studentProfile, teacherProfile, ...rest } = profile;
+
+    return NextResponse.json({
+      ...rest,
+      // Phone lives on the profile row (User has no phone column), so it has
+      // to be joined in — without it the edit form always started blank.
+      phone: studentProfile?.phone ?? teacherProfile?.phone ?? "",
+    });
   } catch (error) {
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Something went wrong" },
@@ -61,17 +72,64 @@ export async function PATCH(request: Request) {
       }
     }
 
-    if (Object.keys(data).length === 0) {
+    let phone: string | null | undefined;
+    if ("phone" in body) {
+      if (body.phone !== null && typeof body.phone !== "string") {
+        return NextResponse.json({ message: "Invalid phone value" }, { status: 400 });
+      }
+      phone = body.phone === null ? "" : String(body.phone).trim();
+    }
+
+    if (Object.keys(data).length === 0 && phone === undefined) {
       return NextResponse.json({ message: "No valid fields to update" }, { status: 400 });
     }
 
-    const updatedUser = await prisma.user.update({
+    // `phone` lives on the profile row (Student/Teacher) — the User table has
+    // no phone column, which is why a phone edit used to be accepted and then
+    // silently thrown away.
+    const rel = await prisma.user.findUnique({
       where: { id: sessionUser.id },
-      data,
-      select: userSelect,
+      select: {
+        studentProfile: { select: { id: true, phone: true } },
+        teacherProfile: { select: { id: true, phone: true } },
+      },
     });
+    const studentId = rel?.studentProfile?.id ?? null;
+    const teacherId = rel?.teacherProfile?.id ?? null;
 
-    return NextResponse.json({ message: "Profile updated", user: updatedUser });
+    if (phone !== undefined) {
+      if (studentId != null) {
+        await prisma.student.update({ where: { id: studentId }, data: { phone: phone ?? "" } });
+      } else if (teacherId != null) {
+        await prisma.teacher.update({ where: { id: teacherId }, data: { phone: phone ?? "" } });
+      }
+    }
+
+    const updatedUser =
+      Object.keys(data).length > 0
+        ? await prisma.user.update({
+            where: { id: sessionUser.id },
+            data,
+            select: userSelect,
+          })
+        : await prisma.user.findUnique({
+            where: { id: sessionUser.id },
+            select: userSelect,
+          });
+
+    if (!updatedUser) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      message: "Profile updated",
+      user: {
+        ...updatedUser,
+        // Echo back the phone the caller just saved (or the stored one) so the
+        // form can reflect reality without a second round trip.
+        phone: phone ?? rel?.studentProfile?.phone ?? rel?.teacherProfile?.phone ?? "",
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Something went wrong" },
