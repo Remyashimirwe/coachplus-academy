@@ -3,6 +3,12 @@ import { BRAND_NAME, CONTACT_EMAIL } from "./constants";
 
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
 const FROM_EMAIL = process.env.EMAIL_FROM || `${BRAND_NAME} <admin@coachplusacademy.com>`;
+// Remote logo, already served by the site (verified 200 / image/png).
+//
+// Deliberately NOT a data URI: Gmail strips data URIs entirely, so inlining
+// would hide the logo for the largest share of recipients. A remote <img> is
+// rendered by Gmail, Outlook and Apple Mail alike — it only needs the reader
+// to have images enabled, which is the normal state for OTP mail.
 const LOGO_URL = `${APP_URL}/logo.png`;
 
 let resend: Resend | null = null;
