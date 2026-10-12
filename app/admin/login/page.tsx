@@ -1,16 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FiLock, FiMail, FiArrowLeft, FiEye, FiEyeOff, FiShield } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { login, type LoginState } from "@/app/actions/auth";
+import OtpStep from "@/app/components/OtpStep";
 
 const initialState: LoginState = {};
 
 export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  // The server action answers `requiresVerification` instead of creating a
+  // session, so the form hands over to the OTP step. Kept in local state so
+  // "Change email" can return to the form without a full page reload.
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
+
+  useEffect(() => {
+    if (state?.requiresVerification && state.email) {
+      setOtpEmail(state.email);
+      setShowOtp(true);
+    }
+  }, [state]);
+
+  const finishLogin = ({ isFirstLogin }: { isFirstLogin: boolean }) => {
+    router.push(isFirstLogin ? "/setup-password" : "/admin");
+    router.refresh();
+  };
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0F172A] px-5 py-10">
@@ -39,19 +60,30 @@ export default function AdminLoginPage() {
                 Back Home
               </Link>
 
-              <div className="flex flex-col items-center text-center mb-8">
-                <div className="relative group mb-5">
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
-                  <img
-                    src="/logo.png"
-                    alt="CoachPlus Academy"
-                    className="relative size-16 rounded-2xl object-contain shadow-sm"
-                  />
+              {!showOtp && (
+                <div className="flex flex-col items-center text-center mb-8">
+                  <div className="relative group mb-5">
+                    <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
+                    <img
+                      src="/logo.png"
+                      alt="CoachPlus Academy"
+                      className="relative size-16 rounded-2xl object-contain shadow-sm"
+                    />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-[#21121f] tracking-tight">Admin Portal</h2>
+                  <p className="text-slate-500 mt-1 text-sm">Secure access to the management dashboard</p>
                 </div>
-                <h2 className="text-lg sm:text-xl font-semibold text-[#21121f] tracking-tight">Admin Portal</h2>
-                <p className="text-slate-500 mt-1 text-sm">Secure access to the management dashboard</p>
-              </div>
+              )}
 
+              {showOtp ? (
+                <OtpStep
+                  email={otpEmail}
+                  role="ADMIN"
+                  onVerified={finishLogin}
+                  onBack={() => setShowOtp(false)}
+                />
+              ) : (
+                <>
               {state?.error && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -125,6 +157,8 @@ export default function AdminLoginPage() {
                   )}
                 </button>
               </form>
+                </>
+              )}
             </div>
           </div>
         </motion.div>

@@ -1,21 +1,21 @@
 import { createHash, randomInt, timingSafeEqual } from "crypto";
 import { db } from "./db";
 import { sendVerificationCodeEmail } from "./email";
+import {
+  VERIFICATION_MAX_ATTEMPTS,
+  VERIFICATION_RESEND_COOLDOWN_SECONDS,
+  VERIFICATION_TTL_MINUTES,
+} from "./verification-constants";
+
+// Re-exported so existing server-side imports keep working, while the values
+// themselves are defined once in a module the client may also import.
+export {
+  VERIFICATION_MAX_ATTEMPTS,
+  VERIFICATION_RESEND_COOLDOWN_SECONDS,
+  VERIFICATION_TTL_MINUTES,
+} from "./verification-constants";
 
 export type VerificationPurpose = "login" | "register" | "password_reset";
-
-/** How long a freshly issued code stays valid. */
-export const VERIFICATION_TTL_MINUTES = 10;
-
-/** Wrong guesses allowed before the code is invalidated and must be resent. */
-export const VERIFICATION_MAX_ATTEMPTS = 5;
-
-/**
- * Minimum gap between two emails for the same account/purpose. The app also
- * counts down 60s before enabling its "Resend code" link — this is the
- * server-side equivalent so the button cannot be used to flood an inbox.
- */
-export const VERIFICATION_RESEND_COOLDOWN_SECONDS = 60;
 
 const PURPOSES: readonly string[] = ["login", "register", "password_reset"];
 
@@ -134,4 +134,94 @@ export async function clearVerificationCode(userId: number): Promise<void> {
       verificationAttempts: 0,
     },
   });
+}
+
+/**
+ * A `User` row with the verification columns loaded. Kept structural rather
+ * than a Prisma type so callers can pass whatever `include` they already used.
+ */
+type UserWithVerification = {
+  id: number;
+  emailVerified: boolean;
+  verificationCode: string | null;
+  verificationPurpose: string | null;
+  verificationExpiresAt: Date | null;
+  verificationAttempts: number;
+};
+
+/**
+ * Checks a submitted code against the one pending for [purpose] and, on
+ * success, consumes it so it can never be replayed.
+ *
+ * Shared by `POST /api/auth/verify` (the mobile app) and
+ * `POST /api/auth/verify-session` (the website) so both clients enforce
+ * exactly the same rules — an expiry, attempt limit or purpose change in one
+ * place cannot silently leave the other weaker.
+ *
+ * Every failure returns a user-facing sentence; the caller only decides the
+ * HTTP status. Nothing here throws for an expected bad code.
+ */
+export async function consumeVerificationCode(
+  user: UserWithVerification,
+  code: string,
+  purpose: VerificationPurpose,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  // An already-verified account must never receive a token from a verify
+  // call. This proves knowledge of an emailed code — it is not a login, and
+  // the caller has not presented a password here. (Handing out a session when
+  // `emailVerified` was true would have meant anyone who knows an email
+  // address could take over every verified account.) After a successful verify
+  // the session is returned in that same response; a stale retry is simply
+  // told there is nothing pending and can sign in properly.
+  if (user.emailVerified && !user.verificationCode) {
+    return {
+      ok: false,
+      error: "This account is already verified. Please sign in with your password.",
+    };
+  }
+
+  if (
+    !user.verificationCode ||
+    user.verificationPurpose !== purpose ||
+    !user.verificationExpiresAt ||
+    user.verificationExpiresAt.getTime() < Date.now()
+  ) {
+    await clearVerificationCode(user.id);
+    return { ok: false, error: "That code has expired. Tap Resend code to get a new one." };
+  }
+
+  if (user.verificationAttempts >= VERIFICATION_MAX_ATTEMPTS) {
+    await clearVerificationCode(user.id);
+    return { ok: false, error: "Too many incorrect attempts. Tap Resend code to get a new one." };
+  }
+
+  if (!codesMatch(code, user.verificationCode)) {
+    const attempts = user.verificationAttempts + 1;
+    const exhausted = attempts >= VERIFICATION_MAX_ATTEMPTS;
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        verificationAttempts: attempts,
+        ...(exhausted
+          ? { verificationCode: null, verificationPurpose: null, verificationExpiresAt: null }
+          : {}),
+      },
+    });
+    const left = VERIFICATION_MAX_ATTEMPTS - attempts;
+    return {
+      ok: false,
+      error: exhausted
+        ? "Too many incorrect attempts. Tap Resend code to get a new one."
+        : `Incorrect code. ${left} attempt${left === 1 ? "" : "s"} left.`,
+    };
+  }
+
+  // Success — consume the code (it is single-use) and record the verified flag.
+  await clearVerificationCode(user.id);
+  await db.user.update({
+    where: { id: user.id },
+    data: { emailVerified: true },
+  });
+
+  return { ok: true };
 }

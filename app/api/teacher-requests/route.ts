@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
+import { notifyAdmins } from "@/app/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -44,6 +45,14 @@ export async function POST(request: Request) {
         preferredTime: preferredTime ?? "",
         startDate: startDate ?? "",
       },
+    });
+
+    // A new learning request is a lead an admin must not miss. The route is
+    // public, so there is no actor to exclude — every admin is told.
+    await notifyAdmins({
+      title: "New learning request",
+      message: `${created.parentName} requested ${created.programTitle || "coaching"}.`,
+      type: "info",
     });
 
     return NextResponse.json(created, { status: 201 });

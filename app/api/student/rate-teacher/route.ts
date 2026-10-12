@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 export async function GET(request: Request) {
   try {
@@ -82,6 +83,29 @@ export async function POST(request: Request) {
         },
       });
     }
+
+    // A rating is feedback aimed at one person, so it goes to that teacher —
+    // and to the admins, who use ratings when reviewing teaching staff. The
+    // student who wrote it already knows, so they are skipped.
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: student.teacherId },
+      select: { userId: true },
+    });
+
+    await notifyUsers({
+      userIds: [teacher?.userId ?? null],
+      title: "You received a new rating",
+      message: `${user.name} rated you ${rating} out of 5.`,
+      type: "info",
+      exceptUserId: user.id,
+    });
+
+    await notifyAdmins({
+      title: "New teacher rating",
+      message: `${user.name} rated their teacher ${rating} out of 5.`,
+      type: "info",
+      exceptUserId: user.id,
+    });
 
     return NextResponse.json(result);
   } catch (error) {

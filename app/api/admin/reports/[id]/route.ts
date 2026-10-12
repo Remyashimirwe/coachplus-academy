@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
 import { sendReportUpdateEmail } from '@/app/lib/email';
+import { notifyAdmins, notifyUsers } from '@/app/lib/notifications';
 
 const VALID_STATUSES = ['new', 'reviewed', 'resolved'];
 
@@ -53,6 +54,30 @@ export async function PATCH(
         adminReply,
       });
       emailSent = emailResult.success;
+    }
+
+    // The student who filed the report sees the change in their own report
+    // list straight away, and the admins keep an activity trail of triage
+    // decisions they did not personally make.
+    const statusLabel = status ? status.charAt(0).toUpperCase() + status.slice(1) : null;
+
+    await notifyUsers({
+      userIds: [existing.student.user.id],
+      title: "Your report was updated",
+      message: adminReply
+        ? `An administrator replied to your report "${existing.category}".`
+        : `Your report "${existing.category}" is now ${statusLabel}.`,
+      type: "info",
+      exceptUserId: user.id,
+    });
+
+    if (status && status !== "new" && status !== existing.status) {
+      await notifyAdmins({
+        title: "Report updated",
+        message: `A report from ${existing.student.user.name} was marked ${statusLabel}.`,
+        type: "info",
+        exceptUserId: user.id,
+      });
     }
 
     return NextResponse.json({ message: 'Report updated', report: updated, emailSent });

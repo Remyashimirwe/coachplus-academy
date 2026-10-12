@@ -26,6 +26,7 @@ import {
   FiUser,
 } from "react-icons/fi";
 import { scoreTeacherForStudent, matchLabel } from "@/app/lib/matching";
+import { useToast } from "@/app/components/ToastProvider";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-100 text-amber-700",
@@ -64,6 +65,7 @@ export default function RequestDetailModal({
   onUpdated: (id: number, changes: any) => void;
 }) {
   const [message, setMessage] = useState("");
+  const toast = useToast();
   const [sending, setSending] = useState(false);
   const [sendStatus, setSendStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
@@ -126,9 +128,18 @@ export default function RequestDetailModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         onUpdated(request.id, { status });
+        toast.success(data.message || "Request status updated.");
+      } else {
+        // This handler previously had no error path at all: a failed change
+        // left the dropdown showing a status the server never accepted, with
+        // nothing to explain why.
+        toast.error(data.message || "Couldn't update the request status. Please try again.");
       }
+    } catch {
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setStatusUpdating(false);
     }
@@ -151,11 +162,14 @@ export default function RequestDetailModal({
         });
         if (data.inviteUrl) setApproveInviteUrl(data.inviteUrl);
         setApproveStatus({ success: true, text: data.message || "Request approved!" });
+        toast.success(data.message || "Request approved!");
       } else {
         setApproveStatus({ success: false, text: data.message || "Failed to approve request" });
+        toast.error(data.message || "Failed to approve request");
       }
     } catch {
       setApproveStatus({ success: false, text: "Failed to approve request" });
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setApproving(false);
     }
@@ -188,12 +202,15 @@ export default function RequestDetailModal({
             : null,
         });
         setAssignStatus({ success: true, text: data.message || "Teacher updated!" });
+        toast.success(data.message || "Teacher updated!");
         if (teacherId) setTeacherSearch("");
       } else {
         setAssignStatus({ success: false, text: data.message || "Failed to update teacher assignment" });
+        toast.error(data.message || "Failed to update teacher assignment");
       }
     } catch {
       setAssignStatus({ success: false, text: "Failed to update teacher assignment" });
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setAssigning(false);
     }

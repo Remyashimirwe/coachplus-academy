@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
 import { dayNameFromDate, parsePreferredDays } from '@/app/lib/schedule';
-import { notifyEveryone } from '@/app/lib/notifications';
+import { notifyAdmins, notifyUsers } from '@/app/lib/notifications';
 
 function startOfDay(input?: string | null) {
   const d = input ? new Date(input) : new Date();
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
     const students = await prisma.student.findMany({
       where: { teacherId: teacher.id },
-      select: { id: true, preferredDays: true },
+      select: { id: true, preferredDays: true, userId: true },
     });
 
     const dayName = dayNameFromDate(day);
@@ -142,9 +142,22 @@ export async function POST(request: Request) {
       });
     }
 
-    await notifyEveryone({
-      title: "Attendance Updated",
-      message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
+    // The students whose records were just derived are the ones who need to
+    // know: a teacher's absence changes their attendance for that day, and it
+    // would otherwise appear in their history with no explanation. Admins see
+    // it as activity; unrelated users have nothing to act on, so they are not
+    // told.
+    await notifyUsers({
+      userIds: affected.map((s) => s.userId),
+      title: "Attendance updated by your teacher",
+      message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayName}. Your attendance for that day has been updated to match.`,
+      type: "info",
+      exceptUserId: user.id,
+    });
+
+    await notifyAdmins({
+      title: "Teacher attendance updated",
+      message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayName}.`,
       type: "info",
       exceptUserId: user.id,
     });

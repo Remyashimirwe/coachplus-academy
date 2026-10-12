@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { sendApplicationApprovedEmail } from "@/app/lib/email";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
@@ -15,6 +16,9 @@ export async function POST(
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+  // Captured up front: `user` is shadowed below by the newly created teacher
+  // account, so the acting admin's id must be read before that scope.
+  const actingAdminId = user.id;
 
   const { id } = await params;
   const applicationId = Number(id);
@@ -72,6 +76,23 @@ export async function POST(
     await db.teacherApplication.update({
       where: { id: applicationId },
       data: { status: "approved" },
+    });
+
+    // The new teacher gets a welcome notification on whatever device they
+    // next open, and the admins see the approval in their activity feed.
+    await notifyUsers({
+      userIds: [user.id],
+      title: "Welcome to CoachPlus Academy",
+      message:
+        "Your teacher application was approved. Check your email for the link to set up your password.",
+      type: "success",
+    });
+
+    await notifyAdmins({
+      title: "Teacher application approved",
+      message: `${application.fullName} was approved as a teacher.`,
+      type: "success",
+      exceptUserId: actingAdminId,
     });
 
     const inviteUrl = `${APP_URL}/accept-invite?token=${inviteToken}`;

@@ -5,6 +5,7 @@ import {
   sendTeacherAssignedToParentEmail,
   sendRequestAssignedToTeacherEmail,
 } from "@/app/lib/email";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -49,6 +50,25 @@ export async function POST(
       where: { id: requestId },
       data: { status: parentRequest.status === "assigned" ? "approved" : parentRequest.status },
     });
+
+    // Make the removal visible immediately for the student it affects and for
+    // the admins who own the roster.
+    await notifyUsers({
+      userIds: [student.userId],
+      title: "Your teacher was unassigned",
+      message:
+        "Your administrator removed your assigned teacher. They will follow up with a new match.",
+      type: "warning",
+      exceptUserId: user.id,
+    });
+
+    await notifyAdmins({
+      title: "Teacher unassigned",
+      message: `A teacher was unassigned from ${student.user.name}.`,
+      type: "info",
+      exceptUserId: user.id,
+    });
+
     return NextResponse.json({
       message: "Teacher unassigned from this student",
       request: { ...updated, student },
@@ -100,6 +120,31 @@ export async function POST(
   ]);
 
   const emailSent = parentEmailResult.success && teacherEmailResult.success;
+
+  // Both sides are told in-app as well as by email, each with a message that
+  // makes sense from their own point of view.
+  await notifyUsers({
+    userIds: [student.userId],
+    title: "Your teacher has been assigned",
+    message: `${teacher.user.name} is now your teacher for ${parentRequest.subjects}.`,
+    type: "success",
+    exceptUserId: user.id,
+  });
+
+  await notifyUsers({
+    userIds: [teacher.userId],
+    title: "You have a new student",
+    message: `${parentRequest.parentName} has been assigned to you for ${parentRequest.subjects}.`,
+    type: "success",
+    exceptUserId: user.id,
+  });
+
+  await notifyAdmins({
+    title: "Teacher assigned",
+    message: `${teacher.user.name} was assigned to ${student.user.name}.`,
+    type: "success",
+    exceptUserId: user.id,
+  });
 
   return NextResponse.json({
     message: emailSent

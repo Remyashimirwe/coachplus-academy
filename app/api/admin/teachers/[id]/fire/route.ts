@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { sendTeacherFiredEmail } from "@/app/lib/email";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -46,13 +47,35 @@ export async function POST(
       data: { isFired: true, firedAt: new Date(), fireMessage: message },
     });
 
-    await db.notification.create({
-      data: {
-        userId: teacher.userId,
-        title: "Your teaching role has ended",
-        message,
-        type: "warning",
-      },
+    // The teacher is notified directly (this is the message they will read in
+    // the bell and on their phone), then the admins — who own the roster — and
+    // the students whose lessons now need reassigning. Everyone learns without
+    // having to refresh, and the admin who performed the action is skipped.
+    await notifyUsers({
+      userIds: [teacher.userId],
+      title: "Your teaching role has ended",
+      message,
+      type: "warning",
+    });
+
+    const students = await db.student.findMany({
+      where: { teacherId },
+      select: { userId: true },
+    });
+
+    await notifyUsers({
+      userIds: students.map((s) => s.userId),
+      title: "Your teacher has changed",
+      message: `${teacher.user.name} is no longer teaching. Your administrator will assign you a new teacher.`,
+      type: "warning",
+      exceptUserId: user.id,
+    });
+
+    await notifyAdmins({
+      title: "Teacher dismissed",
+      message: `${teacher.user.name} has been dismissed.`,
+      type: "warning",
+      exceptUserId: user.id,
     });
 
     const emailResult = await sendTeacherFiredEmail({

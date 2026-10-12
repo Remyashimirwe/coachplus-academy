@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { signToken } from "@/app/lib/auth";
-import {
-  VERIFICATION_MAX_ATTEMPTS,
-  clearVerificationCode,
-  codesMatch,
-  isVerificationPurpose,
-} from "@/app/lib/verification";
+import { consumeVerificationCode, isVerificationPurpose } from "@/app/lib/verification";
 
 /**
  * POST /api/auth/verify
@@ -19,6 +14,9 @@ import {
  * Account enumeration is not a concern here: the caller has already proven
  * knowledge of the password during `/auth/login` before this screen appears.
  * Responses always use an `error` key, which is what the Flutter client reads.
+ *
+ * The code check itself lives in `consumeVerificationCode` so this route and
+ * the website's `/auth/verify-session` enforce identical rules.
  */
 export async function POST(request: Request) {
   try {
@@ -43,71 +41,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // An already-verified account must never receive a token from this
-    // endpoint. This route proves knowledge of an emailed code — it is not a
-    // login, and the caller has not presented a password here. (Handing out a
-    // token when `emailVerified` was true would have meant anyone who knows an
-    // email address could take over every verified account.) After a
-    // successful verify the token is returned in that same response; a stale
-    // retry is simply told there is nothing pending and can sign in properly.
-    if (user.emailVerified && !user.verificationCode) {
-      return NextResponse.json(
-        { error: "This account is already verified. Please sign in with your password." },
-        { status: 400 },
-      );
+    const outcome = await consumeVerificationCode(user, String(code).trim(), type);
+    if (!outcome.ok) {
+      return NextResponse.json({ error: outcome.error }, { status: 400 });
     }
-
-    if (
-      !user.verificationCode ||
-      user.verificationPurpose !== type ||
-      !user.verificationExpiresAt ||
-      user.verificationExpiresAt.getTime() < Date.now()
-    ) {
-      await clearVerificationCode(user.id);
-      return NextResponse.json(
-        { error: "That code has expired. Tap Resend code to get a new one." },
-        { status: 400 },
-      );
-    }
-
-    if (user.verificationAttempts >= VERIFICATION_MAX_ATTEMPTS) {
-      await clearVerificationCode(user.id);
-      return NextResponse.json(
-        { error: "Too many incorrect attempts. Tap Resend code to get a new one." },
-        { status: 400 },
-      );
-    }
-
-    if (!codesMatch(String(code).trim(), user.verificationCode)) {
-      const attempts = user.verificationAttempts + 1;
-      const exhausted = attempts >= VERIFICATION_MAX_ATTEMPTS;
-      await db.user.update({
-        where: { id: user.id },
-        data: {
-          verificationAttempts: attempts,
-          ...(exhausted
-            ? { verificationCode: null, verificationPurpose: null, verificationExpiresAt: null }
-            : {}),
-        },
-      });
-      const left = VERIFICATION_MAX_ATTEMPTS - attempts;
-      return NextResponse.json(
-        {
-          error: exhausted
-            ? "Too many incorrect attempts. Tap Resend code to get a new one."
-            : `Incorrect code. ${left} attempt${left === 1 ? "" : "s"} left.`,
-        },
-        { status: 400 },
-      );
-    }
-
-    // Success — the account is verified once and stays verified, so every
-    // later login skips this step entirely.
-    await clearVerificationCode(user.id);
-    await db.user.update({
-      where: { id: user.id },
-      data: { emailVerified: true },
-    });
 
     return NextResponse.json(await issueToken(user));
   } catch (error) {

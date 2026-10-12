@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
+import { notifyAdmins } from "@/app/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -106,6 +107,14 @@ export async function POST(request: Request) {
         },
       },
       include: { documents: true },
+    });
+
+    // A new application is the one thing an admin must not miss. This route is
+    // public, so there is no actor to exclude — every admin is told.
+    await notifyAdmins({
+      title: "New teacher application",
+      message: `${created.fullName} applied to teach.`,
+      type: "info",
     });
 
     return NextResponse.json(created, { status: 201 });

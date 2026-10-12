@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { sendApplicationDeniedEmail } from "@/app/lib/email";
+import { notifyAdmins } from "@/app/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -38,6 +39,16 @@ export async function POST(
   const updated = await db.teacherApplication.update({
     where: { id: applicationId },
     data: { status: "rejected" },
+  });
+
+  // The applicant has no account yet, so an in-app notification would have
+  // nowhere to land — the denial email above is their notification. The
+  // admins, however, should see the decision in their activity feed.
+  await notifyAdmins({
+    title: "Teacher application denied",
+    message: `${application.fullName}'s application was denied.`,
+    type: "warning",
+    exceptUserId: user.id,
   });
 
   return NextResponse.json({ message: "Application denied", application: updated });

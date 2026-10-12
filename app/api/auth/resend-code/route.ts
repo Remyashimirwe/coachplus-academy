@@ -44,14 +44,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "If that account exists, a code was sent." });
     }
 
-    if (type === "login") {
-      // Already verified → there is no code to resend; every later login goes
-      // straight through. Anything else (fresh code, or one cleared after too
-      // many wrong attempts) is exactly what the user is asking for.
-      if (user.emailVerified) {
-        return NextResponse.json({ message: "If that account exists, a code was sent." });
-      }
-    } else if (user.verificationPurpose !== type) {
+    // `login` always has a code outstanding, because a code is demanded on
+    // every sign-in now — including for accounts that were verified before.
+    // This used to short-circuit on `emailVerified`, which was correct when a
+    // verified account skipped the OTP; since OTP-on-every-login that guard
+    // made "Resend code" silently do nothing for every returning user, leaving
+    // them stuck on the verification screen. The 60-second cooldown inside
+    // issueVerificationCode is what still prevents inbox flooding.
+    if (type !== "login" && user.verificationPurpose !== type) {
       // register / password_reset only resend when that flow is actually
       // pending, so the endpoint can't be used to trigger arbitrary emails.
       return NextResponse.json({ message: "If that account exists, a code was sent." });

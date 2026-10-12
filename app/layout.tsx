@@ -8,6 +8,7 @@ import "@fontsource/poppins/900.css";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import WhatsAppButton from "./components/WhatsAppButton";
+import ToastProvider from "./components/ToastProvider";
 import { BRAND_NAME } from "./lib/constants";
 
 export const metadata: Metadata = {
@@ -33,7 +34,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <Navbar />
-        {children}
+        {/* Renders no DOM of its own, so the flex column layout is unchanged;
+            it only provides the toast context plus a fixed-position stack. */}
+        <ToastProvider>{children}</ToastProvider>
         <WhatsAppButton />
       </body>
     </html>

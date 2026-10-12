@@ -14,6 +14,7 @@ import {
   FiAward,
 } from "react-icons/fi";
 import Link from "next/link";
+import OtpStep from "@/app/components/OtpStep";
 
 const roles = [
   { id: "STUDENT", label: "Student", icon: FiBookOpen, activeBg: "bg-blue-600", glow: "shadow-blue-500/30" },
@@ -27,7 +28,19 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  // After a correct password the server demands a 6-digit code on every
+  // sign-in, so the form hands over to an OTP step rather than redirecting.
+  const [stage, setStage] = useState<"credentials" | "otp">("credentials");
+  const [pendingEmail, setPendingEmail] = useState("");
   const router = useRouter();
+
+  const destination = () =>
+    role === "ADMIN" ? "/admin" : role === "TEACHER" ? "/teacher" : "/student";
+
+  const finishLogin = ({ isFirstLogin }: { isFirstLogin: boolean }) => {
+    router.push(isFirstLogin ? "/setup-password" : destination());
+    router.refresh();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,19 +53,22 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password, role }),
         headers: { "Content-Type": "application/json" },
       });
+      const data = await res.json().catch(() => ({}));
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.isFirstLogin) {
-          router.push("/setup-password");
-        } else {
-          router.push(role === "ADMIN" ? "/admin" : role === "TEACHER" ? "/teacher" : "/student");
-        }
-        router.refresh();
-      } else {
-        const data = await res.json();
+      if (!res.ok) {
         setError(data.message || "Invalid credentials");
+        return;
       }
+
+      if (data.requiresVerification) {
+        setPendingEmail(data.email || email);
+        setStage("otp");
+        return;
+      }
+
+      // No code was required (the anti-lockout path: the email could not be
+      // sent), so the session is already established.
+      finishLogin({ isFirstLogin: data.isFirstLogin === true });
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -86,19 +102,33 @@ export default function LoginPage() {
               Back Home
             </Link>
 
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="relative group mb-5">
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
-                <img
-                  src="/logo.png"
-                  alt="CoachPlus Academy"
-                  className="relative size-16 rounded-2xl object-contain shadow-sm"
-                />
+            {stage === "credentials" && (
+              <div className="flex flex-col items-center text-center mb-8">
+                <div className="relative group mb-5">
+                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
+                  <img
+                    src="/logo.png"
+                    alt="CoachPlus Academy"
+                    className="relative size-16 rounded-2xl object-contain shadow-sm"
+                  />
+                </div>
+                <h1 className="text-2xl font-bold text-[#21121f] tracking-tight">Welcome back</h1>
+                <p className="text-slate-500 mt-1 text-sm">Sign in to continue your learning journey</p>
               </div>
-              <h1 className="text-2xl font-bold text-[#21121f] tracking-tight">Welcome back</h1>
-              <p className="text-slate-500 mt-1 text-sm">Sign in to continue your learning journey</p>
-            </div>
+            )}
 
+            {stage === "otp" ? (
+              <OtpStep
+                email={pendingEmail}
+                role={role}
+                onVerified={finishLogin}
+                onBack={() => {
+                  setStage("credentials");
+                  setError("");
+                }}
+              />
+            ) : (
+              <>
             {/* Role Selection */}
             <div className="grid grid-cols-2 gap-3 mb-7">
               {roles.map((r) => {
@@ -200,6 +230,8 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
+              </>
+            )}
 
             <div className="mt-6 rounded-2xl bg-slate-50 border border-slate-100 p-4 text-center">
               <p className="text-xs text-slate-500">

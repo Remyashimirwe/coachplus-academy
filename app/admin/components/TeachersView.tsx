@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import TeacherApplicationModal from "./TeacherApplicationModal";
+import { useToast } from "@/app/components/ToastProvider";
 
 function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
@@ -90,6 +91,7 @@ export default function TeachersView({ teacherApplications }: any) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [view, setView] = useState<"cards" | "table">("table");
+  const toast = useToast();
 
   const selectedApp = applications.find((a) => a.id === selectedId) || null;
 
@@ -165,11 +167,15 @@ export default function TeachersView({ teacherApplications }: any) {
       const data = await res.json();
       if (res.ok) {
         handleApproved(appId);
+        toast.success(data.message || `${app.fullName} was approved.`);
       } else {
-        setRowError((prev) => ({ ...prev, [appId]: data.message || "Failed to approve application" }));
+        const message = data.message || "Failed to approve application";
+        setRowError((prev) => ({ ...prev, [appId]: message }));
+        toast.error(message);
       }
     } catch {
       setRowError((prev) => ({ ...prev, [appId]: "Failed to approve application" }));
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setRowDecision((prev) => ({ ...prev, [appId]: null }));
     }
@@ -187,11 +193,15 @@ export default function TeachersView({ teacherApplications }: any) {
       const data = await res.json();
       if (res.ok) {
         handleDenied(appId);
+        toast.success(data.message || `${app.fullName}'s application was denied.`);
       } else {
-        setRowError((prev) => ({ ...prev, [appId]: data.message || "Failed to deny application" }));
+        const message = data.message || "Failed to deny application";
+        setRowError((prev) => ({ ...prev, [appId]: message }));
+        toast.error(message);
       }
     } catch {
       setRowError((prev) => ({ ...prev, [appId]: "Failed to deny application" }));
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setRowDecision((prev) => ({ ...prev, [appId]: null }));
     }

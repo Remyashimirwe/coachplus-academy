@@ -8,12 +8,14 @@ import {
   FiAlertCircle,
   FiCheckCircle,
 } from "react-icons/fi";
+import { useToast } from "@/app/components/ToastProvider";
 
 export default function FireTeacherModal({ teacher, onClose, onFired }: any) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const toast = useToast();
 
   const canFire = message.trim().length > 0;
 
@@ -31,6 +33,9 @@ export default function FireTeacherModal({ teacher, onClose, onFired }: any) {
       const data = await res.json();
       if (res.ok) {
         setSuccess(data.message || "Teacher dismissed.");
+        // The modal closes itself after a moment, so the inline confirmation
+        // below would be gone before it could be read — the toast outlives it.
+        toast.success(data.message || "Teacher dismissed.");
         onFired?.();
         setTimeout(onClose, 1400);
       } else {

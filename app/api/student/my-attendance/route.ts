@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { dayNameFromDate, isPreferredDay } from "@/app/lib/schedule";
-import { notifyEveryone } from "@/app/lib/notifications";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 function startOfDay(input?: string | null) {
   const d = input ? new Date(input) : new Date();
@@ -111,8 +111,27 @@ export async function POST(request: Request) {
       },
     });
 
-    await notifyEveryone({
-      title: "Attendance Updated",
+    // A self-report is the student's own claim, so the person who most needs
+    // to see it is their teacher — it appears in a separate "self-reported"
+    // section of the teacher's view rather than being merged into the
+    // teacher's own record. The admins are told for the activity feed.
+    // `notifyUsers` drops the null id when a student has no teacher yet.
+    const teacherUserId = student.teacherId
+      ? await prisma.teacher
+          .findUnique({ where: { id: student.teacherId }, select: { userId: true } })
+          .then((t) => t?.userId ?? null)
+      : null;
+
+    await notifyUsers({
+      userIds: [teacherUserId],
+      title: "A student reported their attendance",
+      message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
+      type: "info",
+      exceptUserId: user.id,
+    });
+
+    await notifyAdmins({
+      title: "Student attendance self-reported",
       message: `${user.name} marked themselves ${status === "PRESENT" ? "present" : "absent"} on ${dayNameFromDate(day)}.`,
       type: "info",
       exceptUserId: user.id,

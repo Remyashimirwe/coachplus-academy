@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { sendInviteEmail, sendRequestApprovedEmail } from "@/app/lib/email";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
@@ -15,6 +16,9 @@ export async function POST(
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+  // Captured up front: `user` is shadowed below by the newly created student
+  // account, so the acting admin's id must be read before that scope.
+  const actingAdminId = user.id;
 
   const { id } = await params;
   const requestId = Number(id);
@@ -77,6 +81,21 @@ export async function POST(
       name: parentRequest.parentName,
     });
 
+    await notifyUsers({
+      userIds: [existingUser.id],
+      title: "Your request was approved",
+      message: "Your learning request has been approved and your student account is ready.",
+      type: "success",
+      exceptUserId: actingAdminId,
+    });
+
+    await notifyAdmins({
+      title: "Request approved",
+      message: `${parentRequest.parentName}'s request was approved and linked to an existing student account.`,
+      type: "success",
+      exceptUserId: actingAdminId,
+    });
+
     return NextResponse.json({
       message: "Request approved and linked to the existing student account.",
       status: updated.status,
@@ -127,6 +146,21 @@ export async function POST(
       name: user.name,
       role: "STUDENT",
       token: inviteToken,
+    });
+
+    await notifyUsers({
+      userIds: [user.id],
+      title: "Welcome to CoachPlus Academy",
+      message:
+        "Your learning request was approved and your student account is ready. Check your email for the link to set up your password.",
+      type: "success",
+    });
+
+    await notifyAdmins({
+      title: "Request approved",
+      message: `${parentRequest.parentName}'s request was approved and a student account was created.`,
+      type: "success",
+      exceptUserId: actingAdminId,
     });
 
     return NextResponse.json({

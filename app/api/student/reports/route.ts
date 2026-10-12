@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
 import { sendReportSubmittedEmail } from '@/app/lib/email';
+import { notifyAdmins, notifyUsers } from '@/app/lib/notifications';
 
 const VALID_CATEGORIES = [
   'Teaching Quality',
@@ -86,6 +87,24 @@ export async function POST(request: Request) {
         teacherName: student.teacher?.user.name ?? null,
       });
     }
+
+    // Reports are triaged by people, so the admins are pinged the moment one
+    // arrives — the bell works even when the email service is not configured.
+    // The assigned teacher is told too, since a report will often concern them.
+    await notifyAdmins({
+      title: 'New report submitted',
+      message: `${student.user.name} submitted a report: ${finalCategory}.`,
+      type: 'warning',
+      exceptUserId: user.id,
+    });
+
+    await notifyUsers({
+      userIds: [student.teacher?.user.id ?? null],
+      title: 'A student submitted a report',
+      message: `${student.user.name} submitted a report (${finalCategory}).`,
+      type: 'info',
+      exceptUserId: user.id,
+    });
 
     return NextResponse.json({ message: 'Your report has been submitted to the admin team.', report });
   } catch (error: any) {

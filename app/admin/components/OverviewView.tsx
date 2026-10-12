@@ -15,28 +15,36 @@ import {
   FiArrowRight,
   FiUserPlus,
 } from "react-icons/fi";
+import { useToast } from "@/app/components/ToastProvider";
 
 export default function OverviewView({ programs, requests, teacherApplications, pendingApplications }: any) {
   const [isMounted, setIsMounted] = useState(false);
   const [pending, setPending] = useState<any[]>(pendingApplications || []);
   const [decisionId, setDecisionId] = useState<number | null>(null);
   const [rowError, setRowError] = useState<Record<number, string>>({});
+  const toast = useToast();
 
   useEffect(() => setIsMounted(true), []);
 
   async function handleQuickDecision(id: number, action: "approve" | "deny") {
     setDecisionId(id);
     setRowError((prev) => ({ ...prev, [id]: "" }));
+    const applicant = pending.find((a: any) => a.id === id);
+    const name = applicant?.fullName || "This applicant";
     try {
       const res = await fetch(`/api/admin/teacher-applications/${id}/${action}`, { method: "POST" });
       const data = await res.json();
       if (res.ok) {
         setPending((prev) => prev.filter((a) => a.id !== id));
+        toast.success(data.message || `${name} ${action === "approve" ? "was approved" : "was denied"}.`);
       } else {
-        setRowError((prev) => ({ ...prev, [id]: data.message || `Failed to ${action}` }));
+        const message = data.message || `Failed to ${action}`;
+        setRowError((prev) => ({ ...prev, [id]: message }));
+        toast.error(message);
       }
     } catch {
       setRowError((prev) => ({ ...prev, [id]: `Failed to ${action}` }));
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setDecisionId(null);
     }
