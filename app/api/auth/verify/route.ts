@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { signToken } from "@/app/lib/auth";
-import { consumeVerificationCode, isVerificationPurpose } from "@/app/lib/verification";
+import { consumeVerificationCode, checkVerificationCode, isVerificationPurpose } from "@/app/lib/verification";
 
 /**
  * POST /api/auth/verify
@@ -41,7 +41,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const outcome = await consumeVerificationCode(user, String(code).trim(), type);
+    // `password_reset` is the one purpose whose code is deliberately checked
+    // twice: once here, so the client can advance to its "choose a new
+    // password" screen, and once more in `/auth/reset-password`, which is what
+    // actually consumes it and changes the password. Consuming it here would
+    // make that second call fail with "that code has expired". Every other
+    // purpose is single-use straight from this endpoint.
+    const outcome =
+      type === "password_reset"
+        ? await checkVerificationCode(user, String(code).trim(), type)
+        : await consumeVerificationCode(user, String(code).trim(), type);
     if (!outcome.ok) {
       return NextResponse.json({ error: outcome.error }, { status: 400 });
     }

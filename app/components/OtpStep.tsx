@@ -8,23 +8,33 @@ import { VERIFICATION_RESEND_COOLDOWN_SECONDS } from "@/app/lib/verification-con
 type Props = {
   /** The address the code was sent to — shown so the user knows where to look. */
   email: string;
-  /** Portal the user is signing into; re-checked server-side on verify. */
-  role: string;
-  /** Called once the code is accepted and the session cookie is set. */
-  onVerified: (info: { isFirstLogin: boolean }) => void;
+  /** Portal the user is signing into; re-checked server-side when supplied. */
+  role?: string;
+  /**
+   * Which flow this code belongs to.
+   *
+   * `login` and `register` both end with a session; `password_reset` only
+   * proves control of the inbox and hands off to the new-password step, so no
+   * cookie is created for it.
+   */
+  purpose?: "login" | "register" | "password_reset";
+  /** Called once the code is accepted. The code itself is echoed back because
+   *  the password-reset flow redeems it on the following screen. */
+  onVerified: (info: { isFirstLogin: boolean; code: string }) => void;
   /** Lets the user go back and correct their email or password. */
   onBack: () => void;
 };
 
 /**
- * The 6-digit code step shared by the student/teacher and admin sign-in pages.
+ * The 6-digit code step shared by the student/teacher sign-in page, the admin
+ * sign-in page, self sign-up and password reset.
  *
- * Both portals now require an emailed code on every sign-in, so this keeps the
- * two experiences identical instead of growing a second, subtly different copy.
- * The countdown before "Resend" is mirrored by a server-side cooldown, so the
- * link cannot be used to flood an inbox even if the UI is bypassed.
+ * Every flow that emails a code lands here instead of growing a second, subtly
+ * different copy of the same screen. The countdown before "Resend" is mirrored
+ * by a server-side cooldown, so the link cannot be used to flood an inbox even
+ * if the UI is bypassed.
  */
-export default function OtpStep({ email, role, onVerified, onBack }: Props) {
+export default function OtpStep({ email, role, purpose = "login", onVerified, onBack }: Props) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
@@ -58,7 +68,7 @@ export default function OtpStep({ email, role, onVerified, onBack }: Props) {
         const res = await fetch("/api/auth/verify-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code: trimmed, role }),
+          body: JSON.stringify({ email, code: trimmed, role, type: purpose }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -66,13 +76,13 @@ export default function OtpStep({ email, role, onVerified, onBack }: Props) {
           setVerifying(false);
           return;
         }
-        onVerified({ isFirstLogin: data.isFirstLogin === true });
+        onVerified({ isFirstLogin: data.isFirstLogin === true, code: trimmed });
       } catch {
         setError("Something went wrong. Please try again.");
         setVerifying(false);
       }
     },
-    [code, email, role, onVerified]
+    [code, email, role, purpose, onVerified]
   );
 
   const resend = useCallback(async () => {
@@ -84,7 +94,7 @@ export default function OtpStep({ email, role, onVerified, onBack }: Props) {
       const res = await fetch("/api/auth/resend-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, type: "login" }),
+        body: JSON.stringify({ email, type: purpose }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -100,7 +110,7 @@ export default function OtpStep({ email, role, onVerified, onBack }: Props) {
     } finally {
       setResending(false);
     }
-  }, [cooldown, resending, email]);
+  }, [cooldown, resending, email, purpose]);
 
   return (
     <motion.div
@@ -171,6 +181,8 @@ export default function OtpStep({ email, role, onVerified, onBack }: Props) {
         >
           {verifying ? (
             <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : purpose === "password_reset" ? (
+            "Verify code"
           ) : (
             "Verify & Sign In"
           )}

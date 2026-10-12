@@ -150,18 +150,19 @@ type UserWithVerification = {
 };
 
 /**
- * Checks a submitted code against the one pending for [purpose] and, on
- * success, consumes it so it can never be replayed.
+ * Checks a submitted code against the one pending for [purpose] **without
+ * consuming it**.
  *
- * Shared by `POST /api/auth/verify` (the mobile app) and
- * `POST /api/auth/verify-session` (the website) so both clients enforce
- * exactly the same rules — an expiry, attempt limit or purpose change in one
- * place cannot silently leave the other weaker.
+ * The password-reset flow needs a non-consuming check: both the app and the
+ * website ask for the code on one screen and for the new password on the next,
+ * and both steps submit the same code. Consuming it at the first step would
+ * make the second fail every time. Wrong guesses still burn an attempt, so the
+ * rate limit holds either way.
  *
- * Every failure returns a user-facing sentence; the caller only decides the
- * HTTP status. Nothing here throws for an expected bad code.
+ * Every other flow should use [consumeVerificationCode] instead — a code that
+ * is only ever checked can be replayed until it expires.
  */
-export async function consumeVerificationCode(
+export async function checkVerificationCode(
   user: UserWithVerification,
   code: string,
   purpose: VerificationPurpose,
@@ -176,7 +177,14 @@ export async function consumeVerificationCode(
   if (user.emailVerified && !user.verificationCode) {
     return {
       ok: false,
-      error: "This account is already verified. Please sign in with your password.",
+      // "Sign in with your password" is the right next step after a *login*
+      // verification, but it is a dead end during a password reset — the whole
+      // reason that flow exists is that the password is unknown. Point them at
+      // the only action that can actually help.
+      error:
+        purpose === "password_reset"
+          ? "There is no reset code pending for this account. Request a new one."
+          : "This account is already verified. Please sign in with your password.",
     };
   }
 
@@ -215,6 +223,29 @@ export async function consumeVerificationCode(
         : `Incorrect code. ${left} attempt${left === 1 ? "" : "s"} left.`,
     };
   }
+
+  return { ok: true };
+}
+
+/**
+ * Checks a submitted code against the one pending for [purpose] and, on
+ * success, consumes it so it can never be replayed.
+ *
+ * Shared by `POST /api/auth/verify` (the mobile app) and
+ * `POST /api/auth/verify-session` (the website) so both clients enforce
+ * exactly the same rules — an expiry, attempt limit or purpose change in one
+ * place cannot silently leave the other weaker.
+ *
+ * Every failure returns a user-facing sentence; the caller only decides the
+ * HTTP status. Nothing here throws for an expected bad code.
+ */
+export async function consumeVerificationCode(
+  user: UserWithVerification,
+  code: string,
+  purpose: VerificationPurpose,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const outcome = await checkVerificationCode(user, code, purpose);
+  if (!outcome.ok) return outcome;
 
   // Success — consume the code (it is single-use) and record the verified flag.
   await clearVerificationCode(user.id);

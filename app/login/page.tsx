@@ -233,13 +233,34 @@ export default function LoginPage() {
               </>
             )}
 
-            <div className="mt-6 rounded-2xl bg-slate-50 border border-slate-100 p-4 text-center">
-              <p className="text-xs text-slate-500">
-                {role === "ADMIN"
-                  ? "Restricted access area. Unauthorized access is prohibited."
-                  : "Need an account? Contact your administrator to get invited."}
-              </p>
-            </div>
+            {stage === "credentials" && (
+              <div className="mt-6 space-y-3 text-center">
+                {role === "ADMIN" ? (
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                    <p className="text-xs text-slate-500">
+                      Restricted access area. Unauthorized access is prohibited.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                      <p className="text-xs text-slate-500">
+                        New to CoachPlus Academy?{" "}
+                        <Link href="/register" className="font-semibold text-[#E91E63]">
+                          Create an account
+                        </Link>
+                      </p>
+                    </div>
+                    <Link
+                      href="/forgot-password"
+                      className="inline-block text-sm font-semibold text-slate-500 hover:text-[#E91E63] transition-colors"
+                    >
+                      Forgot your password?
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
