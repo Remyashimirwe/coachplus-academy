@@ -176,7 +176,7 @@ Recommended production setup:
 - Environment variables configured in production
 - Strong `SESSION_SECRET`
 - `APP_URL` set to your production domain
-- `RESEND_API_KEY` configured for outbound email delivery
+- `RESEND_API_KEY` configured for outbound email deliverys
 -
 ## Notes
 
