@@ -40,7 +40,7 @@ The platform supports:
 │   ├── setup-password/     # Invite password setup flows
 │   └── ...
 ├── prisma/
-│   └── schema.prisma        # Database schema
+│   └── schema.prisma        # Database schemas
 ├── public/                  # Static assets and branding files
 ├── app/lib/                 # Shared logic and service helpers
 ├── seed.ts                  # Seed script for admin setup
