@@ -37,7 +37,7 @@ The platform supports:
 │   ├── student/            # Student portal pages
 │   ├── teacher/            # Teacher portal pages
 │   ├── login/              # Authentication pages
-│   ├── setup-password/     # Invite password setup flow
+│   ├── setup-password/     # Invite password setup flows
 │   └── ...
 ├── prisma/
 │   └── schema.prisma        # Database schema
