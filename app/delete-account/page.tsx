@@ -95,10 +95,50 @@ export default function DeleteAccountPage() {
               Delete Your <span className="text-[#E91E63]">Account</span>
             </h1>
 
-            <p className="text-slate-600 mb-8">
+            <p className="text-slate-600 mb-6">
               Deleting your account is <strong className="text-slate-900">permanent</strong>. It removes your
-              personal information and the learning records tied to your account (such as attendance,
-              reports, and ratings). This is not a temporary deactivation and it cannot be undone.
+              personal information and the learning records tied to your account. This is not a temporary
+              deactivation and it cannot be undone.
+            </p>
+
+            {/* Google Play requires the delete-account page to state what is
+                deleted, what is kept, and any retention period. */}
+            <div className="mb-8 grid gap-6 sm:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-5">
+                <h2 className="text-sm font-black uppercase tracking-widest text-emerald-700 mb-3">
+                  What is deleted
+                </h2>
+                <ul className="list-disc ml-5 space-y-1.5 text-sm text-slate-700">
+                  <li>Your account: name, email address, hashed password, and profile photo</li>
+                  <li>Your profile (student or teacher), including phone number and preferences</li>
+                  <li>Attendance records and progress/development reports tied to you</li>
+                  <li>Teacher ratings you submitted or received</li>
+                  <li>Notifications and push-notification device tokens</li>
+                  <li>Any parent/teacher requests you submitted</li>
+                </ul>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5">
+                <h2 className="text-sm font-black uppercase tracking-widest text-slate-600 mb-3">
+                  What is kept
+                </h2>
+                <ul className="list-disc ml-5 space-y-1.5 text-sm text-slate-700">
+                  <li>Programs, subjects, and topics (shared content — never personal)</li>
+                  <li>Other users&rsquo; accounts and records (for example, students assigned to a
+                    deleting teacher are kept and simply unassigned)</li>
+                </ul>
+                <p className="text-sm text-slate-600 mt-4">
+                  <strong className="text-slate-900">Retention period:</strong> deletion is immediate and
+                  permanent — there is no grace period or deferred retention. We may keep limited records
+                  only where required for security, fraud prevention, or to comply with a legal
+                  obligation, and only for as long as that purpose requires.
+                </p>
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold text-[#21121f] mb-3">How to delete your account</h2>
+            <p className="text-slate-600 mb-6 text-sm">
+              Follow the steps below. You can also delete from inside the CoachPlus Academy app:
+              <em> Profile &rarr; Edit Profile &rarr; Delete Account</em>.
             </p>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
