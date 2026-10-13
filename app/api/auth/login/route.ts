@@ -52,30 +52,46 @@ export async function POST(request: Request) {
       studentId: user.studentProfile?.id ?? null,
     };
 
+    // ── Google Play reviewer bypass ──────────────────────────────────
+    // Play's reviewers can't receive the 6-digit email code (they don't control
+    // a real inbox we can send to), so designated reviewer accounts skip the
+    // code step and sign straight in with just the password. This is scoped to
+    // the explicitly-listed emails in the REVIEW_BYPASS_EMAIL env var (a
+    // comma-separated list) — every other account still requires the code on
+    // every sign-in. Set the var to "" (or remove it) after review to disable
+    // the bypass entirely.
+    const bypassEmails = (process.env.REVIEW_BYPASS_EMAIL ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isReviewerBypass = bypassEmails.includes(String(user.email).trim().toLowerCase());
+
     // ── Email verification (required on EVERY sign-in) ───────────────
     // A fresh 6-digit code is emailed via Resend each time the user signs in
     // and no token is issued until it is entered. `emailVerified` is still
     // recorded for reporting, but it no longer short-circuits this check — a
     // code is demanded on every login, not just the first one.
-    const outcome = await issueVerificationCode(user, "login");
+    if (!isReviewerBypass) {
+      const outcome = await issueVerificationCode(user, "login");
 
-    if (outcome.sent || outcome.reason === "cooldown") {
-      // Either a fresh code went out, or one is already sitting in their
-      // inbox from seconds ago (a second tap inside the 60s cooldown). Both
-      // mean a code is outstanding — so ask for it and never hand out a
-      // token. Treating "cooldown" as a success here matters: otherwise
-      // logging in twice inside 60s would bypass verification entirely.
-      return NextResponse.json({
-        requiresVerification: true,
-        message: `We sent a 6-digit code to ${user.email}. Enter it to finish signing in.`,
-        user: userPayload,
-      });
+      if (outcome.sent || outcome.reason === "cooldown") {
+        // Either a fresh code went out, or one is already sitting in their
+        // inbox from seconds ago (a second tap inside the 60s cooldown). Both
+        // mean a code is outstanding — so ask for it and never hand out a
+        // token. Treating "cooldown" as a success here matters: otherwise
+        // logging in twice inside 60s would bypass verification entirely.
+        return NextResponse.json({
+          requiresVerification: true,
+          message: `We sent a 6-digit code to ${user.email}. Enter it to finish signing in.`,
+          user: userPayload,
+        });
+      }
+
+      // `send_failed`: Resend rejected the send (bad key, quota, provider
+      // outage). A user who proved their password must not be locked out by an
+      // email problem, so sign them in normally instead.
+      console.warn(`[auth/login] verification email failed for ${user.email}`);
     }
-
-    // `send_failed`: Resend rejected the send (bad key, quota, provider
-    // outage). A user who proved their password must not be locked out by an
-    // email problem, so sign them in normally instead.
-    console.warn(`[auth/login] verification email failed for ${user.email}`);
 
     const token = await signToken({
       id: user.id,
