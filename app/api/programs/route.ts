@@ -3,7 +3,7 @@ import { getPrograms } from "@/app/lib/db";
 
 export async function GET() {
   try {
-    const programs = await getPrograms({ onlyForTeacherForm: true });
+    const programs = await getPrograms();
     return NextResponse.json({ programs });
   } catch (error: any) {
     return NextResponse.json(

@@ -29,9 +29,13 @@ import {
   FiInstagram,
   FiYoutube,
   FiShield,
+  FiScissors,
+  FiCheck,
+  FiLayers,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
 import TimePicker from "@/app/components/TimePicker";
+import { removeAndReplaceBackground, WEBSITE_BACKGROUND_COLORS } from "@/app/lib/imageBackground";
 
 const MAX_SUBJECTS_PER_PROGRAM = 4;
 const MAX_TOPICS_PER_SUBJECT = 4;
@@ -107,6 +111,7 @@ function UploadField({
   accept,
   files,
   onChange,
+  enableBgRemover,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -117,8 +122,11 @@ function UploadField({
   accept?: string;
   files: { file: File; url: string }[];
   onChange: (files: { file: File; url: string }[]) => void;
+  enableBgRemover?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [processingIdx, setProcessingIdx] = useState<number | null>(null);
+  const [selectedBgColor, setSelectedBgColor] = useState<string>("#0f172a");
 
   const removeFile = (index: number) => {
     const remaining = files.filter((_, i) => i !== index);
@@ -127,6 +135,27 @@ function UploadField({
       const dt = new DataTransfer();
       remaining.forEach(f => dt.items.add(f.file));
       inputRef.current.files = dt.files;
+    }
+  };
+
+  const handleRemoveBackground = async (index: number, color: string) => {
+    try {
+      setProcessingIdx(index);
+      const target = files[index];
+      if (!target || !target.file.type.startsWith("image/")) return;
+      const processed = await removeAndReplaceBackground(target.file, color);
+      const updated = [...files];
+      updated[index] = processed;
+      onChange(updated);
+      if (inputRef.current) {
+        const dt = new DataTransfer();
+        updated.forEach(f => dt.items.add(f.file));
+        inputRef.current.files = dt.files;
+      }
+    } catch (err) {
+      console.error("Failed to remove background:", err);
+    } finally {
+      setProcessingIdx(null);
     }
   };
 
@@ -147,31 +176,95 @@ function UploadField({
         className={`${inputClasses} py-3 cursor-pointer`}
       />
       {files.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {files.map(({ file, url }, i) => (
-            <div key={i} className="relative group/preview rounded-xl border-2 border-slate-100 bg-slate-50 p-2 flex flex-col items-center gap-1 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => removeFile(i)}
-                aria-label={`Remove ${file.name}`}
-                className="absolute -top-2 -right-2 z-10 grid size-6 place-items-center rounded-full bg-[#E91E63] text-white shadow-lg shadow-rose-200 transition-all hover:bg-red-600 hover:scale-110"
-              >
-                <FiX className="size-3.5" />
-              </button>
-              {file.type.startsWith("image/") ? (
-                <div className="h-20 w-full overflow-hidden rounded-lg">
-                  <img src={url} alt={file.name} className="h-full w-full object-cover transition-transform duration-300 group-hover/preview:scale-110" />
+        <div className="mt-4 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {files.map(({ file, url }, i) => (
+              <div key={i} className="relative group/preview rounded-2xl border-2 border-slate-100 bg-slate-50 p-3 flex flex-col gap-2 overflow-hidden shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => removeFile(i)}
+                  aria-label={`Remove ${file.name}`}
+                  className="absolute top-2 right-2 z-10 grid size-6 place-items-center rounded-full bg-[#E91E63] text-white shadow-lg shadow-rose-200 transition-all hover:bg-red-600 hover:scale-110"
+                >
+                  <FiX className="size-3.5" />
+                </button>
+                <div className="flex items-center gap-3">
+                  {file.type.startsWith("image/") ? (
+                    <div className="size-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
+                      <img src={url} alt={file.name} className="h-full w-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="size-20 shrink-0 rounded-xl bg-white border border-slate-100 flex flex-col items-center justify-center gap-1">
+                      <FiFileText className="size-6 text-[#E91E63]" />
+                      <span className="text-[8px] font-medium text-slate-400 uppercase">Document</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0 pr-6">
+                    <p className="text-xs font-semibold text-slate-800 truncate">{file.name}</p>
+                    <p className="text-[10px] text-slate-400 font-medium mt-0.5">{formatFileSize(file.size)}</p>
+                    {file.name.includes("_bg_processed") && (
+                      <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-200">
+                        <FiCheck className="size-2.5" /> Website Background Applied
+                      </span>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="h-20 w-full rounded-lg bg-white border border-slate-100 flex flex-col items-center justify-center gap-1">
-                  <FiFileText className="size-6 text-[#E91E63]" />
-                  <span className="text-[8px] font-medium text-slate-400 uppercase">PDF / Document</span>
-                </div>
-              )}
-              <span className="text-[10px] font-medium text-slate-600 truncate w-full text-center">{file.name}</span>
-              <span className="text-[9px] text-slate-400 font-medium">{formatFileSize(file.size)}</span>
-            </div>
-          ))}
+
+                {enableBgRemover && file.type.startsWith("image/") && (
+                  <div className="mt-2 rounded-xl bg-white p-2.5 border border-slate-100 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                      <span className="flex items-center gap-1.5 text-[#E91E63]">
+                        <FiScissors className="size-3.5" /> Background Remover &amp; Theme Matcher
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500">
+                      Remove photo background and apply our website theme color:
+                    </p>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {WEBSITE_BACKGROUND_COLORS.map((bg) => (
+                        <button
+                          key={bg.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedBgColor(bg.color);
+                            handleRemoveBackground(i, bg.color);
+                          }}
+                          disabled={processingIdx === i}
+                          title={bg.name}
+                          className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-medium transition-all ${
+                            selectedBgColor === bg.color
+                              ? "bg-[#0f172a] text-white ring-2 ring-[#E91E63]"
+                              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          } disabled:opacity-50`}
+                        >
+                          <span className={`size-2.5 rounded-full ${bg.previewClass} border border-slate-300`} />
+                          {bg.name.split(" ")[0]}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBackground(i, selectedBgColor)}
+                      disabled={processingIdx === i}
+                      className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#0f172a] py-2 text-[11px] font-bold text-white transition-all hover:bg-[#E91E63] disabled:opacity-50 shadow-sm"
+                    >
+                      {processingIdx === i ? (
+                        <>
+                          <div className="size-3 border-2 border-white/30 border-t-white animate-spin rounded-full" />
+                          Processing &amp; Matching Color...
+                        </>
+                      ) : (
+                        <>
+                          <FiLayers className="size-3.5" />
+                          Auto Remove Background &amp; Match Website Color
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </Field>
@@ -462,13 +555,16 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiAward />} label="Highest Level of Education *" htmlFor="educationLevel">
+                        <Field icon={<FiAward />} label="Highest Level of Education / Degree Qualification *" htmlFor="educationLevel">
                           <select id="educationLevel" name="educationLevel" required className={`${inputClasses} appearance-none`}>
-                            <option value="">Select Level</option>
-                            <option value="Bachelor&apos;s Degree">Bachelor&apos;s Degree</option>
-                            <option value="Master&apos;s Degree">Master&apos;s Degree</option>
+                            <option value="">Select Level / Degree</option>
+                            <option value="Bachelor of Education (B.Ed.) (e.g. B.Ed. in Mathematics)">1. Bachelor of Education (B.Ed.) — e.g. B.Ed. in Mathematics</option>
+                            <option value="Bachelor of Science (BSc) (e.g. BSc in Physics)">2. Bachelor of Science (BSc) — e.g. BSc in Physics</option>
+                            <option value="Bachelor of Arts (BA) (e.g. BA in English Literature)">3. Bachelor of Arts (BA) — e.g. BA in English Literature</option>
+                            <option value="Bachelor’s Degree in Educational Psychology, Psychopedagogy, or Psychology">4. Bachelor’s Degree in Educational Psychology, Psychopedagogy, or Psychology</option>
+                            <option value="Master's Degree">Master&apos;s Degree</option>
                             <option value="PhD / Doctorate">PhD / Doctorate</option>
-                            <option value="Diploma">Diploma</option>
+                            <option value="Diploma">Diploma / Certificate</option>
                             <option value="Other">Other</option>
                           </select>
                         </Field>
@@ -792,7 +888,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <UploadField icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo" name="photo" required accept="image/*" files={photoFiles} onChange={setPhotoFiles} />
+                        <UploadField icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo" name="photo" required accept="image/*" files={photoFiles} onChange={setPhotoFiles} enableBgRemover={true} />
                         <UploadField icon={<FiFileText />} label="Upload Passport / National ID *" htmlFor="idPassport" name="idPassport" required accept=".pdf,image/*" files={idPassportFiles} onChange={setIdPassportFiles} />
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -800,7 +896,16 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                         <UploadField icon={<FiMessageSquare />} label="Upload Application/Cover Letter *" htmlFor="coverLetter" name="coverLetter" required accept=".pdf,.doc,.docx" files={coverLetterFiles} onChange={setCoverLetterFiles} />
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <UploadField icon={<FiAward />} label="Diploma Upload *" htmlFor="academicCert" name="academicCert" required multiple accept=".pdf,image/*" files={diplomaFiles} onChange={setDiplomaFiles} />
+                        <div>
+                          <UploadField icon={<FiAward />} label="Diploma Upload *" htmlFor="academicCert" name="academicCert" required multiple accept=".pdf,image/*" files={diplomaFiles} onChange={setDiplomaFiles} />
+                          <p className="mt-1 text-[11px] text-slate-500 font-medium leading-relaxed">
+                            Upload your diploma / degree certificate. Supported qualifications:
+                            <br /><span className="text-slate-700 font-semibold">1. Bachelor of Education (B.Ed.)</span> (e.g. B.Ed. in Mathematics)
+                            <br /><span className="text-slate-700 font-semibold">2. Bachelor of Science (BSc)</span> (e.g. BSc in Physics)
+                            <br /><span className="text-slate-700 font-semibold">3. Bachelor of Arts (BA)</span> (e.g. BA in English Literature)
+                            <br /><span className="text-slate-700 font-semibold">4. Bachelor’s Degree in Educational Psychology, Psychopedagogy, or Psychology</span>
+                          </p>
+                        </div>
                         <UploadField icon={<FiShield />} label="Criminal Record Certificate *" htmlFor="criminalRecord" name="criminalRecord" required multiple accept=".pdf,image/*" files={criminalRecordFiles} onChange={setCriminalRecordFiles} />
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">

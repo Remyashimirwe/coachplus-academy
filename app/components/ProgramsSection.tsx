@@ -39,7 +39,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
     router.push(`/request?programId=${programId}`);
   };
 
-  const displayPrograms = programs.slice(0, 6);
+  const displayPrograms = programs;
 
   if (programs.length === 0) {
     return (
@@ -147,32 +147,6 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
               </Link>
             );
           })}
-          {programs.length > 6 && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: displayPrograms.length * 0.1 }}
-              className="flex items-center justify-center"
-            >
-              <Link
-                href="/programs"
-                className="group flex h-full w-full flex-col items-center justify-center gap-6 overflow-hidden rounded-[32px] bg-slate-50 border-2 border-dashed border-slate-200 p-8 transition-all duration-500 hover:scale-[1.02] hover:bg-slate-100 hover:border-[#E91E63]/30"
-              >
-                <div className="size-20 rounded-full bg-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
-                  <FiArrowRight className="size-10 text-[#E91E63] transition-transform group-hover:translate-x-1" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-medium text-[#21121f]">
-                    Explore All Categories
-                  </h3>
-                  <p className="mt-2 text-slate-600">
-                    Discover our full range of learning programs
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
-          )}
         </div>
       </div>
       <ProgramModal 
