@@ -15,10 +15,54 @@ export const WEBSITE_BACKGROUND_COLORS: BackgroundOption[] = [
 ];
 
 /**
- * Removes image background using connected border flood-fill segmentation & color distance,
- * with edge feathering, then composites the foreground over the selected website background color.
+ * Removes image background using remove.bg API when available,
+ * with automatic fallback to client-side connected flood-fill segmentation,
+ * and composites the foreground over the selected website background color.
  */
 export async function removeAndReplaceBackground(
+  file: File,
+  targetColor: string = "#0f172a",
+  tolerance: number = 32
+): Promise<{ file: File; url: string }> {
+  // 1. Try remove.bg API first for state-of-the-art segmentation
+  try {
+    const formData = new FormData();
+    formData.append("image_file", file);
+    if (targetColor !== "transparent") {
+      formData.append("bg_color", targetColor.replace(/^#/, ""));
+    } else {
+      formData.append("format", "png");
+    }
+
+    const res = await fetch("/api/removebg", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.ok) {
+      const blob = await res.blob();
+      const ext = targetColor === "transparent" ? ".png" : ".jpg";
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const newFileName = `${baseName}_removebg${ext}`;
+      const processedFile = new File([blob], newFileName, {
+        type: blob.type || (targetColor === "transparent" ? "image/png" : "image/jpeg"),
+        lastModified: Date.now(),
+      });
+      const url = URL.createObjectURL(processedFile);
+      return { file: processedFile, url };
+    }
+  } catch {
+    // Silently proceed to client-side canvas segmentation fallback
+  }
+
+  // 2. Client-side canvas segmentation fallback
+  return removeAndReplaceBackgroundCanvas(file, targetColor, tolerance);
+}
+
+/**
+ * Client-side fallback canvas segmentation & color compositing
+ */
+export async function removeAndReplaceBackgroundCanvas(
   file: File,
   targetColor: string = "#0f172a",
   tolerance: number = 32
