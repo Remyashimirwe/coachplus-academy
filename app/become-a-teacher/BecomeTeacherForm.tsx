@@ -29,16 +29,12 @@ import {
   FiInstagram,
   FiYoutube,
   FiShield,
-  FiScissors,
-  FiCheck,
-  FiLayers,
   FiEye,
   FiMaximize2,
 } from "react-icons/fi";
-import { saveTeacherApplication } from "@/app/actions/teacher";
 import TimePicker from "@/app/components/TimePicker";
-import { removeAndReplaceBackground, WEBSITE_BACKGROUND_COLORS } from "@/app/lib/imageBackground";
 import ImageLightboxModal from "@/app/components/ImageLightboxModal";
+import type { TeacherTerms } from "@/app/lib/teacherTerms";
 
 const MAX_SUBJECTS_PER_PROGRAM = 4;
 const MAX_TOPICS_PER_SUBJECT = 4;
@@ -104,6 +100,84 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// Vercel caps a single serverless request body at ~4.5 MB. Files are uploaded
+// one at a time so the application itself only sends a small JSON payload.
+// Photos are downscaled first so typical phone pictures stay under the cap.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1600;
+
+async function shrinkImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  // Animated GIFs would lose animation, and canvas cannot decode every format
+  // (e.g. HEIC in some browsers) - leave those untouched.
+  if (
+    file.type === "image/gif" ||
+    file.type === "image/heic" ||
+    file.type === "image/heif"
+  ) {
+    return file;
+  }
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(
+      1,
+      MAX_IMAGE_DIMENSION / Math.max(bitmap.width, bitmap.height),
+    );
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      bitmap.close();
+      return file;
+    }
+    // Flatten transparency onto white so transparent PNGs don't turn black.
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.82),
+    );
+    // Keep the original when compression did not actually help.
+    if (!blob || blob.size >= file.size) return file;
+    const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+    return new File([blob], name, { type: "image/jpeg" });
+  } catch {
+    return file;
+  }
+}
+
+async function prepareUpload(file: File, label: string): Promise<File> {
+  const prepared = await shrinkImage(file);
+  if (prepared.size > MAX_UPLOAD_BYTES) {
+    throw new Error(
+      `${label} is ${formatFileSize(prepared.size)}. Please choose a file smaller than 4 MB (photos are resized automatically).`,
+    );
+  }
+  return prepared;
+}
+
+async function uploadDocument(
+  file: File,
+): Promise<{ url: string; publicId: string }> {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("folder", "teacher-applications");
+  const response = await fetch("/api/uploads", { method: "POST", body });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.url) {
+    throw new Error(
+      data?.error || "Could not upload your document. Please try again.",
+    );
+  }
+  return { url: String(data.url), publicId: String(data.publicId ?? "") };
+}
+
 function UploadField({
   icon,
   label,
@@ -114,7 +188,6 @@ function UploadField({
   accept,
   files,
   onChange,
-  enableBgRemover,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -125,11 +198,8 @@ function UploadField({
   accept?: string;
   files: { file: File; url: string }[];
   onChange: (files: { file: File; url: string }[]) => void;
-  enableBgRemover?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [processingIdx, setProcessingIdx] = useState<number | null>(null);
-  const [selectedBgColor, setSelectedBgColor] = useState<string>("#0f172a");
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
 
   const removeFile = (index: number) => {
@@ -139,27 +209,6 @@ function UploadField({
       const dt = new DataTransfer();
       remaining.forEach(f => dt.items.add(f.file));
       inputRef.current.files = dt.files;
-    }
-  };
-
-  const handleRemoveBackground = async (index: number, color: string) => {
-    try {
-      setProcessingIdx(index);
-      const target = files[index];
-      if (!target || !target.file.type.startsWith("image/")) return;
-      const processed = await removeAndReplaceBackground(target.file, color);
-      const updated = [...files];
-      updated[index] = processed;
-      onChange(updated);
-      if (inputRef.current) {
-        const dt = new DataTransfer();
-        updated.forEach(f => dt.items.add(f.file));
-        inputRef.current.files = dt.files;
-      }
-    } catch (err) {
-      console.error("Failed to remove background:", err);
-    } finally {
-      setProcessingIdx(null);
     }
   };
 
@@ -224,66 +273,8 @@ function UploadField({
                         </button>
                       )}
                     </div>
-                    {file.name.includes("_bg_processed") && (
-                      <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-200">
-                        <FiCheck className="size-2.5" /> Website Background Applied
-                      </span>
-                    )}
                   </div>
                 </div>
-
-                {enableBgRemover && file.type.startsWith("image/") && (
-                  <div className="mt-2 rounded-xl bg-white p-2.5 border border-slate-100 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700">
-                      <span className="flex items-center gap-1.5 text-[#E91E63]">
-                        <FiScissors className="size-3.5" /> Background Remover &amp; Theme Matcher
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500">
-                      Remove photo background and apply our website theme color:
-                    </p>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {WEBSITE_BACKGROUND_COLORS.map((bg) => (
-                        <button
-                          key={bg.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedBgColor(bg.color);
-                            handleRemoveBackground(i, bg.color);
-                          }}
-                          disabled={processingIdx === i}
-                          title={bg.name}
-                          className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-medium transition-all ${
-                            selectedBgColor === bg.color
-                              ? "bg-[#0f172a] text-white ring-2 ring-[#E91E63]"
-                              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                          } disabled:opacity-50`}
-                        >
-                          <span className={`size-2.5 rounded-full ${bg.previewClass} border border-slate-300`} />
-                          {bg.name.split(" ")[0]}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveBackground(i, selectedBgColor)}
-                      disabled={processingIdx === i}
-                      className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#0f172a] py-2 text-[11px] font-bold text-white transition-all hover:bg-[#E91E63] disabled:opacity-50 shadow-sm"
-                    >
-                      {processingIdx === i ? (
-                        <>
-                          <div className="size-3 border-2 border-white/30 border-t-white animate-spin rounded-full" />
-                          Processing &amp; Matching Color...
-                        </>
-                      ) : (
-                        <>
-                          <FiLayers className="size-3.5" />
-                          Auto Remove Background &amp; Match Website Color
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -300,8 +291,10 @@ function UploadField({
   );
 }
 
-export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolean; programs: TeacherProgram[] }) {
+export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen: boolean; programs: TeacherProgram[]; terms: TeacherTerms }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [uploadStep, setUploadStep] = useState("Submitting Application...");
+  const [errorMessage, setErrorMessage] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -463,45 +456,140 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                       }
 
                       setSelectionErrors({});
+                      setErrorMessage("");
+                      setUploadStep("Preparing your application...");
                       setStatus("submitting");
 
-                      const formData = new FormData(formEl);
-                      Object.entries(programSubjects).forEach(([programId, subs]) => {
-                        const program = programs.find(p => p.id === Number(programId));
-                        subs.forEach(s => {
-                          formData.append('subjects', program ? `${program.title}: ${s}` : s);
-                          const topics = programTopics[`${programId}:${s}`] || [];
-                          topics.forEach(t => formData.append('subjects', program ? `${program.title}: ${s} - ${t}` : `${s} - ${t}`));
-                        });
-                      });
-                      selectedDays.forEach(d => {
-                        formData.append('availableDays', d);
-                        formData.append('dayTimeSlots', `${d}: ${dayTimes[d]?.from || ''} - ${dayTimes[d]?.to || ''}`);
-                      });
-                      
                       try {
-                        const result = await saveTeacherApplication(formData);
-                        if (result && result.success) {
-                          setStatus("idle");
-                          setShowSuccessModal(true);
-                          formEl.reset();
-                          setSelectedProgramIds([]);
-                          setProgramSubjects({});
-                          setProgramTopics({});
-                          setSelectedDays([]);
-                          setDayTimes({});
-                          setDiplomaFiles([]);
-                          setCriminalRecordFiles([]);
-                          setPhotoFiles([]);
-                          setIdPassportFiles([]);
-                          setResumeFiles([]);
-                          setCoverLetterFiles([]);
-                          setOtherCertFiles([]);
-                        } else {
-                          setStatus("error");
+                        const formData = new FormData(formEl);
+
+                        // Upload documents one at a time. Vercel rejects request
+                        // bodies over ~4.5 MB, and six documents in a single
+                        // server-action call easily exceed that, which made the
+                        // form impossible to submit.
+                        const pending: { file: File; kind: string; label: string }[] = [];
+                        const addFiles = (name: string, kind: string, label: string) => {
+                          formData.getAll(name).forEach((entry) => {
+                            if (entry instanceof File && entry.size > 0) {
+                              pending.push({ file: entry, kind, label });
+                            }
+                          });
+                        };
+                        addFiles("photo", "photo", "Profile photo");
+                        addFiles("idPassport", "idPassport", "Passport / National ID");
+                        addFiles("resume", "resume", "CV / Resume");
+                        addFiles("coverLetter", "coverLetter", "Cover letter");
+                        addFiles("academicCert", "academicCertificates", "Diploma / academic certificate");
+                        addFiles("criminalRecord", "criminalRecord", "Criminal record certificate");
+                        addFiles("otherCerts", "otherCertificates", "Other certificate");
+
+                        const documents: {
+                          kind: string;
+                          fileName: string;
+                          mimeType: string;
+                          url: string;
+                          publicId: string;
+                        }[] = [];
+
+                        for (let i = 0; i < pending.length; i += 1) {
+                          const item = pending[i];
+                          setUploadStep(`Uploading ${item.label} (${i + 1} of ${pending.length})...`);
+                          const prepared = await prepareUpload(item.file, item.label);
+                          const uploaded = await uploadDocument(prepared);
+                          documents.push({
+                            kind: item.kind,
+                            fileName: prepared.name,
+                            mimeType: prepared.type || "application/octet-stream",
+                            url: uploaded.url,
+                            publicId: uploaded.publicId,
+                          });
                         }
-                      } catch {
+
+                        const subjects: string[] = [];
+                        Object.entries(programSubjects).forEach(([programId, subs]) => {
+                          const program = programs.find(p => p.id === Number(programId));
+                          subs.forEach(s => {
+                            subjects.push(program ? `${program.title}: ${s}` : s);
+                            const topics = programTopics[`${programId}:${s}`] || [];
+                            topics.forEach(t => subjects.push(program ? `${program.title}: ${s} - ${t}` : `${s} - ${t}`));
+                          });
+                        });
+
+                        const value = (name: string) => String(formData.get(name) ?? "").trim();
+                        setUploadStep("Submitting application...");
+                        const response = await fetch("/api/teacher-applications", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            fullName: value("fullName"),
+                            email: value("email"),
+                            phone: value("phone"),
+                            country: value("country"),
+                            province: value("province"),
+                            district: value("district"),
+                            sector: value("sector"),
+                            cell: value("cell"),
+                            village: value("village"),
+                            linkedin: value("linkedin") || null,
+                            instagram: value("instagram") || null,
+                            youtube: value("youtube") || null,
+                            otherSocial: value("otherSocial") || null,
+                            educationLevel: value("educationLevel"),
+                            fieldOfStudy: value("fieldOfStudy"),
+                            institution: value("institution"),
+                            graduationYear: value("graduationYear"),
+                            experienceYears: value("experienceYears"),
+                            subjects,
+                            previousOrg: value("previousOrg") || null,
+                            previousPos: value("previousPos") || null,
+                            expDescription: value("expDescription"),
+                            methods: value("methods"),
+                            difficultStudents: value("difficultStudents"),
+                            engagement: value("engagement"),
+                            teachOnline: value("teachOnline"),
+                            onlinePlatforms: value("onlinePlatforms"),
+                            employmentType: value("employmentType"),
+                            availableDays: selectedDays.join(", "),
+                            availableHours: selectedDays
+                              .map(d => `${d}: ${dayTimes[d]?.from || ""} - ${dayTimes[d]?.to || ""}`)
+                              .join("; "),
+                            startDate: value("startDate"),
+                            portfolioUrl: value("portfolio") || null,
+                            whyTeach: value("whyTeach"),
+                            whySelect: value("whySelect"),
+                            contribution: value("contribution"),
+                            agreedToTerms: true,
+                            documents,
+                          }),
+                        });
+
+                        const result = await response.json().catch(() => null);
+                        if (!response.ok) {
+                          throw new Error(result?.error || "Submission failed. Please try again.");
+                        }
+
+                        setStatus("idle");
+                        setShowSuccessModal(true);
+                        formEl.reset();
+                        setSelectedProgramIds([]);
+                        setProgramSubjects({});
+                        setProgramTopics({});
+                        setSelectedDays([]);
+                        setDayTimes({});
+                        setDiplomaFiles([]);
+                        setCriminalRecordFiles([]);
+                        setPhotoFiles([]);
+                        setIdPassportFiles([]);
+                        setResumeFiles([]);
+                        setCoverLetterFiles([]);
+                        setOtherCertFiles([]);
+                      } catch (error) {
                         setStatus("error");
+                        setErrorMessage(
+                          error instanceof Error
+                            ? error.message
+                            : "Something went wrong while submitting your application. Please try again.",
+                        );
                       }
                     }}
                     className="space-y-10 md:space-y-12"
@@ -917,7 +1005,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <UploadField icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo" name="photo" required accept="image/*" files={photoFiles} onChange={setPhotoFiles} enableBgRemover={true} />
+                        <UploadField icon={<FiImage />} label="Upload Your Profile Photo *" htmlFor="photo" name="photo" required accept="image/*" files={photoFiles} onChange={setPhotoFiles} />
                         <UploadField icon={<FiFileText />} label="Upload Passport / National ID *" htmlFor="idPassport" name="idPassport" required accept=".pdf,image/*" files={idPassportFiles} onChange={setIdPassportFiles} />
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -976,6 +1064,8 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                             onChange={() => {
                               if (!agreedToTerms) {
                                 setShowTermsModal(true);
+                              } else {
+                                setAgreedToTerms(false);
                               }
                             }}
                             className="size-5 rounded border-2 border-slate-200 text-[#E91E63] focus:ring-[#E91E63]"
@@ -1011,7 +1101,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                           {status === "submitting" ? (
                             <>
                               <div className="size-5 border-2 border-white/30 border-t-white animate-spin rounded-full" />
-                              Submitting Application...
+                              {uploadStep}
                             </>
                           ) : (
                             <>
@@ -1029,7 +1119,7 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
                       {status === "error" && (
                         <p className="mt-2 text-center text-xs text-rose-500 font-medium flex items-center justify-center gap-1.5">
                           <FiAlertCircle />
-                          Something went wrong while submitting your application. Please check your connection and try again.
+                          {errorMessage || "Something went wrong while submitting your application. Please check your connection and try again."}
                         </p>
                       )}
                     </div>
@@ -1112,8 +1202,8 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
             >
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-[#0f172a]">Teacher Partner Terms & Conditions</h2>
-                  <p className="text-sm text-[#E91E63] font-bold uppercase tracking-widest mt-1">COACHPLUS ACADEMY</p>
+                  <h2 className="text-lg font-semibold text-[#0f172a]">{terms.title}</h2>
+                  <p className="text-sm text-[#E91E63] font-bold uppercase tracking-widest mt-1">{terms.subtitle}</p>
                 </div>
                 <button
                   onClick={() => setShowTermsModal(false)}
@@ -1124,85 +1214,42 @@ export default function BecomeTeacherForm({ isOpen, programs }: { isOpen: boolea
               </div>
               
               <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-                <section>
-                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">1</span>
-                    YOUR STATUS & PART-TIME DISPATCH
-                  </h3>
-                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Independent Educator:</strong> You are joining CoachPlus Academy as an independent, part-time teacher partner, not as a permanent full-time employee.</li>
-                    <li><strong className="text-slate-900">Session-Based Work:</strong> Assignments are offered on a part-time, per-session basis depending on client demand and your location. CoachPlus Academy does not guarantee a fixed monthly salary or a fixed number of hours.</li>
-                    <li><strong className="text-slate-900">Brand Representation:</strong> When dispatched to teach a CoachPlus Academy student, you act as an official representative of our academy. You must arrive on time, dress professionally, and maintain high teaching standards.</li>
-                    <li><strong className="text-slate-900">No Fixed Monthly Salary:</strong> You pay teachers based on completed hours or matched sessions. You do not owe them a fixed monthly wage if there are no active clients in their area.</li>
-                    <li><strong className="text-slate-900">No Employment Liabilities:</strong> Because they are independent partners, CoachPlus Academy is not legally required to provide full-time benefits, pension contributions, paid annual leave, or severance pay.</li>
-                    <li><strong className="text-slate-900">Platform Membership:</strong> Teachers are members of your certified Educator Network/Forum. They maintain their freedom to work elsewhere, but whenever they accept a CoachPlus Academy dispatch, they must follow your code of conduct and represent your brand professionally.</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">2</span>
-                    TEACHING STANDARDS & CONDUCT
-                  </h3>
-                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Lesson Preparation:</strong> You must prepare your lessons well and help your assigned students reach their goals.</li>
-                    <li><strong className="text-slate-900">Zero Misconduct:</strong> Bad behavior is strictly prohibited. This includes showing up late, using inappropriate language, attending lessons under the influence of alcohol or drugs, or engaging in any unprofessional conduct with students or parents.</li>
-                    <li><strong className="text-slate-900">Account Removal:</strong> Breaking these conduct rules will lead to immediate removal from our active teacher database.</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">3</span>
-                    SAFETY, THEFT & LEGAL RESPONSIBILITY
-                  </h3>
-                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Respecting Client Homes:</strong> During home-coaching visits, you must respect the client&apos;s home, privacy, and family rules.</li>
-                    <li><strong className="text-slate-900">Theft and Property Damage:</strong> If a teacher steals, causes intentional property damage, or breaks the law, CoachPlus Academy will immediately terminate their profile and report them to law enforcement.</li>
-                    <li><strong className="text-slate-900">Personal Liability:</strong> You accept full legal and financial responsibility for your personal actions, damage, or misconduct during active coaching sessions.</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">4</span>
-                    NO DIRECT CASH OR PRIVATE DEALS
-                  </h3>
-                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Client Ownership:</strong> All students, parents, and bookings matched through CoachPlus Academy belong exclusively to the CoachPlus Academy platform.</li>
-                    <li><strong className="text-slate-900">No Direct Payments:</strong> You must never ask for or accept direct cash, private mobile money, or bank transfers from parents. All client payments are collected directly by CoachPlus Academy.</li>
-                    <li><strong className="text-slate-900">No Private Deals:</strong> You are strictly forbidden from making private offline coaching deals with CoachPlus Academy clients outside our platform.</li>
-                    <li><strong className="text-slate-900">Penalties:</strong> Attempting to bypass the platform will result in immediate profile deactivation, forfeiture of unpaid earnings, and potential legal recovery of lost fees.</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">5</span>
-                    LESSON SCHEDULES & CANCELLATIONS
-                  </h3>
-                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Package Completion:</strong> Once you accept a student match, you commit to finishing the full scheduled package.</li>
-                    <li><strong className="text-slate-900">24-Hour Notice:</strong> If you face an emergency and cannot attend a lesson, you must inform CoachPlus Academy at least 24 hours in advance. Unexcused absences will result in payment deductions or account suspension.</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">6</span>
-                    HOW YOU GET PAID
-                  </h3>
-                  <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
-                    <li><strong className="text-slate-900">Central Billing:</strong> CoachPlus Academy handles all client billing directly before lessons begin.</li>
-                    <li><strong className="text-slate-900">Teacher Payouts:</strong> You will receive your agreed partner payment after verified completion of your assigned coaching hours according to our standard payout schedule.</li>
-                    <li><strong className="text-slate-900">Transport:</strong> The cost of transport will be conducted based on your Location provided during registration and it is paid once you start coaching.</li>
-                  </ul>
-                </section>
+                {terms.sections.map((section, sectionIndex) => (
+                  <section key={sectionIndex}>
+                    <h3 className="text-base font-semibold text-[#0f172a] mb-4 flex items-center gap-2">
+                      <span className="flex size-8 items-center justify-center rounded-lg bg-[#E91E63]/10 text-[#E91E63] text-xs">
+                        {sectionIndex + 1}
+                      </span>
+                      {section.title}
+                    </h3>
+                    <ul className="space-y-4 text-sm text-slate-600 leading-relaxed list-disc ml-10">
+                      {section.points.map((point, pointIndex) => {
+                        const colon = point.indexOf(":");
+                        const hasLabel = colon > 0 && colon < 60;
+                        const label = hasLabel ? point.slice(0, colon).trim() : "";
+                        const body = hasLabel ? point.slice(colon + 1).trim() : point;
+                        return (
+                          <li key={pointIndex}>
+                            {hasLabel ? (
+                              <>
+                                <strong className="text-slate-900">{label}:</strong> {body}
+                              </>
+                            ) : (
+                              point
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                ))}
 
                 <div className="bg-[#fff0f3] rounded-3xl p-6 border-2 border-[#E91E63]/10">
-                  <h4 className="font-bold text-[#E91E63] mb-2 uppercase tracking-wider text-xs">Acknowledgment & Sign-Off</h4>
+                  <h4 className="font-bold text-[#E91E63] mb-2 uppercase tracking-wider text-xs">
+                    {terms.acknowledgmentTitle}
+                  </h4>
                   <p className="text-sm text-slate-700 leading-relaxed italic">
-                    &quot;By checking the agreement box on our website, you confirm that you have read, understood, and agreed to follow all the rules in this agreement.&quot;
+                    &quot;{terms.acknowledgment}&quot;
                   </p>
                 </div>
               </div>

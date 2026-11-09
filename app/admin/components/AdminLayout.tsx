@@ -13,6 +13,7 @@ import {
   FiUserCheck,
   FiCalendar,
   FiFlag,
+  FiFileText,
 } from "react-icons/fi";
 import DashboardLayout from "@/app/components/DashboardLayout";
 
@@ -26,6 +27,7 @@ const baseNavItems = [
   { id: "teachers", label: "Teacher Applications", icon: FiUsers, href: "/admin/teachers" },
   { id: "approved-teachers", label: "Approved Teachers", icon: FiUserCheck, href: "/admin/approved-teachers" },
   { id: "reports", label: "Student Reports", icon: FiFlag, href: "/admin/reports" },
+  { id: "terms", label: "Terms & Agreement", icon: FiFileText, href: "/admin/terms" },
   { id: "settings", label: "Settings", icon: FiSettings, href: "/admin/settings" },
 ];
 

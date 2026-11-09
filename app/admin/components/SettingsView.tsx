@@ -14,6 +14,7 @@ import {
   FiPhone,
   FiBookOpen,
   FiClock,
+  FiFileText,
 } from "react-icons/fi";
 
 const APPLIED_STATUS_STYLES: Record<string, string> = {
@@ -128,6 +129,27 @@ export default function SettingsView({
           </Link>
         </section>
       </div>
+
+      <section className="rounded-3xl bg-white p-8 shadow-sm border border-slate-200">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-6">Applicant Content</h2>
+        <Link
+          href="/admin/terms"
+          className="flex items-center justify-between gap-4 p-6 rounded-[32px] bg-slate-50 border border-slate-100 hover:border-[#E91E63]/30 hover:bg-[#E91E63]/5 transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="size-12 rounded-2xl bg-[#7B1FA2] text-white flex items-center justify-center shrink-0 shadow-lg shadow-purple-200">
+              <FiFileText className="size-6" />
+            </div>
+            <div>
+              <p className="text-[13px] font-semibold text-slate-900">Terms &amp; Agreement</p>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Edit the Teacher Partner terms shown on the application form and in the mobile app.
+              </p>
+            </div>
+          </div>
+          <FiArrowRight className="size-5 text-slate-400 shrink-0" />
+        </Link>
+      </section>
 
       <section className="rounded-3xl bg-white p-8 shadow-sm border border-slate-200">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

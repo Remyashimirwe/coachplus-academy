@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { db } from "@/app/lib/db";
 import { requireAdmin } from "@/app/lib/dal";
 import { uploadBufferToCloudinary } from "@/app/lib/cloudinary";
+import {
+  validateTeacherTerms,
+  type TeacherTerms,
+} from "@/app/lib/teacherTerms";
+import { saveTeacherTerms } from "@/app/lib/teacherTermsServer";
 
 export type AdminActionState = {
   error?: string;
@@ -489,5 +494,29 @@ export async function toggleTeacherApplications(isOpen: boolean) {
   revalidatePath("/admin/settings");
   revalidatePath("/become-a-teacher");
   
+  return { success: true };
+}
+
+/**
+ * Saves the Teacher Partner Terms & Conditions edited from the admin
+ * dashboard. The same content is read by the website form and the Flutter app.
+ */
+export async function saveTeacherTermsAction(
+  terms: TeacherTerms
+): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
+
+  const validationError = validateTeacherTerms(terms);
+  if (validationError) {
+    return { success: false, error: validationError };
+  }
+
+  await saveTeacherTerms(terms);
+
+  revalidatePath("/admin/terms");
+  revalidatePath("/admin/settings");
+  revalidatePath("/become-a-teacher");
+  revalidatePath("/api/terms");
+
   return { success: true };
 }

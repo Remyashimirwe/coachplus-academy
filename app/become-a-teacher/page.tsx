@@ -1,4 +1,5 @@
 import { getSetting, getPrograms } from "@/app/lib/db";
+import { getTeacherTerms } from "@/app/lib/teacherTermsServer";
 import BecomeTeacherForm from "./BecomeTeacherForm";
 import Footer from "../components/Footer";
 
@@ -6,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BecomeTeacherPage() {
   const isOpen = await getSetting("teacher_applications_open", "true") === "true";
+  const terms = await getTeacherTerms();
   const rawPrograms = await getPrograms();
   const programs = rawPrograms.map((p) => ({
     id: p.id,
@@ -57,7 +59,7 @@ export default async function BecomeTeacherPage() {
         </div>
       </div>
 
-      <BecomeTeacherForm isOpen={isOpen} programs={programs} />
+      <BecomeTeacherForm isOpen={isOpen} programs={programs} terms={terms} />
       <Footer />
     </main>
   );
