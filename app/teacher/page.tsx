@@ -22,9 +22,15 @@ import {
   FiPhone,
   FiUser,
   FiCamera,
+  FiEye,
+  FiScissors,
+  FiLayers,
+  FiCheck,
 } from "react-icons/fi";
 import { DAYS_OF_WEEK, parsePreferredDays, toISODate, weekRange } from "@/app/lib/schedule";
 import { resizeImage } from "@/app/lib/image";
+import { removeAndReplaceBackground, WEBSITE_BACKGROUND_COLORS } from "@/app/lib/imageBackground";
+import ImageLightboxModal from "@/app/components/ImageLightboxModal";
 
 interface TeacherProfile {
   name: string;
@@ -96,6 +102,11 @@ export default function TeacherPage() {
   const [savingLocation, setSavingLocation] = useState(false);
   const [locationStatus, setLocationStatus] = useState<{ success: boolean; text: string } | null>(null);
   const [savingImage, setSavingImage] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [showBgOptions, setShowBgOptions] = useState(false);
+  const [selectedBgColor, setSelectedBgColor] = useState("#0f172a");
+  const [isProcessingBg, setIsProcessingBg] = useState(false);
+  const [bgApplied, setBgApplied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const locationLine = [profile?.country, profile?.city, profile?.village, profile?.cell]
@@ -106,6 +117,7 @@ export default function TeacherPage() {
     const file = e.target.files?.[0];
     if (!file || savingImage) return;
     setSavingImage(true);
+    setBgApplied(false);
     try {
       const dataUrl = await resizeImage(file);
       const res = await fetch("/api/account", {
@@ -122,6 +134,32 @@ export default function TeacherPage() {
     } finally {
       setSavingImage(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleRemoveBg(bgColor: string) {
+    if (!profile?.image || isProcessingBg) return;
+    setIsProcessingBg(true);
+    try {
+      const res = await fetch(profile.image);
+      const blob = await res.blob();
+      const file = new File([blob], "profile.png", { type: blob.type || "image/png" });
+      const result = await removeAndReplaceBackground(file, bgColor);
+      const patchRes = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: result.url }),
+      });
+      if (patchRes.ok) {
+        setProfile((prev) => (prev ? { ...prev, image: result.url } : prev));
+        setSelectedBgColor(bgColor);
+        setBgApplied(true);
+        window.dispatchEvent(new Event("account:updated"));
+      }
+    } catch (err) {
+      console.error("Background removal failed:", err);
+    } finally {
+      setIsProcessingBg(false);
     }
   }
 
@@ -274,7 +312,13 @@ export default function TeacherPage() {
         <div className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="relative size-16 shrink-0">
-              <div className="size-16 overflow-hidden rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] flex items-center justify-center text-2xl font-black">
+              <div
+                onClick={() => profile?.image && setShowLightbox(true)}
+                className={`size-16 overflow-hidden rounded-2xl bg-gradient-to-tr from-[#FF5733] to-[#E91E63] flex items-center justify-center text-2xl font-black ${
+                  profile?.image ? "cursor-pointer hover:ring-2 hover:ring-[#E91E63] transition-all" : ""
+                }`}
+                title={profile?.image ? "Click to view full screen" : ""}
+              >
                 {profile?.image ? (
                   <img src={profile.image} alt={profile.name} className="h-full w-full object-cover" />
                 ) : (
@@ -297,7 +341,7 @@ export default function TeacherPage() {
               <p className="text-sm text-slate-300 truncate flex items-center gap-1.5">
                 <FiMail className="size-3.5 shrink-0" /> {profile?.email || ""}
               </p>
-              <div className="flex flex-wrap gap-2 mt-2 text-[11px] font-semibold">
+              <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] font-semibold">
                 {profile?.phone && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
                     <FiPhone className="size-3" /> {profile.phone}
@@ -306,6 +350,29 @@ export default function TeacherPage() {
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1">
                   <FiUsers className="size-3" /> {students.length} {students.length === 1 ? "Student" : "Students"}
                 </span>
+
+                {profile?.image && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowLightbox(true)}
+                      className="inline-flex items-center gap-1 rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-white transition-colors"
+                      title="View big screen"
+                    >
+                      <FiEye className="size-3 text-[#E91E63]" /> Big Screen
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isProcessingBg}
+                      onClick={() => setShowBgOptions((prev) => !prev)}
+                      className="inline-flex items-center gap-1 rounded-full bg-white/10 hover:bg-[#E91E63] px-2.5 py-1 text-white transition-colors"
+                      title="Remove background & match website theme"
+                    >
+                      <FiScissors className="size-3 text-[#E91E63]" />
+                      <span>{isProcessingBg ? "Removing BG..." : "Remove BG & Theme"}</span>
+                    </button>
+                  </>
+                )}
               </div>
               {/* Location line on small screens */}
               {locationLine && (
@@ -335,6 +402,57 @@ export default function TeacherPage() {
               </button>
             </div>
           </div>
+
+          {bgApplied && (
+            <div className="mt-3">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-bold text-emerald-300 border border-emerald-400/30">
+                <FiCheck className="size-3" /> Website Theme Background Applied & Saved
+              </span>
+            </div>
+          )}
+
+          {showBgOptions && profile?.image && (
+            <div className="mt-3 p-3 rounded-2xl bg-black/40 border border-white/10 text-white space-y-2.5 animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                  <FiLayers className="size-3.5 text-[#E91E63]" /> Match Background to Website Theme:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowBgOptions(false)}
+                  className="text-slate-400 hover:text-white text-xs"
+                >
+                  <FiX className="size-3.5" />
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {WEBSITE_BACKGROUND_COLORS.map((bg) => (
+                  <button
+                    key={bg.id}
+                    type="button"
+                    disabled={isProcessingBg}
+                    onClick={() => handleRemoveBg(bg.color)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all ${
+                      selectedBgColor === bg.color && bgApplied
+                        ? "border-[#E91E63] bg-white/20 text-white ring-2 ring-[#E91E63]"
+                        : "border-white/10 bg-white/5 text-slate-300 hover:border-white/30 hover:text-white"
+                    }`}
+                  >
+                    <span
+                      className="size-3.5 rounded-full border border-white/20 shrink-0"
+                      style={{ backgroundColor: bg.color === "transparent" ? "transparent" : bg.color }}
+                    />
+                    <span>{bg.name}</span>
+                  </button>
+                ))}
+              </div>
+              {isProcessingBg && (
+                <p className="text-[11px] text-amber-300 animate-pulse font-medium">
+                  Segmenting background and applying color composite...
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Mobile edit entry */}
           {!editingLocation && (
@@ -635,6 +753,14 @@ export default function TeacherPage() {
           </div>
         )}
       </div>
+
+      <ImageLightboxModal
+        isOpen={showLightbox}
+        onClose={() => setShowLightbox(false)}
+        imageUrl={profile?.image || null}
+        title={profile?.name || "Teacher Profile"}
+        subtitle={locationLine || "CoachPlus Academy Teacher"}
+      />
     </div>
   );
 }

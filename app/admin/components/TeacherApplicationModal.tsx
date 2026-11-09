@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ImageLightboxModal from "@/app/components/ImageLightboxModal";
 import {
   FiX,
   FiMail,
@@ -103,6 +104,7 @@ export default function TeacherApplicationModal({
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -206,7 +208,18 @@ export default function TeacherApplicationModal({
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 sm:gap-4 bg-white/90 backdrop-blur px-5 sm:px-8 pt-6 sm:pt-8 pb-6 border-b border-slate-100">
           <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-            <div className="size-14 sm:size-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold text-xl sm:text-2xl shrink-0 overflow-hidden">
+            <div className="size-14 sm:size-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold text-xl sm:text-2xl shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#E91E63] transition-all"
+              onClick={() => {
+                const photoDoc = app.documents?.find((d: any) => d.kind === "photo");
+                if (photoDoc) {
+                  setLightboxImage({
+                    url: documentUrl(photoDoc.id),
+                    title: `${app.fullName}'s Profile Photo`,
+                  });
+                }
+              }}
+              title="Click to view full screen"
+            >
               {app.documents?.find((d: any) => d.kind === "photo") ? (
                 <img
                   src={documentUrl(app.documents.find((d: any) => d.kind === "photo").id)}
@@ -552,6 +565,13 @@ export default function TeacherApplicationModal({
           )}
         </div>
       </div>
+      <ImageLightboxModal
+        isOpen={!!lightboxImage}
+        onClose={() => setLightboxImage(null)}
+        imageUrl={lightboxImage?.url || null}
+        title={lightboxImage?.title || "Teacher Photo"}
+        subtitle={app.fullName}
+      />
     </div>
   );
 }

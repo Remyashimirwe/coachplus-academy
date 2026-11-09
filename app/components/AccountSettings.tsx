@@ -1,8 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FiLoader, FiCheckCircle, FiAlertCircle, FiCamera, FiLock, FiTrash2, FiSave } from "react-icons/fi";
+import {
+  FiLoader,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiCamera,
+  FiLock,
+  FiTrash2,
+  FiSave,
+  FiEye,
+  FiScissors,
+  FiLayers,
+  FiX,
+  FiCheck,
+} from "react-icons/fi";
 import { resizeImage } from "@/app/lib/image";
+import { removeAndReplaceBackground, WEBSITE_BACKGROUND_COLORS } from "@/app/lib/imageBackground";
+import ImageLightboxModal from "@/app/components/ImageLightboxModal";
 
 interface AccountUser {
   id: number;
@@ -27,6 +42,11 @@ export default function AccountSettings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordStatus, setPasswordStatus] = useState<{ success: boolean; text: string } | null>(null);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [showBgOptions, setShowBgOptions] = useState(false);
+  const [selectedBgColor, setSelectedBgColor] = useState("#0f172a");
+  const [isProcessingBg, setIsProcessingBg] = useState(false);
+  const [bgApplied, setBgApplied] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +80,7 @@ export default function AccountSettings() {
     const file = e.target.files?.[0];
     if (!file) return;
     setImageStatus(null);
+    setBgApplied(false);
     try {
       const dataUrl = await resizeImage(file);
       setImage(dataUrl);
@@ -67,6 +88,25 @@ export default function AccountSettings() {
       setImageStatus({ success: false, text: "Could not process that image. Try a different file." });
     } finally {
       e.target.value = "";
+    }
+  };
+
+  const handleRemoveBg = async (bgColor: string) => {
+    if (!image || isProcessingBg) return;
+    setIsProcessingBg(true);
+    setImageStatus(null);
+    try {
+      const res = await fetch(image);
+      const blob = await res.blob();
+      const file = new File([blob], "avatar.png", { type: blob.type || "image/png" });
+      const result = await removeAndReplaceBackground(file, bgColor);
+      setImage(result.url);
+      setSelectedBgColor(bgColor);
+      setBgApplied(true);
+    } catch {
+      setImageStatus({ success: false, text: "Background removal failed. Please try again." });
+    } finally {
+      setIsProcessingBg(false);
     }
   };
 
@@ -192,7 +232,13 @@ export default function AccountSettings() {
         <div className="p-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="relative shrink-0 self-start">
-              <div className="size-20 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] border-2 border-white shadow-md overflow-hidden flex items-center justify-center text-white text-2xl font-black">
+              <div
+                onClick={() => image && setShowLightbox(true)}
+                className={`size-20 rounded-full bg-gradient-to-tr from-[#FF5733] to-[#E91E63] border-2 border-white shadow-md overflow-hidden flex items-center justify-center text-white text-2xl font-black ${
+                  image ? "cursor-pointer hover:ring-2 hover:ring-[#E91E63] transition-all" : ""
+                }`}
+                title={image ? "Click to view full screen" : ""}
+              >
                 {image ? (
                   <img src={image} alt="Profile" className="size-full object-cover" />
                 ) : (
@@ -219,6 +265,30 @@ export default function AccountSettings() {
                 >
                   <FiCamera className="size-3.5" /> Choose Image
                 </button>
+                {image && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowLightbox(true)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:border-slate-300 transition-colors"
+                    >
+                      <FiEye className="size-3.5" /> View Big Screen
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isProcessingBg}
+                      onClick={() => setShowBgOptions((prev) => !prev)}
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-bold transition-all ${
+                        showBgOptions
+                          ? "border-[#E91E63] bg-rose-50 text-[#E91E63]"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                      }`}
+                    >
+                      <FiScissors className="size-3.5 text-[#E91E63]" />
+                      <span>{isProcessingBg ? "Removing..." : "Remove BG & Theme"}</span>
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={saveImage}
                   disabled={savingImage || image === (user?.image || null)}
@@ -237,6 +307,57 @@ export default function AccountSettings() {
                   </button>
                 )}
               </div>
+
+              {bgApplied && (
+                <div className="mt-2.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600 border border-emerald-200">
+                    <FiCheck className="size-3" /> Website Theme Background Applied (Click Save to apply)
+                  </span>
+                </div>
+              )}
+
+              {showBgOptions && image && (
+                <div className="mt-3 p-3 rounded-2xl bg-slate-900 border border-slate-800 text-white space-y-2.5 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                      <FiLayers className="size-3.5 text-[#E91E63]" /> Match Background to Website Theme:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowBgOptions(false)}
+                      className="text-slate-400 hover:text-white text-xs"
+                    >
+                      <FiX className="size-3.5" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {WEBSITE_BACKGROUND_COLORS.map((bg) => (
+                      <button
+                        key={bg.id}
+                        type="button"
+                        disabled={isProcessingBg}
+                        onClick={() => handleRemoveBg(bg.color)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all ${
+                          selectedBgColor === bg.color && bgApplied
+                            ? "border-[#E91E63] bg-white/10 text-white ring-2 ring-[#E91E63]"
+                            : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500 hover:text-white"
+                        }`}
+                      >
+                        <span
+                          className="size-3.5 rounded-full border border-white/20 shrink-0"
+                          style={{ backgroundColor: bg.color === "transparent" ? "transparent" : bg.color }}
+                        />
+                        <span>{bg.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {isProcessingBg && (
+                    <p className="text-[11px] text-amber-300 animate-pulse font-medium">
+                      Segmenting background and applying color composite...
+                    </p>
+                  )}
+                </div>
+              )}
               {imageStatus && (
                 <p className={`mt-2.5 text-xs font-bold flex items-center gap-1.5 ${imageStatus.success ? "text-emerald-600" : "text-rose-600"}`}>
                   {imageStatus.success ? <FiCheckCircle /> : <FiAlertCircle />}
@@ -332,6 +453,14 @@ export default function AccountSettings() {
           </button>
         </div>
       </div>
+
+      <ImageLightboxModal
+        isOpen={showLightbox}
+        onClose={() => setShowLightbox(false)}
+        imageUrl={image}
+        title={user?.name ? `${user.name}'s Profile Picture` : "Profile Picture"}
+        subtitle="CoachPlus Academy Profile"
+      />
     </div>
   );
 }

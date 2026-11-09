@@ -32,10 +32,13 @@ import {
   FiScissors,
   FiCheck,
   FiLayers,
+  FiEye,
+  FiMaximize2,
 } from "react-icons/fi";
 import { saveTeacherApplication } from "@/app/actions/teacher";
 import TimePicker from "@/app/components/TimePicker";
 import { removeAndReplaceBackground, WEBSITE_BACKGROUND_COLORS } from "@/app/lib/imageBackground";
+import ImageLightboxModal from "@/app/components/ImageLightboxModal";
 
 const MAX_SUBJECTS_PER_PROGRAM = 4;
 const MAX_TOPICS_PER_SUBJECT = 4;
@@ -127,6 +130,7 @@ function UploadField({
   const inputRef = useRef<HTMLInputElement>(null);
   const [processingIdx, setProcessingIdx] = useState<number | null>(null);
   const [selectedBgColor, setSelectedBgColor] = useState<string>("#0f172a");
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
 
   const removeFile = (index: number) => {
     const remaining = files.filter((_, i) => i !== index);
@@ -190,8 +194,15 @@ function UploadField({
                 </button>
                 <div className="flex items-center gap-3">
                   {file.type.startsWith("image/") ? (
-                    <div className="size-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
-                      <img src={url} alt={file.name} className="h-full w-full object-cover" />
+                    <div
+                      onClick={() => setLightboxImage({ url, title: file.name })}
+                      className="group/img relative size-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-900 cursor-pointer shadow-inner"
+                      title="Click to open big screen"
+                    >
+                      <img src={url} alt={file.name} className="h-full w-full object-cover transition-transform group-hover/img:scale-110" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white">
+                        <FiMaximize2 className="size-5 drop-shadow" />
+                      </div>
                     </div>
                   ) : (
                     <div className="size-20 shrink-0 rounded-xl bg-white border border-slate-100 flex flex-col items-center justify-center gap-1">
@@ -202,6 +213,17 @@ function UploadField({
                   <div className="flex-1 min-w-0 pr-6">
                     <p className="text-xs font-semibold text-slate-800 truncate">{file.name}</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-0.5">{formatFileSize(file.size)}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {file.type.startsWith("image/") && (
+                        <button
+                          type="button"
+                          onClick={() => setLightboxImage({ url, title: file.name })}
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-[#E91E63] hover:underline"
+                        >
+                          <FiEye className="size-3" /> Open in Big Screen
+                        </button>
+                      )}
+                    </div>
                     {file.name.includes("_bg_processed") && (
                       <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-200">
                         <FiCheck className="size-2.5" /> Website Background Applied
@@ -267,6 +289,13 @@ function UploadField({
           </div>
         </div>
       )}
+      <ImageLightboxModal
+        isOpen={!!lightboxImage}
+        onClose={() => setLightboxImage(null)}
+        imageUrl={lightboxImage?.url || null}
+        title={lightboxImage?.title || "Uploaded Image"}
+        subtitle="Full Screen Preview"
+      />
     </Field>
   );
 }

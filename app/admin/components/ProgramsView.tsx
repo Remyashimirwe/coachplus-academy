@@ -17,6 +17,8 @@ import {
   FiStar,
   FiEye,
   FiEyeOff,
+  FiScissors,
+  FiMaximize2,
 } from "react-icons/fi";
 import {
   addProgram,
@@ -34,6 +36,8 @@ import {
   toggleProgramFeatured,
   toggleShowOnTeacherForm,
 } from "@/app/actions/admin";
+import { removeAndReplaceBackground, WEBSITE_BACKGROUND_COLORS } from "@/app/lib/imageBackground";
+import ImageLightboxModal from "@/app/components/ImageLightboxModal";
 
 /** Moves the item with `draggedId` to sit right before/after the item with `targetId`, keeping every other item's relative order untouched. */
 function reorderById<T extends { id: number }>(items: T[], draggedId: number, targetId: number): T[] {
@@ -81,7 +85,7 @@ function StatusBanner({ state, successMessage }: { state: any; successMessage: s
   );
 }
 
-/** A drag-and-drop-friendly image picker with a live preview. Replaces the old "paste a URL" inputs everywhere. */
+/** A drag-and-drop-friendly image picker with a live preview, background removal + color replacement, and big screen preview. */
 function ImageUploadField({
   name,
   existingImage,
@@ -96,42 +100,201 @@ function ImageUploadField({
   onFileChange?: (file: File | null) => void;
 }) {
   const [preview, setPreview] = useState<string | null>(existingImage || null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [isProcessingBg, setIsProcessingBg] = useState(false);
+  const [showBgOptions, setShowBgOptions] = useState(false);
+  const [selectedBgColor, setSelectedBgColor] = useState<string>("#0f172a");
+  const [bgApplied, setBgApplied] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (existingImage && !currentFile) {
+      setPreview(existingImage);
+    }
+  }, [existingImage, currentFile]);
+
+  const handleFileChange = (file: File | null) => {
+    setCurrentFile(file);
+    setBgApplied(false);
+    onFileChange?.(file);
+    if (!file) {
+      setPreview(existingImage || null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveBg = async (bgColor: string) => {
+    let sourceFile = currentFile;
+    setIsProcessingBg(true);
+    try {
+      if (!sourceFile && preview) {
+        // Fetch remote existing image to convert to File for processing
+        const res = await fetch(preview);
+        const blob = await res.blob();
+        sourceFile = new File([blob], `${name}_image.png`, { type: blob.type || "image/png" });
+      }
+      if (!sourceFile) return;
+
+      const result = await removeAndReplaceBackground(sourceFile, bgColor);
+      setCurrentFile(result.file);
+      setPreview(result.url);
+      setBgApplied(true);
+      setSelectedBgColor(bgColor);
+      onFileChange?.(result.file);
+
+      // Update native file input using DataTransfer
+      if (inputRef.current) {
+        try {
+          const dt = new DataTransfer();
+          dt.items.add(result.file);
+          inputRef.current.files = dt.files;
+        } catch (_) {
+          // ignore if DataTransfer is not permitted
+        }
+      }
+    } catch (err) {
+      console.error("Background removal failed:", err);
+    } finally {
+      setIsProcessingBg(false);
+    }
+  };
 
   const size = compact ? "size-14" : "size-20";
 
   return (
     <div className="space-y-2">
       {!compact && <label className="text-[13px] font-semibold text-slate-700">{label}</label>}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+        {/* Preview Thumbnail with Big Screen Click */}
         <div
-          className={`${size} shrink-0 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center`}
+          onClick={() => preview && setLightboxOpen(true)}
+          className={`group/prev relative ${size} shrink-0 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-900 flex items-center justify-center cursor-pointer transition-all hover:border-[#E91E63]/50 shadow-sm`}
+          title={preview ? "Click to open big screen" : "No image selected"}
         >
           {preview ? (
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            <>
+              <img src={preview} alt="" className="h-full w-full object-cover transition-transform group-hover/prev:scale-110" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/prev:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <FiMaximize2 className="size-4 drop-shadow" />
+              </div>
+            </>
           ) : (
             <FiImage className="text-slate-300" />
           )}
         </div>
-        <label className="flex-1 cursor-pointer">
-          <input
-            type="file"
-            name={name}
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              onFileChange?.(file);
-              if (!file) return;
-              const reader = new FileReader();
-              reader.onload = () => setPreview(reader.result as string);
-              reader.readAsDataURL(file);
-            }}
-          />
-          <span className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-semibold text-slate-600 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors">
-            <FiUpload className="size-3.5" /> {existingImage ? "Change Image" : "Upload Image"}
-          </span>
-        </label>
+
+        {/* Action Controls */}
+        <div className="flex-1 min-w-[200px] flex flex-wrap items-center gap-2">
+          <label className="cursor-pointer">
+            <input
+              ref={inputRef}
+              type="file"
+              name={name}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                handleFileChange(file);
+              }}
+            />
+            <span className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[11px] font-semibold text-slate-700 hover:border-[#E91E63]/40 hover:text-[#E91E63] transition-colors shadow-sm">
+              <FiUpload className="size-3.5 text-[#E91E63]" /> {existingImage || preview ? "Change Image" : "Upload Image"}
+            </span>
+          </label>
+
+          {preview && (
+            <>
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+                title="Open image in full screen"
+              >
+                <FiEye className="size-3.5 text-[#E91E63]" />
+                <span className="hidden sm:inline">Big Screen</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isProcessingBg}
+                onClick={() => setShowBgOptions((prev) => !prev)}
+                className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-semibold transition-all shadow-sm ${
+                  showBgOptions
+                    ? "border-[#E91E63] bg-rose-50 text-[#E91E63]"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-[#E91E63]/40 hover:text-[#E91E63]"
+                }`}
+                title="Remove background and match website theme colors"
+              >
+                <FiScissors className="size-3.5 text-[#E91E63]" />
+                <span>{isProcessingBg ? "Removing BG..." : "Remove BG & Theme"}</span>
+              </button>
+            </>
+          )}
+
+          {bgApplied && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600 border border-emerald-200">
+              <FiCheck className="size-3" /> Website BG Applied
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* Background Removal Color Palette */}
+      {showBgOptions && preview && (
+        <div className="mt-2 p-3 rounded-2xl bg-slate-900 border border-slate-800 text-white space-y-2.5 animate-in fade-in">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+              <FiLayers className="size-3.5 text-[#E91E63]" /> Match Background to Website Theme:
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowBgOptions(false)}
+              className="text-slate-400 hover:text-white text-xs"
+            >
+              <FiX className="size-3.5" />
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {WEBSITE_BACKGROUND_COLORS.map((bg) => (
+              <button
+                key={bg.id}
+                type="button"
+                disabled={isProcessingBg}
+                onClick={() => handleRemoveBg(bg.color)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all ${
+                  selectedBgColor === bg.color && bgApplied
+                    ? "border-[#E91E63] bg-white/10 text-white ring-2 ring-[#E91E63]"
+                    : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500 hover:text-white"
+                }`}
+              >
+                <span
+                  className="size-3.5 rounded-full border border-white/20 shrink-0"
+                  style={{ backgroundColor: bg.color === "transparent" ? "transparent" : bg.color }}
+                />
+                <span>{bg.name}</span>
+              </button>
+            ))}
+          </div>
+          {isProcessingBg && (
+            <p className="text-[11px] text-amber-300 animate-pulse font-medium">
+              Segmenting background and applying color composite...
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      <ImageLightboxModal
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        imageUrl={preview}
+        title={label || "Learning Image"}
+        subtitle="Manage Learning Preview"
+      />
     </div>
   );
 }
