@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { useState, useEffect } from "react";
+import { FaWhatsapp, FaPhoneAlt } from "react-icons/fa";
 import { getSession } from "@/app/lib/auth-actions";
 import PlayStoreButton from "./PlayStoreButton";
 
@@ -90,8 +91,27 @@ export default function Footer() {
           })}
         </div>
         
-        <div className="mt-10 border-t border-white/10 pt-6 text-center text-sm text-slate-500">
-          <p>&copy; 2026 CoachPlus Academy</p>
+        <div className="mt-10 border-t border-white/10 pt-8 pb-8">
+          <div className="flex items-center justify-center gap-4 text-sm text-slate-400 mb-4">
+            <a
+              href="tel:+250780000000"
+              className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
+            >
+              <FaPhoneAlt className="size-4" />
+              <span>+250 780 000 000</span>
+            </a>
+            <span className="text-slate-600">|</span>
+            <a
+              href="https://wa.me/250780000000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-slate-300 hover:text-[#25D366] transition-colors"
+            >
+              <FaWhatsapp className="size-4" />
+              <span>WhatsApp</span>
+            </a>
+          </div>
+          <p className="text-slate-500">&copy; 2026 CoachPlus Academy</p>
         </div>
       </div>
     </footer>

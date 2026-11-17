@@ -296,6 +296,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
   const [uploadStep, setUploadStep] = useState("Submitting Application...");
   const [errorMessage, setErrorMessage] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [receiptEmailSent, setReceiptEmailSent] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [selectedProgramIds, setSelectedProgramIds] = useState<number[]>([]);
@@ -568,6 +569,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           throw new Error(result?.error || "Submission failed. Please try again.");
                         }
 
+                        setReceiptEmailSent(result?.emailSent !== false);
                         setStatus("idle");
                         setShowSuccessModal(true);
                         formEl.reset();
@@ -1163,6 +1165,11 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
               <p className="mt-6 text-lg leading-relaxed text-slate-500">
                 Thank you for applying to join CoachPlus Academy. Our academic team will review your profile and get back to you within 3-5 business days.
               </p>
+              {!receiptEmailSent && (
+                <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-medium text-amber-800">
+                  Your application was received, but we could not send the confirmation email. Our team has your application and will follow up with you.
+                </p>
+              )}
               
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <button

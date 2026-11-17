@@ -4,6 +4,7 @@ import { getUserFromRequest } from "@/app/lib/auth";
 import {
   sendTeacherAssignedToParentEmail,
   sendRequestAssignedToTeacherEmail,
+  sendStudentMatchEmail,
 } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
@@ -95,31 +96,57 @@ export async function POST(
     data: { status: "assigned" },
   });
 
-  const [parentEmailResult, teacherEmailResult] = await Promise.all([
-    sendTeacherAssignedToParentEmail({
-      to: parentRequest.email,
-      parentName: parentRequest.parentName,
-      teacherName: teacher.user.name,
-      teacherEmail: teacher.user.email,
-      teacherPhone: teacher.phone,
-      subjects: parentRequest.subjects,
-    }),
-    sendRequestAssignedToTeacherEmail({
-      to: teacher.user.email,
-      teacherName: teacher.user.name,
-      studentName: parentRequest.parentName,
-      parentEmail: parentRequest.email,
-      parentPhone: parentRequest.phone,
-      program: parentRequest.programTitle,
-      subjects: parentRequest.subjects,
-      preferredTime: parentRequest.preferredTime,
-      learningMode: parentRequest.learningMode,
-      startDate: parentRequest.startDate,
-      details: parentRequest.details,
-    }),
-  ]);
+  const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+  const teacherLocation = [teacher.village, teacher.cell, teacher.city, teacher.country]
+    .filter(Boolean)
+    .join(", ");
 
-  const emailSent = parentEmailResult.success && teacherEmailResult.success;
+  const [parentEmailResult, teacherEmailResult, studentMatchEmailResult] =
+    await Promise.all([
+      sendTeacherAssignedToParentEmail({
+        to: parentRequest.email,
+        parentName: parentRequest.parentName,
+        teacherName: teacher.user.name,
+        teacherEmail: teacher.user.email,
+        teacherPhone: teacher.phone,
+        subjects: parentRequest.subjects,
+      }),
+      sendRequestAssignedToTeacherEmail({
+        to: teacher.user.email,
+        teacherName: teacher.user.name,
+        studentName: parentRequest.parentName,
+        parentEmail: parentRequest.email,
+        parentPhone: parentRequest.phone,
+        program: parentRequest.programTitle,
+        subjects: parentRequest.subjects,
+        preferredTime: parentRequest.preferredTime,
+        learningMode: parentRequest.learningMode,
+        startDate: parentRequest.startDate,
+        details: parentRequest.details,
+      }),
+      // Stage 7: First Student Match Alert — email the teacher with match details.
+      sendStudentMatchEmail({
+        to: teacher.user.email,
+        name: teacher.user.name,
+        subjects: teacher.subjects,
+        studentLevel: parentRequest.grade || "Not specified",
+        learningMode: parentRequest.learningMode || "Not specified",
+        studentLocationOrOnline: parentRequest.location || "Not specified",
+        requestedDaysAndTimes: `${parentRequest.preferredDays || ""} ${parentRequest.preferredTime || ""}`.trim() || "Not specified",
+        startDate: parentRequest.startDate || "Not specified",
+        acceptDeclineLink: `${APP_URL}/teacher/students/${student.id}/respond`,
+        contactPhone: teacher.phone || "",
+        location: teacherLocation || undefined,
+      }).catch((err) => {
+        console.error("Failed to send student match email:", err);
+        return { success: false };
+      }),
+    ]);
+
+  const emailSent =
+    parentEmailResult.success &&
+    teacherEmailResult.success &&
+    studentMatchEmailResult.success;
 
   // Both sides are told in-app as well as by email, each with a message that
   // makes sense from their own point of view.

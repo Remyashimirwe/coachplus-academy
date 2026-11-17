@@ -155,6 +155,10 @@ export default function TeachersView({ teacherApplications }: any) {
     setSelectedId((current) => (current === id ? null : current));
   }
 
+  function handleApplicationStatusChanged(id: number, status: string) {
+    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+  }
+
   async function handleQuickApprove(appId: number) {
     const app = applications.find((a) => a.id === appId);
     if (!app) return;
@@ -549,6 +553,7 @@ export default function TeachersView({ teacherApplications }: any) {
           onClose={() => setSelectedId(null)}
           onApproved={handleApproved}
           onDenied={handleDenied}
+          onStatusChanged={handleApplicationStatusChanged}
         />
       )}
     </div>

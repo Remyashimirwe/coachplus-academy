@@ -29,6 +29,7 @@ import {
   FiLoader,
   FiCopy,
   FiCheck,
+  FiFlag,
 } from "react-icons/fi";
 
 const DOCUMENT_LABELS: Record<string, string> = {
@@ -91,11 +92,13 @@ export default function TeacherApplicationModal({
   onClose,
   onApproved,
   onDenied,
+  onStatusChanged,
 }: {
   app: any;
   onClose: () => void;
   onApproved: (id: number) => void;
   onDenied: (id: number) => void;
+  onStatusChanged: (id: number, status: string) => void;
 }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -105,6 +108,10 @@ export default function TeacherApplicationModal({
   const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
+  const [shortlistError, setShortlistError] = useState<string | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [missingDocsError, setMissingDocsError] = useState<string | null>(null);
+  const [missingDocsSuccess, setMissingDocsSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -191,6 +198,92 @@ export default function TeacherApplicationModal({
       setDecisionError("Failed to deny application");
     } finally {
       setDecision(null);
+    }
+  }
+
+  async function handleShortlist() {
+    setShortlistError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/teacher-applications/${app.id}/shortlist`,
+        { method: "POST" },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        onStatusChanged(app.id, "shortlisted");
+      } else {
+        setShortlistError(data.message || "Failed to shortlist application");
+      }
+    } catch {
+      setShortlistError("Failed to shortlist application");
+    }
+  }
+
+  async function handleScheduleAssessment() {
+    setScheduleError(null);
+    const examDate = prompt("Exam date (e.g. 2026-12-15):");
+    if (!examDate) return;
+    const examTime = prompt("Exam time (e.g. 10:00 AM):");
+    if (!examTime) return;
+    const assessmentMode = prompt("Mode (In-Person / Online):", "In-Person");
+    if (!assessmentMode) return;
+    const locationOrMeetingLink = prompt("Location / Meeting Link:");
+    if (!locationOrMeetingLink) return;
+    const contactPhone = prompt("Contact phone (optional):");
+
+    try {
+      const res = await fetch(
+        `/api/admin/teacher-applications/${app.id}/assessment-schedule`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            examDate,
+            examTime,
+            assessmentMode,
+            locationOrMeetingLink,
+            contactPhone: contactPhone || undefined,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        onStatusChanged(app.id, "assessment_scheduled");
+      } else {
+        setScheduleError(data.message || data.error || "Failed to schedule assessment");
+      }
+    } catch {
+      setScheduleError("Failed to schedule assessment");
+    }
+  }
+
+  async function handleMissingDocs() {
+    setMissingDocsError(null);
+    setMissingDocsSuccess(null);
+    const missingDocument = prompt("Document needed (e.g. National ID):");
+    if (!missingDocument) return;
+    const issueReason = prompt("Reason (e.g. blurry/unreadable):");
+    if (!issueReason) return;
+    const reuploadLink = prompt("Re-upload link:");
+    if (!reuploadLink) return;
+
+    try {
+      const res = await fetch(
+        `/api/admin/teacher-applications/${app.id}/missing-documents`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ missingDocument, issueReason, reuploadLink }),
+        },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setMissingDocsSuccess("Document update email sent.");
+      } else {
+        setMissingDocsError(data.message || "Failed to send missing documents email");
+      }
+    } catch {
+      setMissingDocsError("Failed to send missing documents email");
     }
   }
 
@@ -537,18 +630,45 @@ export default function TeacherApplicationModal({
                 <FiAlertCircle /> {decisionError}
               </p>
             )}
-            {!isPending && !decisionError && (
+            {shortlistError && (
+              <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
+                <FiAlertCircle /> {shortlistError}
+              </p>
+            )}
+            {scheduleError && (
+              <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
+                <FiAlertCircle /> {scheduleError}
+              </p>
+            )}
+            {missingDocsError && (
+              <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
+                <FiAlertCircle /> {missingDocsError}
+              </p>
+            )}
+            {missingDocsSuccess && (
               <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
-                <FiCheckCircle /> {app.status === "rejected" ? "This application has been rejected." : "This applicant is already an accepted teacher."}
+                <FiCheckCircle /> {missingDocsSuccess}
+              </p>
+            )}
+            {!isPending && !decisionError && !shortlistError && !scheduleError && !missingDocsError && !missingDocsSuccess && (
+              <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
+                <FiCheckCircle /> {app.status === "rejected"
+                  ? "This application has been rejected."
+                  : app.status === "shortlisted"
+                    ? "This applicant is shortlisted for assessment."
+                    : app.status === "assessment_scheduled"
+                      ? "This applicant's assessment is scheduled."
+                      : "This applicant is already an accepted teacher."}
               </p>
             )}
           </div>
-          {isPending && (
-            <div className="flex gap-3">
+          {(isPending || app.status === "shortlisted") && (
+            <div className="flex gap-3 flex-wrap">
+              {isPending && <>
               <button
                 onClick={handleDeny}
                 disabled={decision !== null}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white text-rose-600 border-2 border-rose-200 text-[13px] font-semibold hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white text-rose-600 border-2 border-rose-200 text-[13px] font-semibold hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {decision === "deny" ? <FiLoader className="size-4 animate-spin" /> : <FiUserX className="size-4" />}
                 {decision === "deny" ? "Denying..." : "Deny"}
@@ -556,11 +676,40 @@ export default function TeacherApplicationModal({
               <button
                 onClick={handleApprove}
                 disabled={decision !== null}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[13px] font-semibold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[13px] font-semibold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {decision === "approve" ? <FiLoader className="size-4 animate-spin" /> : <FiUserCheck className="size-4" />}
                 {decision === "approve" ? "Approving..." : "Approve & Invite"}
               </button>
+              <button
+                onClick={() => handleShortlist()}
+                disabled={decision !== null}
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-50 text-indigo-600 border-2 border-indigo-200 text-[13px] font-semibold hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FiFlag className="size-4" />
+                Shortlist
+              </button>
+              </>}
+              {app.status === "shortlisted" && (
+                <button
+                  onClick={() => handleScheduleAssessment()}
+                  disabled={decision !== null}
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-amber-50 text-amber-700 border-2 border-amber-200 text-[13px] font-semibold hover:bg-amber-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiClock className="size-4" />
+                  Schedule Exam
+                </button>
+              )}
+              {(isPending || app.status === "shortlisted") && (
+                <button
+                  onClick={() => handleMissingDocs()}
+                  disabled={decision !== null}
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-rose-50 text-rose-700 border-2 border-rose-200 text-[13px] font-semibold hover:bg-rose-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiAlertCircle className="size-4" />
+                  Missing Docs
+                </button>
+              )}
             </div>
           )}
         </div>

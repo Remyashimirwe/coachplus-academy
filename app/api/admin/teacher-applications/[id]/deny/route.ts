@@ -32,7 +32,15 @@ export async function POST(
   }
 
   // Best-effort notification; denial should proceed even if the email fails.
-  await sendApplicationDeniedEmail({ to: application.email, name: application.fullName }).catch(() => null);
+  const location = [application.village, application.cell, application.sector, application.district, application.province, application.country]
+    .filter(Boolean)
+    .join(", ");
+  await sendApplicationDeniedEmail({
+    to: application.email,
+    name: application.fullName,
+    subjects: application.subjects,
+    location: location || undefined,
+  }).catch(() => null);
 
   // Keep the application on record (status "rejected") so the admin can still
   // review it and filter the table by accepted / rejected applicants.

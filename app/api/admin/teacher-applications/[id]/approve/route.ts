@@ -96,10 +96,21 @@ export async function POST(
     });
 
     const inviteUrl = `${APP_URL}/accept-invite?token=${inviteToken}`;
+    const location = [application.village, application.cell, application.sector, application.district, application.province, application.country]
+      .filter(Boolean)
+      .join(", ");
+    const coachingModes = application.teachOnline === "Yes"
+      ? "Online, Home, or Center"
+      : "Home or Center";
     const emailResult = await sendApplicationApprovedEmail({
       to: application.email,
       name: application.fullName,
       inviteUrl,
+      subjects: application.subjects,
+      coachingModes,
+      portalOrAppLink: `${APP_URL}/teacher`,
+      guidelinesLink: `${APP_URL}/terms-of-service`,
+      location: location || undefined,
     });
 
     const { passwordHash, inviteToken: _token, ...safeUser } = user;

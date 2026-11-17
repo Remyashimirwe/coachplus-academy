@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
+import { sendApplicationReceivedEmail } from "@/app/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -109,6 +110,20 @@ export async function POST(request: Request) {
       include: { documents: true },
     });
 
+    // Stage 1: Instant Application Receipt — send confirmation email to the teacher.
+    const location = [village, cell, sector, district, province, country]
+      .filter(Boolean)
+      .join(", ");
+    const emailResult = await sendApplicationReceivedEmail({
+      to: created.email,
+      name: created.fullName,
+      subjects: created.subjects,
+      location: location || undefined,
+    }).catch((err) => {
+      console.error("Failed to send application receipt email:", err);
+      return { success: false, message: "Email delivery failed" };
+    });
+
     // A new application is the one thing an admin must not miss. This route is
     // public, so there is no actor to exclude — every admin is told.
     await notifyAdmins({
@@ -117,7 +132,7 @@ export async function POST(request: Request) {
       type: "info",
     });
 
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json({ ...created, emailSent: emailResult.success }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message ?? "Something went wrong" },

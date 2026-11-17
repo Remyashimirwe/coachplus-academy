@@ -133,10 +133,20 @@ export async function sendApplicationApprovedEmail({
   to,
   name,
   inviteUrl,
+  subjects,
+  coachingModes,
+  portalOrAppLink,
+  guidelinesLink,
+  location,
 }: {
   to: string;
   name: string;
   inviteUrl: string;
+  subjects?: string | null;
+  coachingModes?: string | null;
+  portalOrAppLink?: string | null;
+  guidelinesLink?: string | null;
+  location?: string | null;
 }) {
   const client = getResendClient();
 
@@ -147,33 +157,57 @@ export async function sendApplicationApprovedEmail({
     return { success: false, message: "RESEND_API_KEY is not configured" };
   }
 
+  const { programName, subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeProgram = escapeHtml(programName);
+  const safeSubject = escapeHtml(subjectName);
+  const safeModes = escapeHtml(coachingModes || "Home, Online, or Center");
+  const safePortal = escapeHtml(portalOrAppLink || APP_URL);
+  const safeGuidelines = escapeHtml(guidelinesLink || "#");
+  const safeLocation = escapeHtml(location || "");
+  const safeInviteUrl = escapeHtml(inviteUrl);
+
   try {
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `Congratulations! Your ${BRAND_NAME} teacher application was approved`,
+      subject: "Welcome to CoachPlus Academy! Your Teacher Profile is Approved 🎉",
       html: renderEmail({
-        preheader: `Your application to become a teacher at ${BRAND_NAME} has been approved.`,
+        preheader: `Congratulations! Your teacher application for ${programName} (${subjectName}) has been approved.`,
         bodyHtml: `
-          <h2 style="margin-top:0;">Congratulations, ${name}!</h2>
+          <p>Dear <strong>${safeName}</strong>,</p>
           <p>
-            We're excited to let you know that your application to become a
-            <strong>Teacher</strong> at ${BRAND_NAME} has been <strong>approved</strong>.
+            Congratulations! Following your exam and demo lesson, we are thrilled to officially welcome you to
+            CoachPlus Academy as a verified educator for <strong>${safeProgram}</strong> (${safeSubject}).
           </p>
+          <p><strong>Your Location:</strong> ${safeLocation}</p>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">How You Will Receive Students:</h3>
+          <ol style="margin:12px 0;padding-left:24px;">
+            <li>
+              <strong>Smart Matching:</strong> Our system matches you with students based on your approved subjects,
+              preferred coaching mode (<strong>${safeModes}</strong> — Home, Online, or Center), and the weekly
+              availability you submitted.
+            </li>
+            <li>
+              <strong>Match Notifications:</strong> Whenever a student requests a coach matching your profile, you
+              will receive an instant notification with the class details to accept the assignment.
+            </li>
+            <li>
+              <strong>App &amp; Dashboard Access:</strong> Download the CoachPlus Academy app or log into your teacher
+              portal to manage your schedule and sessions:
+              <a href="${safePortal}" style="color:#E91E63;text-decoration:none;font-weight:700;">${safePortal}</a>
+            </li>
+          </ol>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">Important Reminder:</h3>
           <p>
-            Click the button below to set up your password and activate your official teacher account.
+            Please ensure your availability remains up to date and review our Teacher Code of Conduct and Safety
+            Guidelines attached/linked here:
+            <a href="${safeGuidelines}" style="color:#E91E63;text-decoration:none;">${safeGuidelines}</a>.
           </p>
-          <p style="text-align: center; margin: 32px 0;">
-            <a
-              href="${inviteUrl}"
-              style="background-color:#E91E63;color:#ffffff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:bold;"
-            >
-              Activate My Account
-            </a>
-          </p>
-          <p>Or copy and paste this link into your browser:</p>
-          <p><a href="${inviteUrl}">${inviteUrl}</a></p>
-          <p>This invitation link will expire in 7 days.</p>
+          <p>Welcome aboard — we are excited to work with you to deliver exceptional education!</p>
+          <p>Warm regards,</p>
+          <p>The Academic &amp; Onboarding Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
           ${signature()}
         `,
       }),
@@ -194,9 +228,13 @@ export async function sendApplicationApprovedEmail({
 export async function sendApplicationDeniedEmail({
   to,
   name,
+  subjects,
+  location,
 }: {
   to: string;
   name: string;
+  subjects?: string | null;
+  location?: string | null;
 }) {
   const client = getResendClient();
 
@@ -205,22 +243,40 @@ export async function sendApplicationDeniedEmail({
     return { success: false, message: "RESEND_API_KEY is not configured" };
   }
 
+  const { programName, subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeProgram = escapeHtml(programName);
+  const safeSubject = escapeHtml(subjectName);
+  const safeLocation = escapeHtml(location || "");
+
   try {
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `Update on your ${BRAND_NAME} teacher application`,
+      subject: "Update on Your Teacher Application – CoachPlus Academy",
       html: renderEmail({
-        preheader: `An update on your ${BRAND_NAME} teacher application.`,
+        preheader: `An update on your teacher application for ${programName} (${subjectName}).`,
         bodyHtml: `
-          <h2 style="margin-top:0;">Hi ${name},</h2>
+          <p>Dear <strong>${safeName}</strong>,</p>
           <p>
-            Thank you for taking the time to apply to become a Teacher at ${BRAND_NAME}.
-            After careful review, we're unable to move forward with your application at this time.
+            Thank you for taking the time to apply to CoachPlus Academy for the
+            <strong>${safeProgram}</strong> program (${safeSubject}), and for your interest in teaching with us.
+          </p>
+          <p><strong>Your Location:</strong> ${safeLocation}</p>
+          <p>
+            After careful review of your application and our current student demand, we regret to inform you that we
+            are unable to move forward with your application at this time. Because we match educators strictly to
+            specific curriculum needs, availability, and assessment criteria, we are not always able to accept every
+            qualified applicant.
           </p>
           <p>
-            We truly appreciate your interest and encourage you to apply again in the future.
+            We truly appreciate your passion for education and encourage you to apply again in the future as our
+            programs expand or as you gain additional qualifications and experience.
           </p>
+          <p>We wish you all the best in your teaching career.</p>
+          <p>Warm regards,</p>
+          <p>The Academic &amp; Onboarding Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
           ${signature()}
         `,
       }),
@@ -234,6 +290,102 @@ export async function sendApplicationDeniedEmail({
     return { success: true };
   } catch (err: any) {
     console.error("Failed to send denial email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendStudentMatchEmail({
+  to,
+  name,
+  subjects,
+  studentLevel,
+  learningMode,
+  studentLocationOrOnline,
+  requestedDaysAndTimes,
+  startDate,
+  acceptDeclineLink,
+  contactPhone,
+  location,
+}: {
+  to: string;
+  name: string;
+  subjects?: string | null;
+  studentLevel: string;
+  learningMode: string;
+  studentLocationOrOnline: string;
+  requestedDaysAndTimes: string;
+  startDate: string;
+  acceptDeclineLink: string;
+  contactPhone: string;
+  location?: string | null;
+}) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Student match email not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  const { subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeSubject = escapeHtml(subjectName);
+  const safeLevel = escapeHtml(studentLevel);
+  const safeMode = escapeHtml(learningMode);
+  const safeStudentLoc = escapeHtml(studentLocationOrOnline);
+  const safeSchedule = escapeHtml(requestedDaysAndTimes);
+  const safeStart = escapeHtml(startDate);
+  const safeAcceptLink = escapeHtml(acceptDeclineLink);
+  const safePhone = escapeHtml(contactPhone);
+  const safeLocation = escapeHtml(location || "");
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `New Student Match Request: ${safeSubject} (${safeMode}) 🔔`,
+      html: renderEmail({
+        preheader: `You have been matched with a new student request on CoachPlus Academy.`,
+        bodyHtml: `
+          <p>Dear <strong>${safeName}</strong>,</p>
+          <p>Great news! You have been matched with a new student request on CoachPlus Academy.</p>
+          <p><strong>Your Location:</strong> ${safeLocation}</p>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">Session Summary:</h3>
+          <ul style="margin:12px 0;padding-left:20px;">
+            <li><strong>Subject / Level:</strong> ${safeSubject} (${safeLevel})</li>
+            <li><strong>Coaching Mode:</strong> ${safeMode} (Home Coaching / Online / Coaching Center)</li>
+            <li><strong>Location / Area:</strong> ${safeStudentLoc}</li>
+            <li><strong>Requested Schedule:</strong> ${safeSchedule}</li>
+            <li><strong>Preferred Start Date:</strong> ${safeStart}</li>
+          </ul>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">Action Required:</h3>
+          <p>
+            Please review the details and confirm whether you are available to take this student within the next 24
+            hours:
+          </p>
+          <p style="margin:16px 0;">
+            <strong>Respond Now:</strong>
+            <a href="${safeAcceptLink}" style="background-color:#E91E63;color:#ffffff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Accept / Decline</a>
+          </p>
+          <p>
+            If you have any questions about this placement before accepting, reply to this email or reach out to our
+            coordination desk at
+            <a href="tel:${safePhone}" style="color:#E91E63;text-decoration:none;font-weight:700;">${safePhone}</a>.
+          </p>
+          <p>Warm regards,</p>
+          <p>The Student Coordination Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
+          ${signature("The")}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send student match email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send student match email:", err);
     return { success: false, message: err.message };
   }
 }
@@ -598,6 +750,366 @@ export async function sendReportUpdateEmail({
     return { success: true };
   } catch (err: any) {
     console.error("Failed to send report update email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+/** Builds a display location string from a teacher application's address fields. */
+function buildLocation(app: {
+  country?: string | null;
+  province?: string | null;
+  district?: string | null;
+  sector?: string | null;
+  cell?: string | null;
+  village?: string | null;
+}) {
+  const parts = [
+    app.village,
+    app.cell,
+    app.sector,
+    app.district,
+    app.province,
+    app.country,
+  ]
+    .map((p) => (p || "").trim())
+    .filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : "Not specified";
+}
+
+/** Splits "Program | Subject" into program and subject parts. */
+function splitProgramSubject(subjects: string | null | undefined) {
+  const raw = subjects || "";
+  const idx = raw.indexOf("|");
+  if (idx === -1) return { programName: raw.trim(), subjectName: raw.trim() };
+  return {
+    programName: raw.slice(0, idx).trim() || "CoachPlus Program",
+    subjectName: raw.slice(idx + 1).trim() || "Your Subject",
+  };
+}
+
+export async function sendApplicationReceivedEmail({
+  to,
+  name,
+  subjects,
+  location,
+}: {
+  to: string;
+  name: string;
+  subjects?: string | null;
+  location?: string | null;
+}) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Application receipt email not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  const { programName, subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeProgram = escapeHtml(programName);
+  const safeSubject = escapeHtml(subjectName);
+  const safeLocation = escapeHtml(location || "");
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Application Received: Teaching at CoachPlus Academy 🎓",
+      html: renderEmail({
+        preheader: `We received your teacher application for ${programName} (${subjectName}).`,
+        bodyHtml: `
+          <p>Dear <strong>${safeName}</strong>,</p>
+          <p>
+            Thank you for applying to join CoachPlus Academy as a teacher for the
+            <strong>${safeProgram}</strong> program (${safeSubject}). We have successfully received your
+            application along with your submitted credentials and verification documents.
+          </p>
+          <p><strong>Your Location:</strong> ${safeLocation}</p>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">What Happens Next:</h3>
+          <p>
+            Our academic and compliance team reviews every application carefully to maintain a safe,
+            trusted, and high-quality learning environment for our students across Home, Online, and
+            Center coaching.
+          </p>
+          <ul style="margin:12px 0;padding-left:20px;">
+            <li><strong>Review Timeline:</strong> We will review your qualifications and documents within 3 to 5 business days.</li>
+            <li><strong>Next Update:</strong> Once the review is complete, you will receive an email letting you know if you have been shortlisted for our assessment stage, or if we need any clarification on your documents.</li>
+          </ul>
+          <p>
+            We appreciate your interest in empowering students with CoachPlus Academy and will be in touch soon.
+          </p>
+          <p>Warm regards,</p>
+          <p>The Academic &amp; Onboarding Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
+          ${signature()}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send application receipt email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send application receipt email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendMissingDocumentsEmail({
+  to,
+  name,
+  subjects,
+  missingDocument,
+  issueReason,
+  reuploadLink,
+  location,
+}: {
+  to: string;
+  name: string;
+  subjects?: string | null;
+  missingDocument: string;
+  issueReason: string;
+  reuploadLink: string;
+  location?: string | null;
+}) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Missing documents email not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  const { programName, subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeProgram = escapeHtml(programName);
+  const safeSubject = escapeHtml(subjectName);
+  const safeDoc = escapeHtml(missingDocument);
+  const safeReason = escapeHtml(issueReason);
+  const safeLink = escapeHtml(reuploadLink);
+  const safeLocation = escapeHtml(location || "");
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Action Required: Update Your Document for CoachPlus Academy",
+      html: renderEmail({
+        preheader: `We need an updated document from you to keep your teacher application moving.`,
+        bodyHtml: `
+          <p>Dear <strong>${safeName}</strong>,</p>
+          <p>
+            Thank you again for applying to teach <strong>${safeProgram}</strong> (${safeSubject}) at CoachPlus Academy.
+          </p>
+          <p><strong>Your Location:</strong> ${safeLocation}</p>
+          <p>
+            While reviewing your application, our team noticed an issue with one of your uploaded documents:
+          </p>
+          <ul style="margin:12px 0;padding-left:20px;">
+            <li><strong>Document Needed:</strong> ${safeDoc}</li>
+            <li><strong>Reason:</strong> ${safeReason} (e.g., The file was blurry/unreadable, or an updated copy is required.)</li>
+          </ul>
+          <p>
+            To keep your application moving forward, please reply directly to this email with a clear copy
+            attached, or re-upload the document using the link below:
+          </p>
+          <p style="margin:16px 0;">
+            <strong>Upload Link:</strong> <a href="${safeLink}" style="color:#E91E63;text-decoration:none;font-weight:700;">${safeLink}</a>
+          </p>
+          <p>
+            Please submit this within 48 hours so we can finalize your initial review. If you have any
+            questions, feel free to reply to this email or contact us via WhatsApp.
+          </p>
+          <p>Warm regards,</p>
+          <p>The Academic &amp; Onboarding Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
+          ${signature()}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send missing documents email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send missing documents email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendShortlistedEmail({
+  to,
+  name,
+  subjects,
+  location,
+}: {
+  to: string;
+  name: string;
+  subjects?: string | null;
+  location?: string | null;
+}) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Shortlisted email not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  const { programName, subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeProgram = escapeHtml(programName);
+  const safeSubject = escapeHtml(subjectName);
+  const safeLocation = escapeHtml(location || "");
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Next Steps: Your Teacher Application at CoachPlus Academy 🎓",
+      html: renderEmail({
+        preheader: `Congratulations! You have been shortlisted for the teacher assessment stage.`,
+        bodyHtml: `
+          <p>Dear <strong>${safeName}</strong>,</p>
+          <p>
+            Congratulations! We have reviewed your application and supporting documents for the
+            <strong>${safeProgram}</strong> program (${safeSubject}), and we are pleased to inform you that you
+            have been shortlisted for the next stage of our selection process.
+          </p>
+          <p><strong>Your Location:</strong> ${safeLocation}</p>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">What Happens Next:</h3>
+          <p>
+            To ensure the highest quality of learning for our students, shortlisted candidates complete a brief
+            screening that includes:
+          </p>
+          <ol style="margin:12px 0;padding-left:24px;">
+            <li>
+              A short subject assessment / exam in <strong>${safeSubject}</strong>.
+            </li>
+            <li>
+              A 10-minute demo lesson (conducted either virtually or in person at our center) so we can see your
+              teaching style in action.
+            </li>
+          </ol>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">Scheduling Your Assessment:</h3>
+          <p>
+            You do not need to take any action right now. Our academic team is currently organizing the assessment
+            timetable and will notify you in advance — either by phone call or a follow-up email — with the exact
+            date, time, and location/link for your exam and demo lesson.
+          </p>
+          <p>
+            In the meantime, please begin preparing a brief 10-minute topic from <strong>${safeSubject}</strong>
+            that highlights how you engage students and explain key concepts clearly.
+          </p>
+          <p>We look forward to speaking with you soon!</p>
+          <p>Warm regards,</p>
+          <p>The Academic &amp; Onboarding Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
+          ${signature()}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send shortlisted email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send shortlisted email:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function sendAssessmentScheduledEmail({
+  to,
+  name,
+  subjects,
+  examDate,
+  examTime,
+  assessmentMode,
+  locationOrMeetingLink,
+  contactPhone,
+  location,
+}: {
+  to: string;
+  name: string;
+  subjects?: string | null;
+  examDate: string;
+  examTime: string;
+  assessmentMode: string;
+  locationOrMeetingLink: string;
+  contactPhone: string;
+  location?: string | null;
+}) {
+  const client = getResendClient();
+  if (!client) {
+    console.warn(`RESEND_API_KEY is not set. Assessment scheduled email not sent to ${to}.`);
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  const { subjectName } = splitProgramSubject(subjects);
+  const safeName = escapeHtml(name);
+  const safeSubject = escapeHtml(subjectName);
+  const safeDate = escapeHtml(examDate);
+  const safeTime = escapeHtml(examTime);
+  const safeMode = escapeHtml(assessmentMode);
+  const safeLoc = escapeHtml(locationOrMeetingLink);
+  const safePhone = escapeHtml(contactPhone);
+  const safeAppLocation = escapeHtml(location || "");
+
+  try {
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Confirmed Date: Your CoachPlus Academy Exam & Demo Lesson 📅",
+      html: renderEmail({
+        preheader: `Your subject exam and 10-minute demo lesson are now scheduled.`,
+        bodyHtml: `
+          <p>Dear <strong>${safeName}</strong>,</p>
+          <p>
+            Following up on your shortlisted application for <strong>${safeSubject}</strong>, we are pleased to
+            confirm the schedule for your subject exam and 10-minute demo lesson.
+          </p>
+          <p><strong>Your Location:</strong> ${safeAppLocation}</p>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">Your Assessment Details:</h3>
+          <ul style="margin:12px 0;padding-left:20px;">
+            <li><strong>Date:</strong> ${safeDate}</li>
+            <li><strong>Time:</strong> ${safeTime}</li>
+            <li><strong>Mode:</strong> ${safeMode} (In-Person at CoachPlus Academy Center / Online)</li>
+            <li><strong>Location / Meeting Link:</strong> <a href="${safeLoc}" style="color:#E91E63;text-decoration:none;">${safeLoc}</a></li>
+          </ul>
+          <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">What to Prepare:</h3>
+          <ul style="margin:12px 0;padding-left:20px;">
+            <li><strong>Identification:</strong> Please bring your National ID or Passport (for in-person sessions) or have it ready to show on camera (for online sessions).</li>
+            <li><strong>Demo Lesson:</strong> Be ready to deliver a 10-minute lesson on a core topic in <strong>${safeSubject}</strong> as if you are teaching an actual student.</li>
+            <li><strong>Arrival:</strong> Please arrive or join at least 10 minutes early.</li>
+          </ul>
+          <p>
+            If you have any urgent scheduling conflicts, please contact us immediately at
+            <a href="tel:${safePhone}" style="color:#E91E63;text-decoration:none;font-weight:700;">${safePhone}</a>
+            so we can assist you.
+          </p>
+          <p>We look forward to meeting you!</p>
+          <p>Warm regards,</p>
+          <p>The Academic &amp; Onboarding Team<br/>CoachPlus Academy</p>
+          <p style="font-size:12px;color:#64748b;">Website: coachplusacademy.com | Phone / WhatsApp Contact</p>
+          ${signature()}
+        `,
+      }),
+    });
+
+    if (error) {
+      console.error("Failed to send assessment scheduled email:", error);
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to send assessment scheduled email:", err);
     return { success: false, message: err.message };
   }
 }
