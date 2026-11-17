@@ -58,6 +58,11 @@ export async function POST(
       );
     }
 
+    await db.teacherApplication.update({
+      where: { id: applicationId },
+      data: { status: "documents_needed" },
+    });
+
     // Notify the teacher in-app if they have an account.
     const teacherUser = await db.user.findUnique({ where: { email: application.email } });
     if (teacherUser) {
@@ -77,7 +82,7 @@ export async function POST(
     });
 
     return NextResponse.json({ message: "Missing documents email sent", application });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message || "Failed to send missing documents email" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to send missing documents email" }, { status: 500 });
   }
 }

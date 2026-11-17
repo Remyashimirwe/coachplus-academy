@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
 
     const where: Record<string, unknown> = {};
-    if (status && ['pending', 'approved', 'rejected'].includes(status)) {
+    if (status && ['pending', 'documents_needed', 'shortlisted', 'assessment_scheduled', 'approved', 'rejected'].includes(status)) {
       where.status = status;
     }
 

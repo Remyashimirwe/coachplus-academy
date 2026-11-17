@@ -9,7 +9,6 @@ import {
   FiLinkedin,
   FiMapPin,
   FiAward,
-  FiBookOpen,
   FiClock,
   FiCalendar,
   FiFileText,
@@ -24,12 +23,8 @@ import {
   FiExternalLink,
   FiCheckCircle,
   FiAlertCircle,
-  FiUserCheck,
-  FiUserX,
-  FiLoader,
   FiCopy,
   FiCheck,
-  FiFlag,
 } from "react-icons/fi";
 
 const DOCUMENT_LABELS: Record<string, string> = {
@@ -103,7 +98,6 @@ export default function TeacherApplicationModal({
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [sendStatus, setSendStatus] = useState<{ success: boolean; text: string } | null>(null);
-  const [decision, setDecision] = useState<"approve" | "deny" | null>(null);
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -112,6 +106,7 @@ export default function TeacherApplicationModal({
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [missingDocsError, setMissingDocsError] = useState<string | null>(null);
   const [missingDocsSuccess, setMissingDocsSuccess] = useState<string | null>(null);
+  const [stageChanging, setStageChanging] = useState(false);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -156,7 +151,6 @@ export default function TeacherApplicationModal({
   async function handleApprove() {
     if (!confirm(`Approve ${app.fullName} as an official teacher? An account will be created and an activation email will be sent.`)) return;
 
-    setDecision("approve");
     setDecisionError(null);
     try {
       const res = await fetch(`/api/admin/teacher-applications/${app.id}/approve`, { method: "POST" });
@@ -164,13 +158,14 @@ export default function TeacherApplicationModal({
       if (res.ok) {
         if (data.inviteUrl) setApproveInviteUrl(data.inviteUrl);
         onApproved(app.id);
+        if (data.emailSent === false) {
+          setDecisionError(data.message || "The account was approved, but its email could not be sent. Use the invite link below.");
+        }
       } else {
         setDecisionError(data.message || "Failed to approve application");
       }
     } catch {
       setDecisionError("Failed to approve application");
-    } finally {
-      setDecision(null);
     }
   }
 
@@ -184,7 +179,6 @@ export default function TeacherApplicationModal({
   async function handleDeny() {
     if (!confirm(`Deny ${app.fullName}'s application? It will be marked as rejected and kept on record.`)) return;
 
-    setDecision("deny");
     setDecisionError(null);
     try {
       const res = await fetch(`/api/admin/teacher-applications/${app.id}/deny`, { method: "POST" });
@@ -196,8 +190,6 @@ export default function TeacherApplicationModal({
       }
     } catch {
       setDecisionError("Failed to deny application");
-    } finally {
-      setDecision(null);
     }
   }
 
@@ -279,6 +271,7 @@ export default function TeacherApplicationModal({
       const data = await res.json();
       if (res.ok) {
         setMissingDocsSuccess("Document update email sent.");
+        onStatusChanged(app.id, "documents_needed");
       } else {
         setMissingDocsError(data.message || "Failed to send missing documents email");
       }
@@ -288,6 +281,40 @@ export default function TeacherApplicationModal({
   }
 
   const isPending = app.status === "pending";
+  const statusOptions: Record<string, string[]> = {
+    pending: ["documents_needed", "shortlisted", "approved", "rejected"],
+    documents_needed: ["shortlisted", "approved", "rejected"],
+    shortlisted: ["documents_needed", "assessment_scheduled", "approved", "rejected"],
+    assessment_scheduled: ["documents_needed", "approved", "rejected"],
+  };
+  const statusLabels: Record<string, string> = {
+    pending: "Pending review",
+    documents_needed: "Documents needed",
+    shortlisted: "Shortlisted",
+    assessment_scheduled: "Assessment scheduled",
+    approved: "Approved",
+    rejected: "Rejected",
+  };
+
+  async function changeStatus(nextStatus: string) {
+    setStageChanging(true);
+    setDecisionError(null);
+    setShortlistError(null);
+    setScheduleError(null);
+    setMissingDocsError(null);
+    setMissingDocsSuccess(null);
+    try {
+      switch (nextStatus) {
+        case "documents_needed": await handleMissingDocs(); break;
+        case "shortlisted": await handleShortlist(); break;
+        case "assessment_scheduled": await handleScheduleAssessment(); break;
+        case "approved": await handleApprove(); break;
+        case "rejected": await handleDeny(); break;
+      }
+    } finally {
+      setStageChanging(false);
+    }
+  }
 
   return (
     <div
@@ -346,12 +373,18 @@ export default function TeacherApplicationModal({
                   className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
                     app.status === "pending"
                       ? "bg-amber-100 text-amber-700"
+                      : app.status === "documents_needed"
+                      ? "bg-orange-100 text-orange-700"
+                      : app.status === "shortlisted"
+                      ? "bg-indigo-100 text-indigo-700"
+                      : app.status === "assessment_scheduled"
+                      ? "bg-blue-100 text-blue-700"
                       : app.status === "rejected"
                       ? "bg-rose-100 text-rose-700"
                       : "bg-emerald-100 text-emerald-700"
                   }`}
                 >
-                  {app.status === "approved" ? "Accepted" : app.status}
+                  {statusLabels[app.status] || app.status}
                 </span>
               </div>
             </div>
@@ -662,55 +695,22 @@ export default function TeacherApplicationModal({
               </p>
             )}
           </div>
-          {(isPending || app.status === "shortlisted") && (
-            <div className="flex gap-3 flex-wrap">
-              {isPending && <>
-              <button
-                onClick={handleDeny}
-                disabled={decision !== null}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white text-rose-600 border-2 border-rose-200 text-[13px] font-semibold hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          {statusOptions[app.status] && (
+            <label className="flex items-center gap-3 text-sm font-semibold text-slate-600">
+              <span>Application stage</span>
+              <select
+                value={app.status}
+                disabled={stageChanging}
+                onChange={(event) => void changeStatus(event.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20 disabled:opacity-60"
               >
-                {decision === "deny" ? <FiLoader className="size-4 animate-spin" /> : <FiUserX className="size-4" />}
-                {decision === "deny" ? "Denying..." : "Deny"}
-              </button>
-              <button
-                onClick={handleApprove}
-                disabled={decision !== null}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[13px] font-semibold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {decision === "approve" ? <FiLoader className="size-4 animate-spin" /> : <FiUserCheck className="size-4" />}
-                {decision === "approve" ? "Approving..." : "Approve & Invite"}
-              </button>
-              <button
-                onClick={() => handleShortlist()}
-                disabled={decision !== null}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-50 text-indigo-600 border-2 border-indigo-200 text-[13px] font-semibold hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FiFlag className="size-4" />
-                Shortlist
-              </button>
-              </>}
-              {app.status === "shortlisted" && (
-                <button
-                  onClick={() => handleScheduleAssessment()}
-                  disabled={decision !== null}
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-amber-50 text-amber-700 border-2 border-amber-200 text-[13px] font-semibold hover:bg-amber-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <FiClock className="size-4" />
-                  Schedule Exam
-                </button>
-              )}
-              {(isPending || app.status === "shortlisted") && (
-                <button
-                  onClick={() => handleMissingDocs()}
-                  disabled={decision !== null}
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-rose-50 text-rose-700 border-2 border-rose-200 text-[13px] font-semibold hover:bg-rose-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <FiAlertCircle className="size-4" />
-                  Missing Docs
-                </button>
-              )}
-            </div>
+                <option value={app.status}>{statusLabels[app.status] || app.status}</option>
+                {statusOptions[app.status].map((status) => (
+                  <option key={status} value={status}>{statusLabels[status]}</option>
+                ))}
+              </select>
+              <span className="text-xs font-normal text-slate-400">Changing the stage sends its matching email.</span>
+            </label>
           )}
         </div>
       </div>

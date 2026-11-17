@@ -63,13 +63,28 @@ function groupSubjects(raw: string): GroupedCategory[] {
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700",
+  documents_needed: "bg-orange-100 text-orange-700",
+  shortlisted: "bg-indigo-100 text-indigo-700",
+  assessment_scheduled: "bg-blue-100 text-blue-700",
   approved: "bg-emerald-100 text-emerald-700",
   rejected: "bg-rose-100 text-rose-700",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  documents_needed: "Documents needed",
+  shortlisted: "Shortlisted",
+  assessment_scheduled: "Assessment scheduled",
+  approved: "Accepted",
+  rejected: "Rejected",
 };
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
   { id: "pending", label: "Pending" },
+  { id: "documents_needed", label: "Documents needed" },
+  { id: "shortlisted", label: "Shortlisted" },
+  { id: "assessment_scheduled", label: "Assessment scheduled" },
   { id: "approved", label: "Accepted" },
   { id: "rejected", label: "Rejected" },
 ];
@@ -118,7 +133,14 @@ export default function TeachersView({ teacherApplications }: any) {
       return matchesStatus && matchesSearch && matchesSubject;
     });
 
-    const statusOrder: Record<string, number> = { pending: 0, approved: 1, rejected: 2 };
+    const statusOrder: Record<string, number> = {
+      pending: 0,
+      documents_needed: 1,
+      shortlisted: 2,
+      assessment_scheduled: 3,
+      approved: 4,
+      rejected: 5,
+    };
     return list.sort((a, b) => {
       switch (sortBy) {
         case "oldest":
@@ -381,7 +403,7 @@ export default function TeachersView({ teacherApplications }: any) {
                             }`}
                           >
                             {app.status === "approved" ? <FiCheckCircle className="size-3" /> : app.status === "rejected" ? <FiUserX className="size-3" /> : <FiClock className="size-3" />}
-                            {app.status === "approved" ? "Accepted" : app.status}
+                            {STATUS_LABELS[app.status] || app.status}
                           </span>
                         </td>
                         <td className="px-5 py-4">
@@ -455,7 +477,7 @@ export default function TeachersView({ teacherApplications }: any) {
                           STATUS_STYLES[app.status] || "bg-slate-100 text-slate-600"
                         }`}
                       >
-                        {app.status === "approved" ? "Accepted" : app.status}
+                        {STATUS_LABELS[app.status] || app.status}
                       </span>
                     </div>
                     <p className="text-[13px] text-slate-500 truncate flex items-center gap-1.5">

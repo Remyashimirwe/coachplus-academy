@@ -27,37 +27,43 @@ export async function POST(
     return NextResponse.json({ message: "Application not found" }, { status: 404 });
   }
 
-  if (application.status === "rejected") {
-    return NextResponse.json({ message: "This application has already been rejected" }, { status: 400 });
-  }
+  try {
+    const location = [application.village, application.cell, application.sector, application.district, application.province, application.country]
+      .filter(Boolean)
+      .join(", ");
+    const emailResult = await sendApplicationDeniedEmail({
+      to: application.email,
+      name: application.fullName,
+      subjects: application.subjects,
+      location: location || undefined,
+    });
 
-  // Best-effort notification; denial should proceed even if the email fails.
-  const location = [application.village, application.cell, application.sector, application.district, application.province, application.country]
-    .filter(Boolean)
-    .join(", ");
-  await sendApplicationDeniedEmail({
-    to: application.email,
-    name: application.fullName,
-    subjects: application.subjects,
-    location: location || undefined,
-  }).catch(() => null);
+    if (!emailResult.success) {
+      return NextResponse.json(
+        { message: emailResult.message || "Failed to send rejection email. You can retry." },
+        { status: 502 },
+      );
+    }
 
   // Keep the application on record (status "rejected") so the admin can still
   // review it and filter the table by accepted / rejected applicants.
-  const updated = await db.teacherApplication.update({
-    where: { id: applicationId },
-    data: { status: "rejected" },
-  });
+    const updated = await db.teacherApplication.update({
+      where: { id: applicationId },
+      data: { status: "rejected" },
+    });
 
   // The applicant has no account yet, so an in-app notification would have
   // nowhere to land — the denial email above is their notification. The
   // admins, however, should see the decision in their activity feed.
-  await notifyAdmins({
-    title: "Teacher application denied",
-    message: `${application.fullName}'s application was denied.`,
-    type: "warning",
-    exceptUserId: user.id,
-  });
+    await notifyAdmins({
+      title: "Teacher application denied",
+      message: `${application.fullName}'s application was denied.`,
+      type: "warning",
+      exceptUserId: user.id,
+    });
 
-  return NextResponse.json({ message: "Application denied", application: updated });
+    return NextResponse.json({ message: "Application denied", application: updated });
+  } catch (error) {
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to deny application" }, { status: 500 });
+  }
 }
