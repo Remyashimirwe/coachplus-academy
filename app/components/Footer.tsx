@@ -16,6 +16,7 @@ const footerGroups = [
       { label: "How It Works", href: "/how-it-works" },
       { label: "Why Choose Us", href: "/why-choose-us" },
       { label: "Become a Teacher", href: "/become-a-teacher" },
+      { label: "Application Status", href: "/application-status" },
       { label: "Request a Teacher", href: "/request" },
     ],
   },

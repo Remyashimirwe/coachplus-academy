@@ -31,6 +31,7 @@ import {
   FiShield,
   FiEye,
   FiMaximize2,
+  FiSearch,
 } from "react-icons/fi";
 import TimePicker from "@/app/components/TimePicker";
 import ImageLightboxModal from "@/app/components/ImageLightboxModal";
@@ -1170,8 +1171,16 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                   Your application was received, but we could not send the confirmation email. Our team has your application and will follow up with you.
                 </p>
               )}
-              
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+
+              <Link
+                href="/application-status"
+                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E91E63]/25 bg-[#E91E63]/5 py-4 text-sm font-semibold text-[#E91E63] transition-all hover:-translate-y-0.5 hover:bg-[#E91E63]/10"
+              >
+                <FiSearch className="size-4" />
+                Track your application status
+              </Link>
+
+              <div className="mt-6 flex flex-col gap-4 sm:flex-row">
                 <button
                   onClick={() => setShowSuccessModal(false)}
                   className="flex-1 rounded-2xl bg-[#0f172a] py-5 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
