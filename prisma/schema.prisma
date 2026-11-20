@@ -305,6 +305,10 @@ model TeacherApplication {
   missingDocumentReason String @default("")
   reuploadLink          String @default("")
 
+  // Auto-document-clear: tracks when documents were re-uploaded after being
+  // flagged as missing/unclear, so the system can auto-clear the status.
+  documentsReuploadedAt DateTime?
+
   // Stage 4 — exam & demo lesson details. Stored so the admin can edit the
   // date, time, mode, location and contact phone and resend the confirmation.
   assessmentDate         String @default("")

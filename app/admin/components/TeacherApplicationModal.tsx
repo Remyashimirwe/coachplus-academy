@@ -380,12 +380,12 @@ export default function TeacherApplicationModal({
     assessment_scheduled: ["documents_needed", "approved", "rejected"],
   };
   const statusLabels: Record<string, string> = {
-    pending: "Pending review",
-    documents_needed: "Documents needed",
-    shortlisted: "Shortlisted",
-    assessment_scheduled: "Assessment scheduled",
-    approved: "Approved",
-    rejected: "Rejected",
+    pending: "Stage 1 — Application Receipt (Pending Review)",
+    documents_needed: "Stage 2 — Missing / Unclear Documents",
+    shortlisted: "Stage 3 — Shortlisting & Exam/Demo Lesson Notice",
+    assessment_scheduled: "Stage 4 — Exam & Demo Lesson Date Confirmation",
+    approved: "Stage 5 — Approval & Teacher Onboarding",
+    rejected: "Stage 6 — Application Not Selected (Rejection)",
   };
 
   async function handlePreviewEmail(stage: string) {

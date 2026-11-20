@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
         missingDocument: true,
         missingDocumentReason: true,
         reuploadLink: true,
+        documentsReuploadedAt: true,
         assessmentDate: true,
         assessmentTime: true,
         assessmentMode: true,
@@ -109,6 +110,11 @@ export async function GET(request: NextRequest) {
         application.status === "assessment_scheduled" ? application.assessmentLocation : "",
       assessmentContactPhone:
         application.status === "assessment_scheduled" ? application.assessmentContactPhone : "",
+      // Auto-document-clear — when documents were re-uploaded after being flagged.
+      documentsReuploadedAt:
+        application.status == "documents_needed" || application.status == "pending"
+          ? application.documentsReuploadedAt?.toISOString() ?? ""
+          : "",
     });
   } catch (error) {
     console.error("Failed to look up teacher application status:", error);

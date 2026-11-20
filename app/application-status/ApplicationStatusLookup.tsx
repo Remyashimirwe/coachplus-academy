@@ -32,6 +32,7 @@ type LookupResult = {
   assessmentMode?: string;
   assessmentLocation?: string;
   assessmentContactPhone?: string;
+  documentsReuploadedAt?: string;
 };
 
 const STATUS_META: Record<
@@ -305,6 +306,18 @@ export default function ApplicationStatusLookup() {
                   Re-upload document
                 </a>
               )}
+            </div>
+          )}
+
+          {result.documentsReuploadedAt && (
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 sm:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-600">
+                Documents Re-uploaded
+              </p>
+              <p className="mt-2 text-sm text-slate-700">
+                Your re-uploaded documents have been received. Your application is
+                back under review — we will update you shortly.
+              </p>
             </div>
           )}
 
