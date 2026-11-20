@@ -57,6 +57,14 @@ export async function GET(request: NextRequest) {
         subjects: true,
         status: true,
         createdAt: true,
+        missingDocument: true,
+        missingDocumentReason: true,
+        reuploadLink: true,
+        assessmentDate: true,
+        assessmentTime: true,
+        assessmentMode: true,
+        assessmentLocation: true,
+        assessmentContactPhone: true,
       },
     });
 
@@ -83,6 +91,24 @@ export async function GET(request: NextRequest) {
       status: application.status,
       appliedAt: application.createdAt.toISOString(),
       matched,
+      // Stage 2 — only exposed while the applicant is being asked to re-upload.
+      missingDocument:
+        application.status === "documents_needed" ? application.missingDocument : "",
+      missingDocumentReason:
+        application.status === "documents_needed" ? application.missingDocumentReason : "",
+      reuploadLink:
+        application.status === "documents_needed" ? application.reuploadLink : "",
+      // Stage 4 — the exact details the applicant was emailed.
+      assessmentDate:
+        application.status === "assessment_scheduled" ? application.assessmentDate : "",
+      assessmentTime:
+        application.status === "assessment_scheduled" ? application.assessmentTime : "",
+      assessmentMode:
+        application.status === "assessment_scheduled" ? application.assessmentMode : "",
+      assessmentLocation:
+        application.status === "assessment_scheduled" ? application.assessmentLocation : "",
+      assessmentContactPhone:
+        application.status === "assessment_scheduled" ? application.assessmentContactPhone : "",
     });
   } catch (error) {
     console.error("Failed to look up teacher application status:", error);

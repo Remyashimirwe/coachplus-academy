@@ -24,6 +24,14 @@ type LookupResult = {
   status: string;
   appliedAt: string;
   matched: boolean;
+  missingDocument?: string;
+  missingDocumentReason?: string;
+  reuploadLink?: string;
+  assessmentDate?: string;
+  assessmentTime?: string;
+  assessmentMode?: string;
+  assessmentLocation?: string;
+  assessmentContactPhone?: string;
 };
 
 const STATUS_META: Record<
@@ -264,6 +272,97 @@ export default function ApplicationStatusLookup() {
           <p className="mt-4 text-sm leading-relaxed text-slate-600">
             {meta.message}
           </p>
+
+          {result.status === "documents_needed" && result.missingDocument && (
+            <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50/70 p-4 sm:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-orange-600">
+                Document needed
+              </p>
+              <dl className="mt-3 space-y-2 text-sm">
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Document
+                  </dt>
+                  <dd className="font-semibold text-slate-800">{result.missingDocument}</dd>
+                </div>
+                {result.missingDocumentReason && (
+                  <div>
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      Reason
+                    </dt>
+                    <dd className="text-slate-700">{result.missingDocumentReason}</dd>
+                  </div>
+                )}
+              </dl>
+              {result.reuploadLink && (
+                <a
+                  href={result.reuploadLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange-600"
+                >
+                  <FiFileText className="size-3.5" />
+                  Re-upload document
+                </a>
+              )}
+            </div>
+          )}
+
+          {result.status === "assessment_scheduled" && result.assessmentDate && (
+            <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 sm:p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-600">
+                Your exam &amp; demo lesson
+              </p>
+              <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Date
+                  </dt>
+                  <dd className="font-semibold text-slate-800">
+                    {formatDate(result.assessmentDate) || result.assessmentDate}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Time
+                  </dt>
+                  <dd className="font-semibold text-slate-800">{result.assessmentTime}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Mode
+                  </dt>
+                  <dd className="font-semibold text-slate-800">{result.assessmentMode}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Location / meeting link
+                  </dt>
+                  <dd className="break-words font-semibold text-slate-800">
+                    {result.assessmentLocation?.startsWith("http") ? (
+                      <a
+                        href={result.assessmentLocation}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline underline-offset-2"
+                      >
+                        {result.assessmentLocation}
+                      </a>
+                    ) : (
+                      result.assessmentLocation
+                    )}
+                  </dd>
+                </div>
+              </dl>
+              <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                Please arrive or join 10 minutes early and bring your National ID
+                or Passport.
+                {result.assessmentContactPhone
+                  ? ` To reschedule, call ${result.assessmentContactPhone}.`
+                  : ""}
+              </p>
+            </div>
+          )}
 
           <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-slate-400">
             <FiClock className="size-3.5" />

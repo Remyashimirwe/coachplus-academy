@@ -177,8 +177,14 @@ export default function TeachersView({ teacherApplications }: any) {
     setSelectedId((current) => (current === id ? null : current));
   }
 
-  function handleApplicationStatusChanged(id: number, status: string) {
-    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+  function handleApplicationStatusChanged(
+    id: number,
+    status: string,
+    patch?: Record<string, any>,
+  ) {
+    setApplications((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...(patch || {}), status } : a)),
+    );
   }
 
   async function handleQuickApprove(appId: number) {

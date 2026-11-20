@@ -93,7 +93,11 @@ export default function TeacherApplicationModal({
   onClose: () => void;
   onApproved: (id: number) => void;
   onDenied: (id: number) => void;
-  onStatusChanged: (id: number, status: string) => void;
+  onStatusChanged: (
+    id: number,
+    status: string,
+    patch?: Record<string, any>,
+  ) => void;
 }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -104,9 +108,32 @@ export default function TeacherApplicationModal({
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
   const [shortlistError, setShortlistError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [scheduleSuccess, setScheduleSuccess] = useState<string | null>(null);
+  const [savingSchedule, setSavingSchedule] = useState(false);
   const [missingDocsError, setMissingDocsError] = useState<string | null>(null);
   const [missingDocsSuccess, setMissingDocsSuccess] = useState<string | null>(null);
+  const [savingMissingDocs, setSavingMissingDocs] = useState(false);
   const [stageChanging, setStageChanging] = useState(false);
+  const [activePanel, setActivePanel] = useState<"assessment" | "documents" | null>(null);
+
+  // Editable Stage 4 details. Prefilled from what was last saved so an admin
+  // can change the time/date and resend without retyping everything.
+  const [assessmentDate, setAssessmentDate] = useState(app.assessmentDate || "");
+  const [assessmentTime, setAssessmentTime] = useState(app.assessmentTime || "");
+  const [assessmentMode, setAssessmentMode] = useState(app.assessmentMode || "In-Person");
+  const [assessmentLocation, setAssessmentLocation] = useState(app.assessmentLocation || "");
+  const [assessmentContactPhone, setAssessmentContactPhone] = useState(
+    app.assessmentContactPhone || "",
+  );
+
+  // Editable Stage 2 details.
+  const [missingDocument, setMissingDocument] = useState(app.missingDocument || "");
+  const [missingDocumentReason, setMissingDocumentReason] = useState(
+    app.missingDocumentReason || "",
+  );
+  const [reuploadLink, setReuploadLink] = useState(
+    app.reuploadLink || "https://www.coachplusacademy.com/become-a-teacher",
+  );
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -213,16 +240,19 @@ export default function TeacherApplicationModal({
 
   async function handleScheduleAssessment() {
     setScheduleError(null);
-    const examDate = prompt("Exam date (e.g. 2026-12-15):");
-    if (!examDate) return;
-    const examTime = prompt("Exam time (e.g. 10:00 AM):");
-    if (!examTime) return;
-    const assessmentMode = prompt("Mode (In-Person / Online):", "In-Person");
-    if (!assessmentMode) return;
-    const locationOrMeetingLink = prompt("Location / Meeting Link:");
-    if (!locationOrMeetingLink) return;
-    const contactPhone = prompt("Contact phone (optional):");
+    setScheduleSuccess(null);
 
+    const date = assessmentDate.trim();
+    const time = assessmentTime.trim();
+    const mode = assessmentMode.trim();
+    const location = assessmentLocation.trim();
+    if (!date || !time || !mode || !location) {
+      setScheduleError("Date, time, mode and location/meeting link are all required.");
+      setActivePanel("assessment");
+      return;
+    }
+
+    setSavingSchedule(true);
     try {
       const res = await fetch(
         `/api/admin/teacher-applications/${app.id}/assessment-schedule`,
@@ -230,57 +260,116 @@ export default function TeacherApplicationModal({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            examDate,
-            examTime,
-            assessmentMode,
-            locationOrMeetingLink,
-            contactPhone: contactPhone || undefined,
+            examDate: date,
+            examTime: time,
+            assessmentMode: mode,
+            locationOrMeetingLink: location,
+            contactPhone: assessmentContactPhone.trim() || undefined,
           }),
         },
       );
       const data = await res.json();
+
       if (res.ok) {
-        onStatusChanged(app.id, "assessment_scheduled");
+        onStatusChanged(app.id, "assessment_scheduled", {
+          assessmentDate: date,
+          assessmentTime: time,
+          assessmentMode: mode,
+          assessmentLocation: location,
+          assessmentContactPhone: assessmentContactPhone.trim(),
+        });
+        setScheduleSuccess("Assessment details saved and the Stage 4 email was sent.");
+        setActivePanel(null);
       } else {
+        // The backend saves the fields even when the email fails, so keep the
+        // dashboard in sync and let the admin press retry.
+        if (data.application) {
+          onStatusChanged(app.id, data.application.status || app.status, {
+            assessmentDate: data.application.assessmentDate,
+            assessmentTime: data.application.assessmentTime,
+            assessmentMode: data.application.assessmentMode,
+            assessmentLocation: data.application.assessmentLocation,
+            assessmentContactPhone: data.application.assessmentContactPhone,
+          });
+        }
         setScheduleError(data.message || data.error || "Failed to schedule assessment");
       }
     } catch {
-      setScheduleError("Failed to schedule assessment");
+      setScheduleError("Failed to schedule assessment. Check your connection and try again.");
+    } finally {
+      setSavingSchedule(false);
     }
   }
 
   async function handleMissingDocs() {
     setMissingDocsError(null);
     setMissingDocsSuccess(null);
-    const missingDocument = prompt("Document needed (e.g. National ID):");
-    if (!missingDocument) return;
-    const issueReason = prompt("Reason (e.g. blurry/unreadable):");
-    if (!issueReason) return;
-    const reuploadLink = prompt("Re-upload link:");
-    if (!reuploadLink) return;
 
+    const document = missingDocument.trim();
+    const reason = missingDocumentReason.trim();
+    const link = reuploadLink.trim();
+    if (!document || !reason || !link) {
+      setMissingDocsError("Document, reason and re-upload link are all required.");
+      setActivePanel("documents");
+      return;
+    }
+
+    setSavingMissingDocs(true);
     try {
       const res = await fetch(
         `/api/admin/teacher-applications/${app.id}/missing-documents`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ missingDocument, issueReason, reuploadLink }),
+          body: JSON.stringify({
+            missingDocument: document,
+            issueReason: reason,
+            reuploadLink: link,
+          }),
         },
       );
       const data = await res.json();
+
       if (res.ok) {
-        setMissingDocsSuccess("Document update email sent.");
-        onStatusChanged(app.id, "documents_needed");
+        onStatusChanged(app.id, "documents_needed", {
+          missingDocument: document,
+          missingDocumentReason: reason,
+          reuploadLink: link,
+        });
+        setMissingDocsSuccess("Document request saved and the Stage 2 email was sent.");
+        setActivePanel(null);
       } else {
-        setMissingDocsError(data.message || "Failed to send missing documents email");
+        if (data.application) {
+          onStatusChanged(app.id, data.application.status || app.status, {
+            missingDocument: data.application.missingDocument,
+            missingDocumentReason: data.application.missingDocumentReason,
+            reuploadLink: data.application.reuploadLink,
+          });
+        }
+        setMissingDocsError(data.message || data.error || "Failed to send missing documents email");
       }
     } catch {
-      setMissingDocsError("Failed to send missing documents email");
+      setMissingDocsError("Failed to send missing documents email. Check your connection and try again.");
+    } finally {
+      setSavingMissingDocs(false);
     }
   }
 
   const isPending = app.status === "pending";
+  const canRequestDocuments = app.status !== "approved" && app.status !== "rejected";
+  const canScheduleAssessment =
+    app.status === "shortlisted" || app.status === "assessment_scheduled";
+  const hasAssessmentDetails = Boolean(
+    app.assessmentDate ||
+      app.assessmentTime ||
+      app.assessmentMode ||
+      app.assessmentLocation,
+  );
+  const hasDocumentRequest = Boolean(app.missingDocument);
+  const fieldClass =
+    "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all";
+  const labelClass =
+    "mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400";
   const statusOptions: Record<string, string[]> = {
     pending: ["documents_needed", "shortlisted", "approved", "rejected"],
     documents_needed: ["shortlisted", "approved", "rejected"],
@@ -301,13 +390,30 @@ export default function TeacherApplicationModal({
     setDecisionError(null);
     setShortlistError(null);
     setScheduleError(null);
+    setScheduleSuccess(null);
     setMissingDocsError(null);
     setMissingDocsSuccess(null);
     try {
       switch (nextStatus) {
-        case "documents_needed": await handleMissingDocs(); break;
+        // Stage 2 and Stage 4 need details, so open the editable form instead
+        // of sending an email from a browser prompt.
+        case "documents_needed":
+          setActivePanel("documents");
+          setTimeout(() => {
+            document
+              .getElementById("stage-documents")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 60);
+          break;
+        case "assessment_scheduled":
+          setActivePanel("assessment");
+          setTimeout(() => {
+            document
+              .getElementById("stage-assessment")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 60);
+          break;
         case "shortlisted": await handleShortlist(); break;
-        case "assessment_scheduled": await handleScheduleAssessment(); break;
         case "approved": await handleApprove(); break;
         case "rejected": await handleDeny(); break;
       }
@@ -600,6 +706,249 @@ export default function TeacherApplicationModal({
             </div>
           </div>
 
+          {/* Stage 4 — editable exam & demo lesson details */}
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-semibold text-blue-500 uppercase tracking-widest flex items-center gap-2">
+              <FiCalendar /> Exam &amp; Demo Lesson (Stage 4)
+            </h4>
+            <div
+              id="stage-assessment"
+              className={`rounded-3xl border p-5 sm:p-6 space-y-4 transition-all ${
+                activePanel === "assessment"
+                  ? "border-blue-300 bg-blue-50/50 ring-2 ring-blue-200"
+                  : "border-slate-100 bg-slate-50"
+              }`}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <p className="text-[12px] text-slate-500">
+                  Enter the exact date, time, mode and location/link. Saving sends
+                  the Stage 4 confirmation email — editing and saving again resends it.
+                </p>
+                {hasAssessmentDetails && (
+                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                    Saved
+                  </span>
+                )}
+              </div>
+
+              {canScheduleAssessment ? (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>Exam date</label>
+                      <input
+                        type="date"
+                        value={assessmentDate}
+                        onChange={(event) => setAssessmentDate(event.target.value)}
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Exam time</label>
+                      <input
+                        type="text"
+                        value={assessmentTime}
+                        onChange={(event) => setAssessmentTime(event.target.value)}
+                        placeholder="e.g. 10:00 AM"
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Mode</label>
+                      <select
+                        value={assessmentMode}
+                        onChange={(event) => setAssessmentMode(event.target.value)}
+                        className={fieldClass}
+                      >
+                        <option value="In-Person">In-Person (at the center)</option>
+                        <option value="Online">Online</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Contact phone (optional)</label>
+                      <input
+                        type="tel"
+                        value={assessmentContactPhone}
+                        onChange={(event) => setAssessmentContactPhone(event.target.value)}
+                        placeholder="Phone / WhatsApp for rescheduling"
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>Location or meeting link</label>
+                      <input
+                        type="text"
+                        value={assessmentLocation}
+                        onChange={(event) => setAssessmentLocation(event.target.value)}
+                        placeholder="Center address or https://meet.example.com/..."
+                        className={fieldClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      {scheduleError && (
+                        <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
+                          <FiAlertCircle /> {scheduleError}
+                        </p>
+                      )}
+                      {scheduleSuccess && (
+                        <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
+                          <FiCheckCircle /> {scheduleSuccess}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleScheduleAssessment}
+                      disabled={savingSchedule}
+                      className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-[12px] font-semibold text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <FiSend className="size-3.5" />
+                      {savingSchedule
+                        ? "Sending..."
+                        : hasAssessmentDetails
+                          ? "Update & resend email"
+                          : "Save & send email"}
+                    </button>
+                  </div>
+                </>
+              ) : hasAssessmentDetails ? (
+                <dl className="grid gap-3 text-[12px] text-slate-600 sm:grid-cols-2">
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Date</dt>
+                    <dd className="font-semibold text-slate-800">{app.assessmentDate || "—"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Time</dt>
+                    <dd className="font-semibold text-slate-800">{app.assessmentTime || "—"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Mode</dt>
+                    <dd className="font-semibold text-slate-800">{app.assessmentMode || "—"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Location / link</dt>
+                    <dd className="break-words font-semibold text-slate-800">{app.assessmentLocation || "—"}</dd>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Contact phone</dt>
+                    <dd className="font-semibold text-slate-800">{app.assessmentContactPhone || "—"}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="text-[12px] font-medium text-slate-400">
+                  Shortlist the applicant first, then schedule the exam and demo lesson here.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Stage 2 — editable missing / unclear document request */}
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-semibold text-orange-500 uppercase tracking-widest flex items-center gap-2">
+              <FiFileText /> Missing / Unclear Document (Stage 2)
+            </h4>
+            <div
+              id="stage-documents"
+              className={`rounded-3xl border p-5 sm:p-6 space-y-4 transition-all ${
+                activePanel === "documents"
+                  ? "border-orange-300 bg-orange-50/50 ring-2 ring-orange-200"
+                  : "border-slate-100 bg-slate-50"
+              }`}
+            >
+              <p className="text-[12px] text-slate-500">
+                Tell the applicant which document needs attention and why. Saving
+                sends the Stage 2 email with the re-upload link.
+              </p>
+
+              {canRequestDocuments ? (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>Document needed</label>
+                      <input
+                        type="text"
+                        value={missingDocument}
+                        onChange={(event) => setMissingDocument(event.target.value)}
+                        placeholder="e.g. National ID, Diploma, Criminal Record Certificate"
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Reason</label>
+                      <input
+                        type="text"
+                        value={missingDocumentReason}
+                        onChange={(event) => setMissingDocumentReason(event.target.value)}
+                        placeholder="e.g. The file was blurry / expired"
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>Re-upload link</label>
+                      <input
+                        type="url"
+                        value={reuploadLink}
+                        onChange={(event) => setReuploadLink(event.target.value)}
+                        placeholder="https://..."
+                        className={fieldClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      {missingDocsError && (
+                        <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
+                          <FiAlertCircle /> {missingDocsError}
+                        </p>
+                      )}
+                      {missingDocsSuccess && (
+                        <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
+                          <FiCheckCircle /> {missingDocsSuccess}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleMissingDocs}
+                      disabled={savingMissingDocs}
+                      className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-[12px] font-semibold text-white transition-all hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <FiSend className="size-3.5" />
+                      {savingMissingDocs
+                        ? "Sending..."
+                        : hasDocumentRequest
+                          ? "Update & resend email"
+                          : "Send document request"}
+                    </button>
+                  </div>
+                </>
+              ) : hasDocumentRequest ? (
+                <dl className="grid gap-3 text-[12px] text-slate-600 sm:grid-cols-2">
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Document</dt>
+                    <dd className="font-semibold text-slate-800">{app.missingDocument}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Reason</dt>
+                    <dd className="font-semibold text-slate-800">{app.missingDocumentReason || "—"}</dd>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Re-upload link</dt>
+                    <dd className="break-words font-semibold text-slate-800">{app.reuploadLink || "—"}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="text-[12px] font-medium text-slate-400">
+                  This application has reached a final decision, so no document request can be sent.
+                </p>
+              )}
+            </div>
+          </div>
+
           {/* Send Message */}
           <div className="space-y-4">
             <h4 className="text-[11px] font-semibold text-[#E91E63] uppercase tracking-widest flex items-center gap-2">
@@ -673,6 +1022,11 @@ export default function TeacherApplicationModal({
                 <FiAlertCircle /> {scheduleError}
               </p>
             )}
+            {scheduleSuccess && (
+              <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
+                <FiCheckCircle /> {scheduleSuccess}
+              </p>
+            )}
             {missingDocsError && (
               <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
                 <FiAlertCircle /> {missingDocsError}
@@ -683,7 +1037,7 @@ export default function TeacherApplicationModal({
                 <FiCheckCircle /> {missingDocsSuccess}
               </p>
             )}
-            {!isPending && !decisionError && !shortlistError && !scheduleError && !missingDocsError && !missingDocsSuccess && (
+            {!isPending && !decisionError && !shortlistError && !scheduleError && !scheduleSuccess && !missingDocsError && !missingDocsSuccess && (
               <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
                 <FiCheckCircle /> {app.status === "rejected"
                   ? "This application has been rejected."
@@ -692,6 +1046,11 @@ export default function TeacherApplicationModal({
                     : app.status === "assessment_scheduled"
                       ? "This applicant's assessment is scheduled."
                       : "This applicant is already an accepted teacher."}
+              </p>
+            )}
+            {app.status === "approved" && (
+              <p className="mt-1 text-[11px] font-medium text-slate-400">
+                Stage 7 — assign a student from the Requests page to send the first-student-match email.
               </p>
             )}
           </div>

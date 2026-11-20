@@ -358,12 +358,12 @@ export async function sendStudentMatchEmail({
           </ul>
           <h3 style="margin-top:24px;color:#0f172a;font-size:15px;">Action Required:</h3>
           <p>
-            Please review the details and confirm whether you are available to take this student within the next 24
-            hours:
+            Please review the student details and contact our coordination desk within the next 24 hours to confirm
+            whether you are available to take this student:
           </p>
           <p style="margin:16px 0;">
-            <strong>Respond Now:</strong>
-            <a href="${safeAcceptLink}" style="background-color:#E91E63;color:#ffffff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Accept / Decline</a>
+            <strong>View Student Details:</strong>
+            <a href="${safeAcceptLink}" style="background-color:#E91E63;color:#ffffff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Open My Students</a>
           </p>
           <p>
             If you have any questions about this placement before accepting, reply to this email or reach out to our
@@ -776,14 +776,58 @@ function buildLocation(app: {
   return parts.length > 0 ? parts.join(", ") : "Not specified";
 }
 
-/** Splits "Program | Subject" into program and subject parts. */
+/**
+ * Turns the stored `subjects` field into a program name and a subject name.
+ *
+ * The application form stores one entry per selected subject/topic in the form
+ * `"Program: Subject"` or `"Program: Subject - Topic"` (comma separated). The
+ * older format was `"Program | Subject"`, so both are supported. Without this,
+ * the emails showed the whole comma-separated selection as both the program and
+ * the subject.
+ */
 function splitProgramSubject(subjects: string | null | undefined) {
-  const raw = subjects || "";
-  const idx = raw.indexOf("|");
-  if (idx === -1) return { programName: raw.trim(), subjectName: raw.trim() };
+  const raw = (subjects || "").trim();
+  if (!raw) {
+    return { programName: "CoachPlus Program", subjectName: "Your Subject" };
+  }
+
+  // Legacy format: "Program | Subject".
+  if (raw.includes("|")) {
+    const idx = raw.indexOf("|");
+    return {
+      programName: raw.slice(0, idx).trim() || "CoachPlus Program",
+      subjectName: raw.slice(idx + 1).trim() || "Your Subject",
+    };
+  }
+
+  const programs = new Set<string>();
+  const subjectNames = new Set<string>();
+
+  raw
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .forEach((entry) => {
+      const colon = entry.indexOf(":");
+      if (colon === -1) {
+        subjectNames.add(entry);
+        return;
+      }
+
+      const program = entry.slice(0, colon).trim();
+      let subject = entry.slice(colon + 1).trim();
+
+      // "Subject - Topic" → keep the subject only.
+      const dash = subject.indexOf(" - ");
+      if (dash !== -1) subject = subject.slice(0, dash).trim();
+
+      if (program) programs.add(program);
+      if (subject) subjectNames.add(subject);
+    });
+
   return {
-    programName: raw.slice(0, idx).trim() || "CoachPlus Program",
-    subjectName: raw.slice(idx + 1).trim() || "Your Subject",
+    programName: Array.from(programs).join(", ") || "CoachPlus Program",
+    subjectName: Array.from(subjectNames).join(", ") || "Your Subject",
   };
 }
 

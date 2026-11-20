@@ -292,6 +292,21 @@ model TeacherApplication {
   agreedToTerms     Boolean  @default(false)
   status            String   @default("pending")
   createdAt         DateTime @default(now())
+  stageUpdatedAt    DateTime @default(now()) @updatedAt
+
+  // Stage 2 — missing/unclear document request. Stored so the admin can reopen
+  // the application, edit the wording and resend the same stage email.
+  missingDocument       String @default("")
+  missingDocumentReason String @default("")
+  reuploadLink          String @default("")
+
+  // Stage 4 — exam & demo lesson details. Stored so the admin can edit the
+  // date, time, mode, location and contact phone and resend the confirmation.
+  assessmentDate         String @default("")
+  assessmentTime         String @default("")
+  assessmentMode         String @default("")
+  assessmentLocation     String @default("")
+  assessmentContactPhone String @default("")
 
   documents TeacherApplicationDocument[]
 }

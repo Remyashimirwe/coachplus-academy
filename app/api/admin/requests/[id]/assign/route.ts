@@ -134,7 +134,7 @@ export async function POST(
         studentLocationOrOnline: parentRequest.location || "Not specified",
         requestedDaysAndTimes: `${parentRequest.preferredDays || ""} ${parentRequest.preferredTime || ""}`.trim() || "Not specified",
         startDate: parentRequest.startDate || "Not specified",
-        acceptDeclineLink: `${APP_URL}/teacher/students/${student.id}/respond`,
+        acceptDeclineLink: `${APP_URL}/teacher/students`,
         contactPhone: teacher.phone || "",
         location: teacherLocation || undefined,
       }).catch((err) => {
