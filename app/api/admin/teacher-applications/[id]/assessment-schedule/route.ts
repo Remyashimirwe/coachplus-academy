@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
-import { sendAssessmentScheduledEmail } from "@/app/lib/email";
-import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -44,10 +42,9 @@ export async function POST(
   }
 
   try {
-    // Persist the exact details first so the admin can reopen the application,
-    // edit them and resend the Stage 4 email. The status only moves forward once
-    // the email has actually gone out.
-    const saved = await db.teacherApplication.update({
+    const scheduledFor = new Date(Date.now() + 5 * 60 * 1000);
+
+    await db.teacherApplication.update({
       where: { id: applicationId },
       data: {
         assessmentDate: String(examDate).trim(),
@@ -55,60 +52,18 @@ export async function POST(
         assessmentMode: String(assessmentMode).trim(),
         assessmentLocation: String(locationOrMeetingLink).trim(),
         assessmentContactPhone: String(contactPhone || "").trim(),
+        emailScheduledAt: new Date(),
+        emailScheduledFor: scheduledFor,
+        pendingStatus: "assessment_scheduled",
       },
     });
 
-    // Stage 4: Exam & Demo Date Confirmation — email the teacher.
-    const location = [saved.village, saved.cell, saved.sector, saved.district, saved.province, saved.country]
-      .filter(Boolean)
-      .join(", ");
-    const emailResult = await sendAssessmentScheduledEmail({
-      to: saved.email,
-      name: saved.fullName,
-      subjects: saved.subjects,
-      examDate: saved.assessmentDate,
-      examTime: saved.assessmentTime,
-      assessmentMode: saved.assessmentMode,
-      locationOrMeetingLink: saved.assessmentLocation,
-      contactPhone: saved.assessmentContactPhone,
-      location: location || undefined,
+    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+
+    return NextResponse.json({ 
+      message: "Assessment scheduled. The confirmation email will be sent in 5 minutes. You can cancel or edit this in the application view.", 
+      application: updatedApp 
     });
-    if (!emailResult.success) {
-      return NextResponse.json(
-        {
-          message:
-            "Assessment details were saved, but the confirmation email could not be sent. Please retry.",
-          error: emailResult.message || "Failed to send assessment email. You can retry.",
-          application: saved,
-        },
-        { status: 502 },
-      );
-    }
-
-    const updated = await db.teacherApplication.update({
-      where: { id: applicationId },
-      data: { status: "assessment_scheduled" },
-    });
-
-    // Notify the teacher in-app if they have an account.
-    const teacherUser = await db.user.findUnique({ where: { email: saved.email } });
-    if (teacherUser) {
-      await notifyUsers({
-        userIds: [teacherUser.id],
-        title: "Assessment Scheduled",
-        message: `Your exam and demo lesson is confirmed for ${saved.assessmentDate} at ${saved.assessmentTime}. Check your email for details.`,
-        type: "success",
-      });
-    }
-
-    await notifyAdmins({
-      title: "Assessment scheduled",
-      message: `${saved.fullName}'s assessment is scheduled for ${saved.assessmentDate} at ${saved.assessmentTime}.`,
-      type: "info",
-      exceptUserId: user.id,
-    });
-
-    return NextResponse.json({ message: "Assessment scheduled", application: updated });
   } catch (error: any) {
     return NextResponse.json({ message: error.message || "Failed to schedule assessment" }, { status: 500 });
   }

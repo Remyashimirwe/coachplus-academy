@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
-import { sendMissingDocumentsEmail } from "@/app/lib/email";
-import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -38,68 +36,27 @@ export async function POST(
   }
 
   try {
-    // Persist the request first so the admin can reopen it, edit the wording
-    // and resend the Stage 2 email. The status only moves forward once the
-    // email has actually gone out.
-    const saved = await db.teacherApplication.update({
+    const scheduledFor = new Date(Date.now() + 5 * 60 * 1000);
+
+    await db.teacherApplication.update({
       where: { id: applicationId },
       data: {
         missingDocument: String(missingDocument).trim(),
         missingDocumentReason: String(issueReason).trim(),
         reuploadLink: String(reuploadLink).trim(),
+        emailScheduledAt: new Date(),
+        emailScheduledFor: scheduledFor,
+        pendingStatus: "documents_needed",
       },
     });
 
-    // Stage 2: Missing / Unclear Documents — email the teacher.
-    const location = [saved.village, saved.cell, saved.sector, saved.district, saved.province, saved.country]
-      .filter(Boolean)
-      .join(", ");
-    const emailResult = await sendMissingDocumentsEmail({
-      to: saved.email,
-      name: saved.fullName,
-      subjects: saved.subjects,
-      missingDocument: saved.missingDocument,
-      issueReason: saved.missingDocumentReason,
-      reuploadLink: saved.reuploadLink,
-      location: location || undefined,
+    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+
+    return NextResponse.json({ 
+      message: "Document request queued. The email will be sent in 5 minutes. You can cancel or edit this in the application view.", 
+      application: updatedApp 
     });
-    if (!emailResult.success) {
-      return NextResponse.json(
-        {
-          message:
-            "The document request was saved, but the email could not be sent. Please retry.",
-          error: emailResult.message || "Failed to send missing documents email. You can retry.",
-          application: saved,
-        },
-        { status: 502 },
-      );
-    }
-
-    const updated = await db.teacherApplication.update({
-      where: { id: applicationId },
-      data: { status: "documents_needed" },
-    });
-
-    // Notify the teacher in-app if they have an account.
-    const teacherUser = await db.user.findUnique({ where: { email: saved.email } });
-    if (teacherUser) {
-      await notifyUsers({
-        userIds: [teacherUser.id],
-        title: "Document Update Required",
-        message: "We need an updated document from you to keep your application moving. Check your email.",
-        type: "warning",
-      });
-    }
-
-    await notifyAdmins({
-      title: "Missing documents flagged",
-      message: `Missing/unclear document flagged for ${saved.fullName}: ${saved.missingDocument}.`,
-      type: "warning",
-      exceptUserId: user.id,
-    });
-
-    return NextResponse.json({ message: "Missing documents email sent", application: updated });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to send missing documents email" }, { status: 500 });
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to queue document request" }, { status: 500 });
   }
 }

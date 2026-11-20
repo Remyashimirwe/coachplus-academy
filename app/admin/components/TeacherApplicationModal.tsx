@@ -105,6 +105,9 @@ export default function TeacherApplicationModal({
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [previewEmail, setPreviewEmail] = useState<{ subject: string; body: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
   const [shortlistError, setShortlistError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
@@ -384,6 +387,46 @@ export default function TeacherApplicationModal({
     approved: "Approved",
     rejected: "Rejected",
   };
+
+  async function handlePreviewEmail(stage: string) {
+    setPreviewLoading(true);
+    setPreviewError(null);
+    try {
+      const res = await fetch(`/api/admin/teacher-applications/${app.id}/preview-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPreviewEmail({ subject: data.subject, body: data.bodyHtml });
+      } else {
+        setPreviewError(data.message || "Failed to fetch preview");
+      }
+    } catch {
+      setPreviewError("Network error while fetching preview");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function cancelScheduledEmail() {
+    try {
+      const res = await fetch(`/api/admin/teacher-applications/${app.id}/cancel-email`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        onStatusChanged(app.id, app.status, {
+          emailScheduledAt: null,
+          emailScheduledFor: null,
+          pendingStatus: null,
+        });
+        setPreviewEmail(null);
+      }
+    } catch {
+      setPreviewError("Failed to cancel scheduled email");
+    }
+  }
 
   async function changeStatus(nextStatus: string) {
     setStageChanging(true);

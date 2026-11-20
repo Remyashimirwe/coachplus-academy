@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
-import { sendApplicationApprovedEmail } from "@/app/lib/email";
-import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
-
-const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
 
 export async function POST(
   request: NextRequest,
@@ -47,86 +41,27 @@ export async function POST(
   }
 
   try {
-    const inviteToken = crypto.randomBytes(32).toString("hex");
-    const inviteTokenExpiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
-
-    const user = await db.user.create({
-      data: {
-        name: application.fullName,
-        email: application.email,
-        role: "TEACHER",
-        isFirstLogin: true,
-        inviteToken,
-        inviteTokenExpiresAt,
-        teacherProfile: {
-          create: {
-            phone: application.phone,
-            country: application.country,
-            city: application.district,
-            village: application.village,
-            cell: application.cell,
-            subjects: application.subjects,
-            availableDays: application.availableDays,
-            availableHours: application.availableHours,
-          },
-        },
-      },
-    });
+    const scheduledFor = new Date(Date.now() + 5 * 60 * 1000);
 
     await db.teacherApplication.update({
       where: { id: applicationId },
-      data: { status: "approved" },
+      data: { 
+        emailScheduledAt: new Date(),
+        emailScheduledFor: scheduledFor,
+        pendingStatus: "approved",
+      },
     });
 
-    // The new teacher gets a welcome notification on whatever device they
-    // next open, and the admins see the approval in their activity feed.
-    await notifyUsers({
-      userIds: [user.id],
-      title: "Welcome to CoachPlus Academy",
-      message:
-        "Your teacher application was approved. Check your email for the link to set up your password.",
-      type: "success",
-    });
+    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
 
-    await notifyAdmins({
-      title: "Teacher application approved",
-      message: `${application.fullName} was approved as a teacher.`,
-      type: "success",
-      exceptUserId: actingAdminId,
-    });
-
-    const inviteUrl = `${APP_URL}/accept-invite?token=${inviteToken}`;
-    const location = [application.village, application.cell, application.sector, application.district, application.province, application.country]
-      .filter(Boolean)
-      .join(", ");
-    const coachingModes = application.teachOnline === "Yes"
-      ? "Online, Home, or Center"
-      : "Home or Center";
-    const emailResult = await sendApplicationApprovedEmail({
-      to: application.email,
-      name: application.fullName,
-      inviteUrl,
-      subjects: application.subjects,
-      coachingModes,
-      portalOrAppLink: `${APP_URL}/teacher`,
-      guidelinesLink: `${APP_URL}/terms-of-service`,
-      location: location || undefined,
-    });
-
-    const { passwordHash, inviteToken: _token, ...safeUser } = user;
-
-    return NextResponse.json({
-      message: emailResult.success
-        ? "Application approved! An email has been sent so they can activate their teacher account."
-        : "Application approved and the teacher account was created, but the notification email could not be sent. Please share the invite link manually.",
-      user: safeUser,
-      emailSent: emailResult.success,
-      inviteUrl: emailResult.success ? undefined : inviteUrl,
+    return NextResponse.json({ 
+      message: "Approval queued. The teacher account creation and welcome email will happen in 5 minutes. You can cancel or edit this in the application view.", 
+      application: updatedApp 
     });
   } catch (error: any) {
     if (error.code === "P2002") {
       return NextResponse.json({ message: "Email already exists" }, { status: 400 });
     }
-    return NextResponse.json({ message: error.message || "Failed to approve application" }, { status: 500 });
+    return NextResponse.json({ message: error.message || "Failed to queue approval" }, { status: 500 });
   }
 }

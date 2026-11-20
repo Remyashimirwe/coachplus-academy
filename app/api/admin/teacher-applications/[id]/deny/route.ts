@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
-import { sendApplicationDeniedEmail } from "@/app/lib/email";
-import { notifyAdmins } from "@/app/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -28,42 +26,24 @@ export async function POST(
   }
 
   try {
-    const location = [application.village, application.cell, application.sector, application.district, application.province, application.country]
-      .filter(Boolean)
-      .join(", ");
-    const emailResult = await sendApplicationDeniedEmail({
-      to: application.email,
-      name: application.fullName,
-      subjects: application.subjects,
-      location: location || undefined,
-    });
+    const scheduledFor = new Date(Date.now() + 5 * 60 * 1000);
 
-    if (!emailResult.success) {
-      return NextResponse.json(
-        { message: emailResult.message || "Failed to send rejection email. You can retry." },
-        { status: 502 },
-      );
-    }
-
-  // Keep the application on record (status "rejected") so the admin can still
-  // review it and filter the table by accepted / rejected applicants.
-    const updated = await db.teacherApplication.update({
+    await db.teacherApplication.update({
       where: { id: applicationId },
-      data: { status: "rejected" },
+      data: { 
+        emailScheduledAt: new Date(),
+        emailScheduledFor: scheduledFor,
+        pendingStatus: "rejected",
+      },
     });
 
-  // The applicant has no account yet, so an in-app notification would have
-  // nowhere to land — the denial email above is their notification. The
-  // admins, however, should see the decision in their activity feed.
-    await notifyAdmins({
-      title: "Teacher application denied",
-      message: `${application.fullName}'s application was denied.`,
-      type: "warning",
-      exceptUserId: user.id,
-    });
+    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
 
-    return NextResponse.json({ message: "Application denied", application: updated });
+    return NextResponse.json({ 
+      message: "Rejection queued. The rejection email will be sent in 5 minutes. You can cancel or edit this in the application view.", 
+      application: updatedApp 
+    });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to deny application" }, { status: 500 });
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to queue rejection" }, { status: 500 });
   }
 }
