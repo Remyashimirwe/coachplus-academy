@@ -1111,7 +1111,25 @@ export default function TeacherApplicationModal({
                   <option key={status} value={status}>{statusLabels[status]}</option>
                 ))}
               </select>
-              <span className="text-xs font-normal text-slate-400">Changing the stage sends its matching email.</span>
+              <span className="text-xs font-normal text-slate-400">
+                Changing the stage queues its email for delivery in 5 minutes.
+                You can preview or cancel it below before it sends.
+              </span>
+              {app.pendingStatus && app.emailScheduledFor && (
+                <>
+                  <span className="ml-2 text-[10px] font-semibold text-orange-600 flex items-center gap-1">
+                    <FiClock size={11} /> Pending {app.pendingStatus} — scheduled in {Math.max(0, Math.round((new Date(app.emailScheduledFor).getTime() - Date.now()) / 1000))}s
+                  </span>
+                  <button
+                    type="button"
+                    onClick={cancelScheduledEmail}
+                    disabled={stageChanging}
+                    className="ml-3 inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/50 px-4 py-2.5 text-[12px] font-semibold text-rose-700 transition-all hover:bg-rose-100 disabled:opacity-60"
+                  >
+                    <FiX className="size-3.5" /> Cancel
+                  </button>
+                </>
+              )}
             </label>
           )}
         </div>
