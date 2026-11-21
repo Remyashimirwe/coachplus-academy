@@ -26,7 +26,7 @@ export async function POST(
   }
 
   try {
-    const scheduledFor = new Date(Date.now() + 5 * 60 * 1000);
+    const scheduledFor = new Date(Date.now() + 60 * 1000);
 
     await db.teacherApplication.update({
       where: { id: applicationId },
@@ -38,7 +38,7 @@ export async function POST(
     });
 
     return NextResponse.json({ 
-      message: "Shortlisting queued. The email will be sent in 5 minutes. You can cancel or edit this in the application view.", 
+      message: "Shortlisting email queued. It will send in 1 minute. You can cancel or edit it before then.", 
       application 
     });
   } catch (error: any) {

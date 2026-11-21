@@ -89,7 +89,8 @@ export default function AdminLayout({ children, user }: { children: React.ReactN
     return item;
   });
 
-  const currentNavItem = navItems.find(item => item.href === pathname);
+  const currentNavItem = navItems.find(item => item.href === pathname)
+    ?? navItems.find(item => item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
   const title = currentNavItem ? currentNavItem.label : "Admin Dashboard";
 
   return (

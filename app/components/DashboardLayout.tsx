@@ -227,14 +227,36 @@ export default function DashboardLayout({
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className={`flex h-20 shrink-0 items-center ${sidebarCollapsed ? "justify-center px-3" : "gap-3 px-8"} border-b border-slate-800`}>
+        <div className={`flex h-20 shrink-0 items-center ${sidebarCollapsed ? "justify-between px-2" : "gap-3 px-6"} border-b border-slate-800`}>
           <img src="/logo.png" alt="CoachPlus Academy" className="size-9 rounded-lg" />
-          {!sidebarCollapsed && <span className="text-lg font-semibold tracking-tight">
+          {!sidebarCollapsed && <span className="flex-1 text-lg font-semibold tracking-tight">
             CoachPlus <span className="text-white">Academy</span>
           </span>}
+          {canCollapseSidebar && !sidebarCollapsed && (
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              className="hidden lg:inline-flex rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+            >
+              <FiChevronLeft className="size-4" />
+            </button>
+          )}
+          {canCollapseSidebar && sidebarCollapsed && (
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+              className="hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white lg:inline-flex"
+            >
+              <FiChevronRight className="size-4" />
+            </button>
+          )}
         </div>
 
-        <div className={`${sidebarCollapsed ? "px-3 py-4 flex justify-center" : "px-6 py-5"} border-b border-slate-800 shrink-0`}>
+        {!canCollapseSidebar && <div className={`${sidebarCollapsed ? "px-3 py-4 flex justify-center" : "px-6 py-5"} border-b border-slate-800 shrink-0`}>
           {sidebarCollapsed ? (
             <Avatar user={displayUser} className="size-10 rounded-full bg-white text-slate-900 border border-white/20 font-bold text-sm shrink-0" />
           ) : <>
@@ -250,7 +272,7 @@ export default function DashboardLayout({
                 {displayUser.role}
             </span>
           </>}
-        </div>
+        </div>}
 
         <nav className={`flex-1 min-h-0 overflow-y-auto mt-6 ${sidebarCollapsed ? "px-2" : "px-4"} space-y-5 pb-4`}>
           {(() => {
@@ -287,7 +309,67 @@ export default function DashboardLayout({
           })()}
         </nav>
 
-        <div className={`shrink-0 border-t border-slate-800 w-full ${sidebarCollapsed ? "px-2" : "px-4"} py-4 space-y-2`}>
+        <div className={`relative shrink-0 border-t border-slate-800 w-full ${sidebarCollapsed ? "px-2" : "px-4"} py-4 space-y-2`}>
+          {canCollapseSidebar && (
+            <div className="relative">
+              {notificationsOpen && (
+                <section className="absolute bottom-0 left-3 right-3 z-50 mb-14 overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl lg:left-full lg:right-auto lg:ml-3 lg:w-80">
+                  <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
+                    <div>
+                      <h2 className="text-sm font-semibold text-slate-900">Notifications</h2>
+                      <p className="text-[11px] text-slate-500">{unreadCount ? `${unreadCount} unread` : "You’re all caught up"}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {unreadCount > 0 && (
+                        <button onClick={markAllRead} className="text-[10px] font-semibold text-slate-700 hover:text-[#E91E63]">
+                          Mark read
+                        </button>
+                      )}
+                      <button onClick={() => setNotificationsOpen(false)} aria-label="Close notifications" className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200">
+                        <FiX className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                  {canPromptNotifications && (
+                    <div className="flex items-center gap-2 border-b border-slate-100 bg-amber-50 px-4 py-3">
+                      <FiBell className="size-4 shrink-0 text-amber-600" />
+                      <p className="flex-1 text-[11px] text-slate-600">Turn on browser alerts to stay updated.</p>
+                      <button onClick={requestBrowserPermission} className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-white">Allow</button>
+                    </div>
+                  )}
+                  <div className="max-h-[55vh] overflow-y-auto">
+                    {notifications.length ? notifications.map((notification) => (
+                      <article key={notification.id} className={`border-b border-slate-100 px-4 py-3 ${notification.read ? "bg-white" : "bg-indigo-50/50"}`}>
+                        <div className="flex gap-3">
+                          <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                            {notification.type === "success" ? <FiCheckCircle className="size-4" /> : notification.type === "warning" ? <FiAlertCircle className="size-4" /> : <FiInfo className="size-4" />}
+                          </span>
+                          <div className="min-w-0">
+                            <h3 className="text-xs font-semibold text-slate-900">{notification.title}</h3>
+                            <p className="mt-0.5 text-[11px] leading-relaxed text-slate-600">{notification.message}</p>
+                            <time className="mt-1 block text-[10px] text-slate-400">{notificationTime(notification.createdAt)}</time>
+                          </div>
+                        </div>
+                      </article>
+                    )) : <p className="px-4 py-8 text-center text-xs text-slate-400">No notifications yet.</p>}
+                  </div>
+                </section>
+              )}
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen((open) => !open)}
+                title={sidebarCollapsed ? "Notifications" : undefined}
+                aria-expanded={notificationsOpen}
+                className={`flex w-full items-center ${sidebarCollapsed ? "justify-center px-3" : "gap-3 px-4"} rounded-xl py-3 text-[13px] font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white`}
+              >
+                <span className="relative">
+                  <FiBell className="size-5" />
+                  {unreadCount > 0 && <span className="absolute -right-2 -top-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+                </span>
+                {!sidebarCollapsed && <><span className="flex-1 text-left">Notifications</span>{unreadCount > 0 && <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">{unreadCount}</span>}</>}
+              </button>
+            </div>
+          )}
           <button
             onClick={handleLogout}
             title={sidebarCollapsed ? "Sign Out" : undefined}
@@ -302,7 +384,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className={sidebarCollapsed ? "lg:pl-20 transition-[padding] duration-300" : "lg:pl-72 transition-[padding] duration-300"}>
         {/* Topbar */}
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/85 backdrop-blur-md">
+        <header className={`sticky top-0 z-40 border-b border-slate-200 bg-white/85 backdrop-blur-md ${canCollapseSidebar ? "lg:hidden" : ""}`}>
           <div className="h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <button
@@ -311,22 +393,13 @@ export default function DashboardLayout({
               >
                 <FiMenu className="size-6" />
               </button>
-              {canCollapseSidebar && <button
-                type="button"
-                onClick={toggleSidebar}
-                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                className="hidden lg:inline-flex p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg"
-              >
-                {sidebarCollapsed ? <FiChevronRight className="size-5" /> : <FiChevronLeft className="size-5" />}
-              </button>}
               <div className="min-w-0">
                 <h1 className="text-base font-semibold text-slate-900 truncate leading-tight">{resolvedTitle}</h1>
                 <p className="text-[11px] font-medium text-slate-400 truncate">CoachPlus Academy · {user.role} portal</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {!canCollapseSidebar && <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <Link
                 href="/"
                 className="hidden sm:flex items-center gap-2 text-[13px] font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors"
@@ -420,7 +493,7 @@ export default function DashboardLayout({
                   <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">{displayUser.role}</span>
                 </div>
               </div>
-            </div>
+            </div>}
           </div>
           <div className="h-0.5 bg-slate-900" />
         </header>
@@ -445,7 +518,7 @@ export default function DashboardLayout({
       )}
 
       {/* Click outside to close notifications */}
-      {notificationsOpen && (
+      {notificationsOpen && !canCollapseSidebar && (
           <div 
             className="fixed inset-0 z-30" 
             onClick={() => setNotificationsOpen(false)} 

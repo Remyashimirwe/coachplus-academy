@@ -120,6 +120,7 @@ export default function TeacherApplicationModal({
   const [savingMissingDocs, setSavingMissingDocs] = useState(false);
   const [stageChanging, setStageChanging] = useState(false);
   const [activePanel, setActivePanel] = useState<"assessment" | "documents" | null>(null);
+  const [clock, setClock] = useState<number | null>(null);
 
   // Editable Stage 4 details. Prefilled from what was last saved so an admin
   // can change the time/date and resend without retyping everything.
@@ -152,6 +153,12 @@ export default function TeacherApplicationModal({
       document.body.style.overflow = "";
     };
   }, [onClose, pageMode]);
+
+  useEffect(() => {
+    setClock(Date.now());
+    const timer = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   async function handleSendMessage() {
     const trimmed = message.trim();
@@ -383,12 +390,12 @@ export default function TeacherApplicationModal({
     assessment_scheduled: ["documents_needed", "approved", "rejected"],
   };
   const statusLabels: Record<string, string> = {
-    pending: "Stage 1 — Application Receipt (Pending Review)",
-    documents_needed: "Stage 2 — Missing / Unclear Documents",
-    shortlisted: "Stage 3 — Shortlisting & Exam/Demo Lesson Notice",
-    assessment_scheduled: "Stage 4 — Exam & Demo Lesson Date Confirmation",
-    approved: "Stage 5 — Approval & Teacher Onboarding",
-    rejected: "Stage 6 — Application Not Selected (Rejection)",
+    pending: "Stage 1: Review",
+    documents_needed: "Stage 2: Documents needed",
+    shortlisted: "Stage 3: Shortlisted",
+    assessment_scheduled: "Stage 4: Assessment set",
+    approved: "Stage 5: Approved",
+    rejected: "Stage 6: Rejected",
   };
 
   async function handlePreviewEmail(stage: string) {
@@ -1090,54 +1097,63 @@ export default function TeacherApplicationModal({
             {!isPending && !decisionError && !shortlistError && !scheduleError && !scheduleSuccess && !missingDocsError && !missingDocsSuccess && (
               <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
                 <FiCheckCircle /> {app.status === "rejected"
-                  ? "This application has been rejected."
+                  ? "Application rejected."
                   : app.status === "shortlisted"
-                    ? "This applicant is shortlisted for assessment."
+                    ? "Shortlisted for assessment."
                     : app.status === "assessment_scheduled"
-                      ? "This applicant's assessment is scheduled."
-                      : "This applicant is already an accepted teacher."}
+                      ? "Assessment scheduled."
+                      : "Approved teacher."}
               </p>
             )}
             {app.status === "approved" && (
               <p className="mt-1 text-[11px] font-medium text-slate-400">
-                Stage 7 — assign a student from the Requests page to send the first-student-match email.
+                Next: assign a student from Requests.
               </p>
             )}
           </div>
           {statusOptions[app.status] && (
-            <label className="flex items-center gap-3 text-sm font-semibold text-slate-600">
-              <span>Application stage</span>
-              <select
-                value={app.status}
-                disabled={stageChanging}
-                onChange={(event) => void changeStatus(event.target.value)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20 disabled:opacity-60"
-              >
-                <option value={app.status}>{statusLabels[app.status] || app.status}</option>
-                {statusOptions[app.status].map((status) => (
-                  <option key={status} value={status}>{statusLabels[status]}</option>
-                ))}
-              </select>
-              <span className="text-xs font-normal text-slate-400">
-                Changing the stage queues its email for delivery in 5 minutes.
-                You can preview or cancel it below before it sends.
-              </span>
-              {app.pendingStatus && app.emailScheduledFor && (
-                <>
-                  <span className="ml-2 text-[10px] font-semibold text-orange-600 flex items-center gap-1">
-                    <FiClock size={11} /> Pending {app.pendingStatus} — scheduled in {Math.max(0, Math.round((new Date(app.emailScheduledFor).getTime() - Date.now()) / 1000))}s
-                  </span>
-                  <button
-                    type="button"
-                    onClick={cancelScheduledEmail}
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm font-semibold text-slate-700">
+                  <span>Application stage</span>
+                  <select
+                    value={app.status}
                     disabled={stageChanging}
-                    className="ml-3 inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/50 px-4 py-2.5 text-[12px] font-semibold text-rose-700 transition-all hover:bg-rose-100 disabled:opacity-60"
+                    onChange={(event) => void changeStatus(event.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20 disabled:opacity-60 sm:max-w-md"
                   >
-                    <FiX className="size-3.5" /> Cancel
-                  </button>
-                </>
-              )}
-            </label>
+                    <option value={app.status}>{statusLabels[app.status] || app.status}</option>
+                    {statusOptions[app.status].map((status) => (
+                      <option key={status} value={status}>{statusLabels[status]}</option>
+                    ))}
+                  </select>
+                </label>
+                <p className="text-xs leading-relaxed text-slate-500 sm:max-w-xs">
+                  Stage emails send in 1 minute. You can cancel before then.
+                </p>
+              </div>
+              {app.pendingStatus && app.emailScheduledFor && (() => {
+                const secondsLeft = clock === null
+                  ? 60
+                  : Math.max(0, Math.ceil((new Date(app.emailScheduledFor).getTime() - clock) / 1000));
+                const countdown = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`;
+                return (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3">
+                    <span className="inline-flex items-center gap-2 text-xs font-semibold text-orange-700">
+                      <FiClock size={14} /> {statusLabels[app.pendingStatus] || app.pendingStatus} sends in {countdown}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={cancelScheduledEmail}
+                      disabled={stageChanging}
+                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60"
+                    >
+                      <FiX className="size-3.5" /> Cancel email
+                    </button>
+                  </div>
+                );
+              })()}
+            </section>
           )}
         </div>
       </div>

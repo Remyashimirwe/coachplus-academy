@@ -294,7 +294,7 @@ model TeacherApplication {
   createdAt         DateTime @default(now())
   stageUpdatedAt    DateTime @default(now()) @updatedAt
 
-  // Email scheduling: used to implement the 5-minute delay/cancel system.
+  // Email scheduling: used to implement the 1-minute delay/cancel system.
   emailScheduledAt  DateTime? 
   emailScheduledFor  DateTime? 
   pendingStatus     String?   // The status to transition to once the email is sent

@@ -41,7 +41,7 @@ export async function POST(
   }
 
   try {
-    const scheduledFor = new Date(Date.now() + 5 * 60 * 1000);
+    const scheduledFor = new Date(Date.now() + 60 * 1000);
 
     await db.teacherApplication.update({
       where: { id: applicationId },
@@ -55,7 +55,7 @@ export async function POST(
     const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
 
     return NextResponse.json({ 
-      message: "Approval queued. The teacher account creation and welcome email will happen in 5 minutes. You can cancel or edit this in the application view.", 
+      message: "Approval email queued. The account setup email will send in 1 minute. You can cancel or edit it before then.", 
       application: updatedApp 
     });
   } catch (error: any) {
