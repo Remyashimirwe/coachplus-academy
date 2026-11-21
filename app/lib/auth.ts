@@ -11,23 +11,13 @@ import { NextRequest, NextResponse } from "next/server";
  * environment, and production refuses to start without one instead of quietly
  * signing tokens with a publicly known value.
  */
-const secretFromEnv = process.env.JWT_SECRET?.trim();
-
-if (!secretFromEnv) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "JWT_SECRET is not set. Add it to the deployment environment (see .env.example) — " +
-        "without it every session in the app could be forged.",
-    );
+function signingKey() {
+  const secret = process.env.JWT_SECRET?.trim() || process.env.SESSION_SECRET?.trim();
+  if (!secret) {
+    throw new Error("Set JWT_SECRET or SESSION_SECRET to enable signed sessions.");
   }
-  console.warn(
-    "[auth] JWT_SECRET is not set — using an INSECURE development-only secret. " +
-      "Set JWT_SECRET before deploying.",
-  );
+  return new TextEncoder().encode(secret);
 }
-
-const DEV_ONLY_SECRET = "development-only-secret-set-JWT_SECRET";
-const key = new TextEncoder().encode(secretFromEnv || DEV_ONLY_SECRET);
 
 /** Lifetime of the httpOnly cookie used by the website (unchanged). */
 const SESSION_TTL = "2h";
@@ -48,13 +38,13 @@ export async function encrypt(
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
-    .sign(key);
+    .sign(signingKey());
 }
 
 export async function decrypt(input: string | undefined): Promise<any> {
   if (!input) return null;
   try {
-    const { payload } = await jwtVerify(input, key, {
+    const { payload } = await jwtVerify(input, signingKey(), {
       algorithms: ["HS256"],
     });
     return payload;

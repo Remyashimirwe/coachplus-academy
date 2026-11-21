@@ -89,7 +89,7 @@ Notes:
 
 - `DATABASE_URL` is required for Prisma and the app database connection.
 - `RESEND_API_KEY` is optional for local development; if absent, the app logs the invite URL instead of sending email.
-- `SESSION_SECRET` should be a secure random value in production.
+- Set `JWT_SECRET` or `SESSION_SECRET` to a secure random value in production. `JWT_SECRET` takes precedence when both are set.
 
 ## Installation
 
@@ -174,7 +174,7 @@ Recommended production setup:
 
 - PostgreSQL database hosted securely
 - Environment variables configured in production
-- Strong `SESSION_SECRET`
+- Strong `JWT_SECRET` or `SESSION_SECRET`
 - `APP_URL` set to your production domain
 - `RESEND_API_KEY` configured for outbound email deliverys
 -
