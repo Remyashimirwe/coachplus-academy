@@ -88,11 +88,13 @@ export default function TeacherApplicationModal({
   onApproved,
   onDenied,
   onStatusChanged,
+  pageMode = false,
 }: {
   app: any;
   onClose: () => void;
   onApproved: (id: number) => void;
   onDenied: (id: number) => void;
+  pageMode?: boolean;
   onStatusChanged: (
     id: number,
     status: string,
@@ -139,6 +141,7 @@ export default function TeacherApplicationModal({
   );
 
   useEffect(() => {
+    if (pageMode) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -148,7 +151,7 @@ export default function TeacherApplicationModal({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, [onClose, pageMode]);
 
   async function handleSendMessage() {
     const trimmed = message.trim();
@@ -467,12 +470,16 @@ export default function TeacherApplicationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-6 animate-in fade-in duration-200"
-      onClick={onClose}
+      className={pageMode
+        ? "min-h-[calc(100vh-8rem)] animate-in fade-in duration-200"
+        : "fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-6 animate-in fade-in duration-200"}
+      onClick={pageMode ? undefined : onClose}
     >
       <div
-        className="relative w-full sm:max-w-4xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto bg-white sm:rounded-[32px] shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
+        className={pageMode
+          ? "relative w-full max-w-5xl mx-auto overflow-hidden bg-white rounded-3xl shadow-sm border border-slate-200"
+          : "relative w-full sm:max-w-4xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto bg-white sm:rounded-[32px] shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"}
+        onClick={pageMode ? undefined : (e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 sm:gap-4 bg-white/90 backdrop-blur px-5 sm:px-8 pt-6 sm:pt-8 pb-6 border-b border-slate-100">

@@ -1,9 +1,6 @@
 "use client";
 
 import {
-  FiMail,
-  FiPhone,
-  FiMapPin,
   FiClock,
   FiUserCheck,
   FiUserX,
@@ -13,52 +10,13 @@ import {
   FiInbox,
   FiCheckCircle,
   FiSearch,
-  FiBookOpen,
-  FiGrid,
-  FiList,
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
-import TeacherApplicationModal from "./TeacherApplicationModal";
+import Link from "next/link";
 import { useToast } from "@/app/components/ToastProvider";
 
 function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
-}
-
-type GroupedSubject = { name: string; topics: string[] };
-type GroupedCategory = { category: string; subjects: GroupedSubject[] };
-
-function groupSubjects(raw: string): GroupedCategory[] {
-  const categoryMap = new Map<string, Map<string, string[]>>();
-
-  (raw || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .forEach((entry) => {
-      const idx = entry.indexOf(":");
-      if (idx === -1) return;
-      const category = entry.slice(0, idx).trim();
-      const rest = entry.slice(idx + 1).trim();
-      const dashIdx = rest.indexOf(" - ");
-      let subject: string;
-      let topic: string | null = null;
-      if (dashIdx !== -1) {
-        subject = rest.slice(0, dashIdx).trim();
-        topic = rest.slice(dashIdx + 3).trim();
-      } else {
-        subject = rest;
-      }
-      if (!categoryMap.has(category)) categoryMap.set(category, new Map());
-      const subjMap = categoryMap.get(category)!;
-      if (!subjMap.has(subject)) subjMap.set(subject, []);
-      if (topic) subjMap.get(subject)!.push(topic);
-    });
-
-  return Array.from(categoryMap.entries()).map(([category, subjMap]) => ({
-    category,
-    subjects: Array.from(subjMap.entries()).map(([name, topics]) => ({ name, topics })),
-  }));
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -98,17 +56,14 @@ const SORT_OPTIONS = [
 
 export default function TeachersView({ teacherApplications }: any) {
   const [applications, setApplications] = useState<any[]>(teacherApplications);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [rowDecision, setRowDecision] = useState<Record<number, "approve" | "deny" | null>>({});
   const [rowError, setRowError] = useState<Record<number, string | undefined>>({});
   const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-  const [view, setView] = useState<"cards" | "table">("table");
   const toast = useToast();
 
-  const selectedApp = applications.find((a) => a.id === selectedId) || null;
 
   const subjectOptions = useMemo(() => {
     const set = new Set<string>();
@@ -174,17 +129,6 @@ export default function TeachersView({ teacherApplications }: any) {
 
   function handleDenied(id: number) {
     setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: "rejected" } : a)));
-    setSelectedId((current) => (current === id ? null : current));
-  }
-
-  function handleApplicationStatusChanged(
-    id: number,
-    status: string,
-    patch?: Record<string, any>,
-  ) {
-    setApplications((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, ...(patch || {}), status } : a)),
-    );
   }
 
   async function handleQuickApprove(appId: number) {
@@ -246,22 +190,6 @@ export default function TeachersView({ teacherApplications }: any) {
           <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Teacher Applications</h1>
           <p className="text-slate-500">Review, message, and decide on incoming teacher applications.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setView("cards")}
-            className={`p-2.5 rounded-xl transition-all ${view === "cards" ? "bg-[#0f172a] text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-            title="Card view"
-          >
-            <FiGrid className="size-4" />
-          </button>
-          <button
-            onClick={() => setView("table")}
-            className={`p-2.5 rounded-xl transition-all ${view === "table" ? "bg-[#0f172a] text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-            title="Table view"
-          >
-            <FiList className="size-4" />
-          </button>
-        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-3">
@@ -311,12 +239,12 @@ export default function TeachersView({ teacherApplications }: any) {
         </select>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, i) => (
-          <div key={i} className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center gap-4">
-              <div className={`size-12 rounded-2xl ${stat.color} text-white flex items-center justify-center shrink-0 shadow-lg shadow-inherit/20`}>
-                <stat.icon className="size-6" />
+          <div key={i} className="rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+            <div className="flex items-center gap-3">
+              <div className={`size-9 rounded-xl ${stat.color} text-white flex items-center justify-center shrink-0`}>
+                <stat.icon className="size-4" />
               </div>
               <div className="min-w-0">
                 <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest truncate">{stat.label}</h3>
@@ -327,7 +255,6 @@ export default function TeachersView({ teacherApplications }: any) {
         ))}
       </div>
 
-      {view === "table" ? (
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
           {filteredApplications.length === 0 ? (
             <div className="p-16 text-center">
@@ -340,8 +267,6 @@ export default function TeachersView({ teacherApplications }: any) {
                   <tr>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Applicant</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Contact</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Subjects</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Experience</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
                     <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500 text-right">Actions</th>
                   </tr>
@@ -377,31 +302,7 @@ export default function TeachersView({ teacherApplications }: any) {
                           <p className="text-[11px] font-semibold text-slate-600 truncate max-w-[200px]">{app.email}</p>
                           {app.phone && <p className="text-[11px] text-slate-400 truncate max-w-[200px]">{app.phone}</p>}
                         </td>
-                        <td className="px-5 py-4 text-slate-500 max-w-[260px]">
-                          {groupSubjects(app.subjects).length > 0 ? (
-                            <div className="space-y-2">
-                              {groupSubjects(app.subjects).map((cat) => (
-                                <div key={cat.category}>
 
-                                  <p className="text-[11px] font-bold text-slate-700">{cat.category}</p>
-                                  <ul className="ml-3 list-disc space-y-0.5 text-[10px] text-slate-500 marker:text-slate-300">
-                                    {cat.subjects.map((sub) => (
-                                      <li key={sub.name}>
-                                        {sub.name}
-                                        {sub.topics.length > 0 && (
-                                          <span className="text-slate-400"> ({sub.topics.join(", ")})</span>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-slate-400">—</span>
-                          )}
-                        </td>
-                        <td className="px-5 py-4 text-[13px] text-slate-600">{app.experienceYears} yrs</td>
                         <td className="px-5 py-4">
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-tighter ${
@@ -437,12 +338,7 @@ export default function TeachersView({ teacherApplications }: any) {
                                 </button>
                               </>
                             )}
-                            <button
-                              onClick={() => setSelectedId(app.id)}
-                              className="px-3 py-1.5 rounded-lg bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-all"
-                            >
-                              View
-                            </button>
+                            <Link href={`/admin/teachers/${app.id}`} className="px-3 py-1.5 rounded-lg bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-all">View</Link>
                           </div>
                         </td>
                       </tr>
@@ -453,137 +349,8 @@ export default function TeachersView({ teacherApplications }: any) {
             </div>
           )}
         </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
-          {filteredApplications.map((app: any) => {
-            const isPending = app.status === "pending";
-            const decision = rowDecision[app.id];
-            return (
-              <div
-                key={app.id}
-                className="flex flex-col gap-5 rounded-[28px] bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="size-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold text-xl shrink-0 overflow-hidden">
-                    {app.documents?.find((d: any) => d.kind === "photo") ? (
-                      <img
-                        src={documentUrl(app.documents.find((d: any) => d.kind === "photo").id)}
-                        alt=""
-                        className="size-full object-cover"
-                      />
-                    ) : (
-                      app.fullName.charAt(0)
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-                      <h3 className="text-base font-semibold text-slate-900 truncate">{app.fullName}</h3>
-                      <span
-                        className={`shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-tighter ${
-                          STATUS_STYLES[app.status] || "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {STATUS_LABELS[app.status] || app.status}
-                      </span>
-                    </div>
-                    <p className="text-[13px] text-slate-500 truncate flex items-center gap-1.5">
-                      <FiMail className="size-3 shrink-0" /> {app.email}
-                    </p>
-                    {app.phone && (
-                      <p className="text-[13px] text-slate-500 truncate flex items-center gap-1.5">
-                        <FiPhone className="size-3 shrink-0" /> {app.phone}
-                      </p>
-                    )}
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-semibold text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <FiClock className="text-indigo-500 shrink-0" /> {app.experienceYears} Years
-                  </span>
-                  <span className="flex items-center gap-1.5 min-w-0">
-                    <FiMapPin className="text-rose-500 shrink-0" />
-                    <span className="truncate">
-                      {[app.district, app.province, app.country].filter(Boolean).join(", ")}
-                    </span>
-                  </span>
-                </div>
-
-                {app.subjects && (
-                  <div className="flex items-start gap-1.5 text-[11px] font-semibold text-slate-500">
-                    <FiBookOpen className="text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="line-clamp-2">{app.subjects}</span>
-                  </div>
-                )}
-
-                {rowError[app.id] && (
-                  <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
-                    <FiAlertCircle className="shrink-0" /> {rowError[app.id]}
-                  </p>
-                )}
-
-                <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100">
-                  <a
-                    href={`mailto:${app.email}`}
-                    title="Email"
-                    className="p-2.5 rounded-xl bg-slate-50 text-slate-600 hover:bg-rose-50 hover:text-[#E91E63] border border-slate-100 transition-all"
-                  >
-                    <FiMail className="size-4" />
-                  </a>
-                  <a
-                    href={`tel:${app.phone}`}
-                    title="Call"
-                    className="p-2.5 rounded-xl bg-slate-50 text-slate-600 hover:bg-rose-50 hover:text-[#E91E63] border border-slate-100 transition-all"
-                  >
-                    <FiPhone className="size-4" />
-                  </a>
-                  {isPending && (
-                    <>
-                      <button
-                        onClick={() => handleQuickDeny(app.id)}
-                        disabled={decision != null}
-                        title="Deny"
-                        className="p-2.5 rounded-xl bg-white text-rose-600 border-2 border-rose-200 hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {decision === "deny" ? <FiLoader className="size-4 animate-spin" /> : <FiUserX className="size-4" />}
-                      </button>
-                      <button
-                        onClick={() => handleQuickApprove(app.id)}
-                        disabled={decision != null}
-                        title="Approve & Invite"
-                        className="p-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {decision === "approve" ? <FiLoader className="size-4 animate-spin" /> : <FiUserCheck className="size-4" />}
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => setSelectedId(app.id)}
-                    className="ml-auto px-4 py-2.5 rounded-xl bg-[#0f172a] text-white text-[13px] font-semibold hover:bg-[#E91E63] transition-all shadow-lg shadow-slate-200"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-          {filteredApplications.length === 0 && (
-            <div className="md:col-span-2 2xl:col-span-3 bg-white rounded-[40px] p-16 sm:p-20 text-center border-2 border-dashed border-slate-100">
-              <p className="text-slate-400 font-medium italic">No applications found.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {selectedApp && (
-        <TeacherApplicationModal
-          app={selectedApp}
-          onClose={() => setSelectedId(null)}
-          onApproved={handleApproved}
-          onDenied={handleDenied}
-          onStatusChanged={handleApplicationStatusChanged}
-        />
-      )}
     </div>
   );
 }
+

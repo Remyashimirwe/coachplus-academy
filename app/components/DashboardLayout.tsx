@@ -12,6 +12,8 @@ import {
   FiCheckCircle,
   FiInfo,
   FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
 import { IconType } from "react-icons";
 import { logout } from "@/app/actions/auth";
@@ -68,13 +70,14 @@ interface DashboardLayoutProps {
   fallbackTitle?: string;
 }
 
-function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string; onClick: () => void }) {
+function NavLink({ item, pathname, onClick, collapsed }: { item: NavItem; pathname: string; onClick: () => void; collapsed?: boolean }) {
   const isActive = pathname === item.href;
   return (
     <Link
       href={item.href}
       onClick={onClick}
-      className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-medium transition-all ${
+      title={collapsed ? item.label : undefined}
+      className={`group relative flex w-full items-center ${collapsed ? "justify-center px-3" : "gap-3 px-4"} rounded-xl py-3 text-[13px] font-medium transition-all ${
         isActive
           ? "bg-white text-slate-900 shadow-lg shadow-black/20"
           : "text-slate-400 hover:bg-slate-800 hover:text-white"
@@ -86,7 +89,7 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
         }`}
       />
       <item.icon className="size-5 shrink-0" />
-      <span className="truncate">{item.label}</span>
+      {!collapsed && <span className="truncate">{item.label}</span>}
       {!!item.badge && (
         <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-white text-[#0F172A] text-[9px] font-bold flex items-center justify-center">
           {item.badge}
@@ -104,12 +107,27 @@ export default function DashboardLayout({
   fallbackTitle,
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const pathname = usePathname();
   const router = useRouter();
+  const canCollapseSidebar = user.role.toLowerCase() === "admin";
+
+  useEffect(() => {
+    if (!canCollapseSidebar) return;
+    setSidebarCollapsed(window.localStorage.getItem("admin-sidebar-collapsed") === "true");
+  }, [canCollapseSidebar]);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem("admin-sidebar-collapsed", String(next));
+      return next;
+    });
+  };
 
   const [freshUser, setFreshUser] = useState<User | null>(null);
 
@@ -161,7 +179,8 @@ export default function DashboardLayout({
 
   const displayUser = freshUser ?? user;
 
-  const currentNavItem = navItems.find((item) => item.href === pathname);
+  const currentNavItem = navItems.find((item) => item.href === pathname)
+    ?? navItems.find((item) => item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
   const resolvedTitle = title ?? currentNavItem?.label ?? fallbackTitle ?? "Dashboard";
 
   const handleLogout = async () => {
@@ -204,18 +223,21 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col transform bg-[#0F172A] text-white transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex ${sidebarCollapsed ? "lg:w-20" : "lg:w-72"} w-72 flex-col transform bg-[#0F172A] text-white transition-all duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-20 shrink-0 items-center gap-3 px-8 border-b border-slate-800">
+        <div className={`flex h-20 shrink-0 items-center ${sidebarCollapsed ? "justify-center px-3" : "gap-3 px-8"} border-b border-slate-800`}>
           <img src="/logo.png" alt="CoachPlus Academy" className="size-9 rounded-lg" />
-          <span className="text-lg font-semibold tracking-tight">
+          {!sidebarCollapsed && <span className="text-lg font-semibold tracking-tight">
             CoachPlus <span className="text-white">Academy</span>
-          </span>
+          </span>}
         </div>
 
-        <div className="px-6 py-5 border-b border-slate-800 shrink-0">
+        <div className={`${sidebarCollapsed ? "px-3 py-4 flex justify-center" : "px-6 py-5"} border-b border-slate-800 shrink-0`}>
+          {sidebarCollapsed ? (
+            <Avatar user={displayUser} className="size-10 rounded-full bg-white text-slate-900 border border-white/20 font-bold text-sm shrink-0" />
+          ) : <>
             <p className="text-[9px] font-medium text-slate-500 uppercase tracking-widest mb-2.5">Signed in as</p>
             <div className="flex items-center gap-3">
                 <Avatar user={displayUser} className="size-10 rounded-full bg-white text-slate-900 border border-white/20 font-bold text-sm shrink-0" />
@@ -227,16 +249,17 @@ export default function DashboardLayout({
             <span className="mt-3 inline-block rounded-full bg-slate-800 text-slate-300 text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1">
                 {displayUser.role}
             </span>
+          </>}
         </div>
 
-        <nav className="flex-1 min-h-0 overflow-y-auto mt-6 px-4 space-y-5 pb-4">
+        <nav className={`flex-1 min-h-0 overflow-y-auto mt-6 ${sidebarCollapsed ? "px-2" : "px-4"} space-y-5 pb-4`}>
           {(() => {
             const hasSections = navItems.some((item) => !!item.section);
             if (!hasSections) {
               return (
                 <div className="space-y-1">
                   {navItems.map((item) => (
-                    <NavLink key={item.id} item={item} pathname={pathname} onClick={() => setSidebarOpen(false)} />
+                    <NavLink key={item.id} item={item} pathname={pathname} onClick={() => setSidebarOpen(false)} collapsed={sidebarCollapsed} />
                   ))}
                 </div>
               );
@@ -253,10 +276,10 @@ export default function DashboardLayout({
             });
             return groups.map((group) => (
               <div key={group.section}>
-                <p className="px-4 mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-500">{group.section}</p>
+                {!sidebarCollapsed && <p className="px-4 mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-500">{group.section}</p>}
                 <div className="space-y-1">
                   {group.items.map((item) => (
-                    <NavLink key={item.id} item={item} pathname={pathname} onClick={() => setSidebarOpen(false)} />
+                    <NavLink key={item.id} item={item} pathname={pathname} onClick={() => setSidebarOpen(false)} collapsed={sidebarCollapsed} />
                   ))}
                 </div>
               </div>
@@ -264,19 +287,20 @@ export default function DashboardLayout({
           })()}
         </nav>
 
-        <div className="shrink-0 border-t border-slate-800 w-full px-4 py-4 space-y-2">
+        <div className={`shrink-0 border-t border-slate-800 w-full ${sidebarCollapsed ? "px-2" : "px-4"} py-4 space-y-2`}>
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[13px] font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            title={sidebarCollapsed ? "Sign Out" : undefined}
+            className={`flex w-full items-center ${sidebarCollapsed ? "justify-center px-3" : "gap-3 px-4"} rounded-xl py-3.5 text-[13px] font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white`}
           >
             <FiLogOut className="size-5" />
-            Sign Out
+            {!sidebarCollapsed && "Sign Out"}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="lg:pl-72">
+      <div className={sidebarCollapsed ? "lg:pl-20 transition-[padding] duration-300" : "lg:pl-72 transition-[padding] duration-300"}>
         {/* Topbar */}
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/85 backdrop-blur-md">
           <div className="h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
@@ -287,6 +311,15 @@ export default function DashboardLayout({
               >
                 <FiMenu className="size-6" />
               </button>
+              {canCollapseSidebar && <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                className="hidden lg:inline-flex p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg"
+              >
+                {sidebarCollapsed ? <FiChevronRight className="size-5" /> : <FiChevronLeft className="size-5" />}
+              </button>}
               <div className="min-w-0">
                 <h1 className="text-base font-semibold text-slate-900 truncate leading-tight">{resolvedTitle}</h1>
                 <p className="text-[11px] font-medium text-slate-400 truncate">CoachPlus Academy · {user.role} portal</p>
