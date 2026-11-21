@@ -77,7 +77,7 @@ function NavLink({ item, pathname, onClick, collapsed }: { item: NavItem; pathna
       href={item.href}
       onClick={onClick}
       title={collapsed ? item.label : undefined}
-      className={`group relative flex w-full items-center ${collapsed ? "justify-center px-3" : "gap-3 px-4"} rounded-xl py-3 text-[13px] font-medium transition-all ${
+      className={`group relative flex w-full items-center ${collapsed ? "justify-center px-3" : "gap-2.5 px-3"} rounded-lg py-2.5 text-xs font-medium transition-all ${
         isActive
           ? "bg-white text-slate-900 shadow-lg shadow-black/20"
           : "text-slate-400 hover:bg-slate-800 hover:text-white"
@@ -88,7 +88,7 @@ function NavLink({ item, pathname, onClick, collapsed }: { item: NavItem; pathna
           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40"
         }`}
       />
-      <item.icon className="size-5 shrink-0" />
+      <item.icon className="size-[18px] shrink-0" />
       {!collapsed && <span className="truncate">{item.label}</span>}
       {!!item.badge && (
         <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-white text-[#0F172A] text-[9px] font-bold flex items-center justify-center">
@@ -274,7 +274,7 @@ export default function DashboardLayout({
           </>}
         </div>}
 
-        <nav className={`flex-1 min-h-0 overflow-y-auto mt-6 ${sidebarCollapsed ? "px-2" : "px-4"} space-y-5 pb-4`}>
+        <nav className={`scrollbar-hidden mt-3 min-h-0 flex-1 overflow-y-auto ${sidebarCollapsed ? "px-2" : "px-3"} space-y-3 pb-3`}>
           {(() => {
             const hasSections = navItems.some((item) => !!item.section);
             if (!hasSections) {
@@ -317,7 +317,7 @@ export default function DashboardLayout({
                   <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
                     <div>
                       <h2 className="text-sm font-semibold text-slate-900">Notifications</h2>
-                      <p className="text-[11px] text-slate-500">{unreadCount ? `${unreadCount} unread` : "You’re all caught up"}</p>
+                      <p className="text-[11px] text-slate-500">{unreadCount ? `${unreadCount} unread` : "You are all caught up"}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {unreadCount > 0 && (

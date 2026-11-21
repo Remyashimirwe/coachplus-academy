@@ -40,9 +40,9 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
   { id: "pending", label: "Pending" },
-  { id: "documents_needed", label: "Documents needed" },
+  { id: "documents_needed", label: "Documents" },
   { id: "shortlisted", label: "Shortlisted" },
-  { id: "assessment_scheduled", label: "Assessment scheduled" },
+  { id: "assessment_scheduled", label: "Assessment" },
   { id: "approved", label: "Accepted" },
   { id: "rejected", label: "Rejected" },
 ];
@@ -184,15 +184,15 @@ export default function TeachersView({ teacherApplications }: any) {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Teacher Applications</h1>
-          <p className="text-slate-500">Review, message, and decide on incoming teacher applications.</p>
+          <p className="text-xs text-slate-500">Review applications and update each candidate.</p>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-3">
+      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
         <div className="relative w-full lg:w-72">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
           <input
@@ -200,37 +200,42 @@ export default function TeachersView({ teacherApplications }: any) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or email..."
-            className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-3 text-xs text-slate-900 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
           />
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.id}
               onClick={() => setStatusFilter(f.id)}
-              className={`px-4 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-tight transition-all ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all ${
                 statusFilter === f.id
-                  ? "bg-[#0f172a] text-white shadow-lg shadow-slate-200"
-                  : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300"
+                  ? "bg-[#0f172a] text-white"
+                  : "border border-slate-200 bg-white text-slate-500 hover:border-slate-300"
               }`}
             >
               {f.label}
+              <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${statusFilter === f.id ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"}`}>
+                {f.id === "all" ? applications.length : applications.filter((app) => app.status === f.id).length}
+              </span>
             </button>
           ))}
         </div>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+          aria-label="Sort applications"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
         >
           {SORT_OPTIONS.map((s) => (
-            <option key={s.id} value={s.id}>{s.label}</option>
+            <option key={s.id} value={s.id}>{s.label.replace(" first", "")}</option>
           ))}
         </select>
         <select
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
+          aria-label="Filter by subject"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
         >
           <option value="">All subjects</option>
           {subjectOptions.map((s) => (
@@ -241,14 +246,14 @@ export default function TeachersView({ teacherApplications }: any) {
 
       <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, i) => (
-          <div key={i} className="rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+          <div key={i} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
             <div className="flex items-center gap-3">
               <div className={`size-9 rounded-xl ${stat.color} text-white flex items-center justify-center shrink-0`}>
                 <stat.icon className="size-4" />
               </div>
               <div className="min-w-0">
-                <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest truncate">{stat.label}</h3>
-                <p className="text-lg font-bold text-slate-900 mt-0.5">{stat.value}</p>
+                <h3 className="truncate text-[9px] font-semibold uppercase tracking-wide text-slate-500">{stat.label}</h3>
+                <p className="mt-0.5 text-base font-bold text-slate-900">{stat.value}</p>
               </div>
             </div>
           </div>
@@ -265,10 +270,10 @@ export default function TeachersView({ teacherApplications }: any) {
               <table className="w-full text-left">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Applicant</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Contact</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500">Status</th>
-                    <th className="px-5 py-3 text-[10px] font-semibold uppercase text-slate-500 text-right">Actions</th>
+                    <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Applicant</th>
+                    <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Contact</th>
+                    <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                    <th className="px-4 py-2.5 text-right text-[9px] font-semibold uppercase tracking-wide text-slate-500">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -277,7 +282,7 @@ export default function TeachersView({ teacherApplications }: any) {
                     const decision = rowDecision[app.id];
                     return (
                       <tr key={app.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="size-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold text-sm shrink-0 overflow-hidden">
                               {app.documents?.find((d: any) => d.kind === "photo") ? (
@@ -298,12 +303,12 @@ export default function TeachersView({ teacherApplications }: any) {
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           <p className="text-[11px] font-semibold text-slate-600 truncate max-w-[200px]">{app.email}</p>
                           {app.phone && <p className="text-[11px] text-slate-400 truncate max-w-[200px]">{app.phone}</p>}
                         </td>
 
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-tighter ${
                               STATUS_STYLES[app.status] || "bg-slate-100 text-slate-600"
@@ -313,7 +318,7 @@ export default function TeachersView({ teacherApplications }: any) {
                             {STATUS_LABELS[app.status] || app.status}
                           </span>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1.5">
                             {rowError[app.id] && (
                               <FiAlertCircle className="size-4 text-rose-500" title={rowError[app.id]} />

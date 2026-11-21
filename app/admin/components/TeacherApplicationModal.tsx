@@ -23,6 +23,7 @@ import {
   FiExternalLink,
   FiCheckCircle,
   FiAlertCircle,
+  FiEye,
   FiCopy,
   FiCheck,
 } from "react-icons/fi";
@@ -92,8 +93,8 @@ export default function TeacherApplicationModal({
 }: {
   app: any;
   onClose: () => void;
-  onApproved: (id: number) => void;
-  onDenied: (id: number) => void;
+  onApproved: (id: number, patch?: Record<string, any>) => void;
+  onDenied: (id: number, patch?: Record<string, any>) => void;
   pageMode?: boolean;
   onStatusChanged: (
     id: number,
@@ -107,7 +108,14 @@ export default function TeacherApplicationModal({
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [approveInviteUrl, setApproveInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [previewEmail, setPreviewEmail] = useState<{ subject: string; body: string } | null>(null);
+  const [previewEmail, setPreviewEmail] = useState<{
+    stage: string;
+    recipient: string;
+    subject: string;
+    body: string;
+    queued: boolean;
+    saved: boolean;
+  } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
@@ -121,6 +129,9 @@ export default function TeacherApplicationModal({
   const [stageChanging, setStageChanging] = useState(false);
   const [activePanel, setActivePanel] = useState<"assessment" | "documents" | null>(null);
   const [clock, setClock] = useState<number | null>(null);
+  const [savingEmailDraft, setSavingEmailDraft] = useState(false);
+  const [emailDraftSaved, setEmailDraftSaved] = useState(false);
+  const [previewStage, setPreviewStage] = useState<string>(app.pendingStatus || "shortlisted");
 
   // Editable Stage 4 details. Prefilled from what was last saved so an admin
   // can change the time/date and resend without retyping everything.
@@ -189,7 +200,7 @@ export default function TeacherApplicationModal({
   }
 
   async function handleApprove() {
-    if (!confirm(`Approve ${app.fullName} as an official teacher? An account will be created and an activation email will be sent.`)) return;
+    if (!confirm(`Approve ${app.fullName}? Their account email will be sent in 1 minute.`)) return;
 
     setDecisionError(null);
     try {
@@ -197,7 +208,7 @@ export default function TeacherApplicationModal({
       const data = await res.json();
       if (res.ok) {
         if (data.inviteUrl) setApproveInviteUrl(data.inviteUrl);
-        onApproved(app.id);
+        onApproved(app.id, data.application);
         if (data.emailSent === false) {
           setDecisionError(data.message || "The account was approved, but its email could not be sent. Use the invite link below.");
         }
@@ -224,7 +235,7 @@ export default function TeacherApplicationModal({
       const res = await fetch(`/api/admin/teacher-applications/${app.id}/deny`, { method: "POST" });
       const data = await res.json();
       if (res.ok) {
-        onDenied(app.id);
+        onDenied(app.id, data.application);
       } else {
         setDecisionError(data.message || "Failed to deny application");
       }
@@ -242,7 +253,7 @@ export default function TeacherApplicationModal({
       );
       const data = await res.json();
       if (res.ok) {
-        onStatusChanged(app.id, "shortlisted");
+        onStatusChanged(app.id, "shortlisted", data.application || {});
       } else {
         setShortlistError(data.message || "Failed to shortlist application");
       }
@@ -285,13 +296,14 @@ export default function TeacherApplicationModal({
 
       if (res.ok) {
         onStatusChanged(app.id, "assessment_scheduled", {
+          ...(data.application || {}),
           assessmentDate: date,
           assessmentTime: time,
           assessmentMode: mode,
           assessmentLocation: location,
           assessmentContactPhone: assessmentContactPhone.trim(),
         });
-        setScheduleSuccess("Assessment details saved and the Stage 4 email was sent.");
+        setScheduleSuccess("Saved. Stage 4 email queued for 1 minute.");
         setActivePanel(null);
       } else {
         // The backend saves the fields even when the email fails, so keep the
@@ -345,11 +357,12 @@ export default function TeacherApplicationModal({
 
       if (res.ok) {
         onStatusChanged(app.id, "documents_needed", {
+          ...(data.application || {}),
           missingDocument: document,
           missingDocumentReason: reason,
           reuploadLink: link,
         });
-        setMissingDocsSuccess("Document request saved and the Stage 2 email was sent.");
+        setMissingDocsSuccess("Saved. Stage 2 email queued for 1 minute.");
         setActivePanel(null);
       } else {
         if (data.application) {
@@ -380,7 +393,7 @@ export default function TeacherApplicationModal({
   );
   const hasDocumentRequest = Boolean(app.missingDocument);
   const fieldClass =
-    "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-slate-700 outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all";
+    "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20";
   const labelClass =
     "mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400";
   const statusOptions: Record<string, string[]> = {
@@ -409,7 +422,16 @@ export default function TeacherApplicationModal({
       });
       const data = await res.json();
       if (res.ok) {
-        setPreviewEmail({ subject: data.subject, body: data.bodyHtml });
+        setPreviewStage(data.stage);
+        setEmailDraftSaved(Boolean(data.saved));
+        setPreviewEmail({
+          stage: data.stage,
+          recipient: data.recipient,
+          subject: data.subject,
+          body: data.body,
+          queued: data.queued,
+          saved: Boolean(data.saved),
+        });
       } else {
         setPreviewError(data.message || "Failed to fetch preview");
       }
@@ -417,6 +439,35 @@ export default function TeacherApplicationModal({
       setPreviewError("Network error while fetching preview");
     } finally {
       setPreviewLoading(false);
+    }
+  }
+
+  async function saveEmailDraft() {
+    if (!previewEmail || !previewEmail.queued) return;
+    setSavingEmailDraft(true);
+    setPreviewError(null);
+    try {
+      const res = await fetch(`/api/admin/teacher-applications/${app.id}/email-draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: previewEmail.stage, subject: previewEmail.subject, body: previewEmail.body }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPreviewError(data.message || "Could not save email draft.");
+        return;
+      }
+      const patch = {
+        pendingEmailSubject: previewEmail.subject.trim(),
+        pendingEmailBody: previewEmail.body.trim(),
+      };
+      onStatusChanged(app.id, app.status, patch);
+      setPreviewEmail((current) => current ? { ...current, ...patch, saved: true } : current);
+      setEmailDraftSaved(true);
+    } catch {
+      setPreviewError("Could not save email draft. Check your connection.");
+    } finally {
+      setSavingEmailDraft(false);
     }
   }
 
@@ -430,6 +481,8 @@ export default function TeacherApplicationModal({
           emailScheduledAt: null,
           emailScheduledFor: null,
           pendingStatus: null,
+          pendingEmailSubject: null,
+          pendingEmailBody: null,
         });
         setPreviewEmail(null);
       }
@@ -778,8 +831,7 @@ export default function TeacherApplicationModal({
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <p className="text-[12px] text-slate-500">
-                  Enter the exact date, time, mode and location/link. Saving sends
-                  the Stage 4 confirmation email — editing and saving again resends it.
+                  Add the date, time and meeting details. The email sends in 1 minute. Save again to resend.
                 </p>
                 {hasAssessmentDetails && (
                   <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
@@ -916,8 +968,7 @@ export default function TeacherApplicationModal({
               }`}
             >
               <p className="text-[12px] text-slate-500">
-                Tell the applicant which document needs attention and why. Saving
-                sends the Stage 2 email with the re-upload link.
+                Add the document, reason and upload link. The email sends in 1 minute.
               </p>
 
               {canRequestDocuments ? (
@@ -1111,26 +1162,38 @@ export default function TeacherApplicationModal({
               </p>
             )}
           </div>
-          {statusOptions[app.status] && (
+          {(statusOptions[app.status] || app.pendingStatus) && (
             <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm font-semibold text-slate-700">
                   <span>Application stage</span>
                   <select
                     value={app.status}
-                    disabled={stageChanging}
+                    disabled={stageChanging || !statusOptions[app.status]}
                     onChange={(event) => void changeStatus(event.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20 disabled:opacity-60 sm:max-w-md"
                   >
                     <option value={app.status}>{statusLabels[app.status] || app.status}</option>
-                    {statusOptions[app.status].map((status) => (
+                    {(statusOptions[app.status] || []).map((status) => (
                       <option key={status} value={status}>{statusLabels[status]}</option>
                     ))}
                   </select>
                 </label>
-                <p className="text-xs leading-relaxed text-slate-500 sm:max-w-xs">
-                  Stage emails send in 1 minute. You can cancel before then.
-                </p>
+                <div className="flex flex-col items-start gap-2 sm:max-w-xs">
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    Stage emails send in 1 minute. You can cancel before then.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void handlePreviewEmail(app.pendingStatus || previewStage)}
+                    disabled={previewLoading}
+                    className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-50 disabled:opacity-60"
+                  >
+                    <FiEye className="size-4" />
+                    {previewLoading ? "Loading..." : "Preview / edit email"}
+                  </button>
+                  {previewError && <p className="text-[11px] font-medium text-rose-600">{previewError}</p>}
+                </div>
               </div>
               {app.pendingStatus && app.emailScheduledFor && (() => {
                 const secondsLeft = clock === null
@@ -1157,6 +1220,90 @@ export default function TeacherApplicationModal({
           )}
         </div>
       </div>
+      {previewEmail && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 p-3 backdrop-blur-sm sm:p-6" onClick={() => setPreviewEmail(null)}>
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="email-preview-title"
+            className="flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:rounded-3xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-4 py-4 sm:px-6">
+              <div>
+                <h2 id="email-preview-title" className="text-base font-semibold text-slate-900">Email preview</h2>
+                <p className="mt-1 text-xs text-slate-500">Review or edit the message for {previewEmail.stage.replaceAll("_", " ")}.</p>
+              </div>
+              <button type="button" onClick={() => setPreviewEmail(null)} aria-label="Close email preview" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+                <FiX className="size-5" />
+              </button>
+            </header>
+            <div className="min-h-0 space-y-4 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+              <label className="block text-xs font-semibold text-slate-600">
+                Email stage
+                <select
+                  value={previewEmail.stage}
+                  onChange={(event) => void handlePreviewEmail(event.target.value)}
+                  disabled={previewLoading}
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                >
+                  {Object.entries(statusLabels).filter(([stage]) => stage !== "pending").map(([stage, label]) => (
+                    <option key={stage} value={stage}>{label}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                <p>From: <span className="font-semibold text-slate-800">CoachPlus Academy</span> <span className="text-slate-400">via Resend</span></p>
+                <p className="mt-1">To: <span className="font-semibold text-slate-800">{previewEmail.recipient}</span></p>
+              </div>
+              <label className="block text-xs font-semibold text-slate-600">
+                Subject
+                <input
+                  value={previewEmail.subject}
+                  maxLength={180}
+                  onChange={(event) => {
+                    setEmailDraftSaved(false);
+                    setPreviewEmail((current) => current ? { ...current, subject: event.target.value } : current);
+                  }}
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                />
+              </label>
+              <label className="block text-xs font-semibold text-slate-600">
+                Message
+                <textarea
+                  value={previewEmail.body}
+                  maxLength={12000}
+                  rows={12}
+                  onChange={(event) => {
+                    setEmailDraftSaved(false);
+                    setPreviewEmail((current) => current ? { ...current, body: event.target.value } : current);
+                  }}
+                  className="mt-1.5 w-full resize-y rounded-xl border border-slate-200 px-3 py-2.5 text-sm leading-relaxed text-slate-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                />
+                <span className="mt-1 block text-right font-normal text-slate-400">{previewEmail.body.length}/12,000</span>
+              </label>
+              {previewEmail.stage === "approved" && (
+                <p className="text-[11px] text-slate-500">The account setup link is added when this email sends.</p>
+              )}
+              {previewError && <p className="text-xs font-medium text-rose-600">{previewError}</p>}
+              {!previewEmail.queued && <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-xs text-amber-800">Queue this stage first. Then you can save your edits before the email sends.</p>}
+              {emailDraftSaved && <p className="rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">Email saved and queued through Resend.</p>}
+            </div>
+            <footer className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
+              <button type="button" onClick={() => setPreviewEmail(null)} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">Close</button>
+              <button
+                type="button"
+                onClick={() => void saveEmailDraft()}
+                disabled={!previewEmail.queued || savingEmailDraft || emailDraftSaved}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <FiCheckCircle className="size-4" />
+                {savingEmailDraft ? "Saving..." : "Save email"}
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
       <ImageLightboxModal
         isOpen={!!lightboxImage}
         onClose={() => setLightboxImage(null)}

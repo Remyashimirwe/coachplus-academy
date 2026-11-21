@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
+import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
 
 export async function POST(
   request: NextRequest,
@@ -27,6 +28,7 @@ export async function POST(
 
   try {
     const scheduledFor = new Date(Date.now() + 60 * 1000);
+    const emailDraft = buildTeacherApplicationEmailDraft("shortlisted", application);
 
     await db.teacherApplication.update({
       where: { id: applicationId },
@@ -34,12 +36,16 @@ export async function POST(
         emailScheduledAt: new Date(),
         emailScheduledFor: scheduledFor,
         pendingStatus: "shortlisted",
+        pendingEmailSubject: emailDraft.subject,
+        pendingEmailBody: emailDraft.body,
       },
     });
 
+    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+
     return NextResponse.json({ 
       message: "Shortlisting email queued. It will send in 1 minute. You can cancel or edit it before then.", 
-      application 
+      application: updatedApp,
     });
   } catch (error: any) {
     return NextResponse.json({ message: error.message || "Failed to shortlist application" }, { status: 500 });

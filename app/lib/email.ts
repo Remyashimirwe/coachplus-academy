@@ -61,6 +61,42 @@ function signature(label = "The") {
   `;
 }
 
+export async function sendCustomApplicationEmail({
+  to,
+  subject,
+  body,
+}: {
+  to: string;
+  subject: string;
+  body: string;
+}) {
+  const client = getResendClient();
+  if (!client) {
+    return { success: false, message: "RESEND_API_KEY is not configured" };
+  }
+
+  try {
+    const safeBody = escapeHtml(body)
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#E91E63;text-decoration:underline;">$1</a>')
+      .replace(/\r?\n/g, "<br />");
+    const { error } = await client.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: subject.trim(),
+      html: renderEmail({ bodyHtml: `<div>${safeBody}</div>` }),
+    });
+    if (error) {
+      console.error("Failed to send edited teacher application email:", error);
+      return { success: false, message: error.message };
+    }
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Email send failed";
+    console.error("Failed to send edited teacher application email:", error);
+    return { success: false, message };
+  }
+}
+
 export async function sendInviteEmail({
   to,
   name,

@@ -21,6 +21,8 @@ export async function POST(
         emailScheduledAt: null,
         emailScheduledFor: null,
         pendingStatus: null,
+        pendingEmailSubject: null,
+        pendingEmailBody: null,
       },
     });
     return NextResponse.json({ message: "Scheduled email cancelled" });

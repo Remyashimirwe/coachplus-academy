@@ -6,7 +6,8 @@ import {
   sendAssessmentScheduledEmail, 
   sendMissingDocumentsEmail,
   sendApplicationApprovedEmail,
-  sendApplicationDeniedEmail
+  sendApplicationDeniedEmail,
+  sendCustomApplicationEmail,
 } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
@@ -30,10 +31,13 @@ export async function POST() {
         .join(", ");
 
       let emailResult: any = { success: false, message: "Unknown stage" };
+      const hasEmailDraft = Boolean(app.pendingEmailSubject && app.pendingEmailBody);
 
       switch (app.pendingStatus) {
         case "shortlisted":
-          emailResult = await sendShortlistedEmail({
+          emailResult = hasEmailDraft
+            ? await sendCustomApplicationEmail({ to: app.email, subject: app.pendingEmailSubject!, body: app.pendingEmailBody! })
+            : await sendShortlistedEmail({
             to: app.email,
             name: app.fullName,
             subjects: app.subjects,
@@ -41,7 +45,9 @@ export async function POST() {
           });
           break;
         case "assessment_scheduled":
-          emailResult = await sendAssessmentScheduledEmail({
+          emailResult = hasEmailDraft
+            ? await sendCustomApplicationEmail({ to: app.email, subject: app.pendingEmailSubject!, body: app.pendingEmailBody! })
+            : await sendAssessmentScheduledEmail({
             to: app.email,
             name: app.fullName,
             subjects: app.subjects,
@@ -54,7 +60,9 @@ export async function POST() {
           });
           break;
         case "documents_needed":
-          emailResult = await sendMissingDocumentsEmail({
+          emailResult = hasEmailDraft
+            ? await sendCustomApplicationEmail({ to: app.email, subject: app.pendingEmailSubject!, body: app.pendingEmailBody! })
+            : await sendMissingDocumentsEmail({
             to: app.email,
             name: app.fullName,
             subjects: app.subjects,
@@ -67,22 +75,24 @@ export async function POST() {
         case "approved": {
           // Check if user already exists
           const existingUser = await db.user.findUnique({ where: { email: app.email } });
-          if (existingUser) {
+          if (existingUser && !(
+            existingUser.role === "TEACHER" &&
+            existingUser.isFirstLogin &&
+            existingUser.inviteToken
+          )) {
             emailResult = { success: false, message: "A user with this email already exists" };
             break;
           }
 
-          const inviteToken = crypto.randomBytes(32).toString("hex");
-          const inviteTokenExpiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
-
-          const user = await db.user.create({
+          const inviteToken = existingUser?.inviteToken || crypto.randomBytes(32).toString("hex");
+          const user = existingUser || await db.user.create({
             data: {
               name: app.fullName,
               email: app.email,
               role: "TEACHER",
               isFirstLogin: true,
               inviteToken,
-              inviteTokenExpiresAt,
+              inviteTokenExpiresAt: new Date(Date.now() + INVITE_EXPIRY_MS),
               teacherProfile: {
                 create: {
                   phone: app.phone,
@@ -103,34 +113,48 @@ export async function POST() {
             ? "Online, Home, or Center"
             : "Home or Center";
 
-          emailResult = await sendApplicationApprovedEmail({
-            to: app.email,
-            name: app.fullName,
-            inviteUrl,
-            subjects: app.subjects,
-            coachingModes,
-            portalOrAppLink: `${APP_URL}/teacher`,
-            guidelinesLink: `${APP_URL}/terms-of-service`,
-            location: location || undefined,
-          });
+          emailResult = hasEmailDraft
+            ? await sendCustomApplicationEmail({
+                to: app.email,
+                subject: app.pendingEmailSubject!,
+                body: app.pendingEmailBody!.includes("{{INVITE_LINK}}")
+                  ? app.pendingEmailBody!.replaceAll("{{INVITE_LINK}}", inviteUrl)
+                  : `${app.pendingEmailBody!}\n\nSet up your teacher account: ${inviteUrl}`,
+              })
+            : await sendApplicationApprovedEmail({
+                to: app.email,
+                name: app.fullName,
+                inviteUrl,
+                subjects: app.subjects,
+                coachingModes,
+                portalOrAppLink: `${APP_URL}/teacher`,
+                guidelinesLink: `${APP_URL}/terms-of-service`,
+                location: location || undefined,
+              });
 
           if (emailResult.success) {
-            await notifyUsers({
-              userIds: [user.id],
-              title: "Welcome to CoachPlus Academy",
-              message: "Your teacher application was approved. Check your email for the link to set up your password.",
-              type: "success",
-            });
-            await notifyAdmins({
-              title: "Teacher application approved",
-              message: `${app.fullName} was approved as a teacher.`,
-              type: "success",
-            });
+            try {
+              await notifyUsers({
+                userIds: [user.id],
+                title: "Welcome to CoachPlus Academy",
+                message: "Your teacher application was approved. Check your email for the link to set up your password.",
+                type: "success",
+              });
+              await notifyAdmins({
+                title: "Teacher application approved",
+                message: `${app.fullName} was approved as a teacher.`,
+                type: "success",
+              });
+            } catch (notificationError) {
+              console.error("Approval email sent, but notification failed:", notificationError);
+            }
           }
           break;
         }
         case "rejected":
-          emailResult = await sendApplicationDeniedEmail({
+          emailResult = hasEmailDraft
+            ? await sendCustomApplicationEmail({ to: app.email, subject: app.pendingEmailSubject!, body: app.pendingEmailBody! })
+            : await sendApplicationDeniedEmail({
             to: app.email,
             name: app.fullName,
             subjects: app.subjects,
@@ -147,6 +171,8 @@ export async function POST() {
             emailScheduledAt: null,
             emailScheduledFor: null,
             pendingStatus: null,
+            pendingEmailSubject: null,
+            pendingEmailBody: null,
             stageUpdatedAt: new Date(),
           },
         });

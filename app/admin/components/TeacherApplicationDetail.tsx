@@ -22,8 +22,8 @@ export default function TeacherApplicationDetail({ application }: { application:
         app={app}
         pageMode
         onClose={() => router.push("/admin/teachers")}
-        onApproved={() => setApp((current: any) => ({ ...current, status: "approved" }))}
-        onDenied={() => setApp((current: any) => ({ ...current, status: "rejected" }))}
+        onApproved={(_id, patch) => setApp((current: any) => ({ ...current, ...(patch || {}), status: "approved" }))}
+        onDenied={(_id, patch) => setApp((current: any) => ({ ...current, ...(patch || {}), status: "rejected" }))}
         onStatusChanged={(_id, status, patch) =>
           setApp((current: any) => ({ ...current, ...(patch || {}), status }))
         }
