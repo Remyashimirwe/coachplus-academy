@@ -1,7 +1,9 @@
+import { createHash, randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
+import { TEACHER_APPLICATION_DOCUMENTS } from "@/app/lib/teacherApplicationDocuments";
 
 export async function POST(
   request: NextRequest,
@@ -19,11 +21,14 @@ export async function POST(
   }
 
   const body = await request.json();
-  const { missingDocument, issueReason, reuploadLink } = body;
+  const { missingDocumentKind, issueReason } = body;
+  const documentType = TEACHER_APPLICATION_DOCUMENTS.find(
+    (document) => document.kind === missingDocumentKind,
+  );
 
-  if (!missingDocument || !issueReason || !reuploadLink) {
+  if (!documentType || !String(issueReason || "").trim()) {
     return NextResponse.json(
-      { error: "missingDocument, issueReason, and reuploadLink are required" },
+      { error: "Choose a document and explain what needs to be fixed." },
       { status: 400 }
     );
   }
@@ -37,20 +42,29 @@ export async function POST(
   }
 
   try {
+    const token = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const baseUrl = (process.env.APP_URL || "https://www.coachplusacademy.com").replace(/\/$/, "");
+    const uploadUrl = new URL("/reupload-documents", baseUrl);
+    uploadUrl.searchParams.set("token", token);
+    const reuploadLink = uploadUrl.toString();
     const scheduledFor = new Date(Date.now() + 60 * 1000);
     const emailDraft = buildTeacherApplicationEmailDraft("documents_needed", {
       ...application,
-      missingDocument: String(missingDocument).trim(),
+      missingDocument: documentType.label,
       missingDocumentReason: String(issueReason).trim(),
-      reuploadLink: String(reuploadLink).trim(),
+      reuploadLink,
     });
 
     await db.teacherApplication.update({
       where: { id: applicationId },
       data: {
-        missingDocument: String(missingDocument).trim(),
+        missingDocument: documentType.label,
+        missingDocumentKind: documentType.kind,
         missingDocumentReason: String(issueReason).trim(),
-        reuploadLink: String(reuploadLink).trim(),
+        reuploadLink,
+        documentUploadTokenHash: tokenHash,
+        documentUploadTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         emailScheduledAt: new Date(),
         emailScheduledFor: scheduledFor,
         pendingStatus: "documents_needed",
@@ -62,7 +76,7 @@ export async function POST(
     const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
 
     return NextResponse.json({ 
-      message: "Document request email queued. It will send in 1 minute. You can cancel or edit it before then.", 
+      message: "Upload link created. The email is queued for 1 minute.",
       application: updatedApp 
     });
   } catch (error) {

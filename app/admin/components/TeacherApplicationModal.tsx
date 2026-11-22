@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ImageLightboxModal from "@/app/components/ImageLightboxModal";
+import { TEACHER_APPLICATION_DOCUMENTS } from "@/app/lib/teacherApplicationDocuments";
 import {
   FiX,
   FiMail,
@@ -131,7 +132,10 @@ export default function TeacherApplicationModal({
   const [clock, setClock] = useState<number | null>(null);
   const [savingEmailDraft, setSavingEmailDraft] = useState(false);
   const [emailDraftSaved, setEmailDraftSaved] = useState(false);
+  const [copiedReuploadLink, setCopiedReuploadLink] = useState(false);
   const [previewStage, setPreviewStage] = useState<string>(app.pendingStatus || "shortlisted");
+  const [reviewDocuments, setReviewDocuments] = useState<any[]>(app.documents || []);
+  const [documentsReuploadedAt, setDocumentsReuploadedAt] = useState(app.documentsReuploadedAt || "");
 
   // Editable Stage 4 details. Prefilled from what was last saved so an admin
   // can change the time/date and resend without retyping everything.
@@ -144,12 +148,12 @@ export default function TeacherApplicationModal({
   );
 
   // Editable Stage 2 details.
-  const [missingDocument, setMissingDocument] = useState(app.missingDocument || "");
+  const [missingDocumentKind, setMissingDocumentKind] = useState(app.missingDocumentKind || "");
   const [missingDocumentReason, setMissingDocumentReason] = useState(
     app.missingDocumentReason || "",
   );
   const [reuploadLink, setReuploadLink] = useState(
-    app.reuploadLink || "https://www.coachplusacademy.com/become-a-teacher",
+    app.reuploadLink || "",
   );
 
   useEffect(() => {
@@ -170,6 +174,24 @@ export default function TeacherApplicationModal({
     const timer = window.setInterval(() => setClock(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  async function refreshReviewDocuments() {
+    try {
+      const response = await fetch(`/api/admin/teacher-applications/${app.id}`, { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setReviewDocuments(data.documents || []);
+      setDocumentsReuploadedAt(data.documentsReuploadedAt || "");
+    } catch {
+      // Keep the already-loaded document list when a background refresh fails.
+    }
+  }
+
+  useEffect(() => {
+    void refreshReviewDocuments();
+    const timer = window.setInterval(refreshReviewDocuments, 15_000);
+    return () => window.clearInterval(timer);
+  }, [app.id]);
 
   async function handleSendMessage() {
     const trimmed = message.trim();
@@ -330,11 +352,12 @@ export default function TeacherApplicationModal({
     setMissingDocsError(null);
     setMissingDocsSuccess(null);
 
-    const document = missingDocument.trim();
+    const documentType = TEACHER_APPLICATION_DOCUMENTS.find(
+      (item) => item.kind === missingDocumentKind,
+    );
     const reason = missingDocumentReason.trim();
-    const link = reuploadLink.trim();
-    if (!document || !reason || !link) {
-      setMissingDocsError("Document, reason and re-upload link are all required.");
+    if (!documentType || !reason) {
+      setMissingDocsError("Choose the document and add a reason.");
       setActivePanel("documents");
       return;
     }
@@ -347,9 +370,8 @@ export default function TeacherApplicationModal({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            missingDocument: document,
+            missingDocumentKind: documentType.kind,
             issueReason: reason,
-            reuploadLink: link,
           }),
         },
       );
@@ -358,16 +380,19 @@ export default function TeacherApplicationModal({
       if (res.ok) {
         onStatusChanged(app.id, "documents_needed", {
           ...(data.application || {}),
-          missingDocument: document,
+          missingDocument: data.application?.missingDocument || documentType.label,
+          missingDocumentKind: documentType.kind,
           missingDocumentReason: reason,
-          reuploadLink: link,
+          reuploadLink: data.application?.reuploadLink || "",
         });
+        setReuploadLink(data.application?.reuploadLink || "");
         setMissingDocsSuccess("Saved. Stage 2 email queued for 1 minute.");
         setActivePanel(null);
       } else {
         if (data.application) {
           onStatusChanged(app.id, data.application.status || app.status, {
             missingDocument: data.application.missingDocument,
+            missingDocumentKind: data.application.missingDocumentKind,
             missingDocumentReason: data.application.missingDocumentReason,
             reuploadLink: data.application.reuploadLink,
           });
@@ -378,6 +403,17 @@ export default function TeacherApplicationModal({
       setMissingDocsError("Failed to send missing documents email. Check your connection and try again.");
     } finally {
       setSavingMissingDocs(false);
+    }
+  }
+
+  async function copyReuploadLink() {
+    if (!reuploadLink) return;
+    try {
+      await navigator.clipboard.writeText(reuploadLink);
+      setCopiedReuploadLink(true);
+      window.setTimeout(() => setCopiedReuploadLink(false), 2000);
+    } catch {
+      setMissingDocsError("Could not copy the link. Select and copy it manually.");
     }
   }
 
@@ -777,25 +813,41 @@ export default function TeacherApplicationModal({
 
           {/* Documents */}
           <div className="space-y-4">
-            <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <FiFileText /> Documents
-            </h4>
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <FiFileText /> Documents
+              </h4>
+              <button type="button" onClick={refreshReviewDocuments} className="text-[10px] font-semibold text-slate-500 hover:text-slate-900">
+                Refresh
+              </button>
+            </div>
             <div className="pt-1 flex flex-wrap gap-3">
-              {app.documents && app.documents.length > 0 ? (
-                app.documents
-                  .filter((doc: any) => doc.kind !== "photo")
-                  .map((doc: any) => (
+              {reviewDocuments.length > 0 ? (
+                reviewDocuments
+                  .filter((doc: any) => {
+                    if (doc.kind !== "photo") return true;
+                    return Boolean(
+                      documentsReuploadedAt &&
+                      new Date(doc.createdAt).getTime() >= new Date(documentsReuploadedAt).getTime(),
+                    );
+                  })
+                  .map((doc: any) => {
+                    const isReupload = Boolean(
+                      documentsReuploadedAt &&
+                      new Date(doc.createdAt).getTime() >= new Date(documentsReuploadedAt).getTime(),
+                    );
+                    return (
                     <div key={doc.id} className="flex items-center gap-1.5">
                       <a
                         href={documentUrl(doc.id)}
                         target="_blank"
                         rel="noopener noreferrer"
                         title={`Preview ${doc.fileName}`}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"
+                        className={`flex items-center gap-2 rounded-xl border px-4 py-2 transition-all ${isReupload ? "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100" : "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}`}
                       >
                         <FiExternalLink />
                         <span className="text-[11px] font-semibold uppercase tracking-tight">
-                          Preview {DOCUMENT_LABELS[doc.kind] || doc.kind}
+                          {isReupload ? "Review re-upload" : `Preview ${DOCUMENT_LABELS[doc.kind] || doc.kind}`}
                         </span>
                       </a>
                       <a
@@ -807,7 +859,8 @@ export default function TeacherApplicationModal({
                         <FiDownload />
                       </a>
                     </div>
-                  ))
+                    );
+                  })
               ) : (
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl text-slate-500">
                   <FiFileText /> <span className="text-[11px] font-semibold uppercase tracking-tight">No documents uploaded</span>
@@ -968,7 +1021,7 @@ export default function TeacherApplicationModal({
               }`}
             >
               <p className="text-[12px] text-slate-500">
-                Add the document, reason and upload link. The email sends in 1 minute.
+                Choose the document and reason. We’ll create a secure upload link and email it.
               </p>
 
               {canRequestDocuments ? (
@@ -976,13 +1029,19 @@ export default function TeacherApplicationModal({
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
                       <label className={labelClass}>Document needed</label>
-                      <input
-                        type="text"
-                        value={missingDocument}
-                        onChange={(event) => setMissingDocument(event.target.value)}
-                        placeholder="e.g. National ID, Diploma, Criminal Record Certificate"
+                      <select
+                        value={missingDocumentKind}
+                        onChange={(event) => {
+                          const kind = event.target.value;
+                          setMissingDocumentKind(kind);
+                        }}
                         className={fieldClass}
-                      />
+                      >
+                        <option value="">Choose a document</option>
+                        {TEACHER_APPLICATION_DOCUMENTS.map((document) => (
+                          <option key={document.kind} value={document.kind}>{document.label}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className={labelClass}>Reason</label>
@@ -995,14 +1054,22 @@ export default function TeacherApplicationModal({
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>Re-upload link</label>
-                      <input
-                        type="url"
-                        value={reuploadLink}
-                        onChange={(event) => setReuploadLink(event.target.value)}
-                        placeholder="https://..."
-                        className={fieldClass}
-                      />
+                      <label className={labelClass}>Secure upload link</label>
+                      {reuploadLink ? (
+                        <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2">
+                          <a href={reuploadLink} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 break-all px-2 py-1 text-[11px] font-medium text-blue-700 underline">
+                            {reuploadLink}
+                          </a>
+                          <button type="button" onClick={copyReuploadLink} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-200">
+                            {copiedReuploadLink ? <FiCheck /> : <FiCopy />}
+                            {copiedReuploadLink ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2.5 text-[11px] text-slate-500">
+                          Created when you send the request. Link expires in 7 days.
+                        </p>
+                      )}
                     </div>
                   </div>
 

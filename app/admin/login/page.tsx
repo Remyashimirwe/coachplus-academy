@@ -140,6 +140,9 @@ export default function AdminLoginPage() {
                       {showPassword ? <FiEyeOff className="size-5" /> : <FiEye className="size-5" />}
                     </button>
                   </div>
+                  <p className="ml-1 text-[11px] leading-5 text-slate-500">
+                    First sign-in: use your email as the temporary password. After email verification, you’ll set a new password.
+                  </p>
                 </div>
 
                 <button

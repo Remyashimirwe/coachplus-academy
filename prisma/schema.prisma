@@ -304,8 +304,11 @@ model TeacherApplication {
   // Stage 2 — missing/unclear document request. Stored so the admin can reopen
   // the application, edit the wording and resend the same stage email.
   missingDocument       String @default("")
+  missingDocumentKind   String?
   missingDocumentReason String @default("")
   reuploadLink          String @default("")
+  documentUploadTokenHash String?
+  documentUploadTokenExpiresAt DateTime?
 
   // Auto-document-clear: tracks when documents were re-uploaded after being
   // flagged as missing/unclear, so the system can auto-clear the status.

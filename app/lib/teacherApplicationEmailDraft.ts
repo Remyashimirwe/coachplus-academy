@@ -36,7 +36,7 @@ export function buildTeacherApplicationEmailDraft(
     },
     documents_needed: {
       subject: "Please update a document on your teacher application",
-      body: `Dear ${application.fullName},\n\nPlease update this document so we can continue reviewing your application.\n\nDocument: ${application.missingDocument || "Not set"}\nReason: ${application.missingDocumentReason || "Not set"}\nUpload link: ${application.reuploadLink || "Not set"}\n\nPlease send the updated document within 48 hours. Reply to this email if you need help.\n\nRegards,\nCoachPlus Academy`,
+      body: `Dear ${application.fullName},\n\nPlease update this document so we can continue reviewing your application.\n\nDocument: ${application.missingDocument || "Not set"}\nReason: ${application.missingDocumentReason || "Not set"}\nUpload link: ${application.reuploadLink || "Not set"}\n\nThis secure link expires in 7 days. Please upload the requested file within 48 hours. Reply to this email if you need help.\n\nRegards,\nCoachPlus Academy`,
     },
     approved: {
       subject: "Your CoachPlus teacher application is approved",

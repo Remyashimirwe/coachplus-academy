@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         missingDocument: true,
         missingDocumentReason: true,
-        reuploadLink: true,
         documentsReuploadedAt: true,
         assessmentDate: true,
         assessmentTime: true,
@@ -97,8 +96,6 @@ export async function GET(request: NextRequest) {
         application.status === "documents_needed" ? application.missingDocument : "",
       missingDocumentReason:
         application.status === "documents_needed" ? application.missingDocumentReason : "",
-      reuploadLink:
-        application.status === "documents_needed" ? application.reuploadLink : "",
       // Stage 4 — the exact details the applicant was emailed.
       assessmentDate:
         application.status === "assessment_scheduled" ? application.assessmentDate : "",
