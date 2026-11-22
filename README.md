@@ -7,7 +7,7 @@ CoachPlus Academy is a full-stack education platform built with Next.js, Prisma,
 The platform supports:     
  
 - Public landing pages for prospective students and teachers
-- Student enrollment and coaching requests 
+- Student enrollment and coaching requests  
 - Teacher application and approval flow 
 - Secure admin dashboard for managing users and requests 
 - Attendance tracking for students and teachers
