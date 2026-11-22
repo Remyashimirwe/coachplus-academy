@@ -1,4 +1,4 @@
-﻿ALTER TABLE "TeacherApplication"
+ALTER TABLE "TeacherApplication"
   ADD COLUMN IF NOT EXISTS "missingDocumentKind" TEXT,
   ADD COLUMN IF NOT EXISTS "documentUploadTokenHash" TEXT,
   ADD COLUMN IF NOT EXISTS "documentUploadTokenExpiresAt" TIMESTAMP(3);
