@@ -48,6 +48,10 @@ function documentDownloadUrl(docId: number) {
   return `${documentUrl(docId)}?download=1`;
 }
 
+function isSecureReuploadLink(link: unknown): link is string {
+  return typeof link === "string" && /\/reupload-documents\?token=[a-f0-9]{64}/i.test(link);
+}
+
 type GroupedSubject = { name: string; topics: string[] };
 type GroupedCategory = { category: string; subjects: GroupedSubject[] };
 
@@ -153,7 +157,7 @@ export default function TeacherApplicationModal({
     app.missingDocumentReason || "",
   );
   const [reuploadLink, setReuploadLink] = useState(
-    app.reuploadLink || "",
+    isSecureReuploadLink(app.reuploadLink) ? app.reuploadLink : "",
   );
 
   useEffect(() => {
@@ -407,7 +411,7 @@ export default function TeacherApplicationModal({
   }
 
   async function copyReuploadLink() {
-    if (!reuploadLink) return;
+    if (!isSecureReuploadLink(reuploadLink)) return;
     try {
       await navigator.clipboard.writeText(reuploadLink);
       setCopiedReuploadLink(true);
@@ -428,6 +432,7 @@ export default function TeacherApplicationModal({
       app.assessmentLocation,
   );
   const hasDocumentRequest = Boolean(app.missingDocument);
+  const hasSecureUploadLink = isSecureReuploadLink(reuploadLink);
   const fieldClass =
     "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20";
   const labelClass =
@@ -1055,7 +1060,7 @@ export default function TeacherApplicationModal({
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Secure upload link</label>
-                      {reuploadLink ? (
+                      {hasSecureUploadLink ? (
                         <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2">
                           <a href={reuploadLink} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 break-all px-2 py-1 text-[11px] font-medium text-blue-700 underline">
                             {reuploadLink}
@@ -1113,7 +1118,11 @@ export default function TeacherApplicationModal({
                   </div>
                   <div className="sm:col-span-2">
                     <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Re-upload link</dt>
-                    <dd className="break-words font-semibold text-slate-800">{app.reuploadLink || "—"}</dd>
+                    <dd className="break-words font-semibold text-slate-800">
+                      {isSecureReuploadLink(app.reuploadLink)
+                        ? <a href={app.reuploadLink} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Open secure upload page</a>
+                        : "Save a new document request to create a secure upload page."}
+                    </dd>
                   </div>
                 </dl>
               ) : (
