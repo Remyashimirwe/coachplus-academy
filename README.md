@@ -14,7 +14,7 @@ The platform supports:
 - Notifications and invite emails  
 - Program, subject, and topic management
 - Role-based access for admin, teacher, and student users
-
+ 
 ## Tech Stack 
 
 - Next.js 16
