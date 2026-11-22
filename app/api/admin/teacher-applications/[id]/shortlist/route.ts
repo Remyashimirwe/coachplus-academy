@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
+import { sendTeacherApplicationEmailNow } from "@/app/lib/sendTeacherApplicationEmailNow";
 
 export async function POST(
   request: NextRequest,
@@ -27,25 +28,22 @@ export async function POST(
   }
 
   try {
-    const scheduledFor = new Date(Date.now() + 60 * 1000);
-    const emailDraft = buildTeacherApplicationEmailDraft("shortlisted", application);
-
-    await db.teacherApplication.update({
-      where: { id: applicationId },
-      data: { 
-        emailScheduledAt: new Date(),
-        emailScheduledFor: scheduledFor,
-        pendingStatus: "shortlisted",
-        pendingEmailSubject: emailDraft.subject,
-        pendingEmailBody: emailDraft.body,
-      },
+    const emailDraft = application.pendingStatus === "shortlisted" && application.pendingEmailSubject && application.pendingEmailBody
+      ? { subject: application.pendingEmailSubject, body: application.pendingEmailBody }
+      : buildTeacherApplicationEmailDraft("shortlisted", application);
+    const result = await sendTeacherApplicationEmailNow({
+      applicationId,
+      status: "shortlisted",
+      to: application.email,
+      ...emailDraft,
     });
-
-    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+    if (!result.success) {
+      return NextResponse.json({ message: result.message || "Email could not be sent.", application: result.application }, { status: 502 });
+    }
 
     return NextResponse.json({ 
-      message: "Shortlisting email queued. It will send in 1 minute. You can cancel or edit it before then.", 
-      application: updatedApp,
+      message: "Shortlisting email sent.",
+      application: result.application,
     });
   } catch (error: any) {
     return NextResponse.json({ message: error.message || "Failed to shortlist application" }, { status: 500 });

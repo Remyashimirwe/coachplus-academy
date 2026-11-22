@@ -226,7 +226,7 @@ export default function TeacherApplicationModal({
   }
 
   async function handleApprove() {
-    if (!confirm(`Approve ${app.fullName}? Their account email will be sent in 1 minute.`)) return;
+    if (!confirm(`Approve ${app.fullName}? Their account email will be sent immediately.`)) return;
 
     setDecisionError(null);
     try {
@@ -329,7 +329,7 @@ export default function TeacherApplicationModal({
           assessmentLocation: location,
           assessmentContactPhone: assessmentContactPhone.trim(),
         });
-        setScheduleSuccess("Saved. Stage 4 email queued for 1 minute.");
+        setScheduleSuccess("Saved. Stage 4 email sent.");
         setActivePanel(null);
       } else {
         // The backend saves the fields even when the email fails, so keep the
@@ -390,7 +390,7 @@ export default function TeacherApplicationModal({
           reuploadLink: data.application?.reuploadLink || "",
         });
         setReuploadLink(data.application?.reuploadLink || "");
-        setMissingDocsSuccess("Saved. Stage 2 email queued for 1 minute.");
+        setMissingDocsSuccess("Saved. Stage 2 email sent.");
         setActivePanel(null);
       } else {
         if (data.application) {
@@ -484,7 +484,7 @@ export default function TeacherApplicationModal({
   }
 
   async function saveEmailDraft() {
-    if (!previewEmail || !previewEmail.queued) return;
+    if (!previewEmail) return;
     setSavingEmailDraft(true);
     setPreviewError(null);
     try {
@@ -889,7 +889,7 @@ export default function TeacherApplicationModal({
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <p className="text-[12px] text-slate-500">
-                  Add the date, time and meeting details. The email sends in 1 minute. Save again to resend.
+                  Add the date, time and meeting details. Saving sends the email immediately. Save again to resend.
                 </p>
                 {hasAssessmentDetails && (
                   <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
@@ -1257,7 +1257,7 @@ export default function TeacherApplicationModal({
                 </label>
                 <div className="flex flex-col items-start gap-2 sm:max-w-xs">
                   <p className="text-xs leading-relaxed text-slate-500">
-                    Stage emails send in 1 minute. You can cancel before then.
+                    Preview or edit the email here. Saving a stage sends it immediately.
                   </p>
                   <button
                     type="button"
@@ -1362,15 +1362,15 @@ export default function TeacherApplicationModal({
                 <p className="text-[11px] text-slate-500">The account setup link is added when this email sends.</p>
               )}
               {previewError && <p className="text-xs font-medium text-rose-600">{previewError}</p>}
-              {!previewEmail.queued && <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-xs text-amber-800">Queue this stage first. Then you can save your edits before the email sends.</p>}
-              {emailDraftSaved && <p className="rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">Email saved and queued through Resend.</p>}
+              {!previewEmail.queued && <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-xs text-amber-800">Save your edits here, then save this stage to send the email.</p>}
+              {emailDraftSaved && <p className="rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">Email edits saved. They will send when you save this stage.</p>}
             </div>
             <footer className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
               <button type="button" onClick={() => setPreviewEmail(null)} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">Close</button>
               <button
                 type="button"
                 onClick={() => void saveEmailDraft()}
-                disabled={!previewEmail.queued || savingEmailDraft || emailDraftSaved}
+                disabled={savingEmailDraft || emailDraftSaved}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <FiCheckCircle className="size-4" />

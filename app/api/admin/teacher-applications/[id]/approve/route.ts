@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
-import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
+import { sendApplicationApprovedEmail, sendCustomApplicationEmail } from "@/app/lib/email";
+import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
+import crypto from "node:crypto";
+
+const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function POST(
   request: NextRequest,
@@ -11,10 +16,6 @@ export async function POST(
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
-  // Captured up front: `user` is shadowed below by the newly created teacher
-  // account, so the acting admin's id must be read before that scope.
-  const actingAdminId = user.id;
-
   const { id } = await params;
   const applicationId = Number(id);
   if (!Number.isFinite(applicationId)) {
@@ -34,7 +35,7 @@ export async function POST(
   }
 
   const existingUser = await db.user.findUnique({ where: { email: application.email } });
-  if (existingUser) {
+  if (existingUser && !(existingUser.role === "TEACHER" && existingUser.isFirstLogin && existingUser.inviteToken)) {
     return NextResponse.json(
       { message: "A user with this email already exists. Please manage them from Invite User / Assign Student instead." },
       { status: 400 }
@@ -42,25 +43,105 @@ export async function POST(
   }
 
   try {
-    const scheduledFor = new Date(Date.now() + 60 * 1000);
-    const emailDraft = buildTeacherApplicationEmailDraft("approved", application);
+    const inviteToken = existingUser?.inviteToken || crypto.randomBytes(32).toString("hex");
+    const inviteTokenExpiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
+    const teacherUser = existingUser
+      ? await db.user.update({
+          where: { id: existingUser.id },
+          data: { inviteToken, inviteTokenExpiresAt, isFirstLogin: true },
+        })
+      : await db.user.create({
+          data: {
+            name: application.fullName,
+            email: application.email,
+            role: "TEACHER",
+            isFirstLogin: true,
+            inviteToken,
+            inviteTokenExpiresAt,
+            teacherProfile: {
+              create: {
+                phone: application.phone,
+                country: application.country,
+                city: application.district,
+                village: application.village,
+                cell: application.cell,
+                subjects: application.subjects,
+                availableDays: application.availableDays,
+                availableHours: application.availableHours,
+              },
+            },
+          },
+        });
 
+    const inviteUrl = `${APP_URL}/accept-invite?token=${inviteToken}`;
+    const coachingModes = application.teachOnline === "Yes"
+      ? "Online, Home, or Center"
+      : "Home or Center";
+    const hasCustomDraft = application.pendingStatus === "approved" &&
+      Boolean(application.pendingEmailSubject && application.pendingEmailBody);
     await db.teacherApplication.update({
       where: { id: applicationId },
-      data: { 
-        emailScheduledAt: new Date(),
-        emailScheduledFor: scheduledFor,
-        pendingStatus: "approved",
-        pendingEmailSubject: emailDraft.subject,
-        pendingEmailBody: emailDraft.body,
+      data: {
+        emailScheduledAt: null,
+        emailScheduledFor: null,
+        pendingStatus: null,
+        pendingEmailSubject: null,
+        pendingEmailBody: null,
+      },
+    });
+    const emailResult = hasCustomDraft
+      ? await sendCustomApplicationEmail({
+          to: application.email,
+          subject: application.pendingEmailSubject!,
+          body: application.pendingEmailBody!.includes("{{INVITE_LINK}}")
+            ? application.pendingEmailBody!.replaceAll("{{INVITE_LINK}}", inviteUrl)
+            : `${application.pendingEmailBody!}\n\nSet up your teacher account: ${inviteUrl}`,
+        })
+      : await sendApplicationApprovedEmail({
+          to: application.email,
+          name: application.fullName,
+          inviteUrl,
+          subjects: application.subjects,
+          coachingModes,
+          portalOrAppLink: `${APP_URL}/teacher`,
+          guidelinesLink: `${APP_URL}/terms-of-service`,
+        });
+
+    if (!emailResult.success) {
+      return NextResponse.json({ message: emailResult.message || "Approval email could not be sent." }, { status: 502 });
+    }
+
+    const updatedApp = await db.teacherApplication.update({
+      where: { id: applicationId },
+      data: {
+        status: "approved",
+        stageUpdatedAt: new Date(),
+        emailScheduledAt: null,
+        emailScheduledFor: null,
+        pendingStatus: null,
+        pendingEmailSubject: null,
+        pendingEmailBody: null,
       },
     });
 
-    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+    await Promise.allSettled([
+      notifyUsers({
+        userIds: [teacherUser.id],
+        title: "Welcome to CoachPlus Academy",
+        message: "Your teacher application was approved. Check your email to set up your account.",
+        type: "success",
+      }),
+      notifyAdmins({
+        title: "Teacher application approved",
+        message: `${application.fullName} was approved as a teacher.`,
+        type: "success",
+      }),
+    ]);
 
     return NextResponse.json({ 
-      message: "Approval email queued. The account setup email will send in 1 minute. You can cancel or edit it before then.", 
-      application: updatedApp 
+      message: "Approval email sent and teacher account created.",
+      emailSent: true,
+      application: updatedApp,
     });
   } catch (error: any) {
     if (error.code === "P2002") {

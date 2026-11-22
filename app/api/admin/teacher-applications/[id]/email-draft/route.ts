@@ -32,19 +32,22 @@ export async function POST(
   if (!application) {
     return NextResponse.json({ message: "Application not found" }, { status: 404 });
   }
-  if (!application.pendingStatus || !application.emailScheduledFor) {
-    return NextResponse.json({ message: "Queue an application stage before editing its email." }, { status: 409 });
-  }
-  if (stage !== application.pendingStatus) {
+  if (application.emailScheduledFor && stage !== application.pendingStatus) {
     return NextResponse.json({ message: "The selected email stage is not the queued stage." }, { status: 409 });
   }
 
   const updated = await db.teacherApplication.update({
     where: { id: applicationId },
-    data: { pendingEmailSubject: subject, pendingEmailBody: emailBody },
+    data: {
+      pendingStatus: stage,
+      pendingEmailSubject: subject,
+      pendingEmailBody: emailBody,
+      emailScheduledAt: null,
+      emailScheduledFor: null,
+    },
   });
   return NextResponse.json({
-    message: "Email draft saved. It will be sent through Resend when the stage is due.",
+    message: "Email draft saved. It will send through Resend immediately when you save this stage.",
     application: updated,
   });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
+import { sendTeacherApplicationEmailNow } from "@/app/lib/sendTeacherApplicationEmailNow";
 
 export async function POST(
   request: NextRequest,
@@ -43,37 +44,46 @@ export async function POST(
   }
 
   try {
-    const scheduledFor = new Date(Date.now() + 60 * 1000);
-    const emailDraft = buildTeacherApplicationEmailDraft("assessment_scheduled", {
-      ...application,
+    const details = {
       assessmentDate: String(examDate).trim(),
       assessmentTime: String(examTime).trim(),
       assessmentMode: String(assessmentMode).trim(),
       assessmentLocation: String(locationOrMeetingLink).trim(),
       assessmentContactPhone: String(contactPhone || "").trim(),
+    };
+    const defaultDraft = buildTeacherApplicationEmailDraft("assessment_scheduled", {
+      ...application,
+      ...details,
     });
-
-    await db.teacherApplication.update({
-      where: { id: applicationId },
-      data: {
-        assessmentDate: String(examDate).trim(),
-        assessmentTime: String(examTime).trim(),
-        assessmentMode: String(assessmentMode).trim(),
-        assessmentLocation: String(locationOrMeetingLink).trim(),
-        assessmentContactPhone: String(contactPhone || "").trim(),
-        emailScheduledAt: new Date(),
-        emailScheduledFor: scheduledFor,
-        pendingStatus: "assessment_scheduled",
-        pendingEmailSubject: emailDraft.subject,
-        pendingEmailBody: emailDraft.body,
-      },
+    const savedBody = application.pendingStatus === "assessment_scheduled" ? application.pendingEmailBody : null;
+    const emailDraft = savedBody && application.pendingEmailSubject
+      ? {
+          subject: application.pendingEmailSubject,
+          body: savedBody
+            .replace(/^Date:.*$/m, `Date: ${details.assessmentDate}`)
+            .replace(/^Time:.*$/m, `Time: ${details.assessmentTime}`)
+            .replace(/^Mode:.*$/m, `Mode: ${details.assessmentMode}`)
+            .replace(/^Location or link:.*$/m, `Location or link: ${details.assessmentLocation}`)
+            .replace(/^Contact:.*$/m, `Contact: ${details.assessmentContactPhone || "Not set"}`),
+        }
+      : defaultDraft;
+    const result = await sendTeacherApplicationEmailNow({
+      applicationId,
+      status: "assessment_scheduled",
+      to: application.email,
+      ...emailDraft,
+      details,
     });
-
-    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+    if (!result.success) {
+      return NextResponse.json({
+        message: result.message || "Assessment email could not be sent.",
+        application: result.application,
+      }, { status: 502 });
+    }
 
     return NextResponse.json({ 
-      message: "Assessment email queued. It will send in 1 minute. You can cancel or edit it before then.", 
-      application: updatedApp 
+      message: "Assessment email sent.",
+      application: result.application,
     });
   } catch (error: any) {
     return NextResponse.json({ message: error.message || "Failed to schedule assessment" }, { status: 500 });

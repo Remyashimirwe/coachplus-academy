@@ -4,6 +4,7 @@ import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
 import { TEACHER_APPLICATION_DOCUMENTS } from "@/app/lib/teacherApplicationDocuments";
+import { sendTeacherApplicationEmailNow } from "@/app/lib/sendTeacherApplicationEmailNow";
 
 export async function POST(
   request: NextRequest,
@@ -48,36 +49,47 @@ export async function POST(
     const uploadUrl = new URL("/reupload-documents", baseUrl);
     uploadUrl.searchParams.set("token", token);
     const reuploadLink = uploadUrl.toString();
-    const scheduledFor = new Date(Date.now() + 60 * 1000);
-    const emailDraft = buildTeacherApplicationEmailDraft("documents_needed", {
+    const defaultDraft = buildTeacherApplicationEmailDraft("documents_needed", {
       ...application,
       missingDocument: documentType.label,
       missingDocumentReason: String(issueReason).trim(),
       reuploadLink,
     });
+    const savedBody = application.pendingStatus === "documents_needed" ? application.pendingEmailBody : null;
+    const emailDraft = savedBody && application.pendingEmailSubject
+      ? {
+          subject: application.pendingEmailSubject,
+          body: savedBody
+            .replace(/^Document:.*$/m, `Document: ${documentType.label}`)
+            .replace(/^Reason:.*$/m, `Reason: ${String(issueReason).trim()}`)
+            .replace(/^Upload link:.*$/m, `Upload link: ${reuploadLink}`),
+        }
+      : defaultDraft;
 
-    await db.teacherApplication.update({
-      where: { id: applicationId },
-      data: {
+    const result = await sendTeacherApplicationEmailNow({
+      applicationId,
+      status: "documents_needed",
+      to: application.email,
+      ...emailDraft,
+      details: {
         missingDocument: documentType.label,
         missingDocumentKind: documentType.kind,
         missingDocumentReason: String(issueReason).trim(),
         reuploadLink,
         documentUploadTokenHash: tokenHash,
         documentUploadTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        emailScheduledAt: new Date(),
-        emailScheduledFor: scheduledFor,
-        pendingStatus: "documents_needed",
-        pendingEmailSubject: emailDraft.subject,
-        pendingEmailBody: emailDraft.body,
       },
     });
-
-    const updatedApp = await db.teacherApplication.findUnique({ where: { id: applicationId } });
+    if (!result.success) {
+      return NextResponse.json({
+        message: result.message || "The upload link was created, but the email could not be sent.",
+        application: result.application,
+      }, { status: 502 });
+    }
 
     return NextResponse.json({ 
-      message: "Upload link created. The email is queued for 1 minute.",
-      application: updatedApp 
+      message: "Upload link created and email sent.",
+      application: result.application,
     });
   } catch (error) {
     return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to queue document request" }, { status: 500 });
