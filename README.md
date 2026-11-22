@@ -29,7 +29,7 @@ The platform supports:
 
 ## Project Structure
 
-```bash
+```bash 
 .
 ├── app/                     # App routes, pages, and UI
 │   ├── admin/              # Admin dashboard pages and components
