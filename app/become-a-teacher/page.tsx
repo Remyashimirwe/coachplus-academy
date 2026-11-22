@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function BecomeTeacherPage() {
   const isOpen = await getSetting("teacher_applications_open", "true") === "true";
   const terms = await getTeacherTerms();
-  const rawPrograms = await getPrograms();
+  const rawPrograms = await getPrograms({ onlyForTeacherForm: true });
   const programs = rawPrograms.map((p) => ({
     id: p.id,
     title: p.title,

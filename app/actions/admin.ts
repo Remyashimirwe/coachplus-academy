@@ -463,6 +463,7 @@ export async function toggleShowOnTeacherForm(
   }
 
   revalidatePath("/become-a-teacher");
+  revalidatePath("/request");
   revalidatePath("/admin");
 
   return { success: true };

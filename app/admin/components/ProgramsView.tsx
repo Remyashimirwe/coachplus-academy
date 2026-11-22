@@ -485,6 +485,7 @@ export default function ProgramsView({ programs }: any) {
   // order instantly instead of waiting on the server round-trip. Kept in
   // sync whenever fresh data arrives from the server (e.g. after a save).
   const [localPrograms, setLocalPrograms] = useState<any[]>(programs);
+  const [visibilityError, setVisibilityError] = useState<string | null>(null);
   useEffect(() => {
     setLocalPrograms(programs);
   }, [programs]);
@@ -525,9 +526,16 @@ export default function ProgramsView({ programs }: any) {
           : p
       )
     );
-    startTransition(() => {
-      toggleShowOnTeacherForm("topic", topicId, show);
-    });
+    void toggleShowOnTeacherForm("topic", topicId, show)
+      .then(() => setVisibilityError(null))
+      .catch(() => {
+        setLocalPrograms((prev) => prev.map((p: any) => p.id === selectedProgram?.id
+          ? { ...p, subjects: p.subjects.map((s: any) => s.id === subjectId
+              ? { ...s, topics: s.topics.map((t: any) => t.id === topicId ? { ...t, showOnTeacherForm: !show } : t) }
+              : s) }
+          : p));
+        setVisibilityError("Could not save this visibility change. Please try again.");
+      });
   };
 
   const handleToggleSubjectVisibility = (subjectId: number, show: boolean) => {
@@ -541,18 +549,26 @@ export default function ProgramsView({ programs }: any) {
           : p
       )
     );
-    startTransition(() => {
-      toggleShowOnTeacherForm("subject", subjectId, show);
-    });
+    void toggleShowOnTeacherForm("subject", subjectId, show)
+      .then(() => setVisibilityError(null))
+      .catch(() => {
+        setLocalPrograms((prev) => prev.map((p: any) => p.id === selectedProgram?.id
+          ? { ...p, subjects: p.subjects.map((s: any) => s.id === subjectId ? { ...s, showOnTeacherForm: !show } : s) }
+          : p));
+        setVisibilityError("Could not save this visibility change. Please try again.");
+      });
   };
 
   const handleToggleProgramVisibility = (programId: number, show: boolean) => {
     setLocalPrograms((prev) =>
       prev.map((p: any) => (p.id === programId ? { ...p, showOnTeacherForm: show } : p))
     );
-    startTransition(() => {
-      toggleShowOnTeacherForm("program", programId, show);
-    });
+    void toggleShowOnTeacherForm("program", programId, show)
+      .then(() => setVisibilityError(null))
+      .catch(() => {
+        setLocalPrograms((prev) => prev.map((p: any) => p.id === programId ? { ...p, showOnTeacherForm: !show } : p));
+        setVisibilityError("Could not save this visibility change. Please try again.");
+      });
   };
 
   const handleProgramDrop = (targetId: number) => {
@@ -652,6 +668,19 @@ export default function ProgramsView({ programs }: any) {
           <p className="text-slate-500">Organize Categories, Sub-categories, and Subjects for your students.</p>
         </div>
       </div>
+
+      <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-sm text-indigo-950">
+        <FiEye className="mt-0.5 size-4 shrink-0 text-indigo-600" />
+        <p className="leading-relaxed">
+          Use the eye buttons to show or hide a category, sub-category, or subject on both the <strong>Become a Teacher</strong> and <strong>Request a Teacher</strong> forms.
+          Hidden items stay in Manage Learning and can be shown again at any time.
+        </p>
+      </div>
+      {visibilityError && (
+        <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+          {visibilityError}
+        </p>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <div className="space-y-6 min-w-0">
@@ -894,7 +923,7 @@ export default function ProgramsView({ programs }: any) {
                           <h2 className={`text-lg sm:text-base sm:text-lg font-semibold truncate ${selectedProgram?.showOnTeacherForm === false ? "text-slate-400 italic" : "text-slate-900"}`}>{selectedProgram?.title}</h2>
                           {selectedProgram?.showOnTeacherForm === false && (
                             <span className="shrink-0 text-[9px] font-bold uppercase tracking-wide text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                              Hidden from teacher form
+                              Hidden from request forms
                             </span>
                           )}
                           {selectedProgram?.featuredInHero && (
@@ -910,7 +939,8 @@ export default function ProgramsView({ programs }: any) {
                       <button
                         type="button"
                         onClick={() => handleToggleProgramVisibility(selectedProgram!.id, selectedProgram?.showOnTeacherForm === false)}
-                        title={selectedProgram?.showOnTeacherForm === false ? "Show on Become a Teacher form" : "Hide from Become a Teacher form"}
+                        title={selectedProgram?.showOnTeacherForm === false ? "Show on both request forms" : "Hide from both request forms"}
+                        aria-label={selectedProgram?.showOnTeacherForm === false ? "Show category on both request forms" : "Hide category from both request forms"}
                         className={`p-2.5 sm:p-3 rounded-xl transition-colors ${
                           selectedProgram?.showOnTeacherForm === false
                             ? "text-slate-400 hover:bg-slate-100 hover:text-[#E91E63]"
@@ -1019,7 +1049,7 @@ export default function ProgramsView({ programs }: any) {
                                   </h3>
                                   {subject.showOnTeacherForm === false && (
                                     <span className="shrink-0 text-[9px] font-bold uppercase tracking-wide text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
-                                      Hidden
+                                      Hidden from forms
                                     </span>
                                   )}
                                 </div>
@@ -1037,7 +1067,8 @@ export default function ProgramsView({ programs }: any) {
                               <button
                                 type="button"
                                 onClick={() => handleToggleSubjectVisibility(subject.id, subject.showOnTeacherForm === false)}
-                                title={subject.showOnTeacherForm === false ? "Show on Become a Teacher form" : "Hide from Become a Teacher form"}
+                                title={subject.showOnTeacherForm === false ? "Show on both request forms" : "Hide from both request forms"}
+                                aria-label={subject.showOnTeacherForm === false ? `Show ${subject.name} on both request forms` : `Hide ${subject.name} from both request forms`}
                                 className={`p-2 rounded-lg transition-colors ${
                                   subject.showOnTeacherForm === false
                                     ? "text-slate-400 hover:bg-white hover:text-[#E91E63]"
@@ -1124,13 +1155,14 @@ export default function ProgramsView({ programs }: any) {
                                       {topic.name}
                                     </p>
                                     {topic.showOnTeacherForm === false && (
-                                      <p className="text-[9px] text-slate-400 uppercase tracking-wide">Hidden from teacher form</p>
+                                      <p className="text-[9px] text-slate-400 uppercase tracking-wide">Hidden from request forms</p>
                                     )}
                                   </div>
                                   <button
                                     type="button"
                                     onClick={() => handleToggleTopicVisibility(subject.id, topic.id, topic.showOnTeacherForm === false)}
-                                    title={topic.showOnTeacherForm === false ? "Show on Become a Teacher form" : "Hide from Become a Teacher form"}
+                                    title={topic.showOnTeacherForm === false ? "Show on both request forms" : "Hide from both request forms"}
+                                    aria-label={topic.showOnTeacherForm === false ? `Show ${topic.name} on both request forms` : `Hide ${topic.name} from both request forms`}
                                     className={`size-8 flex items-center justify-center rounded-lg transition-all shrink-0 ${
                                       topic.showOnTeacherForm === false
                                         ? "text-slate-300 hover:text-[#E91E63] hover:bg-rose-50"

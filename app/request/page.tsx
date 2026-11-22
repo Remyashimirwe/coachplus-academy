@@ -1,8 +1,10 @@
 import { getPrograms } from "@/app/lib/db";
 import RequestForm from "./RequestForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function RequestPage() {
-  const programs = await getPrograms();
+  const programs = await getPrograms({ onlyForTeacherForm: true });
   
   // Transform data to ensure it matches the expected interface
   const formattedPrograms = programs.map(p => ({
