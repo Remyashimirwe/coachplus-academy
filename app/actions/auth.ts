@@ -21,8 +21,8 @@ export async function login(
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
 
-  if (!email || !password) {
-    return { error: "Please enter your email and password." };
+  if (!email) {
+    return { error: "Please enter your email address." };
   }
 
   const user = await getUserByEmail(email);
@@ -31,16 +31,17 @@ export async function login(
     return { error: "Access denied. Only administrators can sign in here." };
   }
 
-  // Handle first login logic if applicable for admin too
-  if (user.isFirstLogin && !user.passwordHash) {
-    if (password !== email) {
-      return { error: "First time login: Use your email as password." };
+  // First-time admins have no password yet. Their inbox code verifies access,
+  // then the OTP handler sends them to create their password.
+  const needsFirstPassword = user.isFirstLogin && !user.passwordHash;
+  if (!needsFirstPassword) {
+    if (!user.passwordHash) {
+      return { error: "Account not set up properly." };
     }
-  } else if (!user.passwordHash) {
-    return { error: "Account not set up properly." };
-  } else {
-    const isValid = bcrypt.compareSync(password, user.passwordHash);
-    if (!isValid) {
+    if (!password) {
+      return { error: "Please enter your password." };
+    }
+    if (!bcrypt.compareSync(password, user.passwordHash)) {
       return { error: "Invalid email or password." };
     }
   }
@@ -62,8 +63,7 @@ export async function login(
   }
 
   // `send_failed`: Resend rejected the send (bad key, quota, provider
-  // outage). An admin who proved their password must not be locked out of the
-  // dashboard by an email problem, so sign them in normally instead.
+  // outage). Let the verified admin continue so they aren't locked out.
   console.warn(`[admin login] verification email failed for ${user.email}`);
 
   await setSession({

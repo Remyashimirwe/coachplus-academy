@@ -127,7 +127,6 @@ export default function AdminLoginPage() {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      required
                       placeholder="••••••••"
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-11 pr-12 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E91E63]/20 focus:border-[#E91E63] transition-all"
                     />
@@ -141,7 +140,7 @@ export default function AdminLoginPage() {
                     </button>
                   </div>
                   <p className="ml-1 text-[11px] leading-5 text-slate-500">
-                    First sign-in: use your email as the temporary password. After email verification, you’ll set a new password.
+                    First time here? Leave this blank. We’ll send a code so you can set your password.
                   </p>
                 </div>
 
@@ -154,7 +153,7 @@ export default function AdminLoginPage() {
                     <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
-                      Sign In to Dashboard
+                      Continue
                       <FiArrowLeft className="size-5 rotate-180 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
