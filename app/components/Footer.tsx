@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CONTACT_PHONE, CONTACT_PHONE_DISPLAY, WHATSAPP_PHONE } from "@/app/lib/constants";
 
 import { useState, useEffect } from "react";
 import { FaWhatsapp, FaPhoneAlt } from "react-icons/fa";
@@ -95,15 +96,15 @@ export default function Footer() {
         <div className="mt-10 border-t border-white/10 pt-8 pb-8">
           <div className="flex items-center justify-center gap-4 text-sm text-slate-400 mb-4">
             <a
-              href="tel:+250780000000"
+              href={`tel:${CONTACT_PHONE}`}
               className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
             >
               <FaPhoneAlt className="size-4" />
-              <span>+250 780 000 000</span>
+              <span>{CONTACT_PHONE_DISPLAY}</span>
             </a>
             <span className="text-slate-600">|</span>
             <a
-              href="https://wa.me/250780000000"
+              href={`https://wa.me/${WHATSAPP_PHONE}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-slate-300 hover:text-[#25D366] transition-colors"

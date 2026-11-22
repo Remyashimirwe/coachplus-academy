@@ -4,15 +4,14 @@ import { useState } from "react";
 import { FaWhatsapp, FaTimes, FaPhoneAlt } from "react-icons/fa";
 import { FiSend } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { CONTACT_PHONE, WHATSAPP_PHONE } from "@/app/lib/constants";
 
 export default function WhatsAppButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const phoneNumber = "+250780000000"; // Placeholder
-
   const handleSend = () => {
     if (!message.trim()) return;
-    const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     setMessage("");
     setIsOpen(false);
@@ -21,7 +20,7 @@ export default function WhatsAppButton() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-end gap-3">
       <a
-        href={`tel:${phoneNumber}`}
+        href={`tel:${CONTACT_PHONE}`}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-blue-700 active:scale-95"
         aria-label="Call us"
       >

@@ -6,6 +6,10 @@ export const BRAND_NAME = "CoachPlus Academy";
 // professional communication from the company (not a no-reply address).
 export const CONTACT_EMAIL = "admin@coachplusacademy.com";
 
+export const CONTACT_PHONE = "+250791513561";
+export const CONTACT_PHONE_DISPLAY = "+250 791 513 561";
+export const WHATSAPP_PHONE = "250791513561";
+
 // Google Play Store listing for the CoachPlus mobile app.
 // Swap this value for the live listing URL once the app is published.
 export const PLAYSTORE_URL =
