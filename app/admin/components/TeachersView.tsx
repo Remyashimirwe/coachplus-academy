@@ -82,7 +82,7 @@ export default function TeachersView({ teacherApplications }: any) {
     const list = applications.filter((a) => {
       const matchesStatus = statusFilter === "all" || a.status === statusFilter;
       const matchesSearch =
-        !q || a.fullName.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
+        !q || String(a.fullName ?? "").toLowerCase().includes(q) || String(a.email ?? "").toLowerCase().includes(q);
       const matchesSubject =
         !subjectFilter || String(a.subjects || "").toLowerCase().includes(subjectFilter.toLowerCase());
       return matchesStatus && matchesSearch && matchesSubject;
@@ -192,56 +192,72 @@ export default function TeachersView({ teacherApplications }: any) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
-        <div className="relative w-full lg:w-72">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+      <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
+        <div className="relative w-full">
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
           <input
-            type="text"
+            type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-3 text-xs text-slate-900 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
+            placeholder="Search applicants by name or email address"
+            aria-label="Search teacher applications by name or email"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Filter by application status</p>
+          <div className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.id}
+              type="button"
               onClick={() => setStatusFilter(f.id)}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all ${
+              className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
                 statusFilter === f.id
-                  ? "bg-[#0f172a] text-white"
-                  : "border border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                  ? "bg-[#0f172a] text-white shadow-sm"
+                  : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               {f.label}
-              <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${statusFilter === f.id ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"}`}>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] tabular-nums ${statusFilter === f.id ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"}`}>
                 {f.id === "all" ? applications.length : applications.filter((app) => app.status === f.id).length}
               </span>
             </button>
           ))}
+          </div>
         </div>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          aria-label="Sort applications"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
-        >
-          {SORT_OPTIONS.map((s) => (
-            <option key={s.id} value={s.id}>{s.label.replace(" first", "")}</option>
-          ))}
-        </select>
-        <select
-          value={subjectFilter}
-          onChange={(e) => setSubjectFilter(e.target.value)}
-          aria-label="Filter by subject"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
-        >
-          <option value="">All subjects</option>
-          {subjectOptions.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+        <div className="flex flex-col gap-2 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-medium text-slate-500">Showing <span className="font-semibold text-slate-800">{filteredApplications.length}</span> of {applications.length} applications</p>
+          <div className="flex flex-wrap gap-2">
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              Sort
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort applications"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
+              >
+                {SORT_OPTIONS.map((s) => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              Subject
+              <select
+                value={subjectFilter}
+                onChange={(e) => setSubjectFilter(e.target.value)}
+                aria-label="Filter by subject"
+                className="max-w-[220px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
+              >
+                <option value="">All subjects</option>
+                {subjectOptions.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
