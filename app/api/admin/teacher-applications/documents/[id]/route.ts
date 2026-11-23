@@ -33,8 +33,24 @@ export async function GET(
     filename: doc.fileName,
     resourceType,
   });
-  const fileResponse = await fetch(signedUrl || doc.url, { cache: "no-store" });
-  if (!fileResponse.ok || !fileResponse.body) {
+
+  // Use the exact secure URL returned by Cloudinary first. Rebuilding a URL
+  // from publicId can drop the original extension or use the wrong resource
+  // type for PDFs, especially for older uploads.
+  let fileResponse: Response | null = null;
+  try {
+    fileResponse = await fetch(doc.url, { cache: "no-store" });
+  } catch {
+    // Try the signed URL below if the stored delivery URL is no longer valid.
+  }
+  if ((!fileResponse?.ok || !fileResponse.body) && signedUrl && signedUrl !== doc.url) {
+    try {
+      fileResponse = await fetch(signedUrl, { cache: "no-store" });
+    } catch {
+      // Return a controlled gateway error below.
+    }
+  }
+  if (!fileResponse?.ok || !fileResponse.body) {
     return NextResponse.json({ message: "Could not retrieve document" }, { status: 502 });
   }
 

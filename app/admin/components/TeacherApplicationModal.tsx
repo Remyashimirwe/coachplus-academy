@@ -21,7 +21,6 @@ import {
   FiLink,
   FiSend,
   FiDownload,
-  FiExternalLink,
   FiCheckCircle,
   FiAlertCircle,
   FiEye,
@@ -124,6 +123,7 @@ export default function TeacherApplicationModal({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<any | null>(null);
   const [shortlistError, setShortlistError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [scheduleSuccess, setScheduleSuccess] = useState<string | null>(null);
@@ -163,7 +163,10 @@ export default function TeacherApplicationModal({
   useEffect(() => {
     if (pageMode) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (previewDocument) setPreviewDocument(null);
+        else onClose();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
@@ -171,7 +174,7 @@ export default function TeacherApplicationModal({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose, pageMode]);
+  }, [onClose, pageMode, previewDocument]);
 
   useEffect(() => {
     setClock(Date.now());
@@ -843,18 +846,17 @@ export default function TeacherApplicationModal({
                     );
                     return (
                     <div key={doc.id} className="flex items-center gap-1.5">
-                      <a
-                        href={documentUrl(doc.id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDocument(doc)}
                         title={`Preview ${doc.fileName}`}
                         className={`flex items-center gap-2 rounded-xl border px-4 py-2 transition-all ${isReupload ? "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100" : "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}`}
                       >
-                        <FiExternalLink />
+                        <FiEye />
                         <span className="text-[11px] font-semibold uppercase tracking-tight">
                           {isReupload ? "Review re-upload" : `Preview ${DOCUMENT_LABELS[doc.kind] || doc.kind}`}
                         </span>
-                      </a>
+                      </button>
                       <a
                         href={documentDownloadUrl(doc.id)}
                         title={`Download ${doc.fileName}`}
@@ -1387,6 +1389,50 @@ export default function TeacherApplicationModal({
         title={lightboxImage?.title || "Teacher Photo"}
         subtitle={app.fullName}
       />
+      {previewDocument && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/75 p-2 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Preview ${previewDocument.fileName || "document"}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            setPreviewDocument(null);
+          }}
+        >
+          <section
+            className="flex h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-6">
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-semibold text-slate-900">{previewDocument.fileName || "Application document"}</h2>
+                <p className="text-xs text-slate-500">{DOCUMENT_LABELS[previewDocument.kind] || previewDocument.kind}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={documentDownloadUrl(previewDocument.id)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                >
+                  <FiDownload /> Download
+                </a>
+                <button type="button" onClick={() => setPreviewDocument(null)} aria-label="Close document preview" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+                  <FiX />
+                </button>
+              </div>
+            </header>
+            <div className="min-h-0 flex-1 bg-slate-100">
+              {(previewDocument.mimeType || "").startsWith("image/") ? (
+                <div className="flex h-full items-center justify-center overflow-auto p-4">
+                  <img src={documentUrl(previewDocument.id)} alt={previewDocument.fileName || "Uploaded document"} className="max-h-full max-w-full object-contain" />
+                </div>
+              ) : (
+                <iframe title={previewDocument.fileName || "Application document"} src={documentUrl(previewDocument.id)} className="h-full w-full border-0" />
+              )}
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
