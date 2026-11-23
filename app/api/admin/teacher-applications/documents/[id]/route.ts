@@ -33,6 +33,14 @@ export async function GET(
     filename: doc.fileName,
     resourceType,
   });
+  const isPdf = doc.mimeType.toLowerCase() === "application/pdf" || doc.fileName.toLowerCase().endsWith(".pdf");
+  const attachmentUrl = isPdf && resourceType === "image"
+    ? getCloudinaryDocumentUrl(doc.publicId, {
+        download: true,
+        filename: doc.fileName,
+        resourceType,
+      })
+    : null;
 
   // Use the exact secure URL returned by Cloudinary first. Rebuilding a URL
   // from publicId can drop the original extension or use the wrong resource
@@ -50,8 +58,30 @@ export async function GET(
       // Return a controlled gateway error below.
     }
   }
+  // Cloudinary may require the attachment delivery flag for PDFs. The app
+  // still serves this response inline after fetching it, so the browser can
+  // preview it in the admin viewer.
+  if ((!fileResponse?.ok || !fileResponse.body) && attachmentUrl && attachmentUrl !== signedUrl) {
+    try {
+      fileResponse = await fetch(attachmentUrl, { cache: "no-store" });
+    } catch {
+      // Return a useful PDF delivery message below.
+    }
+  }
   if (!fileResponse?.ok || !fileResponse.body) {
-    return NextResponse.json({ message: "Could not retrieve document" }, { status: 502 });
+    const upstreamMessage = fileResponse
+      ? await fileResponse.clone().text().catch(() => "")
+      : "";
+    const pdfBlocked = isPdf && /pdf.{0,100}(disabled|blocked)|(?:disabled|blocked).{0,100}pdf|delivery.{0,100}(?:denied|disabled|blocked)/i.test(upstreamMessage);
+    return new NextResponse(
+      pdfBlocked
+        ? "Cloudinary is blocking PDF delivery. In the Cloudinary Console, open Security settings and enable ‘Allow delivery of PDF and ZIP files’, then try again."
+        : `Could not retrieve document from Cloudinary${fileResponse ? ` (HTTP ${fileResponse.status})` : ""}. Check that the asset still exists and its delivery URL is accessible.`,
+      {
+        status: 502,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "private, no-store" },
+      },
+    );
   }
 
   const safeFilename = doc.fileName.replace(/[\r\n"\\]/g, "_") || "document";
