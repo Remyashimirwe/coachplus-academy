@@ -252,6 +252,7 @@ model Request {
 
 model TeacherApplication {
   id                Int      @id @default(autoincrement())
+  submissionId      String?  @unique
   fullName          String
   email             String
   phone             String

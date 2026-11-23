@@ -518,6 +518,12 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                         });
 
                         const value = (name: string) => String(formData.get(name) ?? "").trim();
+                        const submissionStorageKey = "teacher-application-submission-id";
+                        let submissionId = sessionStorage.getItem(submissionStorageKey);
+                        if (!submissionId) {
+                          submissionId = crypto.randomUUID();
+                          sessionStorage.setItem(submissionStorageKey, submissionId);
+                        }
                         setUploadStep("Submitting application...");
                         const response = await fetch("/api/teacher-applications", {
                           method: "POST",
@@ -562,6 +568,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                             contribution: value("contribution"),
                             agreedToTerms: true,
                             documents,
+                            submissionId,
                           }),
                         });
 
@@ -571,6 +578,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                         }
 
                         setReceiptEmailSent(result?.emailSent !== false);
+                        sessionStorage.removeItem(submissionStorageKey);
                         setStatus("idle");
                         setShowSuccessModal(true);
                         formEl.reset();
@@ -589,7 +597,9 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                       } catch (error) {
                         setStatus("error");
                         setErrorMessage(
-                          error instanceof Error
+                          error instanceof TypeError
+                            ? "Connection interrupted. If your application was already received, submitting again is safe. Please check your connection and retry."
+                            : error instanceof Error
                             ? error.message
                             : "Something went wrong while submitting your application. Please try again.",
                         );

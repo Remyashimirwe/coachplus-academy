@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
 import { sendApplicationReceivedEmail } from "@/app/lib/email";
 
 export async function POST(request: Request) {
+  let requestSubmissionId: string | null = null;
   try {
     const body = await request.json();
 
@@ -47,7 +48,9 @@ export async function POST(request: Request) {
       contribution,
       agreedToTerms,
       documents,
+      submissionId,
     } = body;
+    requestSubmissionId = typeof submissionId === "string" ? submissionId : null;
 
     if (!fullName || !email || !phone) {
       return NextResponse.json(
@@ -56,8 +59,24 @@ export async function POST(request: Request) {
       );
     }
 
+    if (typeof submissionId !== "string" || submissionId.length < 16 || submissionId.length > 100) {
+      return NextResponse.json({ error: "Invalid submission ID. Please refresh and try again." }, { status: 400 });
+    }
+
+    // A browser may lose the response after the database commit. Reuse the
+    // same client token so retries return that saved application instead of
+    // creating duplicate records.
+    const existing = await db.teacherApplication.findUnique({
+      where: { submissionId },
+      include: { documents: true },
+    });
+    if (existing) {
+      return NextResponse.json({ ...existing, emailSent: true, alreadySubmitted: true }, { status: 200 });
+    }
+
     const created = await db.teacherApplication.create({
       data: {
+        submissionId,
         fullName,
         email,
         phone,
@@ -110,30 +129,40 @@ export async function POST(request: Request) {
       include: { documents: true },
     });
 
-    // Stage 1: Instant Application Receipt — send confirmation email to the teacher.
-    const location = [village, cell, sector, district, province, country]
-      .filter(Boolean)
-      .join(", ");
-    const emailResult = await sendApplicationReceivedEmail({
-      to: created.email,
-      name: created.fullName,
-      subjects: created.subjects,
-      location: location || undefined,
-    }).catch((err) => {
-      console.error("Failed to send application receipt email:", err);
-      return { success: false, message: "Email delivery failed" };
+    // Email and notifications are secondary effects. Run them after returning
+    // the committed application so a slow provider cannot look like a failed
+    // submission to the applicant.
+    after(async () => {
+      const location = [village, cell, sector, district, province, country]
+        .filter(Boolean)
+        .join(", ");
+      await sendApplicationReceivedEmail({
+        to: created.email,
+        name: created.fullName,
+        subjects: created.subjects,
+        location: location || undefined,
+      }).catch((err) => console.error("Failed to send application receipt email:", err));
+
+      await notifyAdmins({
+        title: "New teacher application",
+        message: `${created.fullName} applied to teach.`,
+        type: "info",
+      });
     });
 
-    // A new application is the one thing an admin must not miss. This route is
-    // public, so there is no actor to exclude — every admin is told.
-    await notifyAdmins({
-      title: "New teacher application",
-      message: `${created.fullName} applied to teach.`,
-      type: "info",
-    });
-
-    return NextResponse.json({ ...created, emailSent: emailResult.success }, { status: 201 });
+    return NextResponse.json({ ...created, emailSent: null }, { status: 201 });
   } catch (error: any) {
+    // Two nearly simultaneous retries can both pass the initial lookup; the
+    // unique index makes the losing request resolve to the winning save.
+    if (error?.code === "P2002" && requestSubmissionId) {
+      const existing = await db.teacherApplication.findUnique({
+        where: { submissionId: requestSubmissionId },
+        include: { documents: true },
+      }).catch(() => null);
+      if (existing) {
+        return NextResponse.json({ ...existing, emailSent: true, alreadySubmitted: true }, { status: 200 });
+      }
+    }
     return NextResponse.json(
       { error: error.message ?? "Something went wrong" },
       { status: 500 }
