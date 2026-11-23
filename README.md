@@ -19,7 +19,7 @@ The platform supports:
 
 - Next.js 16
 - React 19
-- TypeScript
+- TypeScript 
 - Tailwind CSS
 - Prisma ORM
 - PostgreSQL
