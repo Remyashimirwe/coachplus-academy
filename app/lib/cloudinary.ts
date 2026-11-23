@@ -77,16 +77,19 @@ export function isCloudinaryConfigured() {
 
 export function getCloudinaryDocumentUrl(
   publicId: string,
-  options: { download: boolean; filename: string }
+  options: { download: boolean; filename: string; resourceType?: "image" | "raw" }
 ) {
   const client = getCloudinaryClient();
   if (!client || !publicId) return null;
 
   return client.url(publicId, {
     secure: true,
-    resource_type: "image",
+    resource_type: options.resourceType || "image",
     type: "upload",
     sign_url: true,
-    flags: options.download ? `attachment:${options.filename}` : undefined,
+    flags:
+      options.download && (options.resourceType || "image") === "image"
+        ? `attachment:${options.filename}`
+        : undefined,
   });
 }

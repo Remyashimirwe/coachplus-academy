@@ -3,21 +3,6 @@ import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { getCloudinaryDocumentUrl } from "@/app/lib/cloudinary";
 
-function cloudinaryUrl(url: string, download: boolean) {
-  const parsedUrl = new URL(url);
-  const uploadMarker = "/upload/";
-  const uploadIndex = parsedUrl.pathname.indexOf(uploadMarker);
-
-  if (uploadIndex === -1) return url;
-
-  const pathBeforeUpload = parsedUrl.pathname.slice(0, uploadIndex + uploadMarker.length);
-  const pathAfterUpload = parsedUrl.pathname
-    .slice(uploadIndex + uploadMarker.length)
-    .replace(/^fl_attachment\//, "");
-  parsedUrl.pathname = `${pathBeforeUpload}${download ? "fl_attachment/" : ""}${pathAfterUpload}`;
-  return parsedUrl.toString();
-}
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -42,19 +27,24 @@ export async function GET(
   }
 
   const download = request.nextUrl.searchParams.get("download") === "1";
+  const resourceType = doc.url.includes("/raw/upload/") ? "raw" : "image";
   const signedUrl = getCloudinaryDocumentUrl(doc.publicId, {
     download,
     filename: doc.fileName,
+    resourceType,
   });
-
-  if (signedUrl) {
-    return NextResponse.redirect(signedUrl);
+  const fileResponse = await fetch(signedUrl || doc.url, { cache: "no-store" });
+  if (!fileResponse.ok || !fileResponse.body) {
+    return NextResponse.json({ message: "Could not retrieve document" }, { status: 502 });
   }
 
-  if (request.nextUrl.searchParams.get("download") === "1") {
-    return NextResponse.redirect(cloudinaryUrl(doc.url, true));
-  }
-
-  // Files are hosted on Cloudinary; redirect the (already auth-checked) request there.
-  return NextResponse.redirect(cloudinaryUrl(doc.url, false));
+  const safeFilename = doc.fileName.replace(/[\r\n"\\]/g, "_") || "document";
+  return new NextResponse(fileResponse.body, {
+    headers: {
+      "Content-Type": doc.mimeType || fileResponse.headers.get("content-type") || "application/octet-stream",
+      "Content-Disposition": `${download ? "attachment" : "inline"}; filename="${safeFilename}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
 }
