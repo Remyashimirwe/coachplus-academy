@@ -93,3 +93,23 @@ export function getCloudinaryDocumentUrl(
         : undefined,
   });
 }
+
+/** Creates a short-lived Cloudinary API download URL for blocked originals. */
+export function getCloudinaryPrivateDownloadUrl(
+  publicId: string,
+  options: {
+    format: string;
+    resourceType?: "image" | "raw";
+    attachment: boolean;
+  },
+) {
+  const client = getCloudinaryClient();
+  if (!client || !publicId || !options.format) return null;
+
+  return client.utils.private_download_url(publicId, options.format, {
+    resource_type: options.resourceType || "image",
+    type: "upload",
+    attachment: options.attachment,
+    expires_at: Math.floor(Date.now() / 1000) + 300,
+  });
+}

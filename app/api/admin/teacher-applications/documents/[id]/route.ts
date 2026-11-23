@@ -1,7 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
-import { getCloudinaryDocumentUrl } from "@/app/lib/cloudinary";
+import {
+  getCloudinaryDocumentUrl,
+  getCloudinaryPrivateDownloadUrl,
+} from "@/app/lib/cloudinary";
+
+function cloudinaryPdfPageUrl(url: string, page: number) {
+  const parsedUrl = new URL(url);
+  if (
+    parsedUrl.hostname !== "res.cloudinary.com" ||
+    !parsedUrl.pathname.includes("/image/upload/") ||
+    !parsedUrl.pathname.toLowerCase().endsWith(".pdf")
+  ) {
+    return null;
+  }
+
+  parsedUrl.pathname = parsedUrl.pathname
+    .replace("/image/upload/", `/image/upload/pg_${page}/`)
+    .replace(/\.pdf$/i, ".jpg");
+  return parsedUrl.toString();
+}
 
 export async function GET(
   request: NextRequest,
@@ -27,13 +46,46 @@ export async function GET(
   }
 
   const download = request.nextUrl.searchParams.get("download") === "1";
+  const requestedPage = Number(request.nextUrl.searchParams.get("page") || "1");
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 && requestedPage <= 500
+    ? requestedPage
+    : 1;
   const resourceType = doc.url.includes("/raw/upload/") ? "raw" : "image";
+  const isPdf = doc.mimeType.toLowerCase() === "application/pdf" || doc.fileName.toLowerCase().endsWith(".pdf");
+
+  // Cloudinary can block the original PDF while still allowing page images.
+  // Serving a page image keeps the preview working without changing account settings.
+  if (isPdf && !download) {
+    const pageUrl = cloudinaryPdfPageUrl(doc.url, page);
+    if (pageUrl) {
+      const pageResponse = await fetch(pageUrl, { cache: "no-store" }).catch(() => null);
+      if (pageResponse?.ok && pageResponse.body) {
+        return new NextResponse(pageResponse.body, {
+          headers: {
+            "Content-Type": "image/jpeg",
+            "Content-Disposition": "inline",
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+          },
+        });
+      }
+      return new NextResponse(
+        pageResponse?.status === 400
+          ? `PDF page ${page} is not available.`
+          : "Cloudinary could not render this PDF page. Check that the PDF asset is valid.",
+        {
+          status: pageResponse?.status === 400 ? 404 : 502,
+          headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "private, no-store" },
+        },
+      );
+    }
+  }
+
   const signedUrl = getCloudinaryDocumentUrl(doc.publicId, {
     download,
     filename: doc.fileName,
     resourceType,
   });
-  const isPdf = doc.mimeType.toLowerCase() === "application/pdf" || doc.fileName.toLowerCase().endsWith(".pdf");
   const attachmentUrl = isPdf && resourceType === "image"
     ? getCloudinaryDocumentUrl(doc.publicId, {
         download: true,
@@ -66,6 +118,25 @@ export async function GET(
       fileResponse = await fetch(attachmentUrl, { cache: "no-store" });
     } catch {
       // Return a useful PDF delivery message below.
+    }
+  }
+  if (!fileResponse?.ok || !fileResponse.body) {
+    const format = doc.fileName.includes(".")
+      ? doc.fileName.split(".").pop()!.toLowerCase()
+      : isPdf
+        ? "pdf"
+        : "";
+    const apiDownloadUrl = getCloudinaryPrivateDownloadUrl(doc.publicId, {
+      format,
+      resourceType,
+      attachment: download,
+    });
+    if (apiDownloadUrl) {
+      try {
+        fileResponse = await fetch(apiDownloadUrl, { cache: "no-store" });
+      } catch {
+        // Return a controlled gateway error below.
+      }
     }
   }
   if (!fileResponse?.ok || !fileResponse.body) {

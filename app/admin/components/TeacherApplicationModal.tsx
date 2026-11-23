@@ -39,8 +39,9 @@ const DOCUMENT_LABELS: Record<string, string> = {
   criminalRecord: "Criminal Record Certificate",
 };
 
-function documentUrl(docId: number) {
-  return `/api/admin/teacher-applications/documents/${docId}`;
+function documentUrl(docId: number, page?: number) {
+  const baseUrl = `/api/admin/teacher-applications/documents/${docId}`;
+  return page ? `${baseUrl}?page=${page}` : baseUrl;
 }
 
 function documentDownloadUrl(docId: number) {
@@ -124,6 +125,8 @@ export default function TeacherApplicationModal({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
   const [previewDocument, setPreviewDocument] = useState<any | null>(null);
+  const [pdfPage, setPdfPage] = useState(1);
+  const [pdfPageUnavailable, setPdfPageUnavailable] = useState(false);
   const [shortlistError, setShortlistError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [scheduleSuccess, setScheduleSuccess] = useState<string | null>(null);
@@ -848,7 +851,11 @@ export default function TeacherApplicationModal({
                     <div key={doc.id} className="flex items-center gap-1.5">
                       <button
                         type="button"
-                        onClick={() => setPreviewDocument(doc)}
+                        onClick={() => {
+                          setPreviewDocument(doc);
+                          setPdfPage(1);
+                          setPdfPageUnavailable(false);
+                        }}
                         title={`Preview ${doc.fileName}`}
                         className={`flex items-center gap-2 rounded-xl border px-4 py-2 transition-all ${isReupload ? "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100" : "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}`}
                       >
@@ -1422,9 +1429,24 @@ export default function TeacherApplicationModal({
               </div>
             </header>
             <div className="min-h-0 flex-1 bg-slate-100">
-              {(previewDocument.mimeType || "").startsWith("image/") ? (
+              {(previewDocument.mimeType || "").startsWith("image/") && !(previewDocument.fileName || "").toLowerCase().endsWith(".pdf") ? (
                 <div className="flex h-full items-center justify-center overflow-auto p-4">
                   <img src={documentUrl(previewDocument.id)} alt={previewDocument.fileName || "Uploaded document"} className="max-h-full max-w-full object-contain" />
+                </div>
+              ) : (previewDocument.mimeType || "") === "application/pdf" || (previewDocument.fileName || "").toLowerCase().endsWith(".pdf") ? (
+                <div className="flex h-full min-h-0 flex-col">
+                  <div className="flex items-center justify-center gap-3 border-b border-slate-200 bg-white px-3 py-2">
+                    <button type="button" onClick={() => { setPdfPage((page) => Math.max(1, page - 1)); setPdfPageUnavailable(false); }} disabled={pdfPage <= 1} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-40">Previous</button>
+                    <span className="text-xs font-medium text-slate-600">Page {pdfPage}</span>
+                    <button type="button" onClick={() => { setPdfPage((page) => page + 1); setPdfPageUnavailable(false); }} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700">Next</button>
+                  </div>
+                  <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-4">
+                    {pdfPageUnavailable ? (
+                      <div className="rounded-xl bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">Page {pdfPage} is not available in this PDF.</div>
+                    ) : (
+                      <img key={`${previewDocument.id}-${pdfPage}`} src={documentUrl(previewDocument.id, pdfPage)} alt={`${previewDocument.fileName || "PDF"}, page ${pdfPage}`} onError={() => setPdfPageUnavailable(true)} className="max-h-full max-w-full object-contain shadow-md" />
+                    )}
+                  </div>
                 </div>
               ) : (
                 <iframe title={previewDocument.fileName || "Application document"} src={documentUrl(previewDocument.id)} className="h-full w-full border-0" />
