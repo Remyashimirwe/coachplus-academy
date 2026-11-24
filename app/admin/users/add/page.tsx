@@ -1,6 +1,8 @@
 import { getPrograms } from "@/app/lib/db";
 import AddUserForm from "./AddUserForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function AddUserPage() {
   const rawPrograms = await getPrograms();
   const programs = rawPrograms.map((p) => ({

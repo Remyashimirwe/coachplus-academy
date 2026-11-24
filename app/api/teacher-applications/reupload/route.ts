@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { findDocumentReuploadApplication } from "@/app/lib/documentReupload";
 
 export const runtime = "nodejs";
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const token = request.nextUrl.searchParams.get("token") || "";
     const application = await findDocumentReuploadApplication(token);
@@ -22,7 +23,9 @@ export async function GET(request: NextRequest) {
       reason: application.missingDocumentReason,
     });
   } catch (error) {
-    console.error("Failed to load document re-upload link:", error);
+    console.error(JSON.stringify({ event: "document_reupload_lookup_failed", requestId: request.headers.get("x-request-id"), category: "lookup_error", code: typeof error === "object" && error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json({ message: "We could not load this upload link." }, { status: 500 });
   }
 }
+
+export const GET = withApiObservability("GET /api/teacher-applications/reupload", handleGET);

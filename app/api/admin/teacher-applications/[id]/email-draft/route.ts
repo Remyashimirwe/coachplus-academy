@@ -1,8 +1,9 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -51,3 +52,5 @@ export async function POST(
     application: updated,
   });
 }
+
+export const POST = withApiObservability("POST /api/admin/teacher-applications/[id]/email-draft", handlePOST);

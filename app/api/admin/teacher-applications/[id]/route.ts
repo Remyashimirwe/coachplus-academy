@@ -1,8 +1,9 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -29,3 +30,5 @@ export async function GET(
     headers: { "Cache-Control": "no-store" },
   });
 }
+
+export const GET = withApiObservability("GET /api/admin/teacher-applications/[id]", handleGET);

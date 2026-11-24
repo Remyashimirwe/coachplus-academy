@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -5,7 +6,7 @@ import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
 const ALLOWED_STATUSES = ["new", "contacted", "resolved"];
 
-export async function PATCH(
+async function handlePATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -59,3 +60,5 @@ export async function PATCH(
 
   return NextResponse.json({ message: "Status updated", status: updated.status });
 }
+
+export const PATCH = withApiObservability("PATCH /api/admin/requests/[id]/status", handlePATCH);

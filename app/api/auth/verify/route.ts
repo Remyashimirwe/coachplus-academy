@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { signToken } from "@/app/lib/auth";
 import { consumeVerificationCode, checkVerificationCode, isVerificationPurpose } from "@/app/lib/verification";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * POST /api/auth/verify
@@ -18,9 +20,15 @@ import { consumeVerificationCode, checkVerificationCode, isVerificationPurpose }
  * The code check itself lives in `consumeVerificationCode` so this route and
  * the website's `/auth/verify-session` enforce identical rules.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email, code, type } = await request.json();
+
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "otp-verify-mobile", {
+      ipLimit: 12, accountLimit: 6, windowMs: 15 * 60 * 1000,
+      account: typeof email === "string" ? email : undefined,
+    }));
+    if (limited) return limited;
 
     if (!email || !code || !isVerificationPurpose(type)) {
       return NextResponse.json(
@@ -57,12 +65,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json(await issueToken(user));
   } catch (error) {
+    console.error(JSON.stringify({ event: "otp_verify_mobile_failed", category: "unexpected_error", code: error instanceof Error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "We could not verify that code. Please try again.", code: "OTP_VERIFY_FAILED" },
       { status: 500 },
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/verify", handlePOST);
 
 /** Mirrors the user payload returned by POST /api/auth/login. */
 async function issueToken(user: {

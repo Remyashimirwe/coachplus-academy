@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/app/lib/db";
@@ -8,7 +9,7 @@ import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -180,6 +181,8 @@ export async function POST(
     if (error.code === "P2002") {
       return NextResponse.json({ message: "Email already exists" }, { status: 400 });
     }
-    return NextResponse.json({ message: error.message || "Failed to approve request" }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/requests/[id]/approve", handlePOST);

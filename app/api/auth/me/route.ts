@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -13,7 +14,7 @@ import { getUserFromRequest } from "@/app/lib/auth";
  *  - 401         → the token was rejected (expired/tampered), the app drops
  *                  the local session and returns to the login screen
  */
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const sessionUser = await getUserFromRequest(request);
     if (!sessionUser?.id) {
@@ -43,8 +44,10 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 },
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/auth/me", handleGET);

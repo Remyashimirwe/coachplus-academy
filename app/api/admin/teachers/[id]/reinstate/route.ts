@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
 import { notifyAdmins, notifyUsers } from '@/app/lib/notifications';
 
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -54,6 +55,8 @@ export async function POST(
 
     return NextResponse.json({ message: 'Teacher reinstated successfully' });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : 'Something went wrong' }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/teachers/[id]/reinstate", handlePOST);

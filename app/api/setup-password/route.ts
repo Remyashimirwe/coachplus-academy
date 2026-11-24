@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getSession, login } from '@/app/lib/auth';
 import bcrypt from 'bcryptjs';
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const session = await getSession();
     if (!session) {
@@ -38,6 +39,8 @@ export async function POST(request: Request) {
     });
 
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/setup-password", handlePOST);

@@ -1,4 +1,4 @@
-import { getProgramById } from "@/app/lib/db";
+import { getCachedProgramById } from "@/app/lib/db";
 import { notFound } from "next/navigation";
 import ProgramDetailView from "../ProgramDetailView";
 
@@ -16,7 +16,7 @@ export default async function ProgramPage({
     notFound();
   }
 
-  const program = await getProgramById(programId);
+  const program = await getCachedProgramById(programId);
 
   if (!program) {
     notFound();

@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -9,7 +10,7 @@ import { TEACHER_APPLICATION_DOCUMENTS } from "@/app/lib/teacherApplicationDocum
 // Re-upload documents after being flagged as missing/unclear (Stage 2).
 // When new documents are uploaded, the system auto-clears documents_needed
 // back to pending so the admin can review again.
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -162,8 +163,10 @@ export async function POST(
     }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message ?? "Document re-upload failed" },
+      { error: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/teacher-applications/[id]/reupload-documents", handlePOST);

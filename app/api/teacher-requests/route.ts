@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
@@ -5,7 +6,7 @@ import { isUnavailableError } from "@/app/lib/publicError";
 
 export const maxDuration = 30;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     let body: any;
     try {
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (error: any) {
-    console.error("Teacher request submission failed:", error);
+    console.error(JSON.stringify({ event: "teacher_request_failed", requestId: request.headers.get("x-request-id"), category: "submission_error", code: typeof error === "object" && error && "code" in error ? String(error.code) : "unknown" }));
 
     if (error?.code === "P2000") {
       return NextResponse.json(
@@ -118,3 +119,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/teacher-requests", handlePOST);

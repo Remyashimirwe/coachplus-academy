@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
 /** PATCH → rename a topic. DELETE → remove a topic. */
-export async function PATCH(
+async function handlePATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -34,13 +35,13 @@ export async function PATCH(
     return NextResponse.json({ topic });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -59,8 +60,11 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const PATCH = withApiObservability("PATCH /api/admin/learning/topics/[id]", handlePATCH);
+export const DELETE = withApiObservability("DELETE /api/admin/learning/topics/[id]", handleDELETE);

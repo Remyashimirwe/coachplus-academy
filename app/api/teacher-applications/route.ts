@@ -3,10 +3,12 @@ import { db } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
 import { sendApplicationReceivedEmail } from "@/app/lib/email";
 import { isUnavailableError } from "@/app/lib/publicError";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 export const maxDuration = 30;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   let requestSubmissionId: string | null = null;
   try {
     let body: any;
@@ -62,6 +64,12 @@ export async function POST(request: Request) {
       submissionId,
     } = body;
     requestSubmissionId = typeof submissionId === "string" ? submissionId : null;
+
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "teacher-application", {
+      ipLimit: 20, accountLimit: 5, windowMs: 60 * 60 * 1000,
+      account: typeof email === "string" ? email : undefined,
+    }));
+    if (limited) return limited;
 
     if (typeof fullName !== "string" || fullName.trim().length < 2) {
       return NextResponse.json(
@@ -167,7 +175,7 @@ export async function POST(request: Request) {
         name: created.fullName,
         subjects: created.subjects,
         location: location || undefined,
-      }).catch((err) => console.error("Failed to send application receipt email:", err));
+      }).catch(() => console.error(JSON.stringify({ event: "teacher_application_email_failed", requestId: request.headers.get("x-request-id"), category: "email_provider_error" })));
 
       await notifyAdmins({
         title: "New teacher application",
@@ -190,7 +198,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.error("Teacher application submission failed:", error);
+    console.error(JSON.stringify({ event: "teacher_application_failed", requestId: request.headers.get("x-request-id"), category: "submission_error", code: error?.code ?? "unknown" }));
 
     // A value longer than its database column is an input problem the
     // applicant can fix, not a server crash.
@@ -225,3 +233,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/teacher-applications", handlePOST);

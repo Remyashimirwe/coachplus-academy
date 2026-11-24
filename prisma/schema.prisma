@@ -348,3 +348,20 @@ model Setting {
   key   String @unique
   value String
 }
+
+model RealtimeDemo {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("realtime_demo")
+}
+
+model ApiRateLimit {
+  keyHash     String   @db.VarChar(64)
+  windowStart DateTime @db.Timestamptz(6)
+  hits        Int      @default(1)
+
+  @@id([keyHash, windowStart])
+  @@index([windowStart])
+}

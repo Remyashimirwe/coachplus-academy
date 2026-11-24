@@ -1,8 +1,9 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== "ADMIN") {
@@ -37,8 +38,10 @@ export async function GET(request: Request) {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/admin/requests", handleGET);

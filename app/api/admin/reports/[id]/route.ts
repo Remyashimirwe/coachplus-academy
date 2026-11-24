@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
@@ -6,7 +7,7 @@ import { notifyAdmins, notifyUsers } from '@/app/lib/notifications';
 
 const VALID_STATUSES = ['new', 'reviewed', 'resolved'];
 
-export async function PATCH(
+async function handlePATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -82,6 +83,8 @@ export async function PATCH(
 
     return NextResponse.json({ message: 'Report updated', report: updated, emailSent });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const PATCH = withApiObservability("PATCH /api/admin/reports/[id]", handlePATCH);

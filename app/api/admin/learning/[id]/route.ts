@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
 /** PATCH → update a program's core fields + toggles. DELETE → remove a program. */
-export async function PATCH(
+async function handlePATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -61,13 +62,13 @@ export async function PATCH(
     return NextResponse.json({ program });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -86,8 +87,11 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const PATCH = withApiObservability("PATCH /api/admin/learning/[id]", handlePATCH);
+export const DELETE = withApiObservability("DELETE /api/admin/learning/[id]", handleDELETE);

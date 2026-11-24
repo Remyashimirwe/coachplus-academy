@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -11,7 +12,7 @@ const STAGES = new Set([
   "rejected",
 ]);
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -49,3 +50,5 @@ export async function POST(
     saved: hasSavedDraft,
   });
 }
+
+export const POST = withApiObservability("POST /api/admin/teacher-applications/[id]/preview-email", handlePOST);

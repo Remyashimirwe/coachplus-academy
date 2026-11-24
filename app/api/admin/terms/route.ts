@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -7,19 +8,13 @@ import {
   saveTeacherTerms,
 } from "@/app/lib/teacherTermsServer";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error && error.message
-    ? error.message
-    : "Something went wrong";
-}
-
 async function isAdmin(request: NextRequest) {
   const user = await getUserFromRequest(request);
   return Boolean(user && user.role === "ADMIN");
 }
 
 /** Admin: read the current Teacher Partner terms. */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     if (!(await isAdmin(request))) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -29,14 +24,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ terms });
   } catch (error) {
     return NextResponse.json(
-      { message: errorMessage(error) },
+      { message: "Teacher terms are temporarily unavailable.", code: "TERMS_UNAVAILABLE" },
       { status: 500 }
     );
   }
 }
 
 /** Admin: replace the Teacher Partner terms. */
-export async function PUT(request: NextRequest) {
+async function handlePUT(request: NextRequest) {
   try {
     if (!(await isAdmin(request))) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -63,8 +58,11 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ terms });
   } catch (error) {
     return NextResponse.json(
-      { message: errorMessage(error) },
+      { message: "Teacher terms could not be saved. Please try again.", code: "TERMS_UPDATE_FAILED" },
       { status: 500 }
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/admin/terms", handleGET);
+export const PUT = withApiObservability("PUT /api/admin/terms", handlePUT);

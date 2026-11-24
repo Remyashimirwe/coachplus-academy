@@ -3,15 +3,28 @@ import bcrypt from "bcryptjs";
 import { db } from "@/app/lib/db";
 import { signToken } from "@/app/lib/auth";
 import { issueVerificationCode } from "@/app/lib/verification";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * Mobile-friendly login used by the Flutter app.
  * Verifies credentials and returns a long-lived bearer token plus the user,
  * so the mobile client can authenticate admin/rest calls with the token.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email, password } = await request.json();
+
+    const limited = await enforceRateLimit(
+      request,
+      rateLimitPolicies(request, "mobile-login", {
+        ipLimit: 30,
+        accountLimit: 10,
+        windowMs: 15 * 60 * 1000,
+        account: typeof email === "string" ? email : undefined,
+      }),
+    );
+    if (limited) return limited;
 
     if (!email || !password) {
       return NextResponse.json({ message: "Email and password are required" }, { status: 400 });
@@ -90,7 +103,7 @@ export async function POST(request: Request) {
       // `send_failed`: Resend rejected the send (bad key, quota, provider
       // outage). A user who proved their password must not be locked out by an
       // email problem, so sign them in normally instead.
-      console.warn(`[auth/login] verification email failed for ${user.email}`);
+      console.warn(JSON.stringify({ event: "login_verification_delivery_failed", category: "email_provider_error" }));
     }
 
     const token = await signToken({
@@ -105,7 +118,11 @@ export async function POST(request: Request) {
       token,
       user: userPayload,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message ?? "Something went wrong" }, { status: 500 });
+  } catch (error: unknown) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "unknown";
+    console.error(JSON.stringify({ event: "mobile_login_failed", category: "unexpected_error", code }));
+    return NextResponse.json({ error: "We could not sign you in. Please try again.", code: "LOGIN_FAILED" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/login", handlePOST);

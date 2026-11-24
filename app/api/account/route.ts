@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -10,7 +11,7 @@ const userSelect = {
   image: true,
 } as const;
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user) {
@@ -40,13 +41,13 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   try {
     const sessionUser = await getUserFromRequest(request);
     if (!sessionUser) {
@@ -132,7 +133,7 @@ export async function PATCH(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
@@ -150,7 +151,7 @@ export async function PATCH(request: Request) {
  *
  * Admin accounts are refused here — they must be removed by another admin.
  */
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   try {
     const sessionUser = await getUserFromRequest(request);
     if (!sessionUser) {
@@ -216,8 +217,12 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ message: "Account deleted" });
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/account", handleGET);
+export const PATCH = withApiObservability("PATCH /api/account", handlePATCH);
+export const DELETE = withApiObservability("DELETE /api/account", handleDELETE);

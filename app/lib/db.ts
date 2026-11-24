@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import net from "node:net";
+import { unstable_cache } from "next/cache";
 
 // Node's Happy-Eyeballs connect() gives each candidate address only 250ms by
 // default before abandoning it and moving on. Neon's pooled endpoint can sit
@@ -37,11 +38,20 @@ const pool = new pg.Pool({
   allowExitOnIdle: true,
 });
 
+export { pool };
+
 // Without a listener, errors emitted by idle clients in the pool (e.g. the
 // database closing a stale connection) become unhandled 'error' events and
 // can crash the process instead of just letting the pool discard the client.
 pool.on("error", (err) => {
-  console.error("Unexpected error on idle pg client", err);
+  const code = "code" in err ? String(err.code) : "unknown";
+  console.error(
+    JSON.stringify({
+      event: "postgres_pool_error",
+      code,
+      category: "idle_client_error",
+    }),
+  );
 });
 
 const adapter = new PrismaPg(pool);
@@ -52,7 +62,10 @@ export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     adapter,
-    log: ["query"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
@@ -62,6 +75,10 @@ export const db = prisma;
 export async function getPrograms({
   onlyForTeacherForm = false,
 }: { onlyForTeacherForm?: boolean } = {}) {
+  return queryPrograms(onlyForTeacherForm);
+}
+
+async function queryPrograms(onlyForTeacherForm: boolean) {
   const where = onlyForTeacherForm
     ? { showOnTeacherForm: true }
     : undefined;
@@ -84,8 +101,36 @@ export async function getPrograms({
   });
 }
 
+export async function getCachedPrograms({
+  onlyForTeacherForm = false,
+}: { onlyForTeacherForm?: boolean } = {}) {
+  return cachedPrograms(onlyForTeacherForm);
+}
+
+const cachedPrograms = unstable_cache(
+  async (onlyForTeacherForm: boolean) => queryPrograms(onlyForTeacherForm),
+  ["public-program-catalog-v1"],
+  { revalidate: 30, tags: ["program-catalog"] },
+);
+
 export async function getProgramById(id: number) {
   return prisma.program.findUnique({
+    where: { id },
+    include: {
+      subjects: {
+        orderBy: { sortOrder: "asc" },
+        include: { topics: { orderBy: { sortOrder: "asc" } } },
+      },
+    },
+  });
+}
+
+export async function getCachedProgramById(id: number) {
+  return cachedProgramById(id);
+}
+
+const cachedProgramById = unstable_cache(
+  async (id: number) => prisma.program.findUnique({
     where: { id },
     include: {
       subjects: {
@@ -97,8 +142,10 @@ export async function getProgramById(id: number) {
         },
       },
     },
-  });
-}
+  }),
+  ["public-program-detail-v1"],
+  { revalidate: 30, tags: ["program-catalog"] },
+);
 
 export async function getUserByEmail(email: string) {
   return prisma.user.findUnique({

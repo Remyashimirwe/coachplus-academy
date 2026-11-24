@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { createHash, randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
@@ -6,7 +7,7 @@ import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationE
 import { TEACHER_APPLICATION_DOCUMENTS } from "@/app/lib/teacherApplicationDocuments";
 import { sendTeacherApplicationEmailNow } from "@/app/lib/sendTeacherApplicationEmailNow";
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -92,6 +93,8 @@ export async function POST(
       application: result.application,
     });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Failed to queue document request" }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/teacher-applications/[id]/missing-documents", handlePOST);

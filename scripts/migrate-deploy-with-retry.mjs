@@ -1,5 +1,10 @@
 import { spawn } from "node:child_process";
 
+if (!process.env.DIRECT_URL) {
+  console.error("DIRECT_URL is required for Prisma migrations. No migration was started.");
+  process.exit(1);
+}
+
 // Prisma's PostgreSQL advisory-lock wait is fixed at 10 seconds. Concurrent
 // Vercel builds can therefore fail even when another deployment is applying
 // valid migrations and will release the lock shortly. Retry only that case;

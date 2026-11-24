@@ -4,6 +4,8 @@ import {
   isVerificationPurpose,
   issueVerificationCode,
 } from "@/app/lib/verification";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * POST /api/auth/resend-code
@@ -19,9 +21,15 @@ import {
  * A 200 is returned whether or not the account exists, so this endpoint
  * cannot be used to discover which email addresses are registered.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email, type } = await request.json();
+
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "otp-resend", {
+      ipLimit: 20, accountLimit: 4, windowMs: 60 * 60 * 1000,
+      account: typeof email === "string" ? email : undefined,
+    }));
+    if (limited) return limited;
 
     if (!email || !isVerificationPurpose(type)) {
       return NextResponse.json({ error: "Email and a valid type are required." }, { status: 400 });
@@ -69,9 +77,12 @@ export async function POST(request: Request) {
     // sent, or cooldown (a code is already on its way) — both are successes.
     return NextResponse.json({ message: "Verification code sent" });
   } catch (error) {
+    console.error(JSON.stringify({ event: "otp_resend_failed", category: "unexpected_error", code: error instanceof Error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "We could not resend the code. Please try again shortly.", code: "OTP_RESEND_FAILED" },
       { status: 500 },
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/resend-code", handlePOST);

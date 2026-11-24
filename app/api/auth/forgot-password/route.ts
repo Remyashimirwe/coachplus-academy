@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { issueVerificationCode } from "@/app/lib/verification";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * POST /api/auth/forgot-password
@@ -19,9 +21,14 @@ import { issueVerificationCode } from "@/app/lib/verification";
  * The 60-second cooldown inside `issueVerificationCode` is what stops this
  * being used to flood an inbox.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email } = await request.json();
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "password-reset-request", {
+      ipLimit: 20, accountLimit: 5, windowMs: 60 * 60 * 1000,
+      account: typeof email === "string" ? email : undefined,
+    }));
+    if (limited) return limited;
     // Trimmed only — the stored address is matched exactly, as everywhere else.
     const normalised = String(email ?? "").trim();
 
@@ -50,15 +57,18 @@ export async function POST(request: Request) {
     // `send_failed`: the code never left our systems. Pretending it did would
     // strand the user on a verification screen for an email that will never
     // arrive, so say what actually happened.
-    console.warn(`[auth/forgot-password] reset email failed for ${user.email}`);
+    console.warn(JSON.stringify({ event: "password_reset_email_failed", category: "email_provider_error" }));
     return NextResponse.json(
       { error: "We couldn't send the reset code right now. Please try again in a few minutes." },
       { status: 502 },
     );
   } catch (error) {
+    console.error(JSON.stringify({ event: "password_reset_request_failed", category: "unexpected_error", code: error instanceof Error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "We could not start the password reset. Please try again shortly.", code: "PASSWORD_RESET_REQUEST_FAILED" },
       { status: 500 },
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/forgot-password", handlePOST);

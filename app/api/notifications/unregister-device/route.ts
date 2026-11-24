@@ -1,8 +1,9 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user) {
@@ -23,8 +24,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Device token unregistered" });
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/notifications/unregister-device", handlePOST);

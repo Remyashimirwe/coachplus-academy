@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db, getPrograms } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -7,7 +8,7 @@ import { getUserFromRequest } from "@/app/lib/auth";
  * GET  → full tree ordered by sortOrder.
  * POST → create a program.
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== "ADMIN") {
@@ -18,13 +19,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ programs });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== "ADMIN") {
@@ -70,8 +71,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ program }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/admin/learning", handleGET);
+export const POST = withApiObservability("POST /api/admin/learning", handlePOST);

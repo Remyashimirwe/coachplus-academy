@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -8,7 +9,7 @@ import {
 } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -137,8 +138,8 @@ export async function POST(
         acceptDeclineLink: `${APP_URL}/teacher/students`,
         contactPhone: teacher.phone || "",
         location: teacherLocation || undefined,
-      }).catch((err) => {
-        console.error("Failed to send student match email:", err);
+      }).catch(() => {
+        console.error(JSON.stringify({ event: "student_match_email_failed", category: "email_provider_error" }));
         return { success: false };
       }),
     ]);
@@ -181,3 +182,5 @@ export async function POST(
     emailSent,
   });
 }
+
+export const POST = withApiObservability("POST /api/admin/requests/[id]/assign", handlePOST);

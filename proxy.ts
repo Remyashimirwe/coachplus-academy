@@ -52,6 +52,18 @@ function localePath(locale: Locale, pathname: string) {
 
 export async function proxy(request: NextRequest) {
   const requestPath = request.nextUrl.pathname;
+
+  // Give API requests a trusted correlation ID before they reach a handler.
+  // The route wrapper echoes it to the client and records it with latency/status.
+  if (requestPath === "/api" || requestPath.startsWith("/api/")) {
+    const requestHeaders = new Headers(request.headers);
+    const requestId = crypto.randomUUID();
+    requestHeaders.set("x-request-id", requestId);
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.headers.set("X-Request-ID", requestId);
+    return response;
+  }
+
   const prefix = requestPath.match(/^\/(en|fr)(?=\/|$)/)?.[1];
   const locale: Locale = isLocale(prefix)
     ? prefix
@@ -130,5 +142,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.[^/]+$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.[^/]+$).*)"],
 };

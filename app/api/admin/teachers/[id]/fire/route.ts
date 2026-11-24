@@ -1,10 +1,11 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { sendTeacherFiredEmail } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -92,6 +93,8 @@ export async function POST(
       emailSent: emailResult.success,
     });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message || "Failed to dismiss teacher" }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/teachers/[id]/fire", handlePOST);

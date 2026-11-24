@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
 import { DAYS_OF_WEEK, parsePreferredDays } from '@/app/lib/schedule';
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== 'STUDENT') {
@@ -35,11 +36,11 @@ export async function GET(request: Request) {
       teacherName: student.teacher?.user.name ?? null,
     });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Something went wrong" }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
 
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== 'STUDENT') {
@@ -99,6 +100,9 @@ export async function PUT(request: Request) {
       preferredTime: student?.preferredTime,
     });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Something went wrong" }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const GET = withApiObservability("GET /api/student/settings", handleGET);
+export const PUT = withApiObservability("PUT /api/student/settings", handlePUT);

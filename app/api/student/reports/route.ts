@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
@@ -12,7 +13,7 @@ const VALID_CATEGORIES = [
   'Other',
 ];
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== 'STUDENT') {
@@ -39,11 +40,11 @@ export async function GET(request: Request) {
         : null,
     });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== 'STUDENT') {
@@ -108,6 +109,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: 'Your report has been submitted to the admin team.', report });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+export const GET = withApiObservability("GET /api/student/reports", handleGET);
+export const POST = withApiObservability("POST /api/student/reports", handlePOST);

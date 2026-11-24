@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/app/lib/db';
@@ -9,7 +10,7 @@ function startOfDay(input?: string | null) {
   return d;
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== 'TEACHER') {
@@ -42,13 +43,16 @@ export async function GET(request: Request) {
 
     return NextResponse.json(attendances);
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Something went wrong" }, { status: 500 });
+    return NextResponse.json({ message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
 
-export async function POST() {
+async function handlePOST() {
   return NextResponse.json(
     { message: 'Teachers mark their own attendance now. Use /api/teacher/my-attendance instead.' },
     { status: 403 }
   );
 }
+
+export const GET = withApiObservability("GET /api/teacher/attendance", handleGET);
+export const POST = withApiObservability("POST /api/teacher/attendance", handlePOST);

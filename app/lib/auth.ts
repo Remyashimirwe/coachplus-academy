@@ -116,12 +116,24 @@ export async function login(user: { id: number; email: string; role: string; nam
   const expires = new Date(Date.now() + 2 * 60 * 60 * 1000);
   const session = await encrypt({ user, expires });
   const cookieStore = await cookies();
-  cookieStore.set("session", session, { expires, httpOnly: true });
+  cookieStore.set("session", session, {
+    expires,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
 }
 
 export async function logout() {
   const cookieStore = await cookies();
-  cookieStore.set("session", "", { expires: new Date(0) });
+  cookieStore.set("session", "", {
+    expires: new Date(0),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
 }
 
 export async function updateSession(request: NextRequest) {

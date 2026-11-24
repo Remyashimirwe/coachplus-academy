@@ -6,6 +6,8 @@ import {
   consumeVerificationCode,
   isVerificationPurpose,
 } from "@/app/lib/verification";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * POST /api/auth/verify-session
@@ -29,9 +31,15 @@ import {
  * signed in — and the code is consumed one step later by
  * `/auth/reset-password`, which is also where the password actually changes.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email, code, role, type } = await request.json();
+
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "otp-verify-web", {
+      ipLimit: 12, accountLimit: 6, windowMs: 15 * 60 * 1000,
+      account: typeof email === "string" ? email : undefined,
+    }));
+    if (limited) return limited;
 
     const purpose = isVerificationPurpose(type) ? type : "login";
 
@@ -87,9 +95,12 @@ export async function POST(request: Request) {
       role: user.role,
     });
   } catch (error) {
+    console.error(JSON.stringify({ event: "otp_verify_web_failed", category: "unexpected_error", code: error instanceof Error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "We could not verify that code. Please try again.", code: "OTP_VERIFY_FAILED" },
       { status: 500 },
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/verify-session", handlePOST);

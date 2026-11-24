@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
@@ -14,7 +15,7 @@ import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
 const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-export async function POST() {
+async function handlePOST() {
   const now = new Date();
   
   const pendingApps = await db.teacherApplication.findMany({
@@ -145,8 +146,8 @@ export async function POST() {
                 message: `${app.fullName} was approved as a teacher.`,
                 type: "success",
               });
-            } catch (notificationError) {
-              console.error("Approval email sent, but notification failed:", notificationError);
+            } catch {
+              console.error(JSON.stringify({ event: "approval_notification_failed", category: "notification_error" }));
             }
           }
           break;
@@ -191,10 +192,14 @@ export async function POST() {
         }
       }
       return { id: app.id, success: emailResult.success };
-    } catch (e) {
-      return { id: app.id, success: false, error: e };
+    } catch (error) {
+      const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "unknown";
+      console.error(JSON.stringify({ event: "scheduled_application_email_failed", category: "email_provider_error", code }));
+      return { id: app.id, success: false, error: "Email delivery failed.", code };
     }
   }));
 
   return NextResponse.json({ processed: results.length, results });
 }
+
+export const POST = withApiObservability("POST /api/admin/cron/process-emails", handlePOST);

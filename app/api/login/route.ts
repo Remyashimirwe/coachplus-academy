@@ -3,6 +3,8 @@ import { prisma } from '@/app/lib/db';
 import { login } from '@/app/lib/auth';
 import { issueVerificationCode } from '@/app/lib/verification';
 import bcrypt from 'bcryptjs';
+import { enforceRateLimit, rateLimitPolicies } from '@/app/lib/rate-limit';
+import { withApiObservability } from '@/app/lib/api-observability';
 
 /**
  * Website sign-in (student / teacher).
@@ -18,9 +20,20 @@ import bcrypt from 'bcryptjs';
  * an email problem. In that case the session is issued directly, exactly as
  * `/api/auth/login` does.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email, password, role } = await request.json();
+
+    const limited = await enforceRateLimit(
+      request,
+      rateLimitPolicies(request, "web-login", {
+        ipLimit: 30,
+        accountLimit: 10,
+        windowMs: 15 * 60 * 1000,
+        account: typeof email === "string" ? email : undefined,
+      }),
+    );
+    if (limited) return limited;
 
     if (!email || !password) {
       return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
@@ -77,7 +90,7 @@ export async function POST(request: Request) {
     }
 
     // `send_failed` — the code never left our systems, so don't demand it.
-    console.warn(`[api/login] verification email failed for ${user.email}, issuing session directly`);
+    console.warn(JSON.stringify({ event: "login_verification_delivery_failed", category: "email_provider_error" }));
 
     await login({
         id: user.id,
@@ -93,7 +106,11 @@ export async function POST(request: Request) {
         isFirstLogin: user.isFirstLogin
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "unknown";
+    console.error(JSON.stringify({ event: "web_login_failed", category: "unexpected_error", code }));
+    return NextResponse.json({ error: "We could not sign you in. Please try again.", code: "LOGIN_FAILED" }, { status: 500 });
   }
 }
+
+export const POST = withApiObservability("POST /api/login", handlePOST);

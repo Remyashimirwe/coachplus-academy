@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
 /** Reorders Programs, Subjects, or Topics. Body: { kind, ids: number[] } */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
     if (!user || user.role !== "ADMIN") {
@@ -51,8 +52,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/learning/reorder", handlePOST);

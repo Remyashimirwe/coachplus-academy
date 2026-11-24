@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/app/lib/db";
 import { consumeVerificationCode } from "@/app/lib/verification";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * POST /api/auth/reset-password
@@ -20,9 +22,14 @@ import { consumeVerificationCode } from "@/app/lib/verification";
  */
 const MIN_PASSWORD_LENGTH = 8;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const { email, code, password } = await request.json();
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "password-reset-complete", {
+      ipLimit: 15, accountLimit: 6, windowMs: 60 * 60 * 1000,
+      account: typeof email === "string" ? email : undefined,
+    }));
+    if (limited) return limited;
     // Trimmed only — the stored address is matched exactly, as everywhere else.
     const normalised = String(email ?? "").trim();
 
@@ -70,9 +77,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Your password has been reset. Please sign in." });
   } catch (error) {
+    console.error(JSON.stringify({ event: "password_reset_failed", category: "unexpected_error", code: error instanceof Error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "We could not reset your password. Please try again.", code: "PASSWORD_RESET_FAILED" },
       { status: 500 },
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/reset-password", handlePOST);

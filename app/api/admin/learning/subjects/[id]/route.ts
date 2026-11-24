@@ -1,9 +1,10 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
 /** PATCH → rename a subject. DELETE → remove a subject. POST → add a topic. */
-export async function PATCH(
+async function handlePATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -37,13 +38,13 @@ export async function PATCH(
     return NextResponse.json({ subject });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -62,13 +63,13 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -99,8 +100,12 @@ export async function POST(
     return NextResponse.json({ topic }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/admin/learning/subjects/[id]", handlePOST);
+export const PATCH = withApiObservability("PATCH /api/admin/learning/subjects/[id]", handlePATCH);
+export const DELETE = withApiObservability("DELETE /api/admin/learning/subjects/[id]", handleDELETE);

@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { db } from "@/app/lib/db";
 import { issueVerificationCode } from "@/app/lib/verification";
 import { notifyAdmins } from "@/app/lib/notifications";
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 /**
  * Self-service sign-up, shared by the app's Register screen and the website's
@@ -33,7 +35,7 @@ const SELF_SERVICE_ROLES = ["STUDENT", "TEACHER"] as const;
 /** Matches the app's form validation ("At least 8 characters"). */
 const MIN_PASSWORD_LENGTH = 8;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const name = String(body?.name ?? "").trim();
@@ -42,6 +44,10 @@ export async function POST(request: Request) {
     // stored, so normalising the case here would create accounts those routes
     // then fail to find.
     const email = String(body?.email ?? "").trim();
+    const limited = await enforceRateLimit(request, rateLimitPolicies(request, "registration", {
+      ipLimit: 10, accountLimit: 3, windowMs: 24 * 60 * 60 * 1000, account: email,
+    }));
+    if (limited) return limited;
     const password = String(body?.password ?? "");
     const role = String(body?.role ?? "STUDENT").trim().toUpperCase();
     const phone = String(body?.phone ?? "").trim();
@@ -176,9 +182,12 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    console.error(JSON.stringify({ event: "registration_failed", category: "unexpected_error", code: error instanceof Error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Something went wrong" },
+      { error: "We could not complete registration. Please try again.", code: "REGISTRATION_FAILED" },
       { status: 500 },
     );
   }
 }
+
+export const POST = withApiObservability("POST /api/auth/register", handlePOST);

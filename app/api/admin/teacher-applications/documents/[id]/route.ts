@@ -1,3 +1,4 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
@@ -22,7 +23,7 @@ function cloudinaryPdfPageUrl(url: string, page: number) {
   return parsedUrl.toString();
 }
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -165,3 +166,5 @@ export async function GET(
     },
   });
 }
+
+export const GET = withApiObservability("GET /api/admin/teacher-applications/documents/[id]", handleGET);

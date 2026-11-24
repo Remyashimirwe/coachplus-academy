@@ -10,6 +10,8 @@ export default defineConfig({
     seed: "npx tsx seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Runtime queries use DATABASE_URL (pooled). Schema migrations must use
+    // Neon’s direct, non-pooled endpoint via DIRECT_URL.
+    url: process.env["DIRECT_URL"],
   },
 });

@@ -1,8 +1,9 @@
+import { withApiObservability } from "@/app/lib/api-observability";
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -43,13 +44,13 @@ export async function GET(
     return NextResponse.json(reports);
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
 
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -101,8 +102,11 @@ export async function POST(
     return NextResponse.json(report, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Something went wrong" },
+      { message: "Something went wrong. Please try again.", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/teacher/students/[id]/reports", handleGET);
+export const POST = withApiObservability("POST /api/teacher/students/[id]/reports", handlePOST);

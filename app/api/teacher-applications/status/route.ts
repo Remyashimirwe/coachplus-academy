@@ -1,22 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
-
-// Best-effort rate limit. Serverless instances are short-lived, so this only
-// blunts obvious abuse; it is not a substitute for a real rate limiter.
-const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 15;
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(key: string) {
-  const now = Date.now();
-  const entry = hits.get(key);
-  if (!entry || entry.resetAt < now) {
-    hits.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > MAX_REQUESTS;
-}
+import { enforceRateLimit, rateLimitPolicies } from "@/app/lib/rate-limit";
+import { withApiObservability } from "@/app/lib/api-observability";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -27,24 +12,20 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
  * whether they already have a student are returned — never documents,
  * phone numbers or addresses.
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const email = (request.nextUrl.searchParams.get("email") || "")
     .trim()
     .toLowerCase();
+
+  const limited = await enforceRateLimit(request, rateLimitPolicies(request, "application-status", {
+    ipLimit: 30, accountLimit: 15, windowMs: 60_000, account: email,
+  }));
+  if (limited) return limited;
 
   if (!email || !EMAIL_RE.test(email)) {
     return NextResponse.json(
       { message: "Enter the email address you used on your application." },
       { status: 400 },
-    );
-  }
-
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (isRateLimited(`${ip}:${email}`)) {
-    return NextResponse.json(
-      { message: "Too many status checks. Please wait a minute and try again." },
-      { status: 429 },
     );
   }
 
@@ -114,10 +95,12 @@ export async function GET(request: NextRequest) {
           : "",
     });
   } catch (error) {
-    console.error("Failed to look up teacher application status:", error);
+    console.error(JSON.stringify({ event: "application_status_failed", requestId: request.headers.get("x-request-id"), category: "database_error", code: typeof error === "object" && error && "code" in error ? String(error.code) : "unknown" }));
     return NextResponse.json(
       { message: "We could not check your status right now. Please try again." },
       { status: 500 },
     );
   }
 }
+
+export const GET = withApiObservability("GET /api/teacher-applications/status", handleGET);
