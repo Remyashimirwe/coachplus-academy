@@ -36,6 +36,7 @@ import {
 import TimePicker from "@/app/components/TimePicker";
 import ImageLightboxModal from "@/app/components/ImageLightboxModal";
 import type { TeacherTerms } from "@/app/lib/teacherTerms";
+import { localizedContent, t, useSiteLocale } from "@/app/lib/site-i18n";
 
 const MAX_SUBJECTS_PER_PROGRAM = 4;
 const MAX_TOPICS_PER_SUBJECT = 4;
@@ -43,17 +44,20 @@ const MAX_TOPICS_PER_SUBJECT = 4;
 type ProgramTopic = {
   id: number;
   name: string;
+  nameFr?: string | null;
 };
 
 type ProgramSubject = {
   id: number;
   name: string;
+  nameFr?: string | null;
   topics: ProgramTopic[];
 };
 
 type TeacherProgram = {
   id: number;
   title: string;
+  titleFr?: string | null;
   subjects: ProgramSubject[];
 };
 
@@ -79,11 +83,12 @@ function Field({
   htmlFor?: string;
   children: React.ReactNode;
 }) {
+  const locale = useSiteLocale();
   return (
     <div className="space-y-2">
       <label htmlFor={htmlFor} className="text-xs font-medium text-[#0f172a] flex items-center gap-2 mb-1">
         <span className="flex items-center justify-center size-6 rounded-lg bg-[#E91E63]/5 text-[#E91E63]">{icon}</span>
-        {label}
+        {t(locale, label)}
       </label>
       <div className="relative group">
         {children}
@@ -349,6 +354,7 @@ function UploadField({
 }
 
 export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen: boolean; programs: TeacherProgram[]; terms: TeacherTerms }) {
+  const locale = useSiteLocale();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [uploadStep, setUploadStep] = useState("Submitting Application...");
   const [errorMessage, setErrorMessage] = useState("");
@@ -460,15 +466,15 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                   <div className="size-24 rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center mb-8">
                     <FiAlertCircle className="size-12" />
                   </div>
-                  <h2 className="text-xl font-semibold text-[#0f172a]">Applications are Closed</h2>
+                  <h2 className="text-xl font-semibold text-[#0f172a]">{t(locale, "Applications are Closed")}</h2>
                   <p className="mt-6 text-lg text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    We are currently not accepting new teacher applications. Please check back later or follow us for updates on future recruitment cycles.
+                    {t(locale, "We are currently not accepting new teacher applications. Please check back later or follow us for updates on future recruitment cycles.")}
                   </p>
                   <Link
                     href="/"
                     className="mt-10 inline-flex min-h-[64px] items-center justify-center rounded-2xl bg-[#0f172a] px-10 text-base font-semibold text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#E91E63]"
                   >
-                    Return Home
+                    {t(locale, "Return Home")}
                   </Link>
                 </motion.div>
               ) : (
@@ -479,8 +485,8 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                   className="relative rounded-[32px] md:rounded-[40px] bg-white p-6 md:p-12 shadow-2xl shadow-slate-200 border border-slate-100"
                 >
                   <div className="mb-8 md:mb-12 text-center">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-[#0f172a] tracking-tight">Application Form</h2>
-                    <p className="text-slate-500 mt-3 text-base">Tell us about your expertise and teaching journey</p>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-[#0f172a] tracking-tight">{t(locale, "Application Form")}</h2>
+                    <p className="text-slate-500 mt-3 text-base">{t(locale, "Tell us about your expertise and teaching journey")}</p>
                     <div className="mt-6 flex justify-center">
                       <div className="h-1.5 w-20 rounded-full bg-gradient-to-r from-[#FF5733] to-[#E91E63]" />
                     </div>
@@ -670,8 +676,8 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiUser className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Personal Information</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Basic details to identify you</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Personal Information")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "Basic details to identify you")}</p>
                         </div>
                       </div>
                       <div className="grid gap-6">
@@ -736,22 +742,22 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiBookOpen className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Education</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Your academic background</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Education")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "Your academic background")}</p>
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
                         <Field icon={<FiAward />} label="Highest Level of Education / Degree Qualification *" htmlFor="educationLevel">
                           <select id="educationLevel" name="educationLevel" required className={`${inputClasses} appearance-none`}>
-                            <option value="">Select Level / Degree</option>
+                            <option value="">{t(locale, "Select Level / Degree")}</option>
                             <option value="Bachelor of Education (B.Ed.) (e.g. B.Ed. in Mathematics)">1. Bachelor of Education (B.Ed.) — e.g. B.Ed. in Mathematics</option>
                             <option value="Bachelor of Science (BSc) (e.g. BSc in Physics)">2. Bachelor of Science (BSc) — e.g. BSc in Physics</option>
                             <option value="Bachelor of Arts (BA) (e.g. BA in English Literature)">3. Bachelor of Arts (BA) — e.g. BA in English Literature</option>
                             <option value="Bachelor’s Degree in Educational Psychology, Psychopedagogy, or Psychology">4. Bachelor’s Degree in Educational Psychology, Psychopedagogy, or Psychology</option>
-                            <option value="Master's Degree">Master&apos;s Degree</option>
-                            <option value="PhD / Doctorate">PhD / Doctorate</option>
-                            <option value="Diploma">Diploma / Certificate</option>
-                            <option value="Other">Other</option>
+                            <option value="Master's Degree">{t(locale, "Master's Degree")}</option>
+                            <option value="PhD / Doctorate">{t(locale, "PhD / Doctorate")}</option>
+                            <option value="Diploma">{t(locale, "Diploma / Certificate")}</option>
+                            <option value="Other">{t(locale, "Other")}</option>
                           </select>
                         </Field>
                         <Field icon={<FiBookOpen />} label="Field of Study *" htmlFor="fieldOfStudy">
@@ -775,17 +781,17 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiBriefcase className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Teaching Experience</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Where and what you&apos;ve taught</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Teaching Experience")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "Where and what you&apos;ve taught")}</p>
                         </div>
                       </div>
                       <Field icon={<FiClock />} label="Years of Teaching Experience *" htmlFor="experienceYears">
                         <select id="experienceYears" name="experienceYears" required className={`${inputClasses} appearance-none`}>
-                          <option value="">Select Years</option>
-                          <option value="0-1">Less than 1 year</option>
-                          <option value="1-3">1-3 Years</option>
-                          <option value="4-7">4-7 Years</option>
-                          <option value="8+">8+ Years</option>
+                          <option value="">{t(locale, "Select Years")}</option>
+                          <option value="0-1">{t(locale, "Less than 1 year")}</option>
+                          <option value="1-3">{t(locale, "1-3 Years")}</option>
+                          <option value="4-7">{t(locale, "4-7 Years")}</option>
+                          <option value="8+">{t(locale, "8+ Years")}</option>
                         </select>
                       </Field>
 
@@ -818,7 +824,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
                                 >
                                   <span className={`text-xs font-semibold ${isProgramSelected ? "text-[#E91E63]" : "text-slate-800"}`}>
-                                    {p.title}
+                                    {localizedContent(locale, p.title, p.titleFr)}
                                   </span>
                                   <span className={`size-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
                                     isProgramSelected
@@ -859,7 +865,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                                                 isSelected ? "text-[#E91E63]" : "text-slate-600 hover:text-slate-800"
                                               }`}
                                             >
-                                              <span>{s.name}</span>
+                                              <span>{localizedContent(locale, s.name, s.nameFr)}</span>
                                               {isSelected && <FiCheckCircle className="size-3.5 shrink-0" />}
                                             </button>
                                             {isSelected && hasTopics && (
@@ -886,7 +892,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                                                             : "bg-white border-slate-200 text-slate-500 hover:border-[#E91E63]/40 hover:text-slate-700"
                                                         }`}
                                                       >
-                                                        {t.name}
+                                                        {localizedContent(locale, t.name, t.nameFr)}
                                                       </button>
                                                     );
                                                   })}
@@ -926,8 +932,8 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiStar className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Teaching Skills</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Your pedagogical approach</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Teaching Skills")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "Your pedagogical approach")}</p>
                         </div>
                       </div>
                       <Field icon={<FiActivity />} label="What teaching methods do you use? *" htmlFor="methods">
@@ -940,7 +946,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                         <textarea id="engagement" name="engagement" required className={inputClasses} />
                       </Field>
                       <div className="space-y-3">
-                        <label className="text-xs font-semibold text-slate-700">Are you able to teach online? *</label>
+                        <label className="text-xs font-semibold text-slate-700">{t(locale, "Are you able to teach online? *")}</label>
                         <div className="flex gap-6">
                           {["Yes", "No"].map(option => (
                             <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -964,16 +970,16 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiCalendar className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Availability</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">When can you start teaching?</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Availability")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "When can you start teaching?")}</p>
                         </div>
                       </div>
                       <Field icon={<FiBriefcase />} label="Employment Type *" htmlFor="employmentType">
                         <select id="employmentType" name="employmentType" required className={`${inputClasses} appearance-none`}>
-                          <option value="">Select Type</option>
-                          <option value="Full-time">Full-time</option>
-                          <option value="Part-time">Part-time</option>
-                          <option value="Contract">Contract</option>
+                          <option value="">{t(locale, "Select Type")}</option>
+                          <option value="Full-time">{t(locale, "Full-time")}</option>
+                          <option value="Part-time">{t(locale, "Part-time")}</option>
+                          <option value="Contract">{t(locale, "Contract")}</option>
                         </select>
                       </Field>
                       
@@ -999,7 +1005,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                                 : "bg-white border-slate-100 text-slate-600 hover:border-[#E91E63]/30"
                               }`}
                             >
-                              {d}
+                              {t(locale, d)}
                             </button>
                           ))}
                         </div>
@@ -1014,13 +1020,13 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                                 </p>
                                 <div className="grid grid-cols-2 gap-3">
                                   <TimePicker
-                                    label="From"
+                                    label={t(locale, "From")}
                                     ariaLabel={`${d} from time`}
                                     value={dayTimes[d]?.from || ""}
                                     onChange={(v) => updateDayTime(d, "from", v)}
                                   />
                                   <TimePicker
-                                    label="To"
+                                    label={t(locale, "To")}
                                     ariaLabel={`${d} to time`}
                                     value={dayTimes[d]?.to || ""}
                                     onChange={(v) => updateDayTime(d, "to", v)}
@@ -1047,8 +1053,8 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiMessageSquare className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Final Questions</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Tell us a bit more about your motivation</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Final Questions")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "Tell us a bit more about your motivation")}</p>
                         </div>
                       </div>
                       <Field label="Why do you want to teach at our institution? *" htmlFor="whyTeach" icon={<FiTarget />}>
@@ -1069,8 +1075,8 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiFileText className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">Application Documents</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">Supporting files for your application</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a]">{t(locale, "Application Documents")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium">{t(locale, "Supporting files for your application")}</p>
                         </div>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -1114,8 +1120,8 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           <FiShield className="size-5 md:size-6" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a] hover:text-[#E91E63] transition-colors">Read about the Terms and Agreement carefully</h3>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-medium hover:text-[#E91E63]/70 transition-colors">Please review our partnership policies</p>
+                          <h3 className="text-base md:text-lg font-semibold text-[#0f172a] hover:text-[#E91E63] transition-colors">{t(locale, "Read about the Terms and Agreement carefully")}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-medium hover:text-[#E91E63]/70 transition-colors">{t(locale, "Please review our partnership policies")}</p>
                         </div>
                       </button>
                     </div>
@@ -1228,7 +1234,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                 <FiCheckCircle className="size-12" />
               </div>
               
-              <h2 className="text-xl font-semibold text-[#0f172a]">Application Sent!</h2>
+              <h2 className="text-xl font-semibold text-[#0f172a]">{t(locale, "Application Sent!")}</h2>
               <p className="mt-6 text-lg leading-relaxed text-slate-500">
                 Thank you for applying to join CoachPlus Academy. Our academic team will review your profile and get back to you within 3-5 business days.
               </p>
