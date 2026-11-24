@@ -1,46 +1,68 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const locales = ["en", "fr"];
-const defaultLocale = "en";
+const locales = ["en", "fr"] as const;
+type Locale = (typeof locales)[number];
+const localeCookie = "site-locale";
+const defaultLocale: Locale = "en";
 
-function getLocale(request: NextRequest): string {
-  const acceptLanguage = request.headers.get("accept-language") || "";
-  const match = acceptLanguage.match(/[a-z]{2,3}/i);
-  const language = match ? match[0].toLowerCase() : "";
+function isLocale(value: string | undefined): value is Locale {
+  return locales.some((locale) => locale === value);
+}
 
-  if (locales.includes(language)) {
-    return language;
+function getPreferredLocale(request: NextRequest): Locale {
+  const savedLocale = request.cookies.get(localeCookie)?.value;
+  if (isLocale(savedLocale)) return savedLocale;
+
+  const accepted = (request.headers.get("accept-language") || "")
+    .split(",")
+    .map((entry) => {
+      const [tag, quality] = entry.trim().split(";q=");
+      return {
+        language: tag.split("-")[0].toLowerCase(),
+        quality: quality === undefined ? 1 : Number(quality),
+      };
+    })
+    .filter((entry) => Number.isFinite(entry.quality))
+    .sort((a, b) => b.quality - a.quality);
+
+  for (const entry of accepted) {
+    if (isLocale(entry.language)) return entry.language;
   }
-
   return defaultLocale;
+}
+
+function withLocale(response: NextResponse, locale: Locale, request: NextRequest) {
+  response.headers.set("Content-Language", locale);
+  if (request.cookies.get(localeCookie)?.value !== locale) {
+    response.cookies.set(localeCookie, locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+    });
+  }
+  return response;
 }
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const prefix = pathname.match(/^\/(en|fr)(?=\/|$)/)?.[1];
 
-  // Skip middleware for API routes and static assets
-  if (pathname.startsWith("/api/") || pathname.match(/\.(png|jpg|jpeg|svg|gif|css|js)/)) {
-    return NextResponse.next();
+  if (isLocale(prefix)) {
+    // App Router routes are shared between languages. Keep the selected locale
+    // in the public URL, but rewrite to the existing route tree so /fr/page
+    // does not require a duplicate app/[locale] directory.
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = pathname.slice(prefix.length + 1) || "/";
+    return withLocale(NextResponse.rewrite(rewriteUrl), prefix, request);
   }
 
-  // Redirect if locale in pathname doesn't match accept-language
-  const pathnameHasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
-
-  if (pathnameHasLocale) {
-    return NextResponse.next();
-  }
-
-  // Redirect to default locale
-  const locale = getLocale(request);
-  const newUrl = new URL(`/${locale}${pathname}`, request.url);
-  return NextResponse.redirect(newUrl);
+  return withLocale(NextResponse.next(), getPreferredLocale(request), request);
 }
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.js|.*\\.css).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.[^/]+$).*)",
   ],
 };

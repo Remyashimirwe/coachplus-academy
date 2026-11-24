@@ -15,6 +15,76 @@ const navLinks = [
   { label: "Become a Teacher", href: "/become-a-teacher" },
 ];
 
+type Locale = "en" | "fr";
+
+const navLabels: Record<Locale, Record<string, string>> = {
+  en: {
+    Home: "Home",
+    Categories: "Categories",
+    "How It Works": "How It Works",
+    "Why Choose Us": "Why Choose Us",
+    "Become a Teacher": "Become a Teacher",
+    "Request a Teacher": "Request a Teacher",
+    Logout: "Logout",
+  },
+  fr: {
+    Home: "Accueil",
+    Categories: "Programmes",
+    "How It Works": "Comment ça marche",
+    "Why Choose Us": "Pourquoi nous choisir",
+    "Become a Teacher": "Devenir enseignant",
+    "Request a Teacher": "Demander un enseignant",
+    Logout: "Déconnexion",
+  },
+};
+
+function localeFromPath(pathname: string): Locale | null {
+  const match = pathname.match(/^\/(en|fr)(?=\/|$)/)?.[1];
+  return match === "en" || match === "fr" ? match : null;
+}
+
+function LanguageSwitcher({
+  locale,
+  onChange,
+  mobile = false,
+  overHero = false,
+}: {
+  locale: Locale;
+  onChange: (locale: Locale) => void;
+  mobile?: boolean;
+  overHero?: boolean;
+}) {
+  return (
+    <div
+      aria-label="Choose language"
+      className={`inline-flex items-center gap-1 rounded-xl border p-1 ${
+        mobile || !overHero
+          ? "border-slate-200 bg-white"
+          : "border-white/25 bg-white/10"
+      }`}
+    >
+      {(["en", "fr"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          aria-label={option === "en" ? "English" : "Français"}
+          aria-pressed={locale === option}
+          onClick={() => onChange(option)}
+          className={`min-h-9 min-w-10 rounded-lg px-2 text-xs font-bold transition-colors ${
+            locale === option
+              ? "bg-[#E91E63] text-white"
+              : mobile || !overHero
+                ? "text-slate-600 hover:bg-slate-100"
+                : "text-white/90 hover:bg-white/15"
+          }`}
+        >
+          {option.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const menuVariants = {
   hidden: { opacity: 0, y: -16, scale: 0.98 },
   visible: {
@@ -52,6 +122,28 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [locale, setLocale] = useState<Locale>(() => localeFromPath(pathname) ?? "en");
+  const activePath = pathname.replace(/^\/(en|fr)(?=\/|$)/, "") || "/";
+
+  useEffect(() => {
+    const pathLocale = localeFromPath(pathname);
+    const cookieLocale = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("site-locale="))
+      ?.split("=")[1];
+    const preferred = pathLocale ?? (cookieLocale === "fr" ? "fr" : "en");
+    setLocale(preferred);
+    document.documentElement.lang = preferred;
+  }, [pathname]);
+
+  const switchLanguage = (nextLocale: Locale) => {
+    document.cookie = `site-locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax${
+      window.location.protocol === "https:" ? "; Secure" : ""
+    }`;
+    setLocale(nextLocale);
+    document.documentElement.lang = nextLocale;
+    router.push(`/${nextLocale}${activePath === "/" ? "" : activePath}`);
+  };
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -64,7 +156,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     await logout();
     setUser(null);
-    router.push("/");
+    router.push(`/${locale}`);
     router.refresh();
   };
 
@@ -72,7 +164,7 @@ export default function Navbar() {
     const onScroll = () => {
       setScrolled(window.scrollY > 20);
 
-      if (pathname === "/") {
+      if (activePath === "/") {
         const sections = ["home", "how-it-works", "why-choose-us"];
         
         let currentSection = sections[0];
@@ -93,7 +185,7 @@ export default function Navbar() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [pathname]);
+  }, [activePath, pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -113,23 +205,23 @@ export default function Navbar() {
   }, [menuOpen]);
 
   const hiddenRoutes = ["/admin", "/teacher", "/student", "/login", "/setup-password"];
-  const shouldHide = hiddenRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`));
+  const shouldHide = hiddenRoutes.some(route => activePath === route || activePath.startsWith(`${route}/`));
 
   if (shouldHide) return null;
 
   const isActive = (href: string) => {
     if (href === "/") {
-      return pathname === "/" ;
+      return activePath === "/";
     }
     if (href.startsWith("/#")) {
-      return pathname === "/" && activeSection === href.substring(2);
+      return activePath === "/" && activeSection === href.substring(2);
     }
-    return pathname === href || pathname.startsWith(`${href}/`);
+    return activePath === href || activePath.startsWith(`${href}/`);
   };
 
-  const isHomePage = pathname === "/";
+  const isHomePage = activePath === "/";
 
-  const filteredNavLinks = user 
+  const filteredNavLinks = user
     ? navLinks.filter(link => link.label !== "How It Works" && link.label !== "Why Choose Us")
     : navLinks;
 
@@ -168,7 +260,7 @@ export default function Navbar() {
                   : (isActive(link.href) ? "text-white bg-white/20" : "text-white/80 hover:text-white hover:bg-white/10")
               }`}
             >
-              {link.label}
+              {navLabels[locale][link.label]}
             </Link>
           ))}
           {user ? (
@@ -197,6 +289,11 @@ export default function Navbar() {
               </button>
             </div>
           ) : null}
+          <LanguageSwitcher
+            locale={locale}
+            onChange={switchLanguage}
+            overHero={!scrolled && isHomePage}
+          />
           <Link
             href="/request"
             className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
@@ -206,7 +303,7 @@ export default function Navbar() {
             }`}
           >
             <FiSend className="size-4" />
-            Request a Teacher
+            {navLabels[locale]["Request a Teacher"]}
           </Link>
         </div>
 
@@ -273,10 +370,14 @@ export default function Navbar() {
                           : "text-slate-600 hover:bg-[#fff0f3] hover:text-[#E91E63]"
                       }`}
                     >
-                      {link.label}
+                      {navLabels[locale][link.label]}
                     </Link>
                   </motion.div>
                 ))}
+                <motion.div variants={menuItemVariants} className="mt-3 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-600">Language / Langue</span>
+                  <LanguageSwitcher locale={locale} onChange={switchLanguage} mobile />
+                </motion.div>
                 {user ? (
                   <motion.div variants={menuItemVariants} className="mt-2 flex flex-col gap-2">
                     <Link
@@ -295,7 +396,7 @@ export default function Navbar() {
                       className="flex min-h-[52px] items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-6 text-base font-semibold text-red-600 shadow-sm transition-all duration-200 hover:bg-red-100"
                     >
                       <FiLogOut className="size-5" />
-                      Logout
+                      {navLabels[locale].Logout}
                     </button>
                   </motion.div>
                 ) : null}
@@ -306,7 +407,7 @@ export default function Navbar() {
                     className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#E91E63] px-7 text-base font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#7B1FA2] active:scale-95"
                   >
                     <FiSend className="size-5" />
-                    Request a Teacher
+                    {navLabels[locale]["Request a Teacher"]}
                   </Link>
                 </motion.div>
               </div>
