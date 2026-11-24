@@ -712,15 +712,15 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiLinkedin />} label="LinkedIn Profile" htmlFor="linkedin">
+                        <Field icon={<FiLinkedin />} label="LinkedIn Profile (Optional)" htmlFor="linkedin">
                           <input id="linkedin" name="linkedin" type="url" placeholder="https://linkedin.com/in/username" className={inputClasses} />
                         </Field>
-                        <Field icon={<FiInstagram />} label="Instagram Profile" htmlFor="instagram">
+                        <Field icon={<FiInstagram />} label="Instagram Profile (Optional)" htmlFor="instagram">
                           <input id="instagram" name="instagram" type="url" placeholder="https://instagram.com/username" className={inputClasses} />
                         </Field>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <Field icon={<FiYoutube />} label="YouTube Channel" htmlFor="youtube">
+                        <Field icon={<FiYoutube />} label="YouTube Channel (Optional)" htmlFor="youtube">
                           <input id="youtube" name="youtube" type="url" placeholder="https://youtube.com/@channel" className={inputClasses} />
                         </Field>
                         <Field icon={<FiLink />} label="Other Social Media / Website (Optional)" htmlFor="otherSocial">
