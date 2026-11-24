@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import Link from "next/link";
 import OtpStep from "@/app/components/OtpStep";
+import { t, useSiteLocale } from "@/app/lib/site-i18n";
 
 const roles = [
   { id: "STUDENT", label: "Student", icon: FiBookOpen, activeBg: "bg-blue-600", glow: "shadow-blue-500/30" },
@@ -22,6 +23,7 @@ const roles = [
 ];
 
 export default function LoginPage() {
+  const locale = useSiteLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("STUDENT");
@@ -99,7 +101,7 @@ export default function LoginPage() {
               className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#E91E63] transition-colors"
             >
               <FiArrowLeft className="size-4" />
-              Back Home
+              {t(locale, "Back Home")}
             </Link>
 
             {stage === "credentials" && (
@@ -112,8 +114,8 @@ export default function LoginPage() {
                     className="relative size-16 rounded-2xl object-contain shadow-sm"
                   />
                 </div>
-                <h1 className="text-2xl font-bold text-[#21121f] tracking-tight">Welcome back</h1>
-                <p className="text-slate-500 mt-1 text-sm">Sign in to continue your learning journey</p>
+                <h1 className="text-2xl font-bold text-[#21121f] tracking-tight">{t(locale, "Welcome back")}</h1>
+                <p className="text-slate-500 mt-1 text-sm">{t(locale, "Sign in to continue your learning journey")}</p>
               </div>
             )}
 
@@ -152,7 +154,7 @@ export default function LoginPage() {
                       <r.icon className="size-4" />
                     </div>
                     <span className={`text-sm font-bold ${isActive ? "text-[#21121f]" : "text-slate-600"}`}>
-                      {r.label}
+                      {t(locale, r.label)}
                     </span>
                   </button>
                 );
@@ -161,7 +163,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Email Address</label>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{t(locale, "Email Address")}</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <FiMail className="size-4 text-slate-400 group-focus-within:text-[#E91E63] transition-colors" />
@@ -178,7 +180,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Password</label>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">{t(locale, "Password")}</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <FiLock className="size-4 text-slate-400 group-focus-within:text-[#E91E63] transition-colors" />
@@ -195,7 +197,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-[#E91E63] transition-colors"
-                    aria-label="Toggle password visibility"
+                    aria-label={t(locale, "Toggle password visibility")}
                   >
                     {showPassword ? <FiEyeOff className="size-5" /> : <FiEye className="size-5" />}
                   </button>
@@ -224,7 +226,7 @@ export default function LoginPage() {
                   <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    Sign In
+                    {t(locale, "Sign In")}
                     <FiArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
                   </>
                 )}
@@ -238,16 +240,16 @@ export default function LoginPage() {
                 {role === "ADMIN" ? (
                   <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
                     <p className="text-xs text-slate-500">
-                      Restricted access area. Unauthorized access is prohibited.
+                      {t(locale, "Restricted access area. Unauthorized access is prohibited.")}
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
                       <p className="text-xs text-slate-500">
-                        New to CoachPlus Academy?{" "}
+                        {t(locale, "New to CoachPlus Academy?")}{" "}
                         <Link href="/register" className="font-semibold text-[#E91E63]">
-                          Create an account
+                          {t(locale, "Create an account")}
                         </Link>
                       </p>
                     </div>
@@ -255,7 +257,7 @@ export default function LoginPage() {
                       href="/forgot-password"
                       className="inline-block text-sm font-semibold text-slate-500 hover:text-[#E91E63] transition-colors"
                     >
-                      Forgot your password?
+                      {t(locale, "Forgot your password?")}
                     </Link>
                   </>
                 )}

@@ -192,8 +192,11 @@ model TeacherRating {
 model Program {
   id                Int       @id @default(autoincrement())
   title             String
+  titleFr           String?
   level             String
+  levelFr           String?
   text              String
+  textFr            String?
   image             String?
   sortOrder         Int       @default(0)
   featuredInHero    Boolean   @default(false) // Shown in the homepage Hero slideshow when true
@@ -204,6 +207,7 @@ model Program {
 model Subject {
   id                Int     @id @default(autoincrement())
   name              String
+  nameFr            String?
   image             String?
   sortOrder         Int     @default(0)
   showOnTeacherForm Boolean @default(true) // Selectable on the Become a Teacher application form
@@ -215,6 +219,7 @@ model Subject {
 model Topic {
   id                Int     @id @default(autoincrement())
   name              String
+  nameFr            String?
   image             String?
   sortOrder         Int     @default(0)
   showOnTeacherForm Boolean @default(true)

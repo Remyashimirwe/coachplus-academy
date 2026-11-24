@@ -11,17 +11,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProgramModal from "../components/ProgramModal";
 import PageHero from "../components/PageHero";
-import { t, useSiteLocale } from "../lib/site-i18n";
+import { localizedContent, localizedDatabaseText, t, useSiteLocale } from "../lib/site-i18n";
 
 type Topic = {
   id: number;
   name: string;
+  nameFr?: string | null;
   image: string | null;
 };
 
 type Subject = {
   id: number;
   name: string;
+  nameFr?: string | null;
   image: string | null;
   topics: Topic[];
 };
@@ -29,8 +31,11 @@ type Subject = {
 type Program = {
   id: number;
   title: string;
+  titleFr?: string | null;
   level: string;
+  levelFr?: string | null;
   text: string;
+  textFr?: string | null;
   subjects: Subject[];
   image: string | null;
 };
@@ -91,6 +96,9 @@ export default function ProgramsPage({
                 const description = isLong
                   ? `${program.text.slice(0, MAX_LENGTH).trimEnd()}…`
                   : program.text;
+                const title = localizedContent(locale, program.title, program.titleFr);
+                const level = localizedContent(locale, program.level, program.levelFr);
+                const translatedDescription = localizedDatabaseText(locale, description, program.textFr);
 
                 return (
                 <Link
@@ -108,21 +116,21 @@ export default function ProgramsPage({
                     <div className="aspect-video w-full overflow-hidden relative shrink-0">
                       <img 
                         src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"} 
-                        alt={t(locale, program.title)}
+                        alt={title}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
                       <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg backdrop-blur-sm">
-                        {t(locale, program.level)}
+                        {level}
                       </div>
                     </div>
 
                     <div className="flex flex-1 flex-col p-6">
                       <h2 className="text-base font-medium text-[#0f172a] transition-colors group-hover:text-[#E91E63]">
-                        {t(locale, program.title)}
+                        {title}
                       </h2>
                       <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
-                        {t(locale, description)}
+                        {translatedDescription}
                       </p>
                       {isLong && (
                         <button

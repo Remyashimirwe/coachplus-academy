@@ -5,11 +5,12 @@ import { FiChevronLeft, FiChevronRight, FiImage } from "react-icons/fi";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import PlayStoreButton from "./PlayStoreButton";
-import { t, useSiteLocale } from "../lib/site-i18n";
+import { localizedContent, t, useSiteLocale } from "../lib/site-i18n";
 
 type HeroProgram = {
   id: number;
   title: string;
+  titleFr?: string | null;
   level: string;
   text: string;
   image: string | null;
@@ -19,6 +20,7 @@ const AUTOPLAY_DELAY = 5000;
 
 /** Modern auto-advancing slideshow of the Categories an admin has marked as "Show in Homepage Slideshow" (Admin > Manage Learning), showing each program's image and name. */
 function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
+  const locale = useSiteLocale();
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
@@ -62,7 +64,7 @@ function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
           <Link href={`/programs?programId=${active.id}`} className="absolute inset-0 block">
             <img
               src={active.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=800&fit=crop"}
-              alt={active.title}
+              alt={localizedContent(locale, active.title, active.titleFr)}
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#21121f]/90 via-[#21121f]/10 to-transparent" />
@@ -74,7 +76,7 @@ function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="absolute inset-x-0 bottom-0 p-6 sm:p-8"
             >
-              <h3 className="text-2xl font-bold text-white drop-shadow-md">{active.title}</h3>
+              <h3 className="text-2xl font-bold text-white drop-shadow-md">{localizedContent(locale, active.title, active.titleFr)}</h3>
             </motion.div>
           </Link>
         </motion.div>

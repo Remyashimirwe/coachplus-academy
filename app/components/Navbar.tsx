@@ -144,6 +144,7 @@ export default function Navbar() {
     }`;
     setLocale(nextLocale);
     document.documentElement.lang = nextLocale;
+    window.dispatchEvent(new Event("site-locale-change"));
     router.push(`/${nextLocale}${activePath === "/" ? "" : activePath}`);
   };
 
@@ -206,7 +207,7 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
-  const hiddenRoutes = ["/admin", "/teacher", "/student", "/login", "/setup-password"];
+  const hiddenRoutes = ["/admin", "/teacher", "/student", "/setup-password"];
   const shouldHide = hiddenRoutes.some(route => activePath === route || activePath.startsWith(`${route}/`));
 
   if (shouldHide) return null;

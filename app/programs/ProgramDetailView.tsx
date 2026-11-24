@@ -8,16 +8,18 @@ import {
   FiCheck,
   FiChevronLeft,
 } from "react-icons/fi";
-import { t, useSiteLocale } from "../lib/site-i18n";
+import { localizedContent, localizedDatabaseText, t, useSiteLocale } from "../lib/site-i18n";
 
 type Topic = {
   id: number;
   name: string;
+  nameFr?: string | null;
 };
 
 type Subject = {
   id: number;
   name: string;
+  nameFr?: string | null;
   image: string | null;
   topics: Topic[];
 };
@@ -25,14 +27,20 @@ type Subject = {
 type Program = {
   id: number;
   title: string;
+  titleFr?: string | null;
   level: string;
+  levelFr?: string | null;
   text: string;
+  textFr?: string | null;
   subjects: Subject[];
   image: string | null;
 };
 
 export default function ProgramDetailView({ program }: { program: Program }) {
   const locale = useSiteLocale();
+  const programTitle = localizedContent(locale, program.title, program.titleFr);
+  const programLevel = localizedContent(locale, program.level, program.levelFr);
+  const programText = localizedDatabaseText(locale, program.text, program.textFr);
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
       {/* Hero Section */}
@@ -64,14 +72,14 @@ export default function ProgramDetailView({ program }: { program: Program }) {
             >
               <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20">
                 <FiBookOpen className="size-3.5" />
-                {t(locale, program.level)}
+                {programLevel}
               </p>
               <h1 className="mt-3 text-lg font-extrabold tracking-tight sm:text-xl md:text-2xl">
-                {t(locale, program.title)}{" "}
-                <span className="text-white/80">({t(locale, program.level)})</span>
+                {programTitle}{" "}
+                <span className="text-white/80">({programLevel})</span>
               </h1>
               <p className="mt-2.5 max-w-2xl text-xs text-white/90 leading-relaxed sm:text-sm">
-                {t(locale, program.text)}
+                {programText}
               </p>
               
               <div className="mt-5">
@@ -125,7 +133,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
               {t(locale, "Available ")}<span className="text-[#E91E63]">{t(locale, "Programs")}</span>
             </h2>
             <p className="mt-2.5 text-xs font-medium text-slate-600 sm:text-sm">
-              {t(locale, "Choose a specialized path within ")}{t(locale, program.title)}{t(locale, " to find the perfect tutor.")}
+              {t(locale, "Choose a specialized path within ")}{programTitle}{t(locale, " to find the perfect tutor.")}
             </p>
           </div>
 
@@ -142,7 +150,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                 <div className="relative h-48 -mx-8 -mt-8 mb-6 overflow-hidden rounded-t-[32px]">
                   <img 
                     src={subject.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"} 
-                  alt={t(locale, subject.name)}
+                  alt={localizedContent(locale, subject.name, subject.nameFr)}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -150,7 +158,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                     <FiCheck className="size-5" />
                   </div>
                 </div>
-              <h3 className="text-xs font-bold text-slate-900 mb-4">{t(locale, subject.name)}</h3>
+              <h3 className="text-xs font-bold text-slate-900 mb-4">{localizedContent(locale, subject.name, subject.nameFr)}</h3>
                 
                 <div className="flex-1">
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">{t(locale, "Included Subjects:")}</p>
@@ -158,7 +166,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                     {subject.topics.map((topic) => (
                       <li key={topic.id} className="flex items-center gap-2 text-xs font-medium text-slate-600">
                         <div className="size-1.5 rounded-full bg-[#E91E63]/40" />
-                        {t(locale, topic.name)}
+                        {localizedContent(locale, topic.name, topic.nameFr)}
                       </li>
                     ))}
                     {subject.topics.length === 0 && (

@@ -98,8 +98,11 @@ export async function addProgram(
   await requireAdmin();
 
   const title = String(formData.get("title") || "").trim();
+  const titleFr = String(formData.get("titleFr") || "").trim() || null;
   const level = String(formData.get("level") || "").trim();
+  const levelFr = String(formData.get("levelFr") || "").trim() || null;
   const text = String(formData.get("text") || "").trim();
+  const textFr = String(formData.get("textFr") || "").trim() || null;
   const imageFile = formData.get("image") as File | null;
   const featuredInHero = formData.get("featuredInHero") === "on";
   const draftSubjects = parseDraftSubjects(formData);
@@ -121,8 +124,11 @@ export async function addProgram(
     const program = await db.program.create({
       data: {
         title,
+        titleFr,
         level,
+        levelFr,
         text,
+        textFr,
         image,
         sortOrder,
         featuredInHero,
@@ -170,8 +176,11 @@ export async function updateProgram(
 
   const id = Number(formData.get("id"));
   const title = String(formData.get("title") || "").trim();
+  const titleFr = String(formData.get("titleFr") || "").trim() || null;
   const level = String(formData.get("level") || "").trim();
+  const levelFr = String(formData.get("levelFr") || "").trim() || null;
   const text = String(formData.get("text") || "").trim();
+  const textFr = String(formData.get("textFr") || "").trim() || null;
   const imageFile = formData.get("image") as File | null;
   const featuredInHero = formData.get("featuredInHero") === "on";
 
@@ -190,8 +199,11 @@ export async function updateProgram(
     where: { id },
     data: {
       title,
+      titleFr,
       level,
+      levelFr,
       text,
+      textFr,
       featuredInHero,
       ...(image ? { image } : {}),
     },
@@ -228,6 +240,7 @@ export async function addSubject(
 
   const programId = Number(formData.get("programId"));
   const name = String(formData.get("name") || "").trim();
+  const nameFr = String(formData.get("nameFr") || "").trim() || null;
   const imageFile = formData.get("image") as File | null;
 
   if (!programId || !name) {
@@ -246,6 +259,7 @@ export async function addSubject(
   await db.subject.create({
     data: {
       name,
+      nameFr,
       image,
       programId,
       sortOrder,
@@ -266,6 +280,7 @@ export async function updateSubject(
 
   const id = Number(formData.get("id"));
   const name = String(formData.get("name") || "").trim();
+  const nameFr = String(formData.get("nameFr") || "").trim() || null;
   const imageFile = formData.get("image") as File | null;
 
   if (!id || !name) {
@@ -283,6 +298,7 @@ export async function updateSubject(
     where: { id },
     data: {
       name,
+      nameFr,
       ...(image ? { image } : {}),
     },
   });
@@ -329,6 +345,7 @@ export async function addTopic(
 
   const subjectId = Number(formData.get("subjectId"));
   const name = String(formData.get("name") || "").trim();
+  const nameFr = String(formData.get("nameFr") || "").trim() || null;
   const imageFile = formData.get("image") as File | null;
 
   if (!subjectId || !name) {
@@ -347,6 +364,7 @@ export async function addTopic(
   await db.topic.create({
     data: {
       name,
+      nameFr,
       image,
       subjectId,
       sortOrder,
@@ -367,6 +385,7 @@ export async function updateTopic(
 
   const id = Number(formData.get("id"));
   const name = String(formData.get("name") || "").trim();
+  const nameFr = String(formData.get("nameFr") || "").trim() || null;
   const imageFile = formData.get("image") as File | null;
 
   if (!id || !name) {
@@ -384,6 +403,7 @@ export async function updateTopic(
     where: { id },
     data: {
       name,
+      nameFr,
       ...(image ? { image } : {}),
     },
   });

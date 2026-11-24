@@ -22,6 +22,7 @@ import {
 import {saveRequest} from "@/app/actions/request";
 import TimePicker from "../components/TimePicker";
 import Footer from "../components/Footer";
+import { localizedContent, t, useSiteLocale } from "../lib/site-i18n";
 
 interface Topic {
     id: number;
@@ -71,11 +72,12 @@ function Field({
     children: React.ReactNode;
     className?: string;
 }) {
+    const locale = useSiteLocale();
     return (
         <div className={`space-y-2 ${className}`}>
             <label htmlFor={htmlFor} className="text-xs font-semibold text-slate-700 flex items-center gap-2">
                 <span className="text-[#E91E63]">{icon}</span>
-                {label}
+                {t(locale, label)}
             </label>
             <div className="relative group">
                 {children}
@@ -96,6 +98,7 @@ export default function RequestForm({programs}: { programs: Program[] }) {
 }
 
 function RequestFormContent({programs}: { programs: Program[] }) {
+    const locale = useSiteLocale();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [submitError, setSubmitError] = useState("");
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -221,7 +224,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
               Join CoachPlus Academy
             </span>
                         <h1 className="text-2xl font-medium leading-tight sm:text-3xl lg:text-4xl">
-                            Request a <span className="text-[#E91E63]">Teacher</span>
+                            {t(locale, "Request a")} <span className="text-[#E91E63]">{t(locale, "Teacher")}</span>
                         </h1>
                         <p className="mt-6 mx-auto max-w-2xl text-base leading-relaxed text-slate-300">
                             Tell us your learning goals and we&apos;ll find the perfect match from our network of elite
@@ -246,7 +249,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-green-50 text-green-500 mb-8">
                                     <FiCheckCircle className="size-12"/>
                                 </div>
-                                <h2 className="text-xl font-semibold text-[#0f172a]">Request Sent Successfully!</h2>
+                                <h2 className="text-xl font-semibold text-[#0f172a]">{t(locale, "Request Sent Successfully!")}</h2>
                                 <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
                                     Our team is already working on finding the best teacher for you. Expect an update
                                     within 24 hours.
@@ -270,7 +273,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-red-50 text-red-500 mb-8">
                                     <FiX className="size-12"/>
                                 </div>
-                                <h2 className="text-xl font-semibold text-[#0f172a]">Request not sent</h2>
+                                <h2 className="text-xl font-semibold text-[#0f172a]">{t(locale, "Request not sent")}</h2>
                                 <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
                                     {submitError ||
                                         "Something went wrong while sending your request. Please try again later or contact us directly."}
@@ -415,9 +418,9 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                     }}
                                                     className={`${inputClasses} appearance-none cursor-pointer pr-12 text-xs sm:text-sm`}
                                                 >
-                                                    <option value="" disabled>Choose a Category</option>
+                                                    <option value="" disabled>{t(locale, "Choose a Category")}</option>
                                                     {programs.map(p => <option key={p.id}
-                                                                               value={p.id}>{p.title}</option>)}
+                                                                               value={p.id}>{localizedContent(locale, p.title, (p as Program & { titleFr?: string }).titleFr)}</option>)}
                                                 </select>
                                                 <div
                                                     className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#E91E63] transition-colors">
@@ -442,7 +445,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             </label>
                                             {selectionError && (
                                                 <span
-                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">Please select at least one course</span>
+                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">{t(locale, "Please select at least one course")}</span>
                                             )}
                                         </div>
 
@@ -589,7 +592,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             </label>
                                             {modeError && (
                                                 <span
-                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">Please choose a learning mode</span>
+                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">{t(locale, "Please choose a learning mode")}</span>
                                             )}
                                         </div>
                                         <div className="grid gap-4 sm:grid-cols-2">
@@ -633,7 +636,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             </label>
                                             {daysError && (
                                                 <span
-                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">Select days and set times</span>
+                                                    className="text-[10px] font-medium text-red-500 uppercase tracking-wider">{t(locale, "Select days and set times")}</span>
                                             )}
                                         </div>
                                         <p className="text-xs text-slate-500">
@@ -669,20 +672,20 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                                         </p>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <TimePicker
-                                                                label="From"
+                                                                label={t(locale, "From")}
                                                                 ariaLabel={`${d} from time`}
                                                                 value={dayTimes[d]?.from || ""}
                                                                 onChange={(v) => updateDayTime(d, "from", v)}
                                                             />
                                                             <TimePicker
-                                                                label="To"
+                                                                label={t(locale, "To")}
                                                                 ariaLabel={`${d} to time`}
                                                                 value={dayTimes[d]?.to || ""}
                                                                 onChange={(v) => updateDayTime(d, "to", v)}
                                                             />
                                                         </div>
                                                         {daysError && (!dayTimes[d]?.from || !dayTimes[d]?.to) && (
-                                                            <p className="mt-2 text-[10px] font-medium text-red-500">Set a from and to time for {d}</p>
+                                                            <p className="mt-2 text-[10px] font-medium text-red-500">{t(locale, "Set a from and to time for ")}{d}</p>
                                                         )}
                                                     </div>
                                                 ))}
@@ -749,7 +752,7 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                 <FiCheckCircle className="size-12"/>
                             </div>
 
-                            <h2 className="text-xl font-semibold text-[#0f172a]">Request Sent!</h2>
+                            <h2 className="text-xl font-semibold text-[#0f172a]">{t(locale, "Request Sent!")}</h2>
                             <p className="mt-6 text-lg leading-relaxed text-slate-500">
                                 Our team is already working on finding the best teacher for you. Expect an update within
                                 24 hours.

@@ -801,6 +801,12 @@ export default function ProgramsView({ programs }: any) {
                   <label className="text-[13px] font-semibold text-slate-700">Description</label>
                   <textarea name="text" rows={3} required placeholder="What is this category about?" className={`${inputClasses} resize-none`} />
                 </div>
+                <div className="grid gap-4 rounded-2xl border border-rose-100 bg-rose-50/40 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#E91E63]">French translation (optional)</p>
+                  <input name="titleFr" placeholder="Titre en français" className={inputClasses} />
+                  <input name="levelFr" placeholder="Niveau en français" className={inputClasses} />
+                  <textarea name="textFr" rows={3} placeholder="Description en français" className={`${inputClasses} resize-none`} />
+                </div>
                 <ImageUploadField name="image" label="Category Image" />
                 <FeaturedInHeroField />
 
@@ -885,6 +891,12 @@ export default function ProgramsView({ programs }: any) {
                         <input name="level" required defaultValue={selectedProgram?.level} className={inputClasses} />
                       </div>
                     </div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#E91E63]">French translation (optional)</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <input name="titleFr" defaultValue={selectedProgram?.titleFr || ""} placeholder="Titre en français" className={inputClasses} />
+                      <input name="levelFr" defaultValue={selectedProgram?.levelFr || ""} placeholder="Niveau en français" className={inputClasses} />
+                    </div>
+                    <textarea name="textFr" rows={3} defaultValue={selectedProgram?.textFr || ""} placeholder="Description en français" className={`${inputClasses} resize-none`} />
                     <div className="space-y-2">
                       <label className="text-[13px] font-semibold text-slate-700">Description</label>
                       <textarea name="text" rows={3} required defaultValue={selectedProgram?.text} className={`${inputClasses} resize-none`} />
@@ -1010,6 +1022,7 @@ export default function ProgramsView({ programs }: any) {
                               <input name="name" required defaultValue={subject.name} className={`${compactInputClasses} flex-1`} />
                               <ImageUploadField name="image" existingImage={subject.image} compact />
                             </div>
+                            <input name="nameFr" defaultValue={subject.nameFr || ""} placeholder="Nom en français (optionnel)" className={compactInputClasses} />
                             <div className="flex items-center gap-2">
                               <button
                                 type="submit"
@@ -1110,6 +1123,7 @@ export default function ProgramsView({ programs }: any) {
                                   <input type="hidden" name="id" value={topic.id} />
                                   <ImageUploadField name="image" existingImage={topic.image} compact />
                                   <input name="name" required defaultValue={topic.name} className={`${compactInputClasses} flex-1`} />
+                                  <input name="nameFr" defaultValue={topic.nameFr || ""} placeholder="Nom français" className={`${compactInputClasses} flex-1`} />
                                   <div className="flex items-center gap-2 shrink-0">
                                     <button
                                       type="submit"
@@ -1256,6 +1270,7 @@ export default function ProgramsView({ programs }: any) {
                       placeholder="Sub-category name (e.g. Mathematics)"
                       className={`${inputClasses} py-3`}
                     />
+                    <input name="nameFr" placeholder="Nom en français (optionnel)" className={`${inputClasses} py-3`} />
                     <ImageUploadField name="image" label="Sub-category Image" />
                     <button
                       type="submit"

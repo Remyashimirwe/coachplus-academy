@@ -4,16 +4,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiArrowRight, FiCheck } from "react-icons/fi";
 import Link from "next/link";
 import { useEffect } from "react";
+import { localizedContent, localizedDatabaseText, t, useSiteLocale } from "../lib/site-i18n";
 
 type Topic = {
   id: number;
   name: string;
+  nameFr?: string | null;
   image: string | null;
 };
 
 type Subject = {
   id: number;
   name: string;
+  nameFr?: string | null;
   image: string | null;
   topics: Topic[];
 };
@@ -21,8 +24,11 @@ type Subject = {
 type Program = {
   id: number;
   title: string;
+  titleFr?: string | null;
   level: string;
+  levelFr?: string | null;
   text: string;
+  textFr?: string | null;
   subjects: Subject[];
   image: string | null;
 };
@@ -34,6 +40,7 @@ interface ProgramModalProps {
 }
 
 export default function ProgramModal({ program, isOpen, onClose }: ProgramModalProps) {
+  const locale = useSiteLocale();
   // Prevent scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -47,6 +54,9 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
   }, [isOpen]);
 
   if (!program) return null;
+  const title = localizedContent(locale, program.title, program.titleFr);
+  const level = localizedContent(locale, program.level, program.levelFr);
+  const text = localizedDatabaseText(locale, program.text, program.textFr);
 
   return (
     <AnimatePresence>
@@ -82,20 +92,20 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                 <div className="relative aspect-square w-full rounded-3xl overflow-hidden mb-6 shadow-lg ring-4 ring-white">
                   <img 
                     src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80"} 
-                    alt={program.title}
+                    alt={title}
                     className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg">
-                    {program.level}
+                    {level}
                   </div>
                 </div>
                 <h2 className="text-lg font-medium text-[#0f172a] mb-4">
-                  {program.title}{" "}
-                  <span className="text-[#E91E63]">({program.level})</span>
+                  {title}{" "}
+                  <span className="text-[#E91E63]">({level})</span>
                 </h2>
                 <div className="text-slate-600 leading-relaxed text-xs max-h-40 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-200/60 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#E91E63]/40 hover:[&::-webkit-scrollbar-thumb]:bg-[#E91E63]/70">
-                  {program.text}
+                  {text}
                 </div>
               </div>
 
@@ -108,12 +118,12 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                      <span className="text-[#E91E63]">({program.level})</span>
                    </h2>
                    <div className="mt-3 text-slate-600 leading-relaxed text-xs max-h-40 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-200/60 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#E91E63]/40 hover:[&::-webkit-scrollbar-thumb]:bg-[#E91E63]/70">
-                     {program.text}
+                     {text}
                    </div>
                 </div>
 
                 <div className="mb-6 flex items-center justify-between">
-                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Available Programs</h3>
+                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">{t(locale, "Available Programs")}</h3>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
@@ -126,11 +136,11 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                         <div className="size-12 shrink-0 rounded-2xl overflow-hidden border-2 border-white shadow-sm">
                           <img 
                             src={subject.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100&q=80"} 
-                            alt={subject.name}
+                            alt={localizedContent(locale, subject.name, subject.nameFr)}
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <h4 className="font-medium text-slate-800 text-base">{subject.name}</h4>
+                        <h4 className="font-medium text-slate-800 text-base">{localizedContent(locale, subject.name, subject.nameFr)}</h4>
                       </div>
 
                       <div className="flex-1">
@@ -142,13 +152,13 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                             >
                               <div className="size-2 rounded-full bg-[#E91E63]/30 group-hover/topic:bg-[#E91E63] transition-colors" />
                               <span className="text-[10px] font-bold text-slate-600">
-                                {topic.name}
+                                {localizedContent(locale, topic.name, topic.nameFr)}
                               </span>
                             </div>
                           ))}
                           {subject.topics.length === 0 && (
                             <div className="col-span-2">
-                              <span className="text-[10px] text-slate-400 italic">Core curriculum covered</span>
+                              <span className="text-[10px] text-slate-400 italic">{t(locale, "Core curriculum covered")}</span>
                             </div>
                           )}
                         </div>
@@ -158,7 +168,7 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                         href={`/request?programId=${program.id}&subjectId=${subject.id}`}
                         className="flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 py-2.5 text-[10px] font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white hover:border-[#E91E63] active:scale-95"
                       >
-                        Request Teacher
+                        {t(locale, "Request Teacher")}
                         <FiArrowRight className="size-3" />
                       </Link>
                     </motion.div>
@@ -166,7 +176,7 @@ export default function ProgramModal({ program, isOpen, onClose }: ProgramModalP
                   
                   {program.subjects.length === 0 && (
                     <div className="col-span-full py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                      <p className="text-slate-400 font-medium italic">No programs added yet.</p>
+                      <p className="text-slate-400 font-medium italic">{t(locale, "No programs added yet.")}</p>
                     </div>
                   )}
                 </div>
