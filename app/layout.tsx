@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";
 import "@fontsource/poppins/600.css";
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             it only provides the toast context plus a fixed-position stack. */}
         <ToastProvider>{children}</ToastProvider>
         <WhatsAppButton />
+        <Analytics />
       </body>
     </html>
   );
