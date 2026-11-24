@@ -8,7 +8,7 @@ The platform supports:
    
 - Public landing pages for prospective students and teachers
 - Student enrollment and coaching requests  
-- Teacher application and approval flow   
+- Teacher application and approval flow    
 - Secure admin dashboard for managing users and requests   
 - Attendance tracking for students and teachers 
 - Notifications and invite emails   
