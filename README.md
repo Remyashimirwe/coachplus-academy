@@ -15,7 +15,7 @@ The platform supports:
 - Program, subject, and topic management   
 - Role-based access for admin, teacher, and student users 
  
-## Tech Stack 
+## Tech Stack  
 
 - Next.js 16
 - React 19
