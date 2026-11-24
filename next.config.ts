@@ -2,10 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
-  i18n: {
-    locales: ["en", "fr"],
-    defaultLocale: "en",
-  },
+  // i18n removed — App Router supports locale prefixes manually
+  // (e.g. /en/page, /fr/page). The middleware detects accept-language
+  // and redirects; Navbar links switch locale via URL.
   experimental: {
     serverActions: {
       // Category/Sub-category/Subject forms allow image uploads up to 8MB
