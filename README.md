@@ -28,7 +28,7 @@ The platform supports:
 - PostgreSQL driver with Prisma adapter
 
 ## Project Structure
-
+ 
 ```bash 
 .
 ├── app/                     # App routes, pages, and UI
