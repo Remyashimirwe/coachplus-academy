@@ -16,6 +16,7 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 import OtpStep from "@/app/components/OtpStep";
+import { t, useSiteLocale } from "@/app/lib/site-i18n";
 
 const ROLES = [
   { id: "STUDENT", label: "Student", icon: FiBookOpen },
@@ -25,6 +26,7 @@ const ROLES = [
 type RoleId = (typeof ROLES)[number]["id"];
 
 export default function RegisterPage() {
+  const locale = useSiteLocale();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -48,15 +50,15 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(t(locale, "Passwords do not match."));
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(t(locale, "Password must be at least 8 characters."));
       return;
     }
     if (!agreed) {
-      setError("Please accept the terms to continue.");
+      setError(t(locale, "Please accept the terms to continue."));
       return;
     }
 
@@ -70,7 +72,7 @@ export default function RegisterPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data.error || "Couldn't create your account. Please try again.");
+        setError(t(locale, data.error || "Couldn't create your account. Please try again."));
         return;
       }
 
@@ -82,7 +84,7 @@ export default function RegisterPage() {
       // An account exists and a code is on its way — verify it to sign in.
       setStage("otp");
     } catch {
-      setError("Couldn't reach the server. Check your connection and try again.");
+      setError(t(locale, "Couldn't reach the server. Check your connection and try again."));
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,7 @@ export default function RegisterPage() {
               className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#E91E63] transition-colors"
             >
               <FiArrowLeft className="size-4" />
-              Back Home
+              {t(locale, "Back Home")}
             </Link>
 
             {stage === "submitted" ? (
@@ -118,18 +120,16 @@ export default function RegisterPage() {
                   <FiCheckCircle className="size-7" />
                 </div>
                 <h1 className="text-2xl font-bold text-[#21121f] tracking-tight">
-                  Application received
+                  {t(locale, "Application received")}
                 </h1>
                 <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                  Thanks {name.split(" ")[0] || "there"} — our team will review your teaching
-                  application and email you once a decision is made. There is no account to sign
-                  into yet.
+                  {t(locale, "Thanks ")}{name.split(" ")[0] || t(locale, "there")}{t(locale, " — our team will review your teaching application and email you once a decision is made. There is no account to sign into yet.")}
                 </p>
                 <Link
                   href="/"
                   className="mt-7 inline-flex items-center gap-2 rounded-2xl bg-[#E91E63] px-6 py-3.5 font-bold text-white shadow-lg shadow-[#E91E63]/25 hover:bg-[#D81B60] transition-all"
                 >
-                  Back Home
+                  {t(locale, "Back Home")}
                   <FiArrowRight className="size-4" />
                 </Link>
               </div>
@@ -153,10 +153,10 @@ export default function RegisterPage() {
                     />
                   </div>
                   <h1 className="text-2xl font-bold text-[#21121f] tracking-tight">
-                    Create your account
+                    {t(locale, "Create your account")}
                   </h1>
                   <p className="text-slate-500 mt-1 text-sm">
-                    Join CoachPlus Academy in a couple of minutes
+                    {t(locale, "Join CoachPlus Academy in a couple of minutes")}
                   </p>
                 </div>
 
@@ -184,7 +184,7 @@ export default function RegisterPage() {
                               isActive ? "text-[#E91E63]" : "text-slate-600"
                             }`}
                           >
-                            {r.label}
+                            {t(locale, r.label)}
                           </span>
                         </button>
                       );
@@ -193,8 +193,7 @@ export default function RegisterPage() {
 
                   {role === "TEACHER" && (
                     <p className="rounded-xl bg-slate-50 px-3.5 py-3 text-xs leading-relaxed text-slate-500">
-                      Teaching applications are reviewed by our team before an account is created,
-                      so you will receive an email once you are approved.
+                      {t(locale, "Teaching applications are reviewed by our team before an account is created, so you will receive an email once you are approved.")}
                     </p>
                   )}
 
@@ -228,7 +227,7 @@ export default function RegisterPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((s) => !s)}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-label={t(locale, showPassword ? "Hide password" : "Show password")}
                         className="text-slate-400 hover:text-[#E91E63] transition-colors"
                       >
                         {showPassword ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
@@ -253,13 +252,13 @@ export default function RegisterPage() {
                       className="mt-0.5 size-4 shrink-0 rounded border-slate-300 accent-[#E91E63]"
                     />
                     <span>
-                      I agree to the{" "}
+                      {t(locale, "I agree to the ")}{" "}
                       <Link href="/terms-of-service" className="font-semibold text-[#E91E63]">
-                        Terms of Service
+                        {t(locale, "Terms of Service")}
                       </Link>{" "}
-                      and{" "}
+                      {t(locale, " and ")}{" "}
                       <Link href="/privacy-policy" className="font-semibold text-[#E91E63]">
-                        Privacy Policy
+                        {t(locale, "Privacy Policy")}
                       </Link>
                       .
                     </span>
@@ -280,7 +279,7 @@ export default function RegisterPage() {
                       <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        Create account
+                        {t(locale, "Create account")}
                         <FiArrowRight className="size-5" />
                       </>
                     )}
@@ -288,9 +287,9 @@ export default function RegisterPage() {
                 </form>
 
                 <p className="mt-6 text-center text-sm text-slate-500">
-                  Already have an account?{" "}
+                  {t(locale, "Already have an account?")}{" "}
                   <Link href="/login" className="font-semibold text-[#E91E63]">
-                    Sign in
+                    {t(locale, "Sign in")}
                   </Link>
                 </p>
               </>
@@ -317,7 +316,7 @@ function Input({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">
-        {label}
+        {t(useSiteLocale(), label)}
       </label>
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

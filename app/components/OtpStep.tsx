@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FiArrowLeft, FiMail, FiShield } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { VERIFICATION_RESEND_COOLDOWN_SECONDS } from "@/app/lib/verification-constants";
+import { t, useSiteLocale } from "@/app/lib/site-i18n";
 
 type Props = {
   /** The address the code was sent to — shown so the user knows where to look. */
@@ -35,6 +36,7 @@ type Props = {
  * if the UI is bypassed.
  */
 export default function OtpStep({ email, role, purpose = "login", onVerified, onBack }: Props) {
+  const locale = useSiteLocale();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
@@ -59,7 +61,7 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
       e.preventDefault();
       const trimmed = code.trim();
       if (trimmed.length !== 6) {
-        setError("Enter the full 6-digit code.");
+        setError(t(locale, "Enter the full 6-digit code."));
         return;
       }
       setError("");
@@ -72,13 +74,13 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          setError(data.error || "That code didn't work. Please try again.");
+          setError(t(locale, data.error || "That code didn't work. Please try again."));
           setVerifying(false);
           return;
         }
         onVerified({ isFirstLogin: data.isFirstLogin === true, code: trimmed });
       } catch {
-        setError("Something went wrong. Please try again.");
+        setError(t(locale, "Something went wrong. Please try again."));
         setVerifying(false);
       }
     },
@@ -98,15 +100,15 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || "We couldn't resend the code. Please try again in a moment.");
+        setError(t(locale, data.error || "We couldn't resend the code. Please try again in a moment."));
       } else {
-        setInfo("A new code is on its way.");
+        setInfo(t(locale, "A new code is on its way."));
         setCooldown(VERIFICATION_RESEND_COOLDOWN_SECONDS);
         setCode("");
         inputRef.current?.focus();
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t(locale, "Something went wrong. Please try again."));
     } finally {
       setResending(false);
     }
@@ -122,9 +124,9 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
         <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-[#E91E63]/10 text-[#E91E63]">
           <FiShield className="size-7" />
         </div>
-        <h2 className="text-xl font-bold text-[#21121f] tracking-tight">Enter your code</h2>
+        <h2 className="text-xl font-bold text-[#21121f] tracking-tight">{t(locale, "Enter your code")}</h2>
         <p className="text-slate-500 mt-1.5 text-sm">
-          We sent a 6-digit code to
+          {t(locale, "We sent a 6-digit code to")}
           <br />
           <span className="font-semibold text-slate-700 break-all">{email}</span>
         </p>
@@ -136,7 +138,7 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
             htmlFor="otp"
             className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1"
           >
-            Verification Code
+            {t(locale, "Verification Code")}
           </label>
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -182,9 +184,9 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
           {verifying ? (
             <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : purpose === "password_reset" ? (
-            "Verify code"
+            t(locale, "Verify code")
           ) : (
-            "Verify & Sign In"
+            t(locale, "Verify & Sign In")
           )}
         </button>
       </form>
@@ -196,7 +198,7 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
           className="inline-flex items-center gap-1.5 font-semibold text-slate-500 hover:text-[#E91E63] transition-colors"
         >
           <FiArrowLeft className="size-4" />
-          Change email
+          {t(locale, "Change email")}
         </button>
         <button
           type="button"
@@ -205,10 +207,10 @@ export default function OtpStep({ email, role, purpose = "login", onVerified, on
           className="font-semibold text-[#E91E63] disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
         >
           {resending
-            ? "Sending…"
+            ? t(locale, "Sending…")
             : cooldown > 0
-            ? `Resend code in ${cooldown}s`
-            : "Resend code"}
+            ? `${t(locale, "Resend code in ")}${cooldown}${t(locale, "s")}`
+            : t(locale, "Resend code")}
         </button>
       </div>
     </motion.div>
