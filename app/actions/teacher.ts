@@ -2,6 +2,7 @@
 
 import { db, getSetting } from "@/app/lib/db";
 import { uploadBufferToCloudinary } from "@/app/lib/cloudinary";
+import { isUnavailableError, safeErrorMessage } from "@/app/lib/publicError";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB per file
 
@@ -107,7 +108,14 @@ export async function saveTeacherApplication(formData: FormData) {
       ])
     ).filter((doc): doc is NonNullable<typeof doc> => doc !== null);
   } catch (error: unknown) {
-    return { success: false, error: error instanceof Error ? error.message : "Failed to process uploaded files" };
+    console.error("Failed to process teacher application files:", error);
+    return {
+      success: false,
+      error: safeErrorMessage(
+        error,
+        "We couldn't process one of your uploaded files. Please try again.",
+      ),
+    };
   }
 
   try {
@@ -172,6 +180,11 @@ export async function saveTeacherApplication(formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Failed to save teacher application:", error);
-    return { success: false, error: "Database operation failed" };
+    return {
+      success: false,
+      error: isUnavailableError(error)
+        ? "Our application system is temporarily unavailable, so your details were not saved. Please try again in a minute."
+        : "We couldn't save your application because of a server error. Please try again in a moment.",
+    };
   }
 }

@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { uploadBufferToCloudinary, isCloudinaryConfigured } from "@/app/lib/cloudinary";
 import { getUserFromRequest } from "@/app/lib/auth";
+import { isTechnicalMessage } from "@/app/lib/publicError";
 
 // Buffer + formData require the Node runtime (not the Edge runtime).
 export const runtime = "nodejs";
+
+// Large documents on a slow mobile connection can take longer than the
+// platform default; a timeout here looks like an unexplained network failure
+// to the applicant.
+export const maxDuration = 60;
 
 // Reject oversized uploads before reading them into memory.
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -37,37 +43,79 @@ function sanitizeFolder(raw: unknown): string {
  * rate limiting here to limit abuse of the open upload.
  */
 export async function POST(request: Request) {
+  if (!isCloudinaryConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "File uploads are temporarily unavailable because storage is not configured. Please contact support.",
+      },
+      { status: 503 },
+    );
+  }
+
+  let form: FormData;
   try {
-    if (!isCloudinaryConfigured()) {
-      return NextResponse.json({ error: "Uploads are not configured" }, { status: 503 });
-    }
+    form = await request.formData();
+  } catch {
+    return NextResponse.json(
+      { error: "We couldn't read the uploaded file. Please choose it again." },
+      { status: 400 },
+    );
+  }
 
-    const form = await request.formData();
-    const file = form.get("file");
-    const folder = sanitizeFolder(form.get("folder"));
+  const file = form.get("file");
+  const folder = sanitizeFolder(form.get("folder"));
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "file is required" }, { status: 400 });
-    }
-    if (file.size > MAX_BYTES) {
-      return NextResponse.json({ error: "File is too large (max 10 MB)" }, { status: 413 });
-    }
+  if (!(file instanceof File)) {
+    return NextResponse.json(
+      { error: "Please choose a file to upload." },
+      { status: 400 },
+    );
+  }
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json(
+      {
+        error: `"${file.name}" is too large. The maximum upload size is 10 MB.`,
+      },
+      { status: 413 },
+    );
+  }
 
+  let result: Awaited<ReturnType<typeof uploadBufferToCloudinary>>;
+  try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await uploadBufferToCloudinary(buffer, {
+    result = await uploadBufferToCloudinary(buffer, {
       folder,
       filename: file.name,
     });
-
-    // Silently record whether a signed-in user uploaded (helps correlate abuse)
-    // without making it a requirement.
-    await getUserFromRequest(request).catch(() => null);
-
-    return NextResponse.json({ url: result.url, publicId: result.publicId });
   } catch (error) {
+    console.error(`Cloudinary upload failed for "${file.name}":`, error);
+
+    // Keep a short, human-readable Cloudinary reason (for example
+    // "Invalid image file"), but never surface network/socket internals.
+    const rawReason =
+      error instanceof Error ? error.message.trim() : "";
+    const reason =
+      rawReason &&
+      rawReason.length <= 200 &&
+      !rawReason.includes("\n") &&
+      !isTechnicalMessage(rawReason)
+        ? rawReason
+        : null;
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Upload failed" },
-      { status: 500 }
+      {
+        error: reason
+          ? `Cloudinary could not store "${file.name}": ${reason}`
+          : `Cloudinary could not store "${file.name}". Please try again.`,
+      },
+      { status: 502 },
     );
   }
+
+  // Silently record whether a signed-in user uploaded (helps correlate abuse)
+  // without making it a requirement.
+  await getUserFromRequest(request).catch(() => null);
+
+  return NextResponse.json({ url: result.url, publicId: result.publicId });
 }

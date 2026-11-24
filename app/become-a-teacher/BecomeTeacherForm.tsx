@@ -101,6 +101,42 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// Low-level strings that must never be shown to an applicant. A bare
+// "Failed to fetch" is what browsers and some server-side clients return when
+// the network or database is unreachable; it tells the applicant nothing.
+const TECHNICAL_ERROR_PATTERN =
+  /failed to fetch|fetch failed|networkerror|load failed|typeerror|econnrefused|econnreset|etimedout|enotfound|eai_again|socketexception|clientexception|invalid prisma|\bp\d{4}\b|sqlstate|stack trace|at\s+\S+\s*\(.+:\d+:\d+\)/i;
+
+function looksTechnical(message: string) {
+  return TECHNICAL_ERROR_PATTERN.test(message);
+}
+
+/**
+ * Converts any thrown value into a sentence the applicant can act on.
+ * Server-provided explanations are kept when they are meaningful; technical
+ * details (including "Failed to fetch") are replaced with a specific fallback.
+ */
+function friendlyErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof TypeError) {
+    const text = error.message.toLowerCase();
+    if (
+      text.includes("fetch") ||
+      text.includes("network") ||
+      text.includes("load failed")
+    ) {
+      return "We couldn't reach the server. Check your internet connection and try again.";
+    }
+    return fallback;
+  }
+  if (error instanceof Error) {
+    const message = error.message.trim();
+    if (message && message.length <= 300 && !looksTechnical(message)) {
+      return message;
+    }
+  }
+  return fallback;
+}
+
 // Vercel caps a single serverless request body at ~4.5 MB. Files are uploaded
 // one at a time so the application itself only sends a small JSON payload.
 // Photos are downscaled first so typical phone pictures stay under the cap.
@@ -165,15 +201,35 @@ async function prepareUpload(file: File, label: string): Promise<File> {
 
 async function uploadDocument(
   file: File,
+  label: string,
 ): Promise<{ url: string; publicId: string }> {
   const body = new FormData();
   body.append("file", file);
   body.append("folder", "teacher-applications");
-  const response = await fetch("/api/uploads", { method: "POST", body });
+
+  let response: Response;
+  try {
+    response = await fetch("/api/uploads", { method: "POST", body });
+  } catch {
+    throw new Error(
+      `We couldn't reach the server while uploading "${label}". Check your internet connection and try again.`,
+    );
+  }
+
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.url) {
+    const serverMessage =
+      typeof data?.error === "string" ? data.error.trim() : "";
+    const reason =
+      serverMessage && !looksTechnical(serverMessage)
+        ? serverMessage
+        : response.status === 413
+          ? "The file is too large."
+          : response.status === 503
+            ? "File storage is temporarily unavailable."
+            : "The upload service could not store this file.";
     throw new Error(
-      data?.error || "Could not upload your document. Please try again.",
+      `Could not upload "${label}". ${reason} Please try again.`,
     );
   }
   return { url: String(data.url), publicId: String(data.publicId ?? "") };
@@ -497,7 +553,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           const item = pending[i];
                           setUploadStep(`Uploading ${item.label} (${i + 1} of ${pending.length})...`);
                           const prepared = await prepareUpload(item.file, item.label);
-                          const uploaded = await uploadDocument(prepared);
+                          const uploaded = await uploadDocument(prepared, item.label);
                           documents.push({
                             kind: item.kind,
                             fileName: prepared.name,
@@ -596,12 +652,12 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                         setOtherCertFiles([]);
                       } catch (error) {
                         setStatus("error");
+                        setUploadStep("Submitting Application...");
                         setErrorMessage(
-                          error instanceof TypeError
-                            ? "Connection interrupted. If your application was already received, submitting again is safe. Please check your connection and retry."
-                            : error instanceof Error
-                            ? error.message
-                            : "Something went wrong while submitting your application. Please try again.",
+                          `${friendlyErrorMessage(
+                            error,
+                            "We couldn't submit your application. Please check your connection and try again.",
+                          )} If your application was already received, submitting again is safe.`,
                         );
                       }
                     }}

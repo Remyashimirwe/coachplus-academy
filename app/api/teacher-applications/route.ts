@@ -2,11 +2,22 @@ import { after, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
 import { sendApplicationReceivedEmail } from "@/app/lib/email";
+import { isUnavailableError } from "@/app/lib/publicError";
+
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   let requestSubmissionId: string | null = null;
   try {
-    const body = await request.json();
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "We couldn't read the application data. Please refresh the page and try again." },
+        { status: 400 },
+      );
+    }
 
     const {
       fullName,
@@ -52,9 +63,24 @@ export async function POST(request: Request) {
     } = body;
     requestSubmissionId = typeof submissionId === "string" ? submissionId : null;
 
-    if (!fullName || !email || !phone) {
+    if (typeof fullName !== "string" || fullName.trim().length < 2) {
       return NextResponse.json(
-        { error: "fullName, email, and phone are required" },
+        { error: "Please enter your full name." },
+        { status: 400 }
+      );
+    }
+    if (
+      typeof email !== "string" ||
+      !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())
+    ) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
+    if (typeof phone !== "string" || phone.trim().length < 5) {
+      return NextResponse.json(
+        { error: "Please enter your phone number." },
         { status: 400 }
       );
     }
@@ -163,8 +189,38 @@ export async function POST(request: Request) {
         return NextResponse.json({ ...existing, emailSent: true, alreadySubmitted: true }, { status: 200 });
       }
     }
+
+    console.error("Teacher application submission failed:", error);
+
+    // A value longer than its database column is an input problem the
+    // applicant can fix, not a server crash.
+    if (error?.code === "P2000") {
+      return NextResponse.json(
+        {
+          error:
+            "One of your answers is too long. Please shorten it and submit again.",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (isUnavailableError(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "Our application system is temporarily unavailable, so your details were not saved. Please try again in a minute.",
+        },
+        { status: 503 },
+      );
+    }
+
+    // Never return error.message here: database drivers and proxies can put
+    // raw text such as "Failed to fetch" or a stack trace in it.
     return NextResponse.json(
-      { error: error.message ?? "Something went wrong" },
+      {
+        error:
+          "We couldn't save your application because of a server error. Please try again in a moment.",
+      },
       { status: 500 }
     );
   }

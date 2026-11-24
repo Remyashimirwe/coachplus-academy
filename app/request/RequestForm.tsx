@@ -97,6 +97,7 @@ export default function RequestForm({programs}: { programs: Program[] }) {
 
 function RequestFormContent({programs}: { programs: Program[] }) {
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+    const [submitError, setSubmitError] = useState("");
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const searchParams = useSearchParams();
     const programIdParam = searchParams.get("programId");
@@ -269,10 +270,10 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                     className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-red-50 text-red-500 mb-8">
                                     <FiX className="size-12"/>
                                 </div>
-                                <h2 className="text-xl font-semibold text-[#0f172a]">Form is not Submited</h2>
+                                <h2 className="text-xl font-semibold text-[#0f172a]">Request not sent</h2>
                                 <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-slate-500">
-                                    Something went wrong while sending your request. Please try again later or contact
-                                    us directly.
+                                    {submitError ||
+                                        "Something went wrong while sending your request. Please try again later or contact us directly."}
                                 </p>
                                 <button
                                     onClick={() => setStatus("idle")}
@@ -328,19 +329,31 @@ function RequestFormContent({programs}: { programs: Program[] }) {
                                             formData.append('availableDays', d);
                                             formData.append('dayTimeSlots', `${d}: ${dayTimes[d]?.from || ''} - ${dayTimes[d]?.to || ''}`);
                                         });
-                                        const result = await saveRequest(formData);
+                                        try {
+                                            const result = await saveRequest(formData);
 
-                                        if (result && result.success) {
-                                            setStatus("idle");
-                                            setShowSuccessModal(true);
-                                            // Reset form
-                                            e.currentTarget.reset();
-                                            setSelectedSubjects([]);
-                                            setSelectedCourses({});
-                                            setSelectedMode("");
-                                            setSelectedDays([]);
-                                            setDayTimes({});
-                                        } else {
+                                            if (result && result.success) {
+                                                setSubmitError("");
+                                                setStatus("idle");
+                                                setShowSuccessModal(true);
+                                                // Reset form
+                                                e.currentTarget.reset();
+                                                setSelectedSubjects([]);
+                                                setSelectedCourses({});
+                                                setSelectedMode("");
+                                                setSelectedDays([]);
+                                                setDayTimes({});
+                                            } else {
+                                                setSubmitError(
+                                                    result?.error ||
+                                                    "We couldn't save your request. Please try again.",
+                                                );
+                                                setStatus("error");
+                                            }
+                                        } catch {
+                                            setSubmitError(
+                                                "We couldn't reach the server. Check your internet connection and try again.",
+                                            );
                                             setStatus("error");
                                         }
                                     }}

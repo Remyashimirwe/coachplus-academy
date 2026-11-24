@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
+import { isUnavailableError } from "@/app/lib/publicError";
+
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { message: "We couldn't read the request data. Please refresh the page and try again." },
+        { status: 400 },
+      );
+    }
 
     const {
       studentName,
@@ -27,9 +38,18 @@ export async function POST(request: Request) {
       startDate,
     } = body;
 
-    if (!studentName || !email) {
+    if (typeof studentName !== "string" || studentName.trim().length === 0) {
       return NextResponse.json(
-        { message: "studentName and email are required" },
+        { message: "Please enter the student or guardian name." },
+        { status: 400 }
+      );
+    }
+    if (
+      typeof email !== "string" ||
+      !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())
+    ) {
+      return NextResponse.json(
+        { message: "Please enter a valid email address." },
         { status: 400 }
       );
     }
@@ -67,8 +87,33 @@ export async function POST(request: Request) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (error: any) {
+    console.error("Teacher request submission failed:", error);
+
+    if (error?.code === "P2000") {
+      return NextResponse.json(
+        {
+          message:
+            "One of your answers is too long. Please shorten it and try again.",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (isUnavailableError(error)) {
+      return NextResponse.json(
+        {
+          message:
+            "Our request system is temporarily unavailable, so your request was not saved. Please try again in a minute.",
+        },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json(
-      { message: error.message ?? "Something went wrong" },
+      {
+        message:
+          "We couldn't save your request because of a server error. Please try again in a moment.",
+      },
       { status: 500 }
     );
   }

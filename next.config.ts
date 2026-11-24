@@ -13,6 +13,30 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  async headers() {
+    // The mobile app talks to this API directly. Browsers block those calls
+    // (and report only "Failed to fetch") unless the response allows the
+    // origin, so expose the public API cross-origin. No credentials are
+    // allowed here: app requests use a Bearer token, and the admin dashboard
+    // stays same-origin with its cookies.
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+          { key: "Access-Control-Max-Age", value: "86400" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
