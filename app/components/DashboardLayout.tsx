@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -228,7 +229,7 @@ export default function DashboardLayout({
         }`}
       >
         <div className={`flex h-20 shrink-0 items-center ${sidebarCollapsed ? "justify-between px-2" : "gap-3 px-6"} border-b border-slate-800`}>
-          <img src="/logo.png" alt="CoachPlus Academy" className="size-9 rounded-lg" />
+          <Image src="/logo.png" alt="CoachPlus Academy" width={36} height={36} sizes="36px" className="size-9 rounded-lg" />
           {!sidebarCollapsed && <span className="flex-1 text-lg font-semibold tracking-tight">
             CoachPlus <span className="text-white">Academy</span>
           </span>}

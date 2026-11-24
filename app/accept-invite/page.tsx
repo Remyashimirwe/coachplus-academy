@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiLock, FiCheck, FiArrowRight, FiArrowLeft } from "react-icons/fi";
@@ -93,9 +94,12 @@ function AcceptInviteContent() {
               </Link>
               <div className="relative group mb-6">
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
-                <img
+                <Image
                   src="/logo.png"
                   alt="CoachPlus Academy"
+                  width={64}
+                  height={64}
+                  sizes="64px"
                   className="relative size-16 rounded-2xl object-contain shadow-sm"
                 />
               </div>

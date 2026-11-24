@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -240,9 +241,12 @@ export default function Navbar() {
         <Link href="/" className="group flex items-center gap-3 font-normal">
           <div className="relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-0 blur transition duration-300 group-hover:opacity-100" />
-            <img
+            <Image
               src="/logo.png"
               alt="CoachPlus Academy"
+              width={64}
+              height={64}
+              sizes="(min-width: 640px) 48px, 40px"
               className="relative h-10 w-auto rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105 sm:h-12"
             />
           </div>
@@ -379,7 +383,14 @@ export default function Navbar() {
                 ))}
                 <motion.div variants={menuItemVariants} className="mt-3 flex items-center justify-between">
                   <span className="text-sm font-semibold text-slate-600">Language / Langue</span>
-                  <LanguageSwitcher locale={locale} onChange={switchLanguage} mobile />
+                  <LanguageSwitcher
+                    locale={locale}
+                    onChange={(nextLocale) => {
+                      setMenuOpen(false);
+                      switchLanguage(nextLocale);
+                    }}
+                    mobile
+                  />
                 </motion.div>
                 {user ? (
                   <motion.div variants={menuItemVariants} className="mt-2 flex flex-col gap-2">

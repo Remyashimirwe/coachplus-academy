@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -146,9 +147,12 @@ export default function RegisterPage() {
                 <div className="flex flex-col items-center text-center mb-8">
                   <div className="relative group mb-5">
                     <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
-                    <img
+                    <Image
                       src="/logo.png"
                       alt="CoachPlus Academy"
+                      width={64}
+                      height={64}
+                      sizes="64px"
                       className="relative size-16 rounded-2xl object-contain shadow-sm"
                     />
                   </div>

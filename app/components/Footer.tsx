@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { CONTACT_PHONE, CONTACT_PHONE_DISPLAY, WHATSAPP_PHONE } from "@/app/lib/constants";
 
 import { useState, useEffect } from "react";
@@ -50,9 +51,12 @@ export default function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(2,1fr)]">
           <div>
             <Link href="/" className="group flex items-center gap-3 font-normal w-fit">
-              <img
+              <Image
                 src="/logo.png"
                 alt="CoachPlus Academy"
+                width={40}
+                height={40}
+                sizes="40px"
                 className="size-10 rounded-2xl object-contain shadow-sm transition-transform group-hover:scale-105"
               />
               <span className="text-2xl font-semibold tracking-tight text-white">

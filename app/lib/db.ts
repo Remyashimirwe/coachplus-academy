@@ -10,7 +10,13 @@ import net from "node:net";
 // falling through so local dev and seed scripts can reach the database.
 net.setDefaultAutoSelectFamilyAttemptTimeout(5_000);
 
-const connectionString = process.env.DATABASE_URL;
+// pg-connection-string warns about legacy SSL mode aliases. Make the current
+// behavior explicit so the warning goes away without weakening certificate
+// verification (the legacy modes currently behave like verify-full).
+const connectionString = process.env.DATABASE_URL?.replace(
+  /([?&]sslmode=)(?:prefer|require|verify-ca)(?=(&|$))/i,
+  "$1verify-full",
+);
 
 const pool = new pg.Pool({
   connectionString,

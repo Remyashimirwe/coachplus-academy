@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { FormEvent, useEffect, useState } from "react";
 import { FiAlertCircle, FiCheckCircle, FiFileText, FiUploadCloud } from "react-icons/fi";
 
@@ -86,7 +88,7 @@ export default function DocumentReuploadForm({ token }: { token: string }) {
         <div className="bg-gradient-to-r from-orange-500 to-rose-600 px-6 py-7 text-white sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm">
-              <img src="/logo.png" alt="CoachPlus Academy logo" className="size-full object-contain" />
+              <Image src="/logo.png" alt="CoachPlus Academy logo" width={36} height={36} sizes="36px" className="size-full object-contain" />
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">CoachPlus Academy</p>
