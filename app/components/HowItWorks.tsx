@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { FiMessageSquare, FiUsers, FiAward } from "react-icons/fi";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 const steps = [
   {
@@ -22,6 +23,7 @@ const steps = [
 ];
 
 export default function HowItWorks() {
+  const locale = useSiteLocale();
   return (
     <section id="how-it-works" className="scroll-mt-24 bg-[#fffaf8] py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
@@ -40,9 +42,9 @@ export default function HowItWorks() {
                 <div className="mb-8 flex size-20 items-center justify-center rounded-3xl bg-[#fff0f3] text-[#E91E63] shadow-inner transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                   <Icon className="size-10" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#21121f]">{step.title}</h3>
+                <h3 className="text-lg font-semibold text-[#21121f]">{t(locale, step.title)}</h3>
                 <p className="mt-4 text-base font-normal leading-relaxed text-slate-600">
-                  {step.text}
+                  {t(locale, step.text)}
                 </p>
                 {index < steps.length - 1 && (
                   <div className="absolute top-10 left-full hidden h-px w-full bg-gradient-to-r from-[#E91E63]/20 to-transparent md:block -ml-4 -z-10" />

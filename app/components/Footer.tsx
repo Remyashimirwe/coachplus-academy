@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { FaWhatsapp, FaPhoneAlt } from "react-icons/fa";
 import { getSession } from "@/app/lib/auth-actions";
 import PlayStoreButton from "./PlayStoreButton";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 const footerGroups = [
   {
@@ -32,6 +33,7 @@ const footerGroups = [
 ];
 
 export default function Footer() {
+  const locale = useSiteLocale();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -58,11 +60,11 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-8 max-w-sm text-sm leading-relaxed text-slate-400">
-              Your Success Starts with the Right Coach.
+              {t(locale, "Your Success Starts with the Right Coach.")}
             </p>
             <div className="mt-6">
               <p className="mb-3 text-sm text-slate-400">
-                Learn on the go — get the CoachPlus app.
+                {t(locale, "Learn on the go — get the CoachPlus app.")}
               </p>
               <PlayStoreButton variant="outline" className="min-h-[46px] px-5" />
             </div>
@@ -75,7 +77,7 @@ export default function Footer() {
 
             return (
               <div key={group.title}>
-                <h3 className="text-sm font-semibold text-white mb-6">{group.title}</h3>
+                <h3 className="text-sm font-semibold text-white mb-6">{t(locale, group.title)}</h3>
                 <ul className="flex flex-col gap-4">
                   {filteredLinks.map((link) => (
                     <li key={link.label}>
@@ -83,7 +85,7 @@ export default function Footer() {
                         href={link.href}
                         className="text-sm text-slate-400 transition hover:text-[#E91E63]"
                       >
-                        {link.label}
+                        {t(locale, link.label)}
                       </Link>
                     </li>
                   ))}

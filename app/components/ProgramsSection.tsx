@@ -6,6 +6,7 @@ import { FiArrowRight } from "react-icons/fi";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProgramModal from "./ProgramModal";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 const MAX_LENGTH = 200;
 
@@ -24,6 +25,7 @@ type Program = {
 };
 
 export default function ProgramsSection({ programs }: { programs: Program[] }) {
+  const locale = useSiteLocale();
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
@@ -49,9 +51,9 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
             <div className="size-20 rounded-full bg-slate-100 flex items-center justify-center mb-6">
               <FiArrowRight className="size-10 text-slate-300" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900">No Programs Available</h3>
+            <h3 className="text-2xl font-bold text-slate-900">{t(locale, "No Programs Available")}</h3>
             <p className="mt-2 text-slate-600 max-w-md">
-              We're currently updating our curriculum. Please check back soon for our new learning paths.
+              {t(locale, "We're currently updating our curriculum. Please check back soon for our new learning paths.")}
             </p>
           </div>
         </div>
@@ -67,7 +69,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
             <div className="absolute inset-0 bg-[#E91E63]/10 rounded-full blur-md" />
             <div className="absolute inset-0 bg-white shadow-sm rounded-full border border-[#E91E63]/10" />
             <h2 className="relative text-lg font-bold uppercase tracking-widest text-[#E91E63]">
-              Our Categories
+              {t(locale, "Our Categories")}
             </h2>
           </div>
         </div>
@@ -100,16 +102,16 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg backdrop-blur-sm">
-                      {program.level}
+                      {t(locale, program.level)}
                     </div>
                   </div>
                   
                   <div className="flex flex-1 flex-col p-6">
                     <h3 className="text-base font-medium text-[#21121f] transition-colors group-hover:text-[#E91E63]">
-                      {program.title}
+                      {t(locale, program.title)}
                     </h3>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-700">
-                      {description}
+                      {t(locale, description)}
                     </p>
                     {isLong && (
                       <button
@@ -120,7 +122,7 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                         }}
                         className="mt-2 self-start text-sm font-bold text-[#E91E63] transition-colors hover:text-[#7B1FA2]"
                       >
-                        Show more
+                        {t(locale, "Show more")}
                       </button>
                     )}
                     
@@ -133,13 +135,13 @@ export default function ProgramsSection({ programs }: { programs: Program[] }) {
                         }}
                         className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border-2 border-[#E91E63] text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95"
                       >
-                        Show Details
+                        {t(locale, "Show Details")}
                       </button>
                       <button
                         onClick={(e) => handleRequestTeacher(e, program.id)}
                         className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[#21121f] text-sm font-bold text-white transition-all hover:bg-[#E91E63] active:scale-95 shadow-md"
                       >
-                        Request a Teacher
+                        {t(locale, "Request a Teacher")}
                       </button>
                     </div>
                   </div>

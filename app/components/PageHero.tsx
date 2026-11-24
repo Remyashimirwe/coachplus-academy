@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 export default function PageHero({
   badge = "Join CoachPlus Academy",
@@ -11,6 +12,7 @@ export default function PageHero({
   title: React.ReactNode;
   subtitle?: string;
 }) {
+  const locale = useSiteLocale();
   return (
     <div className="relative overflow-hidden bg-[#0f172a] pt-40 pb-24 text-white">
       <div className="absolute inset-0 bg-gradient-to-br from-[#FF5733]/20 via-[#E91E63]/20 to-[#7B1FA2]/20" />
@@ -24,14 +26,14 @@ export default function PageHero({
           transition={{ duration: 0.5 }}
         >
           <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white backdrop-blur-md border border-white/20 mb-6 uppercase tracking-widest">
-            {badge}
+            {t(locale, badge)}
           </span>
           <h1 className="text-2xl font-medium leading-tight sm:text-3xl lg:text-4xl">
             {title}
           </h1>
           {subtitle && (
             <p className="mt-8 mx-auto max-w-2xl text-xl leading-relaxed text-slate-300">
-              {subtitle}
+            {t(locale, subtitle)}
             </p>
           )}
         </motion.div>

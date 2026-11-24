@@ -5,6 +5,7 @@ import { FiChevronLeft, FiChevronRight, FiImage } from "react-icons/fi";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import PlayStoreButton from "./PlayStoreButton";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 type HeroProgram = {
   id: number;
@@ -118,6 +119,7 @@ function ProgramsSlideshow({ programs }: { programs: HeroProgram[] }) {
 }
 
 export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
+  const locale = useSiteLocale();
   return (
     <section id="home" className="relative overflow-hidden bg-gradient-to-br from-[#FF5733] via-[#E91E63] to-[#7B1FA2] pt-20 pb-16 text-white md:pt-24 md:pb-20">
       {/* Decorative background elements */}
@@ -134,10 +136,10 @@ export default function Hero({ programs = [] }: { programs?: HeroProgram[] }) {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-3xl font-semibold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
-              Forum for certified professional teachers
+              {t(locale, "Forum for certified professional teachers")}
             </h1>
             <p className="mt-6 max-w-lg text-lg text-white/90 leading-relaxed sm:text-base">
-              Trusted educators providing personalized home and online coaching
+              {t(locale, "Trusted educators providing personalized home and online coaching")}
             </p>
             <motion.div
               initial={{ opacity: 0, y: 12 }}

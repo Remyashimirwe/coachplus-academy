@@ -7,6 +7,7 @@ import {
   FiUser,
   FiShield,
 } from "react-icons/fi";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 const features = [
   {
@@ -32,6 +33,7 @@ const features = [
 ];
 
 export default function Features() {
+  const locale = useSiteLocale();
   return (
     <section id="why-choose-us" className="bg-[#f8fafc] py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
@@ -50,9 +52,9 @@ export default function Features() {
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-[#fff0f3] text-[#E91E63] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                   <Icon className="size-7" />
                 </div>
-                <h3 className="mt-8 text-lg font-semibold text-[#21121f]">{feature.title}</h3>
+                <h3 className="mt-8 text-lg font-semibold text-[#21121f]">{t(locale, feature.title)}</h3>
                 <p className="mt-4 text-sm font-normal leading-relaxed text-slate-500">
-                  {feature.text}
+                  {t(locale, feature.text)}
                 </p>
               </motion.article>
             );

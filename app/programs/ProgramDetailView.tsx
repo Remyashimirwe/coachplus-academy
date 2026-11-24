@@ -8,6 +8,7 @@ import {
   FiCheck,
   FiChevronLeft,
 } from "react-icons/fi";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 type Topic = {
   id: number;
@@ -31,6 +32,7 @@ type Program = {
 };
 
 export default function ProgramDetailView({ program }: { program: Program }) {
+  const locale = useSiteLocale();
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
       {/* Hero Section */}
@@ -50,7 +52,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
               className="inline-flex items-center gap-2 mb-5 text-white/80 hover:text-white transition-colors font-medium"
             >
               <FiChevronLeft className="size-5" />
-              Back to Programs
+              {t(locale, "Back to Programs")}
             </Link>
           </motion.div>
 
@@ -62,14 +64,14 @@ export default function ProgramDetailView({ program }: { program: Program }) {
             >
               <p className="inline-flex items-center gap-2 rounded-full bg-white/14 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20">
                 <FiBookOpen className="size-3.5" />
-                {program.level}
+                {t(locale, program.level)}
               </p>
               <h1 className="mt-3 text-lg font-extrabold tracking-tight sm:text-xl md:text-2xl">
-                {program.title}{" "}
-                <span className="text-white/80">({program.level})</span>
+                {t(locale, program.title)}{" "}
+                <span className="text-white/80">({t(locale, program.level)})</span>
               </h1>
               <p className="mt-2.5 max-w-2xl text-xs text-white/90 leading-relaxed sm:text-sm">
-                {program.text}
+                {t(locale, program.text)}
               </p>
               
               <div className="mt-5">
@@ -77,7 +79,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                   href={`/request?programId=${program.id}`}
                   className="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-[#E91E63] shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
                 >
-                  Request a Teacher
+                  {t(locale, "Request a Teacher")}
                   <FiArrowRight className="size-3.5" />
                 </Link>
               </div>
@@ -117,13 +119,13 @@ export default function ProgramDetailView({ program }: { program: Program }) {
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-xs font-bold uppercase tracking-widest text-[#E91E63] mb-3">
-              Available programs
+              {t(locale, "Available programs")}
             </h2>
             <h2 className="text-lg font-extrabold tracking-tight text-[#21121f] sm:text-xl">
-              Available <span className="text-[#E91E63]">Programs</span>
+              {t(locale, "Available ")}<span className="text-[#E91E63]">{t(locale, "Programs")}</span>
             </h2>
             <p className="mt-2.5 text-xs font-medium text-slate-600 sm:text-sm">
-              Choose a specialized path within {program.title} to find the perfect tutor.
+              {t(locale, "Choose a specialized path within ")}{t(locale, program.title)}{t(locale, " to find the perfect tutor.")}
             </p>
           </div>
 
@@ -140,7 +142,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                 <div className="relative h-48 -mx-8 -mt-8 mb-6 overflow-hidden rounded-t-[32px]">
                   <img 
                     src={subject.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"} 
-                    alt={subject.name}
+                  alt={t(locale, subject.name)}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -148,19 +150,19 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                     <FiCheck className="size-5" />
                   </div>
                 </div>
-              <h3 className="text-xs font-bold text-slate-900 mb-4">{subject.name}</h3>
+              <h3 className="text-xs font-bold text-slate-900 mb-4">{t(locale, subject.name)}</h3>
                 
                 <div className="flex-1">
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Included Subjects:</p>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">{t(locale, "Included Subjects:")}</p>
                   <ul className="space-y-2 mb-8">
                     {subject.topics.map((topic) => (
                       <li key={topic.id} className="flex items-center gap-2 text-xs font-medium text-slate-600">
                         <div className="size-1.5 rounded-full bg-[#E91E63]/40" />
-                        {topic.name}
+                        {t(locale, topic.name)}
                       </li>
                     ))}
                     {subject.topics.length === 0 && (
-                      <li className="text-slate-400 italic text-sm">General study topics</li>
+                      <li className="text-slate-400 italic text-sm">{t(locale, "General study topics")}</li>
                     )}
                   </ul>
                 </div>
@@ -169,7 +171,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
                   href={`/request?programId=${program.id}&subjectId=${subject.id}`}
                   className="flex items-center justify-center gap-2 rounded-xl bg-[#E91E63] py-2.5 text-xs font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
                 >
-                  Request a Teacher
+                  {t(locale, "Request a Teacher")}
                   <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </motion.div>
@@ -178,7 +180,7 @@ export default function ProgramDetailView({ program }: { program: Program }) {
 
           {program.subjects.length === 0 && (
             <div className="mt-8 rounded-3xl bg-white p-12 text-center shadow-sm ring-1 ring-slate-100">
-              <p className="text-slate-500 font-medium">No courses have been added yet.</p>
+              <p className="text-slate-500 font-medium">{t(locale, "No courses have been added yet.")}</p>
             </div>
           )}
         </div>
@@ -191,24 +193,24 @@ export default function ProgramDetailView({ program }: { program: Program }) {
             <div className="absolute -right-24 top-0 size-72 rounded-full bg-[#E91E63]/25 blur-3xl" />
             <div className="relative z-10 max-w-3xl">
               <h2 className="text-lg font-extrabold text-white sm:text-xl">
-                Ready to Find the Right Teacher for You?
+                {t(locale, "Ready to Find the Right Teacher for You?")}
               </h2>
               <p className="mt-3 text-xs leading-relaxed text-white/60">
-                Connect with qualified and trusted teachers who match your learning needs, goals, location, and preferred learning style. Whether you’re learning a new subject, developing a skill, preparing for an exam, or pursuing professional growth, CoachPlus Academy helps you find the right teacher for your journey.
+                {t(locale, "Connect with qualified and trusted teachers who match your learning needs, goals, location, and preferred learning style. Whether you’re learning a new subject, developing a skill, preparing for an exam, or pursuing professional growth, CoachPlus Academy helps you find the right teacher for your journey.")}
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/request"
                   className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-5 text-xs font-bold text-white shadow-xl shadow-rose-500/25 transition-all hover:-translate-y-1 hover:bg-[#7B1FA2]"
                 >
-                  Get Started Now
+                  {t(locale, "Get Started Now")}
                   <FiArrowRight className="size-4" />
                 </Link>
                 <Link
                   href="/become-a-teacher"
                   className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-white/20 px-5 text-xs font-bold text-white backdrop-blur-sm transition-all hover:bg-white/10"
                 >
-                  Join as a Teacher
+                  {t(locale, "Join as a Teacher")}
                 </Link>
               </div>
             </div>

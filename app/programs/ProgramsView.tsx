@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProgramModal from "../components/ProgramModal";
 import PageHero from "../components/PageHero";
+import { t, useSiteLocale } from "../lib/site-i18n";
 
 type Topic = {
   id: number;
@@ -39,6 +40,7 @@ export default function ProgramsPage({
 }: {
   programs: Program[];
 }) {
+  const locale = useSiteLocale();
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
@@ -59,9 +61,9 @@ export default function ProgramsPage({
   return (
     <main className="min-h-screen bg-white text-[#21121f]">
       <PageHero
-        badge="Our Categories"
-        title={<>Learning paths for <span className="text-[#E91E63]">every goal</span></>}
-        subtitle="Explore our learning categories and find the perfect fit for you."
+        badge={t(locale, "Our Categories")}
+        title={<>{t(locale, "Learning paths for every goal")}</>}
+        subtitle={t(locale, "Explore our learning categories and find the perfect fit for you.")}
       />
 
       <section className="bg-white py-12 md:py-24">
@@ -71,15 +73,15 @@ export default function ProgramsPage({
               <div className="size-20 rounded-full bg-slate-50 flex items-center justify-center mb-6">
                 <FiBookOpen className="size-10 text-slate-300" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900">No Programs Available</h3>
+              <h3 className="text-2xl font-bold text-slate-900">{t(locale, "No Programs Available")}</h3>
               <p className="mt-2 text-slate-600 max-w-md px-6">
-                We&apos;re currently expanding our offerings. Please check back later or contact us for custom tutoring needs.
+                {t(locale, "We're currently expanding our offerings. Please check back later or contact us for custom tutoring needs.")}
               </p>
               <Link
                 href="/request"
                 className="mt-8 inline-flex items-center justify-center rounded-2xl bg-[#E91E63] px-8 py-4 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
               >
-                Request a Custom Category
+                {t(locale, "Request a Custom Category")}
               </Link>
             </div>
           ) : (
@@ -106,21 +108,21 @@ export default function ProgramsPage({
                     <div className="aspect-video w-full overflow-hidden relative shrink-0">
                       <img 
                         src={program.image || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"} 
-                        alt={program.title}
+                        alt={t(locale, program.title)}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
                       <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#E91E63] shadow-lg backdrop-blur-sm">
-                        {program.level}
+                        {t(locale, program.level)}
                       </div>
                     </div>
 
                     <div className="flex flex-1 flex-col p-6">
                       <h2 className="text-base font-medium text-[#0f172a] transition-colors group-hover:text-[#E91E63]">
-                        {program.title}
+                        {t(locale, program.title)}
                       </h2>
                       <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
-                        {description}
+                        {t(locale, description)}
                       </p>
                       {isLong && (
                         <button
@@ -131,7 +133,7 @@ export default function ProgramsPage({
                           }}
                           className="mt-2 self-start text-sm font-bold text-[#E91E63] transition-colors hover:text-[#7B1FA2]"
                         >
-                          Show more
+                          {t(locale, "Show more")}
                         </button>
                       )}
                       
@@ -144,14 +146,14 @@ export default function ProgramsPage({
                           }}
                           className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#E91E63] py-3 text-sm font-bold text-[#E91E63] transition-all hover:bg-[#E91E63] hover:text-white active:scale-95 shadow-sm"
                         >
-                          Read more
+                          {t(locale, "Read more")}
                           <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                         </button>
                         <button
                           onClick={(e) => handleRequestTeacher(e, program.id)}
                           className="flex items-center justify-center gap-2 rounded-2xl bg-[#E91E63] py-3 text-sm font-bold text-white transition-all hover:bg-[#7B1FA2] active:scale-95 shadow-lg shadow-rose-500/20"
                         >
-                          Request a Teacher
+                          {t(locale, "Request a Teacher")}
                           <FiArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                         </button>
                       </div>
