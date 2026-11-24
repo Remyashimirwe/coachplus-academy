@@ -2,9 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
-  // i18n removed — App Router supports locale prefixes manually
-  // (e.g. /en/page, /fr/page). The middleware detects accept-language
-  // and redirects; Navbar links switch locale via URL.
+  // App Router locale prefixes are mapped to shared routes below. The root
+  // Proxy stores the visitor's preferred locale and protects dashboard paths.
   experimental: {
     serverActions: {
       // Category/Sub-category/Subject forms allow image uploads up to 8MB
@@ -15,6 +14,14 @@ const nextConfig: NextConfig = {
       // overhead and the rest of the form fields.
       bodySizeLimit: "10mb",
     },
+  },
+  async rewrites() {
+    return [
+      { source: "/en", destination: "/" },
+      { source: "/en/:path*", destination: "/:path*" },
+      { source: "/fr", destination: "/" },
+      { source: "/fr/:path*", destination: "/:path*" },
+    ];
   },
   async headers() {
     // The mobile app talks to this API directly. Browsers block those calls

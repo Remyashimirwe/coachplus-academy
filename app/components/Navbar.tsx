@@ -122,7 +122,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [user, setUser] = useState<any>(null);
-  const [locale, setLocale] = useState<Locale>(() => localeFromPath(pathname) ?? "en");
+  // Keep the server render and first browser render identical; the saved/path
+  // locale is applied after hydration to avoid rewrite-related mismatches.
+  const [locale, setLocale] = useState<Locale>("en");
   const activePath = pathname.replace(/^\/(en|fr)(?=\/|$)/, "") || "/";
 
   useEffect(() => {
