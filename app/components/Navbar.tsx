@@ -251,13 +251,13 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-1 min-[1440px]:flex">
           {filteredNavLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`group relative rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
+              className={`group relative whitespace-nowrap rounded-xl px-2.5 py-2 text-[13px] font-semibold transition-all duration-300 ${
                 scrolled || !isHomePage
                   ? (isActive(link.href) ? "text-[#E91E63] bg-[#fff0f3]" : "text-slate-600 hover:text-[#E91E63] hover:bg-[#fff0f3]") 
                   : (isActive(link.href) ? "text-white bg-white/20" : "text-white/80 hover:text-white hover:bg-white/10")
@@ -299,7 +299,7 @@ export default function Navbar() {
           />
           <Link
             href="/request"
-            className={`group inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-6 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
+            className={`group inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-2xl px-4 text-sm font-bold shadow-xl transition-all duration-300 hover:-translate-y-1 active:scale-95 ${
               scrolled || !isHomePage
                 ? "bg-[#E91E63] text-white hover:bg-[#7B1FA2] hover:shadow-rose-500/25"
                 : "bg-white text-[#E91E63] hover:bg-white/90 hover:shadow-white/10"
@@ -314,7 +314,7 @@ export default function Navbar() {
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle menu"
           aria-expanded={menuOpen}
-          className={`grid size-11 place-items-center rounded-2xl border transition-all duration-300 active:scale-90 md:hidden ${
+          className={`grid size-11 place-items-center rounded-2xl border transition-all duration-300 active:scale-90 min-[1440px]:hidden ${
             scrolled || !isHomePage
               ? "border-slate-200 bg-white text-slate-900 hover:border-[#E91E63]"
               : "border-white/20 bg-white/10 text-white hover:bg-white/20"
@@ -343,7 +343,7 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 z-[65] bg-slate-900/40 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-[65] bg-slate-900/40 backdrop-blur-sm min-[1440px]:hidden"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
@@ -358,7 +358,7 @@ export default function Navbar() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className={`fixed inset-x-0 z-[70] px-5 md:hidden transition-all duration-500 ${scrolled ? "top-[72px]" : "top-[88px]"}`}
+            className={`fixed inset-x-0 z-[70] px-5 min-[1440px]:hidden transition-all duration-500 ${scrolled ? "top-[72px]" : "top-[88px]"}`}
           >
             <div className="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl">
               <div className="flex flex-col gap-2">
