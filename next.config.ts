@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
+  i18n: {
+    locales: ["en", "fr"],
+    defaultLocale: "en",
+  },
   experimental: {
     serverActions: {
       // Category/Sub-category/Subject forms allow image uploads up to 8MB
