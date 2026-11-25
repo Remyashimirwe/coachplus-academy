@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-// Two hours from the deployment window (10:18 Kigali on 25 Nov 2026).
-const AVAILABLE_AT = new Date("2026-11-25T10:18:15Z").getTime();
+// Two hours from the countdown restart (13:59 Kigali on 25 Nov 2026).
+const AVAILABLE_AT = new Date("2026-11-25T11:59:15Z").getTime();
 
 function remainingTime() {
   const seconds = Math.max(0, Math.floor((AVAILABLE_AT - Date.now()) / 1000));
