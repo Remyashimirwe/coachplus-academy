@@ -10,8 +10,13 @@ export default defineConfig({
     seed: "npx tsx seed.ts",
   },
   datasource: {
-    // Runtime queries use DATABASE_URL (pooled). Schema migrations must use
-    // Neon’s direct, non-pooled endpoint via DIRECT_URL.
-    url: process.env["DIRECT_URL"],
+    // Prefer a direct migration URL (required for pooled databases such as
+    // Neon). Railway's Postgres DATABASE_URL is already a direct connection,
+    // so it is a safe fallback when Railway has not defined DIRECT_URL.
+    url:
+      process.env["DIRECT_URL"] ||
+      (process.env["RAILWAY_ENVIRONMENT_NAME"]
+        ? process.env["DATABASE_URL"]
+        : undefined),
   },
 });

@@ -1,7 +1,13 @@
 import { spawn } from "node:child_process";
 
-if (!process.env.DIRECT_URL) {
-  console.error("DIRECT_URL is required for Prisma migrations. No migration was started.");
+const migrationUrl =
+  process.env.DIRECT_URL ||
+  (process.env.RAILWAY_ENVIRONMENT_NAME ? process.env.DATABASE_URL : undefined);
+
+if (!migrationUrl) {
+  console.error(
+    "DIRECT_URL is required for Prisma migrations (or DATABASE_URL on Railway). No migration was started.",
+  );
   process.exit(1);
 }
 
