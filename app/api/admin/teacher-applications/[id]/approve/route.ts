@@ -4,9 +4,10 @@ import { db } from "@/app/lib/db";
 import { getUserFromRequest } from "@/app/lib/auth";
 import { sendApplicationApprovedEmail, sendCustomApplicationEmail } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
+import { SITE_URL } from "@/app/lib/site-url";
 import crypto from "node:crypto";
 
-const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+const APP_URL = SITE_URL;
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function handlePOST(

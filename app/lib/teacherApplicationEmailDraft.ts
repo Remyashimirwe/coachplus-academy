@@ -1,3 +1,5 @@
+import { SITE_URL } from "./site-url";
+
 export type ApplicationEmailStage =
   | "shortlisted"
   | "assessment_scheduled"
@@ -5,7 +7,7 @@ export type ApplicationEmailStage =
   | "approved"
   | "rejected";
 
-const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+const APP_URL = SITE_URL;
 
 type ApplicationEmailData = {
   fullName: string;

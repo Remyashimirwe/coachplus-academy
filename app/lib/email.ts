@@ -1,7 +1,8 @@
 import { Resend } from "resend";
 import { BRAND_NAME, CONTACT_EMAIL } from "./constants";
+import { SITE_URL } from "./site-url";
 
-const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+const APP_URL = SITE_URL;
 const FROM_EMAIL = process.env.EMAIL_FROM || `${BRAND_NAME} <admin@coachplusacademy.com>`;
 // Remote logo, already served by the site (verified 200 / image/png).
 //

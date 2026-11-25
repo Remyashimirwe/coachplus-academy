@@ -8,6 +8,7 @@ import {
   sendStudentMatchEmail,
 } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
+import { SITE_URL } from "@/app/lib/site-url";
 
 async function handlePOST(
   request: NextRequest,
@@ -97,7 +98,7 @@ async function handlePOST(
     data: { status: "assigned" },
   });
 
-  const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+  const APP_URL = SITE_URL;
   const teacherLocation = [teacher.village, teacher.cell, teacher.city, teacher.country]
     .filter(Boolean)
     .join(", ");

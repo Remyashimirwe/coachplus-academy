@@ -175,7 +175,7 @@ Recommended production setup:
 - PostgreSQL database hosted securely
 - Environment variables configured in production
 - Strong `JWT_SECRET` or `SESSION_SECRET`
-- `APP_URL` set to your production domain
+- `APP_URL` set to `https://coachplusacademy.com` in production
 - `DIRECT_URL` set to the unpooled PostgreSQL URL for production migrations (or use a direct `DATABASE_URL`)
 - `RESEND_API_KEY` configured for outbound email deliverys
 -

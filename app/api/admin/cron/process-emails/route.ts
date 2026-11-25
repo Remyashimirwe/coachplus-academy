@@ -11,8 +11,9 @@ import {
   sendCustomApplicationEmail,
 } from "@/app/lib/email";
 import { notifyAdmins, notifyUsers } from "@/app/lib/notifications";
+import { SITE_URL } from "@/app/lib/site-url";
 
-const APP_URL = process.env.APP_URL || "https://www.coachplusacademy.com";
+const APP_URL = SITE_URL;
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 async function handlePOST() {

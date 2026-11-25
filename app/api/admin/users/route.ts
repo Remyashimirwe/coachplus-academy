@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { prisma } from '@/app/lib/db';
 import { getUserFromRequest } from '@/app/lib/auth';
 import { sendInviteEmail } from '@/app/lib/email';
+import { SITE_URL } from '@/app/lib/site-url';
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -51,7 +52,7 @@ async function handlePOST(request: Request) {
     const emailResult = await sendInviteEmail({ to: email, name, role, token: inviteToken });
 
     const { passwordHash, inviteToken: _token, ...safeUser } = user;
-    const inviteUrl = `${process.env.APP_URL || 'https://www.coachplusacademy.com'}/accept-invite?token=${inviteToken}`;
+    const inviteUrl = `${SITE_URL}/accept-invite?token=${inviteToken}`;
 
     return NextResponse.json({
       message: emailResult.success

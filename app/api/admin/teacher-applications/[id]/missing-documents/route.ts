@@ -6,6 +6,7 @@ import { getUserFromRequest } from "@/app/lib/auth";
 import { buildTeacherApplicationEmailDraft } from "@/app/lib/teacherApplicationEmailDraft";
 import { TEACHER_APPLICATION_DOCUMENTS } from "@/app/lib/teacherApplicationDocuments";
 import { sendTeacherApplicationEmailNow } from "@/app/lib/sendTeacherApplicationEmailNow";
+import { SITE_URL } from "@/app/lib/site-url";
 
 async function handlePOST(
   request: NextRequest,
@@ -46,7 +47,7 @@ async function handlePOST(
   try {
     const token = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");
-    const baseUrl = (process.env.APP_URL || "https://www.coachplusacademy.com").replace(/\/$/, "");
+    const baseUrl = SITE_URL;
     const uploadUrl = new URL("/reupload-documents", baseUrl);
     uploadUrl.searchParams.set("token", token);
     const reuploadLink = uploadUrl.toString();
