@@ -13,7 +13,7 @@ The platform supports:
 - Attendance tracking for students and teachers  
 - Notifications and invite emails   
 - Program, subject, and topic management   
-- Role-based access for admin, teacher, and student users    
+- Role-based access for admin, teacher, and student users     
   
 ## Tech Stack  
 
