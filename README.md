@@ -176,11 +176,13 @@ Recommended production setup:
 - Environment variables configured in production
 - Strong `JWT_SECRET` or `SESSION_SECRET`
 - `APP_URL` set to your production domain
+- `DIRECT_URL` set to the unpooled PostgreSQL URL for production migrations (or use a direct `DATABASE_URL`)
 - `RESEND_API_KEY` configured for outbound email deliverys
 -
 ## Notes
 
 - The app uses Prisma with PostgreSQL and is optimized for a hosted database such as Neon, Supabase, or a managed Postgres service.
+- Vercel production builds apply committed Prisma migrations before building; Preview builds do not touch the production database.
 - The default app name in package metadata is `wecouch`, but the product branding is CoachPlus Academy.
 
 ## License

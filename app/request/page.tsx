@@ -1,7 +1,15 @@
 import { getCachedPrograms } from "@/app/lib/db";
 import RequestForm from "./RequestForm";
+import { pageMetadata } from "@/app/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = pageMetadata({
+  title: "Request a Teacher",
+  description:
+    "Tell CoachPlus Academy your learning goals and get matched with a trusted teacher for home or online coaching in Rwanda.",
+  path: "/request",
+});
 
 export default async function RequestPage() {
   const programs = await getCachedPrograms({ onlyForTeacherForm: true });

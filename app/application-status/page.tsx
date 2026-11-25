@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import ApplicationStatusLookup from "./ApplicationStatusLookup";
 import Footer from "../components/Footer";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Application Status",
   description:
     "Track your CoachPlus Academy teacher application from receipt through shortlisting, assessment and your first student match.",
-};
+  path: "/application-status",
+});
 
 export default function ApplicationStatusPage() {
   return (

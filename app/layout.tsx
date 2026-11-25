@@ -11,18 +11,33 @@ import Navbar from "./components/Navbar";
 import WhatsAppButton from "./components/WhatsAppButton";
 import ToastProvider from "./components/ToastProvider";
 import { BRAND_NAME } from "./lib/constants";
+import { SITE_URL } from "./lib/site-url";
+
+const siteDescription =
+  "Find trusted teachers for personalized home and online coaching in Rwanda. Explore school support, Cambridge programs, languages, exam preparation, and practical skills.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: `%s | ${BRAND_NAME}`,
-    default: `${BRAND_NAME} | Find the Perfect Teacher`,
+    default: `${BRAND_NAME} | Find Trusted Teachers in Rwanda`,
   },
-  description:
-    "Connect with verified home and online teachers for personalized learning.",
+  description: siteDescription,
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
     apple: "/logo.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: BRAND_NAME,
+    description: siteDescription,
+    images: [{ url: "/logo.png", alt: `${BRAND_NAME} logo` }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    description: siteDescription,
+    images: ["/logo.png"],
   },
 };
 
@@ -34,6 +49,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "EducationalOrganization",
+                "@id": `${SITE_URL}/#organization`,
+                name: BRAND_NAME,
+                url: SITE_URL,
+                logo: `${SITE_URL}/logo.svg`,
+                description: siteDescription,
+                areaServed: { "@type": "Country", name: "Rwanda" },
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "@id": `${SITE_URL}/#website`,
+                name: BRAND_NAME,
+                url: SITE_URL,
+                publisher: { "@id": `${SITE_URL}/#organization` },
+              },
+            ]).replace(/</g, "\\u003c"),
+          }}
+        />
         <Navbar />
         {/* Renders no DOM of its own, so the flex column layout is unchanged;
             it only provides the toast context plus a fixed-position stack. */}

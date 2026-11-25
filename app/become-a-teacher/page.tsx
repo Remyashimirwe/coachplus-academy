@@ -3,8 +3,16 @@ import { getTeacherTerms } from "@/app/lib/teacherTermsServer";
 import BecomeTeacherForm from "./BecomeTeacherForm";
 import Footer from "../components/Footer";
 import BecomeTeacherIntro from "./BecomeTeacherIntro";
+import { pageMetadata } from "@/app/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = pageMetadata({
+  title: "Teach with CoachPlus Academy",
+  description:
+    "Join CoachPlus Academy's network of trusted educators and connect with students seeking personalized home and online coaching in Rwanda.",
+  path: "/become-a-teacher",
+});
 
 export default async function BecomeTeacherPage() {
   const isOpen = await getSetting("teacher_applications_open", "true") === "true";

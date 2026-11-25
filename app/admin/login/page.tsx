@@ -66,10 +66,11 @@ export default function AdminLoginPage() {
                   <div className="relative group mb-5">
                     <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#FF5733] to-[#E91E63] opacity-20 blur transition duration-300 group-hover:opacity-40" />
                     <Image
-                      src="/logo.png"
+                      src="/logo.svg"
                       alt="CoachPlus Academy"
                       width={64}
                       height={64}
+                      unoptimized
                       sizes="64px"
                       className="relative size-16 rounded-2xl object-contain shadow-sm"
                     />

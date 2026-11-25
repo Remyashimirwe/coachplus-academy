@@ -10,11 +10,12 @@ export default defineConfig({
     seed: "npx tsx seed.ts",
   },
   datasource: {
-    // Prefer a direct migration URL (required for pooled databases such as
-    // Neon). Railway's Postgres DATABASE_URL is already a direct connection,
-    // so it is a safe fallback when Railway has not defined DIRECT_URL.
+    // Prefer a direct migration URL. The production build script supplies
+    // DIRECT_URL from the explicitly unpooled URL or a verified direct
+    // DATABASE_URL on Vercel. Railway's DATABASE_URL is already direct.
     url:
       process.env["DIRECT_URL"] ||
+      process.env["DATABASE_URL_UNPOOLED"] ||
       (process.env["RAILWAY_ENVIRONMENT_NAME"]
         ? process.env["DATABASE_URL"]
         : undefined),
