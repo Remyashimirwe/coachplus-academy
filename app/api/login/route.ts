@@ -84,7 +84,7 @@ async function handlePOST(request: Request) {
       // 60s would bypass verification entirely.
       return NextResponse.json({
         requiresVerification: true,
-        email: user.email,
+        email: user.email, 
         message: `We sent a 6-digit code to ${user.email}. Enter it to finish signing in.`,
       });
     }
