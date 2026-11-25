@@ -64,6 +64,11 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  // Temporary public maintenance screen. Keep the API available for the mobile app.
+  if (requestPath !== "/maintenance") {
+    return NextResponse.rewrite(new URL("/maintenance", request.url));
+  }
+
   const prefix = requestPath.match(/^\/(en|fr)(?=\/|$)/)?.[1];
   const locale: Locale = isLocale(prefix)
     ? prefix
