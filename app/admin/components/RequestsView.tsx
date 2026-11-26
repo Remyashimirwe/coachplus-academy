@@ -12,6 +12,59 @@ import {
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import RequestDetailModal from "./RequestDetailModal";
+import {
+  getCells,
+  getDistricts,
+  getProvinces,
+  getSectors,
+  getVillages,
+} from "rwanda-locations";
+
+type LocationField = "country" | "province" | "district" | "sector" | "cell" | "village";
+type LocationFilters = Record<LocationField, string>;
+
+const LOCATION_FIELDS: { id: LocationField; label: string }[] = [
+  { id: "country", label: "Country" },
+  { id: "province", label: "Province" },
+  { id: "district", label: "District" },
+  { id: "sector", label: "Sector" },
+  { id: "cell", label: "Cell" },
+  { id: "village", label: "Village" },
+];
+
+const EMPTY_LOCATION_FILTERS: LocationFilters = {
+  country: "",
+  province: "",
+  district: "",
+  sector: "",
+  cell: "",
+  village: "",
+};
+
+function normalizeLocation(value: unknown) {
+  return String(value ?? "").trim().toLocaleLowerCase();
+}
+
+function rwandaLocationOptions(field: LocationField, filters: LocationFilters): string[] {
+  if (field === "country") return ["Rwanda"];
+  if (filters.country && normalizeLocation(filters.country) !== "rwanda") return [];
+  try {
+    switch (field) {
+      case "province": return getProvinces();
+      case "district": return filters.province ? getDistricts(filters.province) : [];
+      case "sector": return filters.province && filters.district ? getSectors(filters.province, filters.district) : [];
+      case "cell": return filters.province && filters.district && filters.sector
+        ? getCells(filters.province, filters.district, filters.sector)
+        : [];
+      case "village": return filters.province && filters.district && filters.sector && filters.cell
+        ? getVillages(filters.province, filters.district, filters.sector, filters.cell)
+        : [];
+      default: return [];
+    }
+  } catch {
+    return [];
+  }
+}
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-amber-100 text-amber-700",
@@ -36,6 +89,7 @@ export default function RequestsView({ requests, teachers }: any) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
+  const [locationFilters, setLocationFilters] = useState<LocationFilters>(EMPTY_LOCATION_FILTERS);
 
   const selectedRequest = items.find((r) => r.id === selectedId) || null;
 
@@ -65,6 +119,32 @@ export default function RequestsView({ requests, teachers }: any) {
     return Array.from(set).sort();
   }, [teachers]);
 
+  const locationOptions = useMemo(() => {
+    return Object.fromEntries(LOCATION_FIELDS.map(({ id }) => {
+      const existingValues = items
+        .filter((request) => LOCATION_FIELDS.every(({ id: otherField }) =>
+          otherField === id || !locationFilters[otherField] ||
+          normalizeLocation(request[otherField]) === normalizeLocation(locationFilters[otherField]),
+        ))
+        .map((request) => String(request[id] ?? "").trim())
+        .filter(Boolean);
+      const unique = new Map<string, string>();
+      [...rwandaLocationOptions(id, locationFilters), ...existingValues].forEach((value) => {
+        if (!unique.has(normalizeLocation(value))) unique.set(normalizeLocation(value), value);
+      });
+      return [id, Array.from(unique.values()).sort((a, b) => a.localeCompare(b))];
+    })) as Record<LocationField, string[]>;
+  }, [items, locationFilters]);
+
+  function updateLocationFilter(field: LocationField, value: string) {
+    const fieldIndex = LOCATION_FIELDS.findIndex(({ id }) => id === field);
+    setLocationFilters((current) => {
+      const next = { ...current, [field]: value };
+      LOCATION_FIELDS.slice(fieldIndex + 1).forEach(({ id }) => { next[id] = ""; });
+      return next;
+    });
+  }
+
   const filteredItems = useMemo(() => {
     return items.filter((r) => {
       const matchesFilter = filter === "all" || r.status === filter || (filter === "new" && !r.status);
@@ -75,16 +155,29 @@ export default function RequestsView({ requests, teachers }: any) {
         r.email?.toLowerCase().includes(q) ||
         r.subjects?.toLowerCase().includes(q);
       const matchesSubject = !subjectFilter || r.subjects?.toLowerCase().includes(subjectFilter.toLowerCase());
-      return matchesFilter && matchesSearch && matchesSubject;
+      const matchesLocation = LOCATION_FIELDS.every(({ id }) =>
+        !locationFilters[id] || normalizeLocation(r[id]) === normalizeLocation(locationFilters[id]),
+      );
+      return matchesFilter && matchesSearch && matchesSubject && matchesLocation;
     });
-  }, [items, filter, search, subjectFilter]);
+  }, [items, filter, search, subjectFilter, locationFilters]);
 
   function handleUpdated(id: number, changes: any) {
     setItems((prev) => prev.map((r) => (r.id === id ? { ...r, ...changes } : r)));
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-900 sm:text-xl">Teacher Requests</h1>
+          <p className="text-xs text-slate-500">Review families looking for a teacher and narrow requests by location.</p>
+        </div>
+        <p className="text-xs font-medium text-slate-500">
+          Showing <span className="font-semibold text-slate-800">{filteredItems.length}</span> of {items.length} requests
+        </p>
+      </div>
+
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat, i) => (
           <div key={i} className="rounded-3xl bg-white p-5 shadow-sm border border-slate-200">
@@ -101,55 +194,95 @@ export default function RequestsView({ requests, teachers }: any) {
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className={`px-4 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-tight transition-all ${
-                filter === f.id
-                  ? "bg-[#0f172a] text-white shadow-lg shadow-slate-200"
-                  : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Request status</p>
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFilter(f.id)}
+                className={`rounded-xl px-3.5 py-2 text-[11px] font-semibold transition-all ${
+                  filter === f.id
+                    ? "bg-[#0f172a] text-white shadow-sm"
+                    : "border border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
+                }`}
+              >
+                {f.label}
+                <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] tabular-nums ${filter === f.id ? "bg-white/15" : "bg-white text-slate-500"}`}>
+                  {f.id === "all" ? items.length : items.filter((request) => (f.id === "new" ? !request.status || request.status === "new" : request.status === f.id)).length}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
+
+        <div className="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-[minmax(0,1fr)_220px]">
+          <label className="relative block">
+            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
             <input
-              type="text"
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, email, subject..."
-              className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900 transition-all"
+              placeholder="Search by name, email, or subject"
+              aria-label="Search teacher requests"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20"
             />
-          </div>
-          <select
-            value={subjectFilter}
-            onChange={(e) => setSubjectFilter(e.target.value)}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900 transition-all"
-          >
-            <option value="">All subjects</option>
-            {subjectOptions.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          </label>
+          <label>
+            <span className="sr-only">Filter by subject</span>
+            <select
+              value={subjectFilter}
+              onChange={(e) => setSubjectFilter(e.target.value)}
+              aria-label="Filter by subject"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20"
+            >
+              <option value="">All subjects</option>
+              {subjectOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
         </div>
-      </div>
+
+        <div className="border-t border-slate-100 pt-4">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Location</p>
+            {LOCATION_FIELDS.some(({ id }) => locationFilters[id]) && (
+              <button type="button" onClick={() => setLocationFilters(EMPTY_LOCATION_FILTERS)} className="text-[11px] font-semibold text-[#E91E63] hover:underline">
+                Clear location filters
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+            {LOCATION_FIELDS.map(({ id, label }) => (
+              <label key={id} className="min-w-0">
+                <span className="sr-only">Filter by {label}</span>
+                <select
+                  value={locationFilters[id]}
+                  onChange={(event) => updateLocationFilter(id, event.target.value)}
+                  aria-label={`Filter by ${label}`}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20"
+                >
+                  <option value="">All {id === "country" ? "countries" : `${label.toLowerCase()}s`}</option>
+                  {locationOptions[id].map((value) => <option key={value} value={value}>{value}</option>)}
+                </select>
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] text-slate-400">Choose any level or combine locations to narrow the requests.</p>
+        </div>
+      </section>
 
       <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px] text-left">
+          <table className="w-full min-w-[1120px] text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70">
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Student / Parent</th>
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Grade</th>
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Learning Mode</th>
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Preferred Schedule</th>
+                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Location</th>
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Courses &amp; Topics</th>
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Status</th>
                 <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500 text-right">Action</th>
@@ -174,6 +307,11 @@ export default function RequestsView({ requests, teachers }: any) {
                   <td className="px-5 py-3.5 text-[12px] text-slate-600 whitespace-nowrap">{request.learningMode || "—"}</td>
                   <td className="px-5 py-3.5 text-[11px] text-slate-500 max-w-[220px] truncate">
                     {request.preferredTime || request.preferredDays || "—"}
+                  </td>
+                  <td className="px-5 py-3.5 text-[11px] text-slate-600 max-w-[220px]">
+                    <p className="line-clamp-2" title={[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}>
+                      {[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}
+                    </p>
                   </td>
                   <td className="px-5 py-3.5 text-[11px] text-slate-600 max-w-[240px] truncate">
                     {request.subjects || "Not specified"}
@@ -220,7 +358,7 @@ export default function RequestsView({ requests, teachers }: any) {
               ))}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-16 text-center">
+                  <td colSpan={8} className="px-5 py-16 text-center">
                     <p className="text-slate-400 text-sm italic">No requests found.</p>
                   </td>
                 </tr>
