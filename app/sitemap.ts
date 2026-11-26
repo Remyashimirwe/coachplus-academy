@@ -9,7 +9,6 @@ const publicPaths = [
   "/why-choose-us",
   "/request",
   "/become-a-teacher",
-  "/application-status",
   "/privacy-policy",
   "/terms-of-service",
   "/cookie-policy",

@@ -2,12 +2,17 @@ import ApplicationStatusLookup from "./ApplicationStatusLookup";
 import Footer from "../components/Footer";
 import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "Application Status",
-  description:
-    "Track your CoachPlus Academy teacher application from receipt through shortlisting, assessment and your first student match.",
-  path: "/application-status",
-});
+export const metadata = {
+  ...pageMetadata({
+    title: "Application Status",
+    description:
+      "Track your CoachPlus Academy teacher application from receipt through shortlisting, assessment and your first student match.",
+    path: "/application-status",
+  }),
+  // This page only lets applicants look up a private application status; it
+  // is not a search landing page and should not appear in Google's index.
+  robots: { index: false, follow: false },
+};
 
 export default function ApplicationStatusPage() {
   return (
