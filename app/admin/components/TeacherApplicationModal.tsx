@@ -692,6 +692,53 @@ export default function TeacherApplicationModal({
             )}
           </div>
 
+          <section className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+            <h4 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Personal &amp; Previous Experience</h4>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Email Address</p>
+                <p className="break-words text-[13px] text-slate-700">{app.email || "Not provided"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Phone Number</p>
+                <p className="text-[13px] text-slate-700">{app.phone || "Not provided"}</p>
+              </div>
+              <div className="sm:col-span-2 xl:col-span-1">
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Address</p>
+                <p className="break-words text-[13px] text-slate-700">
+                  {[app.village, app.cell, app.sector, app.district, app.province, app.country].filter(Boolean).join(", ") || "Not provided"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Previous School / Organization</p>
+                <p className="break-words text-[13px] text-slate-700">{app.previousOrg || "Not provided"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Previous Teaching Position</p>
+                <p className="break-words text-[13px] text-slate-700">{app.previousPos || "Not provided"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Portfolio / Sample Work</p>
+                {app.portfolioUrl ? (
+                  <a href={app.portfolioUrl} target="_blank" rel="noopener noreferrer" className="break-all text-[13px] text-indigo-600 underline">{app.portfolioUrl}</a>
+                ) : <p className="text-[13px] text-slate-700">Not provided</p>}
+              </div>
+              <div className="sm:col-span-2 xl:col-span-3">
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Social Profiles / Website</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
+                  {([['LinkedIn', app.linkedin], ['Instagram', app.instagram], ['YouTube', app.youtube], ['Other', app.otherSocial]] as const).map(([label, url]) => url ? (
+                    <a key={label} href={url} target="_blank" rel="noopener noreferrer" className="break-all text-indigo-600 underline">{label}: {url}</a>
+                  ) : null)}
+                  {!app.linkedin && !app.instagram && !app.youtube && !app.otherSocial && <span className="text-slate-500">None provided</span>}
+                </div>
+              </div>
+              <div className="sm:col-span-2 xl:col-span-3">
+                <p className="text-[10px] font-semibold uppercase text-slate-400">Teacher Partner Terms &amp; Privacy Policy</p>
+                <p className="text-[13px] font-semibold text-slate-700">{app.agreedToTerms ? "Accepted" : "Not accepted"}</p>
+              </div>
+            </div>
+          </section>
+
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-8">
             {/* Education & Experience */}
             <div className="space-y-4">
@@ -750,7 +797,7 @@ export default function TeacherApplicationModal({
               <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 h-full">
                 <div>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Methods</p>
-                  <p className="text-[11px] text-slate-600 line-clamp-3" title={app.methods}>{app.methods}</p>
+                  <p className="text-[11px] text-slate-600 whitespace-pre-wrap break-words">{app.methods}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Online Teaching</p>
@@ -759,6 +806,10 @@ export default function TeacherApplicationModal({
                 <div>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Online Platforms</p>
                   <p className="text-[11px] text-slate-600 break-words">{app.onlinePlatforms || "None specified"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 font-semibold uppercase">Keeping Students Engaged</p>
+                  <p className="text-[11px] text-slate-600 whitespace-pre-wrap break-words">{app.engagement || "Not provided"}</p>
                 </div>
               </div>
             </div>
@@ -799,7 +850,11 @@ export default function TeacherApplicationModal({
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold text-indigo-500 uppercase mb-1">Why CoachPlus Academy?</p>
-                  <p className="text-[13px] text-slate-600 leading-relaxed break-words">{app.whyTeach}</p>
+                  <p className="text-[13px] text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{app.whyTeach}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold text-indigo-500 uppercase mb-1">Why Should We Select You?</p>
+                  <p className="text-[13px] text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{app.whySelect || "Not provided"}</p>
                 </div>
               </div>
             </div>
@@ -812,11 +867,11 @@ export default function TeacherApplicationModal({
               <div className="bg-slate-50 p-5 sm:p-6 rounded-3xl border border-slate-100 space-y-4 h-full">
                 <div>
                   <p className="text-[10px] font-semibold text-rose-500 uppercase mb-1">Difficult Students</p>
-                  <p className="text-[13px] text-slate-600 leading-relaxed break-words">{app.difficultStudents}</p>
+                  <p className="text-[13px] text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{app.difficultStudents}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold text-rose-500 uppercase mb-1">Contribution</p>
-                  <p className="text-[13px] text-slate-600 leading-relaxed break-words">{app.contribution}</p>
+                  <p className="text-[13px] text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{app.contribution}</p>
                 </div>
               </div>
             </div>
@@ -836,7 +891,7 @@ export default function TeacherApplicationModal({
               {reviewDocuments.length > 0 ? (
                 reviewDocuments
                   .filter((doc: any) => {
-                    if (doc.kind !== "photo") return true;
+                    if (doc.kind !== "photo" || !documentsReuploadedAt) return true;
                     return Boolean(
                       documentsReuploadedAt &&
                       new Date(doc.createdAt).getTime() >= new Date(documentsReuploadedAt).getTime(),

@@ -14,6 +14,62 @@ import {
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/ToastProvider";
+import {
+  getCells,
+  getDistricts,
+  getProvinces,
+  getSectors,
+  getVillages,
+} from "rwanda-locations";
+
+type LocationField = "country" | "province" | "district" | "sector" | "cell" | "village";
+type LocationFilters = Record<LocationField, string>;
+
+const LOCATION_FIELDS: { id: LocationField; label: string }[] = [
+  { id: "country", label: "Country" },
+  { id: "province", label: "Province" },
+  { id: "district", label: "District" },
+  { id: "sector", label: "Sector" },
+  { id: "cell", label: "Cell" },
+  { id: "village", label: "Village" },
+];
+
+const EMPTY_LOCATION_FILTERS: LocationFilters = {
+  country: "",
+  province: "",
+  district: "",
+  sector: "",
+  cell: "",
+  village: "",
+};
+
+function normalizeLocation(value: unknown) {
+  return String(value ?? "").trim().toLocaleLowerCase();
+}
+
+function rwandaLocationOptions(field: LocationField, filters: LocationFilters): string[] {
+  if (field === "country") return ["Rwanda"];
+  if (filters.country && normalizeLocation(filters.country) !== "rwanda") return [];
+
+  try {
+    switch (field) {
+      case "province": return getProvinces();
+      case "district": return filters.province ? getDistricts(filters.province) : [];
+      case "sector": return filters.province && filters.district ? getSectors(filters.province, filters.district) : [];
+      case "cell": return filters.province && filters.district && filters.sector
+        ? getCells(filters.province, filters.district, filters.sector)
+        : [];
+      case "village": return filters.province && filters.district && filters.sector && filters.cell
+        ? getVillages(filters.province, filters.district, filters.sector, filters.cell)
+        : [];
+      default: return [];
+    }
+  } catch {
+    // Keep application-entered locations available if older values do not
+    // match a name in the current Rwanda administrative data.
+    return [];
+  }
+}
 
 function documentUrl(docId: number) {
   return `/api/admin/teacher-applications/documents/${docId}`;
@@ -52,6 +108,12 @@ const SORT_OPTIONS = [
   { id: "oldest", label: "Oldest first" },
   { id: "status", label: "By status" },
   { id: "name", label: "By name" },
+  { id: "country", label: "By country" },
+  { id: "province", label: "By province" },
+  { id: "district", label: "By district" },
+  { id: "sector", label: "By sector" },
+  { id: "cell", label: "By cell" },
+  { id: "village", label: "By village" },
 ];
 
 export default function TeachersView({ teacherApplications }: any) {
@@ -62,6 +124,7 @@ export default function TeachersView({ teacherApplications }: any) {
   const [subjectFilter, setSubjectFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [locationFilters, setLocationFilters] = useState<LocationFilters>(EMPTY_LOCATION_FILTERS);
   const toast = useToast();
 
 
@@ -77,6 +140,33 @@ export default function TeachersView({ teacherApplications }: any) {
     return Array.from(set).sort();
   }, [applications]);
 
+  const locationOptions = useMemo(() => {
+    return Object.fromEntries(LOCATION_FIELDS.map(({ id }) => {
+      const existingValues = applications
+        .filter((application) => LOCATION_FIELDS.every(({ id: otherField }) =>
+          otherField === id || !locationFilters[otherField] ||
+          normalizeLocation(application[otherField]) === normalizeLocation(locationFilters[otherField]),
+        ))
+        .map((application) => String(application[id] ?? "").trim())
+        .filter(Boolean);
+      const canonicalValues = rwandaLocationOptions(id, locationFilters);
+      const unique = new Map<string, string>();
+      [...canonicalValues, ...existingValues].forEach((value) => {
+        if (!unique.has(normalizeLocation(value))) unique.set(normalizeLocation(value), value);
+      });
+      return [id, Array.from(unique.values()).sort((a, b) => a.localeCompare(b))];
+    })) as Record<LocationField, string[]>;
+  }, [applications, locationFilters]);
+
+  function updateLocationFilter(field: LocationField, value: string) {
+    const fieldIndex = LOCATION_FIELDS.findIndex(({ id }) => id === field);
+    setLocationFilters((current) => {
+      const next = { ...current, [field]: value };
+      LOCATION_FIELDS.slice(fieldIndex + 1).forEach(({ id }) => { next[id] = ""; });
+      return next;
+    });
+  }
+
   const filteredApplications = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = applications.filter((a) => {
@@ -85,7 +175,10 @@ export default function TeachersView({ teacherApplications }: any) {
         !q || String(a.fullName ?? "").toLowerCase().includes(q) || String(a.email ?? "").toLowerCase().includes(q);
       const matchesSubject =
         !subjectFilter || String(a.subjects || "").toLowerCase().includes(subjectFilter.toLowerCase());
-      return matchesStatus && matchesSearch && matchesSubject;
+      const matchesLocation = LOCATION_FIELDS.every(({ id }) =>
+        !locationFilters[id] || normalizeLocation(a[id]) === normalizeLocation(locationFilters[id]),
+      );
+      return matchesStatus && matchesSearch && matchesSubject && matchesLocation;
     });
 
     const statusOrder: Record<string, number> = {
@@ -104,12 +197,19 @@ export default function TeachersView({ teacherApplications }: any) {
           return (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3);
         case "name":
           return a.fullName.localeCompare(b.fullName);
+        case "country":
+        case "province":
+        case "district":
+        case "sector":
+        case "cell":
+        case "village":
+          return String(a[sortBy] ?? "").localeCompare(String(b[sortBy] ?? ""), undefined, { sensitivity: "base" });
         case "newest":
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [applications, search, subjectFilter, statusFilter, sortBy]);
+  }, [applications, search, subjectFilter, statusFilter, sortBy, locationFilters]);
 
   const stats = useMemo(() => {
     const pending = applications.filter((a) => a.status === "pending").length;
@@ -225,6 +325,39 @@ export default function TeachersView({ teacherApplications }: any) {
             </button>
           ))}
           </div>
+        </div>
+        <div>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Filter by location</p>
+            {LOCATION_FIELDS.some(({ id }) => locationFilters[id]) && (
+              <button
+                type="button"
+                onClick={() => setLocationFilters(EMPTY_LOCATION_FILTERS)}
+                className="text-[11px] font-semibold text-[#E91E63] hover:underline"
+              >
+                Clear location filters
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+            {LOCATION_FIELDS.map(({ id, label }) => (
+              <label key={id} className="min-w-0">
+                <span className="sr-only">Filter by {label}</span>
+                <select
+                  value={locationFilters[id]}
+                  onChange={(event) => updateLocationFilter(id, event.target.value)}
+                  aria-label={`Filter by ${label}`}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
+                >
+                  <option value="">All {id === "country" ? "countries" : `${label.toLowerCase()}s`}</option>
+                  {locationOptions[id].map((value) => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+          <p className="mt-1.5 text-[10px] text-slate-400">Choose any location level, or combine levels to narrow the list.</p>
         </div>
         <div className="flex flex-col gap-2 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-medium text-slate-500">Showing <span className="font-semibold text-slate-800">{filteredApplications.length}</span> of {applications.length} applications</p>
