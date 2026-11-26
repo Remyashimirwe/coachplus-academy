@@ -24,8 +24,8 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   icons: {
-    icon: "/logo.svg",
-    shortcut: "/logo.svg",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
     apple: "/logo.png",
   },
   openGraph: {
