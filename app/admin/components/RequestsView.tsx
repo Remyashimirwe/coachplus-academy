@@ -284,12 +284,11 @@ export default function RequestsView({ requests, teachers }: any) {
 
       <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left">
+          <table className="w-full min-w-[680px] text-left">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Family</th>
-                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Learning request</th>
-                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Schedule &amp; location</th>
+                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Applicant</th>
+                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Contact</th>
                 <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Status</th>
                 <th className="px-4 py-2.5 text-right text-[9px] font-semibold uppercase tracking-wide text-slate-500">Actions</th>
               </tr>
@@ -304,20 +303,14 @@ export default function RequestsView({ requests, teachers }: any) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[13px] font-semibold text-slate-900 truncate">{request.parent_name}</p>
-                        <p className="max-w-[190px] truncate text-[11px] font-medium text-slate-600">{request.email}</p>
-                        <p className="text-[10px] text-slate-400">{new Date(request.created_at).toLocaleDateString()}</p>
+                        <p className="max-w-[240px] truncate text-[11px] font-medium text-slate-600">{request.subjects || "Subjects not specified"}</p>
+                        <p className="text-[10px] text-slate-400">Submitted {new Date(request.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="max-w-[260px] truncate text-[12px] font-semibold text-slate-700">{request.subjects || "Subjects not specified"}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-500">{[request.grade, request.learningMode].filter(Boolean).join(" · ") || "Grade or mode not specified"}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="max-w-[240px] truncate text-[11px] font-medium text-slate-600">{[request.preferredDays, request.preferredTime].filter(Boolean).join(" · ") || "Schedule not specified"}</p>
-                    <p className="mt-0.5 max-w-[240px] truncate text-[10px] text-slate-400" title={[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}>
-                      {[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}
-                    </p>
+                    <p className="max-w-[240px] truncate text-[11px] font-semibold text-slate-600">{request.email}</p>
+                    {request.phone && <p className="mt-0.5 max-w-[200px] truncate text-[11px] text-slate-400">{request.phone}</p>}
                   </td>
                   <td className="px-4 py-3">
                     <span
