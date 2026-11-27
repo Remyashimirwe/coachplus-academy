@@ -75,6 +75,7 @@ type RequestDetailModalProps = {
   teachers?: { id: number; name: string; email: string; phone?: string; subjects?: string }[];
   onClose: () => void;
   onUpdated: (id: number, changes: {
+    embedded?: boolean;
     status?: string;
     studentId?: number;
     student?: {
