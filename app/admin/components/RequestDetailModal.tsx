@@ -55,22 +55,45 @@ function SectionTitle({ icon, children, color = "text-slate-400" }: { icon: Reac
 type RequestDetailModalProps = {
   request: {
     id: number;
-    parentName?: string;
-    email?: string;
+    parent_name: string;
+    email: string;
     status?: string;
     grade?: string;
     learningMode?: string;
     programTitle?: string;
     subjects?: string;
+    details?: string;
     phone?: string;
     phone2?: string;
     preferredDays?: string;
     preferredTime?: string;
     startDate?: string;
-    createdAt?: Date;
-    parent_name?: string;
+    created_at?: string | Date;
     location?: string;
-    [key: string]: unknown;
+    country?: string;
+    province?: string;
+    district?: string;
+    sector?: string;
+    cell?: string;
+    village?: string;
+    idPassport?: string;
+    studentId?: number | null;
+    student?: {
+      id?: number;
+      user?: { name?: string; email?: string };
+      phone?: string;
+      program?: string;
+      subjects?: string;
+      learningMode?: string;
+      preferredDays?: string;
+      preferredTime?: string;
+      startDate?: string;
+      teacher?: { user?: { name?: string } } | null;
+    } | null;
+    assignedTeacher?: {
+      id: number;
+      user: { name: string; email: string };
+    } | null;
   };
   teachers?: { id: number; name: string; email: string; phone?: string; subjects?: string }[];
   onClose: () => void;
@@ -83,6 +106,10 @@ type RequestDetailModalProps = {
       name: string;
       email: string;
     };
+    assignedTeacher?: {
+      id: number;
+      user: { name: string; email: string };
+    } | null;
   }) => void;
   embedded?: boolean;
 };
@@ -300,7 +327,7 @@ export default function RequestDetailModal({
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 sm:gap-4 bg-white/90 backdrop-blur px-6 sm:px-10 pt-6 sm:pt-8 pb-6 border-b border-slate-100">
           <div className="flex items-center gap-4 sm:gap-5 min-w-0">
             <div className="size-14 sm:size-16 rounded-2xl bg-gradient-to-tr from-[#E91E63] to-[#FF5733] text-white flex items-center justify-center font-semibold text-base sm:text-lg shrink-0">
-              {request.parent_name.charAt(0)}
+              {request.parent_name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
               <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{request.parent_name}</h3>
@@ -317,13 +344,13 @@ export default function RequestDetailModal({
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <span
                   className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${
-                    STATUS_STYLES[request.status] || "bg-slate-100 text-slate-600"
+                    STATUS_STYLES[request.status || "new"] || "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {request.status}
                 </span>
                 <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
-                  <FiClock className="size-3" /> Submitted {new Date(request.created_at).toLocaleString()}
+                  <FiClock className="size-3" /> Submitted {request.created_at ? new Date(request.created_at).toLocaleString() : "—"}
                 </span>
               </div>
             </div>

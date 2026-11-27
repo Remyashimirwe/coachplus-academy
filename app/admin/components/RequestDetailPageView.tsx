@@ -12,12 +12,7 @@ type TeacherOption = {
   subjects?: string;
 };
 
-type RequestData = {
-  id: number;
-  parent_name: string;
-  email: string;
-  [key: string]: unknown;
-};
+type RequestData = React.ComponentProps<typeof RequestDetailModal>["request"];
 
 export default function RequestDetailPageView({
   request: initialRequest,
