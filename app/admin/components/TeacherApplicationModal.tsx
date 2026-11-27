@@ -614,7 +614,7 @@ export default function TeacherApplicationModal({
               )}
             </div>
             <div className="min-w-0">
-              <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{app.fullName}</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate" title={app.fullName}>{app.fullName}</h3>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                 <p className="text-[13px] font-semibold text-slate-500 flex items-center gap-1.5 min-w-0">
                   <FiMail className="text-indigo-500 shrink-0" /> <span className="truncate">{app.email}</span>
@@ -702,6 +702,12 @@ export default function TeacherApplicationModal({
           <section className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
             <h4 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Personal &amp; Previous Experience</h4>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {app.fullName.length > 32 && (
+                <div className="sm:col-span-2 xl:col-span-3">
+                  <p className="text-[10px] font-semibold uppercase text-slate-400">Full applicant name</p>
+                  <p className="break-words text-[13px] text-slate-700">{app.fullName}</p>
+                </div>
+              )}
               <div>
                 <p className="text-[10px] font-semibold uppercase text-slate-400">Email Address</p>
                 <p className="break-words text-[13px] text-slate-700">{app.email || "Not provided"}</p>

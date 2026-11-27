@@ -459,7 +459,7 @@ export default function TeachersView({ teacherApplications }: any) {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[13px] font-semibold text-slate-900 truncate">{app.fullName}</p>
+                              <p className="max-w-[180px] truncate text-xs font-semibold text-slate-900" title={app.fullName}>{app.fullName}</p>
                               <p className="text-[11px] text-slate-400">
                                 {new Date(app.created_at).toLocaleDateString()}
                               </p>

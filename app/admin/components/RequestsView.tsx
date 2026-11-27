@@ -396,7 +396,7 @@ export default function RequestsView({ requests, teachers }: RequestsViewProps) 
                         {String(request.parent_name || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-semibold text-slate-900">{request.parent_name}</p>
+                        <p className="max-w-[220px] truncate text-xs font-semibold text-slate-900" title={request.parent_name}>{request.parent_name}</p>
                         <p className="mt-0.5 max-w-[320px] truncate text-[11px] text-slate-500" title={[request.programTitle, request.grade, request.learningMode].filter(Boolean).join(" · ") || "Tutoring request"}>
                           {[request.programTitle || request.grade, request.learningMode].filter(Boolean).join(" · ") || "Tutoring request"}
                         </p>

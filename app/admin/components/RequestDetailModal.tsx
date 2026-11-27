@@ -330,7 +330,7 @@ export default function RequestDetailModal({
               {request.parent_name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{request.parent_name}</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate" title={request.parent_name}>{request.parent_name}</h3>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-slate-500">
                 <p className="flex items-center gap-1.5 truncate">
                   <FiMail className="text-indigo-500 shrink-0" /> <span className="truncate">{request.email}</span>
