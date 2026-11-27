@@ -66,10 +66,12 @@ export async function sendCustomApplicationEmail({
   to,
   subject,
   body,
+  name,
 }: {
   to: string;
   subject: string;
   body: string;
+  name?: string;
 }) {
   const client = getResendClient();
   if (!client) {
@@ -80,11 +82,14 @@ export async function sendCustomApplicationEmail({
     const safeBody = escapeHtml(body)
       .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#E91E63;text-decoration:underline;">$1</a>')
       .replace(/\r?\n/g, "<br />");
+    const greeting = name?.trim()
+      ? `<p style="margin:0 0 16px 0;">Dear ${escapeHtml(name.trim())},</p>`
+      : "";
     const { error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject: subject.trim(),
-      html: renderEmail({ bodyHtml: `<div>${safeBody}</div>` }),
+      html: renderEmail({ bodyHtml: `${greeting}<div>${safeBody}</div>` }),
     });
     if (error) {
       console.error("Failed to send edited teacher application email:", error);

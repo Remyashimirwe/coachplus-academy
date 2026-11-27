@@ -60,6 +60,7 @@ async function handlePOST(request: Request) {
       to: recipient.email,
       subject,
       body: message,
+      name: "parentName" in recipient ? recipient.parentName : recipient.fullName,
     })));
     for (const result of results) result.success ? sent++ : failed++;
   }
