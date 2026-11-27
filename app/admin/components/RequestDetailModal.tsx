@@ -12,7 +12,6 @@ import {
   FiAlertCircle,
   FiLoader,
   FiClock,
-  FiCreditCard,
   FiThumbsUp,
   FiUserCheck,
   FiAward,
@@ -22,8 +21,8 @@ import {
   FiCopy,
   FiCheck,
   FiStar,
-  FiCalendar,
   FiUser,
+  FiArrowLeft,
 } from "react-icons/fi";
 import { scoreTeacherForStudent, matchLabel } from "@/app/lib/matching";
 import { useToast } from "@/app/components/ToastProvider";
@@ -58,11 +57,13 @@ export default function RequestDetailModal({
   teachers,
   onClose,
   onUpdated,
+  embedded = false,
 }: {
   request: any;
   teachers?: { id: number; name: string; email: string; phone?: string; subjects?: string }[];
   onClose: () => void;
   onUpdated: (id: number, changes: any) => void;
+  embedded?: boolean;
 }) {
   const [message, setMessage] = useState("");
   const toast = useToast();
@@ -79,6 +80,7 @@ export default function RequestDetailModal({
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    if (embedded) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -88,7 +90,7 @@ export default function RequestDetailModal({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, [onClose, embedded]);
 
   async function handleSendMessage() {
     const trimmed = message.trim();
@@ -250,12 +252,20 @@ export default function RequestDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-6 animate-in fade-in duration-200"
-      onClick={onClose}
+      className={
+        embedded
+          ? "w-full"
+          : "fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-6 animate-in fade-in duration-200"
+      }
+      onClick={embedded ? undefined : onClose}
     >
       <div
-        className="relative w-full sm:max-w-5xl max-h-[100dvh] sm:max-h-[92vh] overflow-y-auto bg-white sm:rounded-[32px] shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
+        className={
+          embedded
+            ? "relative w-full overflow-hidden bg-white rounded-[28px] border border-slate-200 shadow-sm"
+            : "relative w-full sm:max-w-5xl max-h-[100dvh] sm:max-h-[92vh] overflow-y-auto bg-white sm:rounded-[32px] shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
+        }
+        onClick={embedded ? undefined : (e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 sm:gap-4 bg-white/90 backdrop-blur px-6 sm:px-10 pt-6 sm:pt-8 pb-6 border-b border-slate-100">
@@ -298,13 +308,24 @@ export default function RequestDetailModal({
               <FiMail className="size-4" />
               <span className="hidden sm:inline">Email</span>
             </a>
-            <button
-              onClick={onClose}
-              className="p-2.5 rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all"
-              title="Close"
-            >
-              <FiX className="size-5" />
-            </button>
+            {embedded ? (
+              <button
+                onClick={onClose}
+                className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all"
+                title="Back to requests"
+              >
+                <FiArrowLeft className="size-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+            ) : (
+              <button
+                onClick={onClose}
+                className="p-2.5 rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all"
+                title="Close"
+              >
+                <FiX className="size-5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -438,7 +459,7 @@ export default function RequestDetailModal({
                 <div className="rounded-2xl p-4 border bg-emerald-50 border-emerald-100 text-emerald-700 space-y-3">
                   <p className="text-[13px] font-semibold flex items-start gap-2">
                     <FiAlertCircle className="shrink-0 mt-0.5" />
-                    The activation email couldn't be sent. Share this link with them manually so they can set their password:
+                    The activation email couldn&apos;t be sent. Share this link with them manually so they can set their password:
                   </p>
                   <div className="flex items-center gap-2 bg-white rounded-xl border border-emerald-200 p-2 pl-3">
                     <span className="text-xs text-slate-500 truncate flex-1">{approveInviteUrl}</span>

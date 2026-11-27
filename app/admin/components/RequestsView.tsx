@@ -12,9 +12,10 @@ import {
   FiLoader,
   FiUserCheck,
   FiAlertCircle,
+  FiEye,
 } from "react-icons/fi";
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import RequestDetailModal from "./RequestDetailModal";
 import BulkEmailModal from "./BulkEmailModal";
 import { useToast } from "@/app/components/ToastProvider";
 import {
@@ -90,7 +91,6 @@ const FILTERS = [
 
 export default function RequestsView({ requests, teachers }: any) {
   const [items, setItems] = useState<any[]>(requests);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
@@ -99,8 +99,6 @@ export default function RequestsView({ requests, teachers }: any) {
   const [rowAction, setRowAction] = useState<Record<number, string | null>>({});
   const [rowError, setRowError] = useState<Record<number, string | undefined>>({});
   const toast = useToast();
-
-  const selectedRequest = items.find((r) => r.id === selectedId) || null;
 
   const stats = useMemo(() => {
     const newCount = items.filter((r) => r.status === "new").length;
@@ -358,13 +356,13 @@ export default function RequestsView({ requests, teachers }: any) {
 
       <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left">
+          <table className="w-full min-w-[1040px] text-left">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="w-[32%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Applicant</th>
-                <th className="w-[26%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Contact</th>
-                <th className="w-[14%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Status</th>
-                <th className="w-[28%] px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-slate-500">Actions</th>
+                <th className="w-[28%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Applicant</th>
+                <th className="w-[24%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Contact</th>
+                <th className="w-[13%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Status</th>
+                <th className="w-[35%] px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -459,12 +457,14 @@ export default function RequestsView({ requests, teachers }: any) {
                           {rowAction[request.id] === "resolved" ? <FiLoader className="size-3.5 animate-spin" /> : <FiCheckCircle className="size-3.5" />}
                         </button>
                       )}
-                      <button
-                        onClick={() => setSelectedId(request.id)}
-                        className="ml-1 px-3 py-1.5 rounded-lg bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-all whitespace-nowrap"
+                      <Link
+                        href={`/admin/requests/${request.id}`}
+                        title="View all details"
+                        className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-[#0f172a] px-3 py-1.5 text-[11px] font-semibold text-white transition-all hover:bg-[#E91E63] whitespace-nowrap"
                       >
-                        View
-                      </button>
+                        <FiEye className="size-3.5" />
+                        View all details
+                      </Link>
                     </div>
                   </td>
                 </tr>
@@ -481,14 +481,6 @@ export default function RequestsView({ requests, teachers }: any) {
         </div>
       </div>
 
-      {selectedRequest && (
-        <RequestDetailModal
-          request={selectedRequest}
-          teachers={teachers || []}
-          onClose={() => setSelectedId(null)}
-          onUpdated={handleUpdated}
-        />
-      )}
       {bulkEmailOpen && (
         <BulkEmailModal
           recipientType="requests"
