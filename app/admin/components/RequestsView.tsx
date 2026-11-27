@@ -9,10 +9,14 @@ import {
   FiSend,
   FiCheckCircle,
   FiAward,
+  FiLoader,
+  FiUserCheck,
+  FiAlertCircle,
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import RequestDetailModal from "./RequestDetailModal";
 import BulkEmailModal from "./BulkEmailModal";
+import { useToast } from "@/app/components/ToastProvider";
 import {
   getCells,
   getDistricts,
@@ -92,6 +96,9 @@ export default function RequestsView({ requests, teachers }: any) {
   const [subjectFilter, setSubjectFilter] = useState("");
   const [locationFilters, setLocationFilters] = useState<LocationFilters>(EMPTY_LOCATION_FILTERS);
   const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
+  const [rowAction, setRowAction] = useState<Record<number, string | null>>({});
+  const [rowError, setRowError] = useState<Record<number, string | undefined>>({});
+  const toast = useToast();
 
   const selectedRequest = items.find((r) => r.id === selectedId) || null;
 
@@ -166,6 +173,73 @@ export default function RequestsView({ requests, teachers }: any) {
 
   function handleUpdated(id: number, changes: any) {
     setItems((prev) => prev.map((r) => (r.id === id ? { ...r, ...changes } : r)));
+  }
+
+  async function handleQuickStatus(id: number, status: "contacted" | "resolved") {
+    if (rowAction[id]) return;
+    setRowAction((prev) => ({ ...prev, [id]: status }));
+    setRowError((prev) => ({ ...prev, [id]: undefined }));
+    try {
+      const res = await fetch(`/api/admin/requests/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        handleUpdated(id, { status: data.status || status });
+        toast.success(data.message || `Request marked ${status}.`);
+      } else {
+        const message = data.message || "Couldn't update the request status.";
+        setRowError((prev) => ({ ...prev, [id]: message }));
+        toast.error(message);
+      }
+    } catch {
+      const message = "Couldn't reach the server. Check your connection and try again.";
+      setRowError((prev) => ({ ...prev, [id]: message }));
+      toast.error(message);
+    } finally {
+      setRowAction((prev) => ({ ...prev, [id]: null }));
+    }
+  }
+
+  async function handleQuickApprove(request: { id: number; parent_name?: string; studentId?: number | null; status?: string }) {
+    if (rowAction[request.id]) return;
+    if (!confirm(`Approve ${request.parent_name}'s request? A student account will be created and an activation email will be sent.`)) return;
+
+    setRowAction((prev) => ({ ...prev, [request.id]: "approve" }));
+    setRowError((prev) => ({ ...prev, [request.id]: undefined }));
+    try {
+      const res = await fetch(`/api/admin/requests/${request.id}/approve`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        handleUpdated(request.id, {
+          status: data.status || "approved",
+          studentId: data.student?.id,
+          student: data.student,
+        });
+        if (data.inviteUrl) {
+          try {
+            await navigator.clipboard.writeText(data.inviteUrl);
+            toast.success("Request approved. The activation email couldn't be sent, so the invite link was copied to your clipboard.");
+          } catch {
+            toast.success(`Request approved. Share this invite link manually: ${data.inviteUrl}`);
+          }
+        } else {
+          toast.success(data.message || "Request approved!");
+        }
+      } else {
+        const message = data.message || "Failed to approve request.";
+        setRowError((prev) => ({ ...prev, [request.id]: message }));
+        toast.error(message);
+      }
+    } catch {
+      const message = "Couldn't reach the server. Check your connection and try again.";
+      setRowError((prev) => ({ ...prev, [request.id]: message }));
+      toast.error(message);
+    } finally {
+      setRowAction((prev) => ({ ...prev, [request.id]: null }));
+    }
   }
 
   return (
@@ -284,13 +358,13 @@ export default function RequestsView({ requests, teachers }: any) {
 
       <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left">
+          <table className="w-full min-w-[900px] text-left">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="w-[38%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Applicant</th>
-                <th className="w-[30%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Contact</th>
+                <th className="w-[32%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Applicant</th>
+                <th className="w-[26%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Contact</th>
                 <th className="w-[14%] px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Status</th>
-                <th className="w-[18%] px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-slate-500">Actions</th>
+                <th className="w-[28%] px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -328,6 +402,9 @@ export default function RequestsView({ requests, teachers }: any) {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-1.5">
+                      {rowError[request.id] && (
+                        <FiAlertCircle className="size-4 shrink-0 text-rose-500" title={rowError[request.id]} />
+                      )}
                       <a
                         href={`mailto:${request.email}`}
                         title="Email family"
@@ -340,10 +417,47 @@ export default function RequestsView({ requests, teachers }: any) {
                         <a
                           href={`tel:${request.phone}`}
                           title="Call"
+                          aria-label={`Call ${request.parent_name}`}
                           className="p-2 rounded-lg bg-white text-slate-600 hover:text-[#E91E63] hover:bg-rose-50 border border-slate-200 transition-all"
                         >
                           <FiPhone className="size-3.5" />
                         </a>
+                      )}
+                      {(request.status === "new" || !request.status) && (
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStatus(request.id, "contacted")}
+                          disabled={rowAction[request.id] != null}
+                          title="Mark as contacted"
+                          aria-label={`Mark ${request.parent_name} as contacted`}
+                          className="p-2 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {rowAction[request.id] === "contacted" ? <FiLoader className="size-3.5 animate-spin" /> : <FiSend className="size-3.5" />}
+                        </button>
+                      )}
+                      {!request.studentId && request.status !== "resolved" && (
+                        <button
+                          type="button"
+                          onClick={() => handleQuickApprove(request)}
+                          disabled={rowAction[request.id] != null}
+                          title="Approve & invite"
+                          aria-label={`Approve ${request.parent_name}'s request`}
+                          className="p-2 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm shadow-emerald-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {rowAction[request.id] === "approve" ? <FiLoader className="size-3.5 animate-spin" /> : <FiUserCheck className="size-3.5" />}
+                        </button>
+                      )}
+                      {request.status !== "resolved" && (
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStatus(request.id, "resolved")}
+                          disabled={rowAction[request.id] != null}
+                          title="Mark as resolved"
+                          aria-label={`Mark ${request.parent_name}'s request as resolved`}
+                          className="p-2 rounded-lg bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {rowAction[request.id] === "resolved" ? <FiLoader className="size-3.5 animate-spin" /> : <FiCheckCircle className="size-3.5" />}
+                        </button>
                       )}
                       <button
                         onClick={() => setSelectedId(request.id)}
@@ -357,7 +471,7 @@ export default function RequestsView({ requests, teachers }: any) {
               ))}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-16 text-center">
+                  <td colSpan={4} className="px-5 py-16 text-center">
                     <p className="text-slate-400 text-sm italic">No requests found.</p>
                   </td>
                 </tr>
