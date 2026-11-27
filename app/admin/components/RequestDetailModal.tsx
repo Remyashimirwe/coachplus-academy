@@ -52,19 +52,47 @@ function SectionTitle({ icon, children, color = "text-slate-400" }: { icon: Reac
   );
 }
 
+type RequestDetailModalProps = {
+  request: {
+    id: number;
+    parentName?: string;
+    email?: string;
+    status?: string;
+    grade?: string;
+    learningMode?: string;
+    programTitle?: string;
+    subjects?: string;
+    phone?: string;
+    phone2?: string;
+    preferredDays?: string;
+    preferredTime?: string;
+    startDate?: string;
+    createdAt?: Date;
+    parent_name?: string;
+    location?: string;
+    [key: string]: unknown;
+  };
+  teachers?: { id: number; name: string; email: string; phone?: string; subjects?: string }[];
+  onClose: () => void;
+  onUpdated: (id: number, changes: {
+    status?: string;
+    studentId?: number;
+    student?: {
+      id: number;
+      name: string;
+      email: string;
+    };
+  }) => void;
+  embedded?: boolean;
+};
+
 export default function RequestDetailModal({
   request,
   teachers,
   onClose,
   onUpdated,
   embedded = false,
-}: {
-  request: any;
-  teachers?: { id: number; name: string; email: string; phone?: string; subjects?: string }[];
-  onClose: () => void;
-  onUpdated: (id: number, changes: any) => void;
-  embedded?: boolean;
-}) {
+}: RequestDetailModalProps) {
   const [message, setMessage] = useState("");
   const toast = useToast();
   const [sending, setSending] = useState(false);

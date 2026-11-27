@@ -89,7 +89,29 @@ const FILTERS = [
   { id: "resolved", label: "Resolved" },
 ];
 
-export default function RequestsView({ requests, teachers }: any) {
+type RequestsViewProps = {
+  requests: Array<{
+    id: number;
+    parent_name?: string;
+    email?: string;
+    phone?: string;
+    status?: string;
+    grade?: string;
+    learningMode?: string;
+    programTitle?: string;
+    subjects?: string;
+    [key: string]: unknown;
+  }>;
+  teachers?: Array<{
+    id: number;
+    name: string;
+    email: string;
+    phone?: string;
+    subjects?: string;
+  }>;
+};
+
+export default function RequestsView({ requests, teachers }: RequestsViewProps) {
   const [items, setItems] = useState<any[]>(requests);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
