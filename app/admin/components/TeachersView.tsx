@@ -10,6 +10,7 @@ import {
   FiInbox,
   FiCheckCircle,
   FiSearch,
+  FiMail,
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -472,6 +473,14 @@ export default function TeachersView({ teacherApplications }: any) {
                             {rowError[app.id] && (
                               <FiAlertCircle className="size-4 text-rose-500" title={rowError[app.id]} />
                             )}
+                            <a
+                              href={`mailto:${app.email}`}
+                              title={`Email ${app.fullName}`}
+                              aria-label={`Email ${app.fullName}`}
+                              className="p-2 rounded-lg bg-white text-slate-600 border border-slate-200 hover:bg-rose-50 hover:text-[#E91E63] transition-all"
+                            >
+                              <FiMail className="size-3.5" />
+                            </a>
                             {isPending && (
                               <>
                                 <button

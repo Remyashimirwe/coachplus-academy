@@ -275,50 +275,44 @@ export default function RequestsView({ requests, teachers }: any) {
 
       <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1120px] text-left">
-            <thead>
+          <table className="w-full min-w-[860px] text-left">
+            <thead className="bg-slate-50">
               <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Student / Parent</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Grade</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Learning Mode</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Preferred Schedule</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Location</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Courses &amp; Topics</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Status</th>
-                <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500 text-right">Action</th>
+                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Family</th>
+                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Learning request</th>
+                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Schedule &amp; location</th>
+                <th className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                <th className="px-4 py-2.5 text-right text-[9px] font-semibold uppercase tracking-wide text-slate-500">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-100">
               {filteredItems.map((request: any) => (
-                <tr key={request.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="px-5 py-3.5">
+                <tr key={request.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="size-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-[13px] font-semibold shrink-0">
-                        {request.parent_name.charAt(0)}
+                      <div className="size-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold shrink-0">
+                        {String(request.parent_name || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[13px] font-medium text-slate-900 truncate">{request.parent_name}</p>
-                        <p className="text-[11px] text-slate-500 truncate">{request.email}</p>
-                        {request.phone && <p className="text-[11px] text-slate-400 truncate">{request.phone}</p>}
+                        <p className="text-[13px] font-semibold text-slate-900 truncate">{request.parent_name}</p>
+                        <p className="max-w-[190px] truncate text-[11px] font-medium text-slate-600">{request.email}</p>
+                        <p className="text-[10px] text-slate-400">{new Date(request.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-[12px] text-slate-600 whitespace-nowrap">{request.grade || "—"}</td>
-                  <td className="px-5 py-3.5 text-[12px] text-slate-600 whitespace-nowrap">{request.learningMode || "—"}</td>
-                  <td className="px-5 py-3.5 text-[11px] text-slate-500 max-w-[220px] truncate">
-                    {request.preferredTime || request.preferredDays || "—"}
+                  <td className="px-4 py-3">
+                    <p className="max-w-[260px] truncate text-[12px] font-semibold text-slate-700">{request.subjects || "Subjects not specified"}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">{[request.grade, request.learningMode].filter(Boolean).join(" · ") || "Grade or mode not specified"}</p>
                   </td>
-                  <td className="px-5 py-3.5 text-[11px] text-slate-600 max-w-[220px]">
-                    <p className="line-clamp-2" title={[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}>
+                  <td className="px-4 py-3">
+                    <p className="max-w-[240px] truncate text-[11px] font-medium text-slate-600">{[request.preferredDays, request.preferredTime].filter(Boolean).join(" · ") || "Schedule not specified"}</p>
+                    <p className="mt-0.5 max-w-[240px] truncate text-[10px] text-slate-400" title={[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}>
                       {[request.village, request.cell, request.sector, request.district, request.province, request.country].filter(Boolean).join(", ") || request.location || "Location not provided"}
                     </p>
                   </td>
-                  <td className="px-5 py-3.5 text-[11px] text-slate-600 max-w-[240px] truncate">
-                    {request.subjects || "Not specified"}
-                  </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-3">
                     <span
-                      className={`inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-tight whitespace-nowrap ${
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-tighter whitespace-nowrap ${
                         STATUS_STYLES[request.status] || "bg-slate-100 text-slate-600"
                       }`}
                     >
@@ -328,12 +322,13 @@ export default function RequestsView({ requests, teachers }: any) {
                       <p className="text-[10px] text-violet-600 mt-1 truncate">to {request.assignedTeacher.user.name}</p>
                     )}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
                       <a
                         href={`mailto:${request.email}`}
-                        title="Email client"
-                        className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:text-[#E91E63] hover:bg-rose-50 border border-slate-100 transition-all"
+                        title="Email family"
+                        aria-label={`Email ${request.parent_name}`}
+                        className="p-2 rounded-lg bg-white text-slate-600 hover:text-[#E91E63] hover:bg-rose-50 border border-slate-200 transition-all"
                       >
                         <FiMail className="size-3.5" />
                       </a>
@@ -341,14 +336,14 @@ export default function RequestsView({ requests, teachers }: any) {
                         <a
                           href={`tel:${request.phone}`}
                           title="Call"
-                          className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:text-[#E91E63] hover:bg-rose-50 border border-slate-100 transition-all"
+                          className="p-2 rounded-lg bg-white text-slate-600 hover:text-[#E91E63] hover:bg-rose-50 border border-slate-200 transition-all"
                         >
                           <FiPhone className="size-3.5" />
                         </a>
                       )}
                       <button
                         onClick={() => setSelectedId(request.id)}
-                        className="ml-1 px-3.5 py-2 rounded-lg bg-[#0f172a] text-white text-[11px] font-medium hover:bg-[#E91E63] transition-all whitespace-nowrap"
+                        className="ml-1 px-3 py-1.5 rounded-lg bg-[#0f172a] text-white text-[11px] font-semibold hover:bg-[#E91E63] transition-all whitespace-nowrap"
                       >
                         View
                       </button>
@@ -358,7 +353,7 @@ export default function RequestsView({ requests, teachers }: any) {
               ))}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-16 text-center">
+                  <td colSpan={5} className="px-5 py-16 text-center">
                     <p className="text-slate-400 text-sm italic">No requests found.</p>
                   </td>
                 </tr>
