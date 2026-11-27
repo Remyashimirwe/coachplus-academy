@@ -15,6 +15,7 @@ import {
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/app/components/ToastProvider";
+import BulkEmailModal from "./BulkEmailModal";
 import {
   getCells,
   getDistricts,
@@ -126,6 +127,7 @@ export default function TeachersView({ teacherApplications }: any) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [locationFilters, setLocationFilters] = useState<LocationFilters>(EMPTY_LOCATION_FILTERS);
+  const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
   const toast = useToast();
 
 
@@ -360,8 +362,19 @@ export default function TeachersView({ teacherApplications }: any) {
           </div>
           <p className="mt-1.5 text-[10px] text-slate-400">Choose any location level, or combine levels to narrow the list.</p>
         </div>
-        <div className="flex flex-col gap-2 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-medium text-slate-500">Showing <span className="font-semibold text-slate-800">{filteredApplications.length}</span> of {applications.length} applications</p>
+        <div className="flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <p className="text-xs font-medium text-slate-500">Showing <span className="font-semibold text-slate-800">{filteredApplications.length}</span> of {applications.length} applications</p>
+            <button
+              type="button"
+              onClick={() => setBulkEmailOpen(true)}
+              disabled={!filteredApplications.length || filteredApplications.length > 250}
+              title={filteredApplications.length > 250 ? "Filter the list to 250 or fewer recipients" : "Compose an email to all filtered applications"}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#d31655] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <FiMail className="size-4" /> Email {filteredApplications.length} applicants
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             <label className="flex items-center gap-2 text-xs font-medium text-slate-500">
               Sort
@@ -513,6 +526,13 @@ export default function TeachersView({ teacherApplications }: any) {
           )}
         </div>
 
+      {bulkEmailOpen && (
+        <BulkEmailModal
+          recipientType="applications"
+          recipientIds={filteredApplications.map((application: any) => application.id)}
+          onClose={() => setBulkEmailOpen(false)}
+        />
+      )}
     </div>
   );
 }

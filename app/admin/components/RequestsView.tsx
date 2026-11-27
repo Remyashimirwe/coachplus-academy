@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import RequestDetailModal from "./RequestDetailModal";
+import BulkEmailModal from "./BulkEmailModal";
 import {
   getCells,
   getDistricts,
@@ -90,6 +91,7 @@ export default function RequestsView({ requests, teachers }: any) {
   const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
   const [locationFilters, setLocationFilters] = useState<LocationFilters>(EMPTY_LOCATION_FILTERS);
+  const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
 
   const selectedRequest = items.find((r) => r.id === selectedId) || null;
 
@@ -168,33 +170,14 @@ export default function RequestsView({ requests, teachers }: any) {
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-1">
         <div>
           <h1 className="text-lg font-semibold text-slate-900 sm:text-xl">Teacher Requests</h1>
           <p className="text-xs text-slate-500">Review families looking for a teacher and narrow requests by location.</p>
         </div>
-        <p className="text-xs font-medium text-slate-500">
-          Showing <span className="font-semibold text-slate-800">{filteredItems.length}</span> of {items.length} requests
-        </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {stats.map((stat, i) => (
-          <div key={i} className="rounded-3xl bg-white p-5 shadow-sm border border-slate-200">
-            <div className="flex items-center gap-4">
-              <div className={`size-11 rounded-2xl ${stat.color} text-white flex items-center justify-center shrink-0 shadow-lg shadow-inherit/20`}>
-                <stat.icon className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest truncate">{stat.label}</h3>
-                <p className="text-base font-semibold text-slate-900 mt-0.5">{stat.value}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 shadow-sm sm:p-4">
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Request status</p>
           <div className="flex flex-wrap gap-2">
@@ -218,7 +201,7 @@ export default function RequestsView({ requests, teachers }: any) {
           </div>
         </div>
 
-        <div className="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="grid gap-2 border-t border-slate-200 pt-3 sm:grid-cols-[minmax(0,1fr)_220px]">
           <label className="relative block">
             <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
             <input
@@ -227,7 +210,7 @@ export default function RequestsView({ requests, teachers }: any) {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or subject"
               aria-label="Search teacher requests"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
             />
           </label>
           <label>
@@ -236,7 +219,7 @@ export default function RequestsView({ requests, teachers }: any) {
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
               aria-label="Filter by subject"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
             >
               <option value="">All subjects</option>
               {subjectOptions.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -244,7 +227,7 @@ export default function RequestsView({ requests, teachers }: any) {
           </label>
         </div>
 
-        <div className="border-t border-slate-100 pt-4">
+        <div className="border-t border-slate-200 pt-3">
           <div className="mb-2 flex items-center justify-between gap-3">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Location</p>
             {LOCATION_FIELDS.some(({ id }) => locationFilters[id]) && (
@@ -261,7 +244,7 @@ export default function RequestsView({ requests, teachers }: any) {
                   value={locationFilters[id]}
                   onChange={(event) => updateLocationFilter(id, event.target.value)}
                   aria-label={`Filter by ${label}`}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:bg-white focus:ring-2 focus:ring-[#E91E63]/20"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63]/20"
                 >
                   <option value="">All {id === "country" ? "countries" : `${label.toLowerCase()}s`}</option>
                   {locationOptions[id].map((value) => <option key={value} value={value}>{value}</option>)}
@@ -271,7 +254,33 @@ export default function RequestsView({ requests, teachers }: any) {
           </div>
           <p className="mt-2 text-[10px] text-slate-400">Choose any level or combine locations to narrow the requests.</p>
         </div>
+        <div className="flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-medium text-slate-500">Showing <span className="font-semibold text-slate-800">{filteredItems.length}</span> of {items.length} requests</p>
+          <button
+            type="button"
+            onClick={() => setBulkEmailOpen(true)}
+            disabled={!filteredItems.length || filteredItems.length > 250}
+            title={filteredItems.length > 250 ? "Filter the list to 250 or fewer recipients" : "Compose an email to all filtered requests"}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#d31655] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <FiMail className="size-4" /> Email {filteredItems.length} requests
+          </button>
+        </div>
       </section>
+
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
+        {stats.map((stat, i) => (
+          <div key={i} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${stat.color} text-white`}><stat.icon className="size-4" /></div>
+              <div className="min-w-0">
+                <h3 className="truncate text-[9px] font-semibold uppercase tracking-wide text-slate-500">{stat.label}</h3>
+                <p className="mt-0.5 text-base font-bold text-slate-900">{stat.value}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -369,6 +378,13 @@ export default function RequestsView({ requests, teachers }: any) {
           teachers={teachers || []}
           onClose={() => setSelectedId(null)}
           onUpdated={handleUpdated}
+        />
+      )}
+      {bulkEmailOpen && (
+        <BulkEmailModal
+          recipientType="requests"
+          recipientIds={filteredItems.map((request) => request.id)}
+          onClose={() => setBulkEmailOpen(false)}
         />
       )}
     </div>
