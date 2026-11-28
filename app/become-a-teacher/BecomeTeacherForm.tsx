@@ -1236,7 +1236,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
               
               <h2 className="text-xl font-semibold text-[#0f172a]">{t(locale, "Application Sent!")}</h2>
               <p className="mt-6 text-lg leading-relaxed text-slate-500">
-                Thank you for applying to join CoachPlus Academy. Our academic team will review your profile and get back to you within 3-5 business days.
+                {t(locale, "Thank you for applying to join CoachPlus Academy. Our academic team will review your profile and get back to you within 1-2 weeks.")}
               </p>
               {!receiptEmailSent && (
                 <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-medium text-amber-800">

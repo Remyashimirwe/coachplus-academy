@@ -918,7 +918,7 @@ export async function sendApplicationReceivedEmail({
             Center coaching.
           </p>
           <ul style="margin:12px 0;padding-left:20px;">
-            <li><strong>Review Timeline:</strong> We will review your qualifications and documents within 3 to 5 business days.</li>
+            <li><strong>Review Timeline:</strong> We will review your qualifications and documents within 1 to 2 weeks.</li>
             <li><strong>Next Update:</strong> Once the review is complete, you will receive an email letting you know if you have been shortlisted for our assessment stage, or if we need any clarification on your documents.</li>
           </ul>
           <p>

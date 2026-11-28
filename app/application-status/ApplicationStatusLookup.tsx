@@ -451,7 +451,7 @@ export default function ApplicationStatusLookup() {
 
           <p className="mt-8 rounded-2xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500">
             Every stage also lands in your inbox. If a step looks stuck for more
-            than 5 business days, reply to any CoachPlus email or message us on
+            than 2 weeks, reply to any CoachPlus email or message us on
             WhatsApp.
           </p>
         </div>
