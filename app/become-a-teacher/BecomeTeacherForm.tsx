@@ -359,7 +359,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
   const [uploadStep, setUploadStep] = useState("Submitting Application...");
   const [errorMessage, setErrorMessage] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [receiptEmailSent, setReceiptEmailSent] = useState(true);
+  const [receiptEmailSent, setReceiptEmailSent] = useState<true | false | "pending">("pending");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [selectedProgramIds, setSelectedProgramIds] = useState<number[]>([]);
@@ -639,7 +639,7 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
                           throw new Error(result?.error || "Submission failed. Please try again.");
                         }
 
-                        setReceiptEmailSent(result?.emailSent !== false);
+                        setReceiptEmailSent(result?.emailSent === true ? true : result?.emailSent === false ? false : "pending");
                         sessionStorage.removeItem(submissionStorageKey);
                         setStatus("idle");
                         setShowSuccessModal(true);
@@ -1241,6 +1241,11 @@ export default function BecomeTeacherForm({ isOpen, programs, terms }: { isOpen:
               {!receiptEmailSent && (
                 <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-medium text-amber-800">
                   Your application was received, but we could not send the confirmation email. Our team has your application and will follow up with you.
+                </p>
+              )}
+              {receiptEmailSent === "pending" && (
+                <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+                  Your application is saved. The confirmation email is being sent; please check your inbox and spam folder shortly.
                 </p>
               )}
 

@@ -1,5 +1,5 @@
 import { after, NextResponse } from "next/server";
-import { db } from "@/app/lib/db";
+import { db, getSetting } from "@/app/lib/db";
 import { notifyAdmins } from "@/app/lib/notifications";
 import { sendApplicationReceivedEmail } from "@/app/lib/email";
 import { isUnavailableError } from "@/app/lib/publicError";
@@ -93,6 +93,47 @@ async function handlePOST(request: Request) {
       );
     }
 
+    const requiredFields: Record<string, unknown> = {
+      country, province, district, sector, cell, village,
+      educationLevel, fieldOfStudy, institution, graduationYear,
+      experienceYears, expDescription, methods, difficultStudents,
+      engagement, onlinePlatforms, employmentType, startDate,
+      whyTeach, whySelect, contribution,
+    };
+    const missingField = Object.entries(requiredFields).find(
+      ([, value]) => typeof value !== "string" || !value.trim(),
+    );
+    if (missingField) {
+      return NextResponse.json(
+        { error: "Please complete all required application fields." },
+        { status: 400 },
+      );
+    }
+    if (!Array.isArray(subjects) || subjects.length === 0 || subjects.some((subject: unknown) => typeof subject !== "string" || !subject.trim())) {
+      return NextResponse.json(
+        { error: "Select at least one subject before submitting." },
+        { status: 400 },
+      );
+    }
+    if (agreedToTerms !== true) {
+      return NextResponse.json(
+        { error: "Please accept the terms and conditions before submitting." },
+        { status: 400 },
+      );
+    }
+    const requiredDocumentKinds = ["photo", "idPassport", "resume", "coverLetter", "academicCertificates", "criminalRecord"];
+    const submittedDocumentKinds = new Set(
+      Array.isArray(documents)
+        ? documents.filter((doc: any) => doc && typeof doc.kind === "string" && typeof doc.url === "string" && doc.url.trim()).map((doc: any) => doc.kind)
+        : [],
+    );
+    if (requiredDocumentKinds.some((kind) => !submittedDocumentKinds.has(kind))) {
+      return NextResponse.json(
+        { error: "Upload all required application documents before submitting." },
+        { status: 400 },
+      );
+    }
+
     if (typeof submissionId !== "string" || submissionId.length < 16 || submissionId.length > 100) {
       return NextResponse.json({ error: "Invalid submission ID. Please refresh and try again." }, { status: 400 });
     }
@@ -106,6 +147,14 @@ async function handlePOST(request: Request) {
     });
     if (existing) {
       return NextResponse.json({ ...existing, emailSent: true, alreadySubmitted: true }, { status: 200 });
+    }
+
+    const applicationsOpen = await getSetting("teacher_applications_open", "true") === "true";
+    if (!applicationsOpen) {
+      return NextResponse.json(
+        { error: "Teacher applications are currently closed." },
+        { status: 403 },
+      );
     }
 
     const created = await db.teacherApplication.create({
@@ -184,7 +233,7 @@ async function handlePOST(request: Request) {
       });
     });
 
-    return NextResponse.json({ ...created, emailSent: null }, { status: 201 });
+    return NextResponse.json({ ...created, emailSent: "pending" }, { status: 201 });
   } catch (error: any) {
     // Two nearly simultaneous retries can both pass the initial lookup; the
     // unique index makes the losing request resolve to the winning save.
