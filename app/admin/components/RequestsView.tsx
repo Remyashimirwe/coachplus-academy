@@ -512,7 +512,11 @@ export default function RequestsView({ requests, teachers }: RequestsViewProps) 
       {bulkEmailOpen && (
         <BulkEmailModal
           recipientType="requests"
-          recipientIds={filteredItems.map((request) => request.id)}
+          recipients={filteredItems.map((request) => ({
+            id: request.id,
+            name: request.parent_name || "Applicant",
+            email: request.email || "",
+          }))}
           onClose={() => setBulkEmailOpen(false)}
         />
       )}

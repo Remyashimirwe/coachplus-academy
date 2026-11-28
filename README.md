@@ -90,6 +90,7 @@ Notes:
 - `DATABASE_URL` is required for Prisma and the app database connection.
 - `RESEND_API_KEY` is optional for local development; if absent, the app logs the invite URL instead of sending email.
 - Set `JWT_SECRET` or `SESSION_SECRET` to a secure random value in production. `JWT_SECRET` takes precedence when both are set.
+- Push notifications require Firebase service-account JSON in `FIREBASE_SERVICE_ACCOUNT_KEY_ANDROID` and `FIREBASE_SERVICE_ACCOUNT_KEY_IOS`. Android and iOS currently use different Firebase projects, so provide a service account from each matching project. A single `FIREBASE_SERVICE_ACCOUNT_KEY` is supported only when both platforms share one Firebase project. Keep these values in the hosting provider's secret environment settings; never commit service-account keys.
 
 ## Installation
 

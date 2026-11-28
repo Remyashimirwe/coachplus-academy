@@ -530,7 +530,11 @@ export default function TeachersView({ teacherApplications }: any) {
       {bulkEmailOpen && (
         <BulkEmailModal
           recipientType="applications"
-          recipientIds={filteredApplications.map((application: any) => application.id)}
+          recipients={filteredApplications.map((application: any) => ({
+            id: application.id,
+            name: application.fullName || "Applicant",
+            email: application.email || "",
+          }))}
           onClose={() => setBulkEmailOpen(false)}
         />
       )}
