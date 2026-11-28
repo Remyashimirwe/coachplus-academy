@@ -5,6 +5,12 @@ import { FiAlertCircle, FiCheck, FiLoader, FiMail, FiSearch, FiX } from "react-i
 
 type RecipientType = "requests" | "applications";
 type BulkEmailRecipient = { id: number; name: string; email: string };
+type FailedEmailRecipient = BulkEmailRecipient & { reason: string };
+type BulkEmailResult = {
+  sent: number;
+  failed: number;
+  failedRecipients: FailedEmailRecipient[];
+};
 
 export default function BulkEmailModal({
   recipientType,
@@ -23,7 +29,7 @@ export default function BulkEmailModal({
   const [selectedIds, setSelectedIds] = useState<number[]>(
     () => recipients.map((recipient) => recipient.id),
   );
-  const [result, setResult] = useState<{ sent: number; failed: number } | null>(null);
+  const [result, setResult] = useState<BulkEmailResult | null>(null);
   const label = recipientType === "requests" ? "request" : "teacher application";
   const selectedIdSet = new Set(selectedIds);
   const matchingRecipients = recipients.filter((recipient) => {
@@ -44,28 +50,42 @@ export default function BulkEmailModal({
       : [...current, id]);
   }
 
-  async function handleSend(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (sending || result) return;
+  async function sendRecipients(recipientIds: number[]) {
+    if (sending || recipientIds.length === 0) return;
     setSending(true);
     setError("");
     try {
       const response = await fetch("/api/admin/bulk-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientType, recipientIds: selectedIds, subject, message }),
+        body: JSON.stringify({ recipientType, recipientIds, subject, message }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         setError(data.message || "Could not send the emails. Please try again.");
         return;
       }
-      setResult({ sent: data.sent ?? 0, failed: data.failed ?? 0 });
+      setResult((previous) => ({
+        sent: (previous?.sent ?? 0) + (data.sent ?? 0),
+        failed: data.failed ?? 0,
+        failedRecipients: data.failedRecipients ?? [],
+      }));
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleSend(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (result) return;
+    await sendRecipients(selectedIds);
+  }
+
+  async function handleRetryFailed() {
+    if (!result) return;
+    await sendRecipients(result.failedRecipients.map((recipient) => recipient.id));
   }
 
   return (
@@ -86,9 +106,34 @@ export default function BulkEmailModal({
           <div className="space-y-4 overflow-y-auto px-5 py-6 sm:px-6">
             <div className={`flex items-start gap-3 rounded-xl border p-4 ${result.failed ? "border-amber-200 bg-amber-50 text-amber-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>
               {result.failed > 0 && <FiAlertCircle className="mt-0.5 size-4 shrink-0" />}
-              <p className="text-sm">Sent to {result.sent} recipient{result.sent === 1 ? "" : "s"}{result.failed ? `; ${result.failed} failed.` : "."}</p>
+              <p className="text-sm">Sent to {result.sent} recipient{result.sent === 1 ? "" : "s"}{result.failed ? `; ${result.failed} still need attention.` : "."}</p>
             </div>
-            <div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-xl bg-[#0f172a] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#E91E63]">Done</button></div>
+            {error && <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</p>}
+            {result.failedRecipients.length > 0 && (
+              <section className="overflow-hidden rounded-xl border border-slate-200">
+                <div className="border-b border-slate-100 bg-slate-50 px-3.5 py-2.5">
+                  <h3 className="text-xs font-semibold text-slate-700">Failed recipients ({result.failedRecipients.length})</h3>
+                </div>
+                <div className="max-h-56 divide-y divide-slate-100 overflow-y-auto">
+                  {result.failedRecipients.map((recipient) => (
+                    <div key={recipient.id} className="px-3.5 py-2.5">
+                      <p className="truncate text-xs font-semibold text-slate-700">{recipient.name || "Applicant"}</p>
+                      <p className="truncate text-[10px] text-slate-500">{recipient.email || "No email address"}</p>
+                      <p className="mt-1 break-words text-[10px] text-rose-600">{recipient.reason}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+            <div className="flex flex-col-reverse justify-end gap-2 sm:flex-row">
+              {result.failedRecipients.length > 0 && (
+                <button type="button" onClick={handleRetryFailed} disabled={sending} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E91E63] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#d31655] disabled:cursor-not-allowed disabled:opacity-60">
+                  {sending && <FiLoader className="size-4 animate-spin" />}
+                  {sending ? "Retrying..." : `Retry failed (${result.failedRecipients.length})`}
+                </button>
+              )}
+              <button type="button" onClick={onClose} disabled={sending} className="rounded-xl bg-[#0f172a] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#E91E63] disabled:opacity-60">Done</button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4 overflow-y-auto px-5 py-5 sm:px-6">

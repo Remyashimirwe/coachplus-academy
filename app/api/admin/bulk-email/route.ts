@@ -37,35 +37,63 @@ async function handlePOST(request: Request) {
     return NextResponse.json({ message: "Enter a subject (up to 180 characters) and message (up to 12,000 characters)." }, { status: 400 });
   }
 
-  const recipients = recipientType === "requests"
+  const rows = recipientType === "requests"
     ? await db.request.findMany({ where: { id: { in: ids }, status: { not: "rejected" } }, select: { id: true, email: true, parentName: true } })
     : await db.teacherApplication.findMany({ where: { id: { in: ids }, status: { not: "rejected" } }, select: { id: true, email: true, fullName: true } });
 
-  if (recipients.length !== ids.length) {
+  if (rows.length !== ids.length) {
     return NextResponse.json({ message: "Some recipients are no longer eligible for email. Refresh the list and try again." }, { status: 409 });
   }
 
-  const validRecipients = recipients.filter((recipient) => EMAIL_RE.test(recipient.email.trim()));
-  const uniqueRecipients = [...new Map(validRecipients
-    .map((recipient) => [recipient.email.trim().toLowerCase(), recipient])).values()];
-  if (!uniqueRecipients.length) {
-    return NextResponse.json({ message: "No valid recipient email addresses were found." }, { status: 400 });
+  const recipients = rows.map((recipient) => ({
+    id: recipient.id,
+    email: recipient.email.trim(),
+    name: "parentName" in recipient ? recipient.parentName : recipient.fullName,
+  }));
+  const recipientsByEmail = new Map<string, typeof recipients>();
+  const failedRecipients: { id: number; name: string; email: string; reason: string }[] = [];
+  for (const recipient of recipients) {
+    if (!EMAIL_RE.test(recipient.email)) {
+      failedRecipients.push({ ...recipient, reason: "This recipient does not have a valid email address." });
+      continue;
+    }
+    const key = recipient.email.toLowerCase();
+    const group = recipientsByEmail.get(key) ?? [];
+    group.push(recipient);
+    recipientsByEmail.set(key, group);
   }
 
-  let sent = 0;
-  let failed = recipients.length - validRecipients.length;
-  for (let offset = 0; offset < uniqueRecipients.length; offset += 5) {
-    const batch = uniqueRecipients.slice(offset, offset + 5);
-    const results = await Promise.all(batch.map((recipient) => sendCustomApplicationEmail({
-      to: recipient.email,
-      subject,
-      body: message,
-      name: "parentName" in recipient ? recipient.parentName : recipient.fullName,
+  const recipientGroups = [...recipientsByEmail.values()];
+  for (let offset = 0; offset < recipientGroups.length; offset += 5) {
+    const batch = recipientGroups.slice(offset, offset + 5);
+    const results = await Promise.all(batch.map(async (group) => ({
+      group,
+      result: await sendCustomApplicationEmail({
+        to: group[0].email,
+        subject,
+        body: message,
+        name: group[0].name,
+      }),
     })));
-    for (const result of results) result.success ? sent++ : failed++;
+    for (const { group, result } of results) {
+      if (result.success) continue;
+      for (const recipient of group) {
+        failedRecipients.push({
+          ...recipient,
+          reason: (result.message || "The email provider could not deliver this message.").slice(0, 500),
+        });
+      }
+    }
   }
 
-  return NextResponse.json({ sent, failed, message: `Email sent to ${sent} recipient${sent === 1 ? "" : "s"}.` });
+  const failedIds = new Set(failedRecipients.map((recipient) => recipient.id));
+  const sent = recipients.length - failedIds.size;
+  return NextResponse.json({
+    sent,
+    failed: failedRecipients.length,
+    failedRecipients,
+    message: `Email sent to ${sent} recipient${sent === 1 ? "" : "s"}.`,
+  });
 }
 
 export const POST = withApiObservability("POST /api/admin/bulk-email", handlePOST);
