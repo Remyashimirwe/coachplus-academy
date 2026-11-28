@@ -9,6 +9,7 @@ export default async function RequestsPage() {
 
   const [requests, teachers] = await Promise.all([
     db.request.findMany({
+      where: { status: { not: "rejected" } },
       include: { student: { include: { user: true, teacher: { include: { user: true } } } } },
       orderBy: [
         { status: "asc" },

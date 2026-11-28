@@ -27,6 +27,12 @@ async function handlePOST(
   if (!application) {
     return NextResponse.json({ message: "Application not found" }, { status: 404 });
   }
+  if (application.status === "rejected") {
+    return NextResponse.json({
+      message: "This application was already rejected. No further email was sent.",
+      application,
+    });
+  }
 
   try {
     const emailDraft = application.pendingStatus === "rejected" && application.pendingEmailSubject && application.pendingEmailBody

@@ -33,6 +33,9 @@ async function handlePOST(
   if (!parentRequest) {
     return NextResponse.json({ message: "Request not found" }, { status: 404 });
   }
+  if (parentRequest.status === "rejected") {
+    return NextResponse.json({ message: "This request was rejected. No further email can be sent." }, { status: 409 });
+  }
 
   const result = await sendMessageEmail({
     to: parentRequest.email,

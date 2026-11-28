@@ -8,6 +8,7 @@ export default async function TeachersPage() {
   await requireAdmin();
 
   const teacherApplications = await db.teacherApplication.findMany({
+    where: { status: { not: "rejected" } },
     orderBy: { createdAt: "desc" },
     include: {
       documents: {

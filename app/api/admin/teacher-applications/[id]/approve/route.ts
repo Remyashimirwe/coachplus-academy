@@ -35,6 +35,9 @@ async function handlePOST(
   if (application.status === "approved") {
     return NextResponse.json({ message: "This application has already been approved" }, { status: 400 });
   }
+  if (application.status === "rejected") {
+    return NextResponse.json({ message: "This application was rejected and cannot receive another application email." }, { status: 409 });
+  }
 
   const existingUser = await db.user.findUnique({ where: { email: application.email } });
   if (existingUser && !(existingUser.role === "TEACHER" && existingUser.isFirstLogin && existingUser.inviteToken)) {

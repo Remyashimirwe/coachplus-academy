@@ -33,6 +33,10 @@ async function handlePOST(
     return NextResponse.json({ message: "Request not found" }, { status: 404 });
   }
 
+  if (parentRequest.status === "rejected") {
+    return NextResponse.json({ message: "This request was rejected and cannot receive another email." }, { status: 409 });
+  }
+
   if (parentRequest.studentId) {
     return NextResponse.json(
       { message: "This request has already been approved and has a student account" },

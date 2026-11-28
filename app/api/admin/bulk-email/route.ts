@@ -38,11 +38,11 @@ async function handlePOST(request: Request) {
   }
 
   const recipients = recipientType === "requests"
-    ? await db.request.findMany({ where: { id: { in: ids } }, select: { id: true, email: true, parentName: true } })
-    : await db.teacherApplication.findMany({ where: { id: { in: ids } }, select: { id: true, email: true, fullName: true } });
+    ? await db.request.findMany({ where: { id: { in: ids }, status: { not: "rejected" } }, select: { id: true, email: true, parentName: true } })
+    : await db.teacherApplication.findMany({ where: { id: { in: ids }, status: { not: "rejected" } }, select: { id: true, email: true, fullName: true } });
 
   if (recipients.length !== ids.length) {
-    return NextResponse.json({ message: "Some recipients could not be found. Refresh the list and try again." }, { status: 404 });
+    return NextResponse.json({ message: "Some recipients are no longer eligible for email. Refresh the list and try again." }, { status: 409 });
   }
 
   const validRecipients = recipients.filter((recipient) => EMAIL_RE.test(recipient.email.trim()));

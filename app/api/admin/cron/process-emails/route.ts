@@ -23,6 +23,7 @@ async function handlePOST() {
     where: {
       emailScheduledFor: { lte: now },
       pendingStatus: { not: null },
+      status: { not: "rejected" },
     },
   });
 

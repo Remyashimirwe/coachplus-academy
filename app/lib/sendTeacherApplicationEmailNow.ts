@@ -17,6 +17,20 @@ export async function sendTeacherApplicationEmailNow({
   body: string;
   details?: Prisma.TeacherApplicationUpdateInput;
 }) {
+  const existing = await db.teacherApplication.findUnique({
+    where: { id: applicationId },
+  });
+  if (!existing) {
+    return { success: false as const, message: "Application not found." };
+  }
+  if (existing.status === "rejected") {
+    return {
+      success: false as const,
+      message: "This application was rejected. No further email was sent.",
+      application: existing,
+    };
+  }
+
   const current = await db.teacherApplication.update({
     where: { id: applicationId },
     data: {

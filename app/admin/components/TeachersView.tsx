@@ -102,7 +102,6 @@ const STATUS_FILTERS = [
   { id: "shortlisted", label: "Shortlisted" },
   { id: "assessment_scheduled", label: "Assessment" },
   { id: "approved", label: "Accepted" },
-  { id: "rejected", label: "Rejected" },
 ];
 
 const SORT_OPTIONS = [
@@ -119,7 +118,9 @@ const SORT_OPTIONS = [
 ];
 
 export default function TeachersView({ teacherApplications }: any) {
-  const [applications, setApplications] = useState<any[]>(teacherApplications);
+  const [applications, setApplications] = useState<any[]>(
+    teacherApplications.filter((application: any) => application.status !== "rejected"),
+  );
   const [rowDecision, setRowDecision] = useState<Record<number, "approve" | "deny" | null>>({});
   const [rowError, setRowError] = useState<Record<number, string | undefined>>({});
   const [search, setSearch] = useState("");
@@ -217,12 +218,12 @@ export default function TeachersView({ teacherApplications }: any) {
   const stats = useMemo(() => {
     const pending = applications.filter((a) => a.status === "pending").length;
     const approved = applications.filter((a) => a.status === "approved").length;
-    const rejected = applications.filter((a) => a.status === "rejected").length;
+    const inReview = applications.filter((a) => a.status !== "approved").length;
     return [
-      { label: "Total Applications", value: applications.length, icon: FiUsers, color: "bg-indigo-500" },
+      { label: "Active Applications", value: applications.length, icon: FiUsers, color: "bg-indigo-500" },
       { label: "Pending Review", value: pending, icon: FiInbox, color: "bg-amber-500" },
       { label: "Accepted Teachers", value: approved, icon: FiCheckCircle, color: "bg-emerald-500" },
-      { label: "Rejected", value: rejected, icon: FiUserX, color: "bg-rose-500" },
+      { label: "In Review", value: inReview, icon: FiClock, color: "bg-blue-500" },
     ];
   }, [applications]);
 
@@ -231,7 +232,7 @@ export default function TeachersView({ teacherApplications }: any) {
   }
 
   function handleDenied(id: number) {
-    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: "rejected" } : a)));
+    setApplications((prev) => prev.filter((a) => a.id !== id));
   }
 
   async function handleQuickApprove(appId: number) {

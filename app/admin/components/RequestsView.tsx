@@ -112,7 +112,9 @@ type RequestsViewProps = {
 };
 
 export default function RequestsView({ requests, teachers }: RequestsViewProps) {
-  const [items, setItems] = useState<any[]>(requests);
+  const [items, setItems] = useState<any[]>(
+    requests.filter((request: any) => request.status !== "rejected"),
+  );
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
@@ -192,6 +194,10 @@ export default function RequestsView({ requests, teachers }: RequestsViewProps) 
   }, [items, filter, search, subjectFilter, locationFilters]);
 
   function handleUpdated(id: number, changes: any) {
+    if (changes.status === "rejected") {
+      setItems((prev) => prev.filter((request) => request.id !== id));
+      return;
+    }
     setItems((prev) => prev.map((r) => (r.id === id ? { ...r, ...changes } : r)));
   }
 
